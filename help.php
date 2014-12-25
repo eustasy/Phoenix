@@ -3,22 +3,22 @@
 // License Information /////////////////////////////////////////////////////////////////////////////
 
 /* 
- * PeerTracker - OpenSource BitTorrent Tracker
+ * Phoenix - OpenSource BitTorrent Tracker
  * Revision - $Id: help.php 124 2009-10-28 19:54:09Z trigunflame $
- * Copyright (C) 2009 PeerTracker Team
+ * Copyright (C) 2009 Phoenix Team
  *
- * PeerTracker is free software: you can redistribute it and/or modify
+ * Phoenix is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * 
- * PeerTracker is distributed in the hope that it will be useful,
+ * Phoenix is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with PeerTracker.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Phoenix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 // Note ////////////////////////////////////////////////////////////////////////////////////////////
@@ -587,7 +587,7 @@ elseif (isset($_GET['do']))
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<title>PeerTracker Diagnostics and Utilities</title>
+<title>Phoenix Diagnostics and Utilities</title>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 <script type="text/javascript" src="help.php?load=js_curvy"></script>
 <style type="text/css">

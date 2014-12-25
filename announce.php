@@ -3,36 +3,36 @@
 // License Information /////////////////////////////////////////////////////////////////////////////
 
 /*
- * PeerTracker - OpenSource BitTorrent Tracker
+ * Phoenix - OpenSource BitTorrent Tracker
  * Revision - $Id: announce.php 161 2010-01-20 17:49:50Z trigunflame $
- * Copyright (C) 2009 PeerTracker Team
+ * Copyright (C) 2009 Phoenix Team
  *
- * PeerTracker is free software: you can redistribute it and/or modify
+ * Phoenix is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * PeerTracker is distributed in the hope that it will be useful,
+ * Phoenix is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PeerTracker.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Phoenix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 // Enviroment Runtime //////////////////////////////////////////////////////////////////////////////
 
 // error level
 error_reporting(E_ERROR | E_PARSE);
-//error_reporting(E_ALL & ~E_NOTICE);
+//error_reporting(E_ALL & ~E_WARNING);
 //error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
 
 // ignore disconnects
 ignore_user_abort(true);
 
 // load tracker core
-require './tracker.sqlite3.php';
+require './tracker.mysql.php';
 
 // Verify Request //////////////////////////////////////////////////////////////////////////////////
 
@@ -91,6 +91,10 @@ else $_GET['numwant'] += 0;
 
 // open database
 peertracker::open();
+
+// make info_hash & peer_id SQL friendly
+$_GET['info_hash'] = peertracker::$api->escape_sql($_GET['info_hash']);
+$_GET['peer_id']   = peertracker::$api->escape_sql($_GET['peer_id']);
 
 // announce peers
 peertracker::peers();

@@ -3,22 +3,22 @@
 // License Information /////////////////////////////////////////////////////////////////////////////
 
 /* 
- * PeerTracker - OpenSource BitTorrent Tracker
+ * Phoenix - OpenSource BitTorrent Tracker
  * Revision - $Id: tracker.mysql.php 164 2010-01-23 22:08:58Z trigunflame $
- * Copyright (C) 2009 PeerTracker Team
+ * Copyright (C) 2009 Phoenix Team
  *
- * PeerTracker is free software: you can redistribute it and/or modify
+ * Phoenix is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * 
- * PeerTracker is distributed in the hope that it will be useful,
+ * Phoenix is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with PeerTracker.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Phoenix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 // Configuration ///////////////////////////////////////////////////////////////////////////////////
@@ -44,10 +44,10 @@ $_SERVER['tracker'] = array(
 	'db_host'           => 'localhost',   /* ip or hostname to mysql server */
 	'db_user'           => 'root',        /* username used to connect to mysql */
 	'db_pass'           => '',            /* password used to connect to mysql */
-	'db_name'           => 'peertracker', /* name of the PeerTracker database */
+	'db_name'           => 'peertracker', /* name of the Phoenix database */
 
 	// advanced database options
-	'db_prefix'         => 'pt_',         /* name prefixes for the PeerTracker tables */
+	'db_prefix'         => 'pt_',         /* name prefixes for the Phoenix tables */
 	'db_persist'        => false,         /* use persistent connections if available. */
 );
 
@@ -647,7 +647,7 @@ class peertracker
 			// standard
 			default:
 				echo '<!doctype html><html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8">' .
-				     '<title>PeerTracker: $Id: tracker.mysql.php 164 2010-01-23 22:08:58Z trigunflame $</title>' .
+				     '<title>Phoenix: $Id: tracker.mysql.php 164 2010-01-23 22:08:58Z trigunflame $</title>' .
 					 '<body><pre>' . number_format($stats[0] + $stats[1]) . 
 				     ' peers (' . number_format($stats[0]) . ' seeders + ' . number_format($stats[1]) .
 				     ' leechers) in ' . number_format($stats[2]) . ' torrents</pre></body></html>';
