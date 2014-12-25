@@ -230,28 +230,28 @@ HTML;
 // MySQL Setup
 function setupMySQL()
 {
-	// we need to locate tracker.mysql.php
+	// we need to locate phoenix.php
 	// first, try the most obvious location.. which should be in the 
 	// same directory as the ./help.php file being ran
-	if (is_readable('./tracker.mysql.php'))
+	if (is_readable('./phoenix.php'))
 	{
 		// require
-		require './tracker.mysql.php';
+		require './phoenix.php';
 	}
 	// unfortunately, it does not seem the file is located in the current
 	// directory, we will recurse the paths below and attempt to locate it
-	elseif (findFile(realpath('.'), 'tracker.mysql.php'))
+	elseif (findFile(realpath('.'), 'phoenix.php'))
 	{
 		// require
 		chdir(dirname($_GET['found_file_path']));
-		require './tracker.mysql.php';
+		require './phoenix.php';
 	}
 	// unable to find the file, might as well quit
 	else
 	{
 		$_GET['notice'] = 'no';
 		$_GET['message'] = '' . 
-			"Could not locate the <em>tracker.mysql.php</em> file. " .
+			"Could not locate the <em>phoenix.php</em> file. " .
 			"Make sure all of the necessary tracker files have been uploaded. ";
 		return;
 	}
@@ -303,28 +303,28 @@ function setupMySQL()
 // MySQL Optimizer
 function optimizeMySQL()
 {
-	// we need to locate tracker.mysql.php
+	// we need to locate phoenix.php
 	// first, try the most obvious location.. which should be in the 
 	// same directory as the ./help.php file being ran
-	if (is_readable('./tracker.mysql.php'))
+	if (is_readable('./phoenix.php'))
 	{
 		// require
-		require './tracker.mysql.php';
+		require './phoenix.php';
 	}
 	// unfortunately, it does not seem the file is located in the current
 	// directory, we will recurse the paths below and attempt to locate it
-	elseif (findFile(realpath('.'), 'tracker.mysql.php'))
+	elseif (findFile(realpath('.'), 'phoenix.php'))
 	{
 		// require
 		chdir(dirname($_GET['found_file_path']));
-		require './tracker.mysql.php';
+		require './phoenix.php';
 	}
 	// unable to find the file, might as well quit
 	else
 	{
 		$_GET['notice'] = 'no';
 		$_GET['message'] = '' . 
-			"Could not locate the <em>tracker.mysql.php</em> file. " .
+			"Could not locate the <em>phoenix.php</em> file. " .
 			"Make sure all of the necessary tracker files have been uploaded. ";
 		return;
 	}
