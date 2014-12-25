@@ -77,5 +77,5 @@ if ( is_readable(__DIR__.'/class.phoenix.php') ) {
 
 // fatal error, stop execution
 function tracker_error($error) {
-	exit('d14:failure reason' . strlen($error) . ":{$error}e");
+	exit('d14:Failure Reason'.strlen($error). ":{$error}e");
 }

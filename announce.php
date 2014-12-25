@@ -31,7 +31,7 @@ if (
 	// integer - port
 	// port the client is accepting connections from
 	!isset($_GET['port']) ||
-	!is_numeric($_GET['port']) ||
+	!is_numeric($_GET['port'])
 ) {
 	tracker_error('Client listening port is invalid.');
 
