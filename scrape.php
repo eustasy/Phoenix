@@ -4,8 +4,7 @@
 
 /*
  * Phoenix - OpenSource BitTorrent Tracker
- * Revision - $Id: scrape.php 161 2010-01-20 17:49:50Z trigunflame $
- * Copyright (C) 2009 Phoenix Team
+ * Copyright 2015 Phoenix Team
  *
  * Phoenix is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
