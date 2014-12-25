@@ -2,7 +2,7 @@
 
 // License Information /////////////////////////////////////////////////////////////////////////////
 
-/* 
+/*
  * Phoenix - OpenSource BitTorrent Tracker
  * Copyright 2015 Phoenix Team
  *
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Phoenix is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Phoenix.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -55,14 +55,14 @@ function findFile($dir, $file)
 			// scan dir
 			elseif (
 				// dir check
-				is_dir($dir . '/' . $f) && 
+				is_dir($dir . '/' . $f) &&
 				// file found?
 				findFile($dir . '/' . $f, $file) === true
 			) return true;
 		}
 	}
 	@closedir($h);
-	
+
 	// nothing found
 	return false;
 }
@@ -71,7 +71,7 @@ function findFile($dir, $file)
 function setupMySQL()
 {
 	// we need to locate phoenix.php
-	// first, try the most obvious location.. which should be in the 
+	// first, try the most obvious location.. which should be in the
 	// same directory as the ./help.php file being ran
 	if (is_readable('./phoenix.php'))
 	{
@@ -90,7 +90,7 @@ function setupMySQL()
 	else
 	{
 		$_GET['notice'] = 'no';
-		$_GET['message'] = '' . 
+		$_GET['message'] = '' .
 			"Could not locate the <em>phoenix.php</em> file. " .
 			"Make sure all of the necessary tracker files have been uploaded. ";
 		return;
@@ -98,7 +98,7 @@ function setupMySQL()
 
 	// open db
 	phoenix::open();
-	
+
 	// setup
 	if (
 		phoenix::$api->query("DROP TABLE IF EXISTS `{$_SERVER['tracker']['db_prefix']}peers`") &&
@@ -106,25 +106,25 @@ function setupMySQL()
 			"CREATE TABLE IF NOT EXISTS `{$_SERVER['tracker']['db_prefix']}peers` (" .
 				"`info_hash` binary(20) NOT NULL," .
 				"`peer_id` binary(20) NOT NULL," .
-				"`compact` binary(6) NOT NULL," . 
+				"`compact` binary(6) NOT NULL," .
 				"`ip` char(15) NOT NULL," .
 				"`port` smallint(5) unsigned NOT NULL," .
 				"`state` tinyint(1) unsigned NOT NULL DEFAULT '0'," .
 				"`updated` int(10) unsigned NOT NULL," .
 				"PRIMARY KEY (`info_hash`,`peer_id`)" .
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
-		) && 
+		) &&
 		phoenix::$api->query("DROP TABLE IF EXISTS `{$_SERVER['tracker']['db_prefix']}tasks`") &&
 		phoenix::$api->query(
-			"CREATE TABLE IF NOT EXISTS `{$_SERVER['tracker']['db_prefix']}tasks` (" . 
-				"`name` varchar(5) NOT NULL," . 
-				"`value` int(10) unsigned NOT NULL" . 
+			"CREATE TABLE IF NOT EXISTS `{$_SERVER['tracker']['db_prefix']}tasks` (" .
+				"`name` varchar(5) NOT NULL," .
+				"`value` int(10) unsigned NOT NULL" .
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
 		))
 	{
 		// Check Table
 		phoenix::$api->query('CHECK TABLE `'.$_SERVER['tracker']['db_prefix'].'peers`');
-		
+
 		// no errors, hopefully???
 		$_GET['message'] = 'Your MySQL Tracker Database has been setup.';
 	}
@@ -142,7 +142,7 @@ function setupMySQL()
 function optimizeMySQL()
 {
 	// we need to locate phoenix.php
-	// first, try the most obvious location.. which should be in the 
+	// first, try the most obvious location.. which should be in the
 	// same directory as the ./help.php file being ran
 	if (is_readable('./phoenix.php'))
 	{
@@ -161,7 +161,7 @@ function optimizeMySQL()
 	else
 	{
 		$_GET['notice'] = 'no';
-		$_GET['message'] = '' . 
+		$_GET['message'] = '' .
 			"Could not locate the <em>phoenix.php</em> file. " .
 			"Make sure all of the necessary tracker files have been uploaded. ";
 		return;
@@ -169,12 +169,12 @@ function optimizeMySQL()
 
 	// open db
 	phoenix::open();
-	
+
 	// optimize
 	if (
-		phoenix::$api->query("CHECK TABLE `{$_SERVER['tracker']['db_prefix']}peers`") && 
-		phoenix::$api->query("ANALYZE TABLE `{$_SERVER['tracker']['db_prefix']}peers`") && 
-		phoenix::$api->query("REPAIR TABLE `{$_SERVER['tracker']['db_prefix']}peers`") && 
+		phoenix::$api->query("CHECK TABLE `{$_SERVER['tracker']['db_prefix']}peers`") &&
+		phoenix::$api->query("ANALYZE TABLE `{$_SERVER['tracker']['db_prefix']}peers`") &&
+		phoenix::$api->query("REPAIR TABLE `{$_SERVER['tracker']['db_prefix']}peers`") &&
 		phoenix::$api->query("OPTIMIZE TABLE `{$_SERVER['tracker']['db_prefix']}peers`")
 	)
 	{
@@ -188,7 +188,7 @@ function optimizeMySQL()
 		$_GET['notice'] = 'no';
 		$_GET['message'] = 'Could not optimize the MySQL Database.';
 	}
-	
+
 	// close
 	phoenix::close();
 }
