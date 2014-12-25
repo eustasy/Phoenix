@@ -1,7 +1,5 @@
 # Phoenix
-Simple, Efficient and Fast BitTorrent Tracker
-
-Based on [PeerTracker](https://github.com/JonnyJD/peertracker)
+A modern fork of [PeerTracker](https://github.com/JonnyJD/peertracker), a lightweight PHP/SQL BitTorrent Tracker.
 
 ## What Do You Need?
 
