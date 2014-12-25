@@ -257,12 +257,12 @@ function setupMySQL()
 	}
 
 	// open db
-	peertracker::open();
+	phoenix::open();
 	
 	// setup
 	if (
-		peertracker::$api->query("DROP TABLE IF EXISTS `{$_SERVER['tracker']['db_prefix']}peers`") &&
-		peertracker::$api->query(
+		phoenix::$api->query("DROP TABLE IF EXISTS `{$_SERVER['tracker']['db_prefix']}peers`") &&
+		phoenix::$api->query(
 			"CREATE TABLE IF NOT EXISTS `{$_SERVER['tracker']['db_prefix']}peers` (" .
 				"`info_hash` binary(20) NOT NULL," .
 				"`peer_id` binary(20) NOT NULL," .
@@ -274,8 +274,8 @@ function setupMySQL()
 				"PRIMARY KEY (`info_hash`,`peer_id`)" .
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
 		) && 
-		peertracker::$api->query("DROP TABLE IF EXISTS `{$_SERVER['tracker']['db_prefix']}tasks`") &&
-		peertracker::$api->query(
+		phoenix::$api->query("DROP TABLE IF EXISTS `{$_SERVER['tracker']['db_prefix']}tasks`") &&
+		phoenix::$api->query(
 			"CREATE TABLE IF NOT EXISTS `{$_SERVER['tracker']['db_prefix']}tasks` (" . 
 				"`name` varchar(5) NOT NULL," . 
 				"`value` int(10) unsigned NOT NULL" . 
@@ -283,7 +283,7 @@ function setupMySQL()
 		))
 	{
 		// Check Table
-		@peertracker::$api->query("CHECK TABLE `{$_SERVER['tracker']['db_prefix']}peers`");
+		@phoenix::$api->query("CHECK TABLE `{$_SERVER['tracker']['db_prefix']}peers`");
 		
 		// no errors, hopefully???
 		$_GET['notice'] = 'yes';
@@ -297,7 +297,7 @@ function setupMySQL()
 	}
 	
 	// close
-	peertracker::close();
+	phoenix::close();
 }
 
 // MySQL Optimizer
@@ -330,14 +330,14 @@ function optimizeMySQL()
 	}
 
 	// open db
-	peertracker::open();
+	phoenix::open();
 	
 	// optimize
 	if (
-		peertracker::$api->query("CHECK TABLE `{$_SERVER['tracker']['db_prefix']}peers`") && 
-		peertracker::$api->query("ANALYZE TABLE `{$_SERVER['tracker']['db_prefix']}peers`") && 
-		peertracker::$api->query("REPAIR TABLE `{$_SERVER['tracker']['db_prefix']}peers`") && 
-		peertracker::$api->query("OPTIMIZE TABLE `{$_SERVER['tracker']['db_prefix']}peers`")
+		phoenix::$api->query("CHECK TABLE `{$_SERVER['tracker']['db_prefix']}peers`") && 
+		phoenix::$api->query("ANALYZE TABLE `{$_SERVER['tracker']['db_prefix']}peers`") && 
+		phoenix::$api->query("REPAIR TABLE `{$_SERVER['tracker']['db_prefix']}peers`") && 
+		phoenix::$api->query("OPTIMIZE TABLE `{$_SERVER['tracker']['db_prefix']}peers`")
 	)
 	{
 		// no errors, hopefully???
@@ -352,7 +352,7 @@ function optimizeMySQL()
 	}
 	
 	// close
-	peertracker::close();
+	phoenix::close();
 }
 
 // Display Information /////////////////////////////////////////////////////////////////////////////

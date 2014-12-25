@@ -1,15 +1,5 @@
 <?php
 
-// error level
-error_reporting(E_ERROR | E_PARSE);
-//error_reporting(E_ALL & ~E_WARNING);
-//error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
-
-// ignore disconnects
-ignore_user_abort(true);
-
-// License Information /////////////////////////////////////////////////////////////////////////////
-
 /*
  * Phoenix - OpenSource BitTorrent Tracker
  * Copyright 2015 Phoenix Team
@@ -26,20 +16,26 @@ ignore_user_abort(true);
  *
  * You should have received a copy of the GNU General Public License
  * along with Phoenix.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
-// Configuration ///////////////////////////////////////////////////////////////////////////////////
+// error level
+error_reporting(E_ERROR | E_PARSE);
+//error_reporting(E_ALL & ~E_WARNING);
+//error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
 
-// tracker state
+// ignore disconnects
+ignore_user_abort(true);
+
 $_SERVER['tracker'] = array(
-	// general tracker options
+
+	// General Tracker Options
 	'open_tracker'      => true,          /* track anything announced to it */
 	'announce_interval' => 1800,          /* how often client will send requests */
 	'min_interval'      => 900,           /* how often client can force requests */
 	'default_peers'     => 50,            /* default # of peers to announce */
 	'max_peers'         => 100,           /* max # of peers to announce */
 
-	// advanced tracker options
+	// Advanced Tracker Options
 	'external_ip'       => true,          /* allow client to specify ip address */
 	'force_compact'     => false,         /* force compact announces only */
 	'full_scrape'       => false,         /* allow scrapes without info_hash */
@@ -47,38 +43,38 @@ $_SERVER['tracker'] = array(
 	'clean_idle_peers'  => 10,            /* tweaks % of time tracker attempts idle peer removal */
 	                                      /* if you have a busy tracker, you may adjust this */
 	                                      /* example: 10 = 10%, 20 = 5%, 50 = 2%, 100 = 1% */
-	// database options
+
+	// General Database Options
+	// Can be better overridden with a config.php file.
 	'db_host'           => 'localhost',   /* ip or hostname to mysql server */
 	'db_user'           => 'root',        /* username used to connect to mysql */
 	'db_pass'           => '',            /* password used to connect to mysql */
-	'db_name'           => 'peertracker', /* name of the Phoenix database */
+	'db_name'           => 'phoenix', /* name of the Phoenix database */
 
-	// advanced database options
+	// Advanced Database Options
 	'db_prefix'         => 'pt_',         /* name prefixes for the Phoenix tables */
 	'db_persist'        => false,         /* use persistent connections if available. */
 );
 
-include 'config.php';
-
-// Tracker Operations //////////////////////////////////////////////////////////////////////////////
+// Override the default database variables with this.
+if ( is_readable(__DIR__.'/config.php') ) {
+	include __DIR__.'/config.php';
+}
 
 // fatal error, stop execution
-function tracker_error($error)
-{
+function tracker_error($error) {
 	exit('d14:failure reason' . strlen($error) . ":{$error}e");
 }
 
-// MySQL Database API //////////////////////////////////////////////////////////////////////////////
+// MySQL Database API
 
 // mysql core
-class peertracker_mysql
-{
+class phoenix_mysql {
 	// database connection
 	public $db;
 
 	// connect to database
-	public function __construct()
-	{
+	public function __construct() {
 		// attempt to connect
 		if (
 			// connection method
@@ -107,26 +103,22 @@ class peertracker_mysql
 	}
 
 	// close database connection
-	public function __destruct()
-	{
+	public function __destruct() {
 		mysql_close($this->db);
 	}
 
 	// make sql safe
-	public function escape_sql($sql)
-	{
+	public function escape_sql($sql) {
 		return mysql_real_escape_string($sql, $this->db);
 	}
 
 	// query database
-	public function query($sql)
-	{
+	public function query($sql) {
 		return mysql_query($sql, $this->db);
 	}
 
 	// return one row
-	public function fetch_once($sql)
-	{
+	public function fetch_once($sql) {
 		// execute query
 		$query = mysql_query($sql, $this->db) OR tracker_error(mysql_error($this->db));
 		$result = mysql_fetch_row($query);
@@ -139,8 +131,7 @@ class peertracker_mysql
 	}
 
 	// return compact peers
-	public function peers_compact($sql, &$peers)
-	{
+	public function peers_compact($sql, &$peers) {
 		// fetch peers
 		$query = mysql_query($sql, $this->db) OR tracker_error('failed to select compact peers');
 
@@ -152,8 +143,7 @@ class peertracker_mysql
 	}
 
 	// return dictionary peers
-	public function peers_dictionary($sql, &$response)
-	{
+	public function peers_dictionary($sql, &$response) {
 		// fetch peers
 		$query = mysql_query($sql, $this->db) OR tracker_error('failed to select peers');
 
@@ -165,8 +155,7 @@ class peertracker_mysql
 	}
 
 	// return dictionary peers without peer_id
-	public function peers_dictionary_no_peer_id($sql, &$response)
-	{
+	public function peers_dictionary_no_peer_id($sql, &$response) {
 		// fetch peers
 		$query = mysql_query($sql, $this->db) OR tracker_error('failed to select peers');
 
@@ -178,8 +167,7 @@ class peertracker_mysql
 	}
 
 	// full scrape of all torrents
-	public function full_scrape($sql, &$response)
-	{
+	public function full_scrape($sql, &$response) {
 		// fetch scrape
 		$query = mysql_query($sql) OR tracker_error('unable to perform a full scrape');
 
@@ -194,14 +182,12 @@ class peertracker_mysql
 // MySQLi Database API /////////////////////////////////////////////////////////////////////////////
 
 // mysqli core
-class peertracker_mysqli
-{
+class phoenix_mysqli {
 	// database connection
 	public $db;
 
 	// connect to database
-	public function __construct()
-	{
+	public function __construct() {
 		// attempt to connect
 		$this->db = new mysqli(
 			// connection method
@@ -224,26 +210,22 @@ class peertracker_mysqli
 	}
 
 	// close database connection
-	public function __destruct()
-	{
+	public function __destruct() {
 		$this->db->close();
 	}
 
 	// make sql safe
-	public function escape_sql($sql)
-	{
+	public function escape_sql($sql) {
 		return $this->db->real_escape_string($sql);
 	}
 
 	// query database
-	public function query($sql)
-	{
+	public function query($sql) {
 		return $this->db->query($sql);
 	}
 
 	// return one row
-	public function fetch_once($sql)
-	{
+	public function fetch_once($sql) {
 		// execute query
 		$query = $this->db->query($sql) OR tracker_error($this->db->error);
 		$result = $query->fetch_row();
@@ -256,8 +238,7 @@ class peertracker_mysqli
 	}
 
 	// return compact peers
-	public function peers_compact($sql, &$peers)
-	{
+	public function peers_compact($sql, &$peers) {
 		// fetch peers
 		$query = $this->db->query($sql) OR tracker_error('failed to select compact peers');
 
@@ -269,8 +250,7 @@ class peertracker_mysqli
 	}
 
 	// return dictionary peers
-	public function peers_dictionary($sql, &$response)
-	{
+	public function peers_dictionary($sql, &$response) {
 		// fetch peers
 		$query = $this->db->query($sql) OR tracker_error('failed to select peers');
 
@@ -282,8 +262,7 @@ class peertracker_mysqli
 	}
 
 	// return dictionary peers without peer_id
-	public function peers_dictionary_no_peer_id($sql, &$response)
-	{
+	public function peers_dictionary_no_peer_id($sql, &$response) {
 		// fetch peers
 		$query = $this->db->query($sql) OR tracker_error('failed to select peers');
 
@@ -295,8 +274,7 @@ class peertracker_mysqli
 	}
 
 	// full scrape of all torrents
-	public function full_scrape($sql, &$response)
-	{
+	public function full_scrape($sql, &$response) {
 		// fetch scrape
 		$query = $this->db->query($sql) OR tracker_error('unable to perform a full scrape');
 
@@ -308,15 +286,13 @@ class peertracker_mysqli
 	}
 }
 
-// peertracker core
-class peertracker
-{
+// phoenix core
+class phoenix {
 	// database api
 	public static $api;
 
 	// open database connection
-	public static function open()
-	{
+	public static function open() {
 		// php version
 		$php = PHP_VERSION;
 
@@ -327,9 +303,9 @@ class peertracker
 				// do we support mysqli?
 				class_exists('mysqli') ?
 					// use the mysqli api
-					new peertracker_mysqli() :
+					new phoenix_mysqli() :
 					// use the mysql api
-					new peertracker_mysql()
+					new phoenix_mysql()
 			// persistent connections
 			) : (
 				// do we support mysqli?
@@ -337,27 +313,24 @@ class peertracker
 				// PHP is >= 5.3
 				(($php[0]+0) > 5 || ($php[0]+0) == 5 && ($php[2]+0) >= 3) ?
 					// use the mysqli api
-					new peertracker_mysqli() :
+					new phoenix_mysqli() :
 					// use the mysql api
-					new peertracker_mysql()
+					new phoenix_mysql()
 			)
 		);
 	}
 
 	// close database connection
-	public static function close()
-	{
+	public static function close() {
 		// trigger __destruct()
 		self::$api = null;
 	}
 
 	// database cleanup
-	public static function clean()
-	{
+	public static function clean() {
 		// run cleanup once per announce interval
 		// check 'clean_idle_peers'% of the time to avoid excess queries
-		if (mt_rand(1, $_SERVER['tracker']['clean_idle_peers']) == 1)
-		{
+		if (mt_rand(1, $_SERVER['tracker']['clean_idle_peers']) == 1) {
 			// unix timestamp
 			$time = time();
 
@@ -368,8 +341,7 @@ class peertracker
 			);
 
 			// first clean cycle?
-			if (($last[0] + 0) == 0)
-			{
+			if (($last[0] + 0) == 0) {
 				self::$api->query(
 					// set tasks value prune to current unix timestamp
 					"REPLACE INTO `{$_SERVER['tracker']['db_prefix']}tasks` VALUES('prune', {$time})"
@@ -383,8 +355,7 @@ class peertracker
 				) OR tracker_error('could not perform maintenance');
 			}
 			// prune idle peers
-			elseif (($last[0] + $_SERVER['tracker']['announce_interval']) < $time)
-			{
+			else if (($last[0] + $_SERVER['tracker']['announce_interval']) < $time) {
 				self::$api->query(
 					// set tasks value prune to current unix timestamp
 					"UPDATE `{$_SERVER['tracker']['db_prefix']}tasks` SET value={$time} WHERE name='prune'"
@@ -401,8 +372,7 @@ class peertracker
 	}
 
 	// insert new peer
-	public static function new_peer()
-	{
+	public static function new_peer() {
 		// insert peer
 		self::$api->query(
 			// insert into the peers table
@@ -419,8 +389,7 @@ class peertracker
 	}
 
 	// full peer update
-	public static function update_peer()
-	{
+	public static function update_peer() {
 		// update peer
 		self::$api->query(
 			// update the peers table
@@ -437,8 +406,7 @@ class peertracker
 	}
 
 	// update peers last access time
-	public static function update_last_access()
-	{
+	public static function update_last_access() {
 		// update peer
 		self::$api->query(
 			// set updated to the current unix timestamp
@@ -449,8 +417,7 @@ class peertracker
 	}
 
 	// remove existing peer
-	public static function delete_peer()
-	{
+	public static function delete_peer() {
 		// delete peer
 		self::$api->query(
 			// delete a peer from the peers table
@@ -461,8 +428,7 @@ class peertracker
 	}
 
 	// tracker event handling
-	public static function event()
-	{
+	public static function event() {
 		// execute peer select
 		$pState = self::$api->fetch_once(
 			// select a peer from the peers table
@@ -472,8 +438,7 @@ class peertracker
 		);
 
 		// process tracker event
-		switch ((isset($_GET['event']) ? $_GET['event'] : false))
-		{
+		switch ((isset($_GET['event']) ? $_GET['event'] : false)) {
 			// client gracefully exited
 			case 'stopped':
 				// remove peer
@@ -490,7 +455,7 @@ class peertracker
 				// new peer
 				if (!isset($pState[2])) self::new_peer();
 				// peer status
-				elseif (
+				else if (
 					// check that ip addresses match
 					$pState[0] != $_GET['ip'] ||
 					// check that listening ports match
@@ -504,8 +469,7 @@ class peertracker
 	}
 
 	// tracker peer list
-	public static function peers()
-	{
+	public static function peers() {
 		// fetch peer total
 		$total = self::$api->fetch_once(
 			// select a count of the number of peers that match the given info_hash
@@ -540,8 +504,7 @@ class peertracker
 		            'e5:peers';
 
 		// compact announce
-		if ($_GET['compact'])
-		{
+		if ($_GET['compact']) {
 			// peers list
 			$peers = '';
 
@@ -552,8 +515,7 @@ class peertracker
 			$response .= strlen($peers) . ':' . $peers;
 		}
 		// dictionary announce
-		else
-		{
+		else {
 			// list start
 			$response .= 'l';
 
@@ -574,14 +536,12 @@ class peertracker
 	}
 
 	// tracker scrape
-	public static function scrape()
-	{
+	public static function scrape() {
 		// scrape response
 		$response = 'd5:filesd';
 
 		// scrape info_hash
-		if (isset($_GET['info_hash']))
-		{
+		if (isset($_GET['info_hash'])) {
 			// scrape
 			$scrape = self::$api->fetch_once(
 				// select total seeders and leechers
@@ -597,8 +557,7 @@ class peertracker
 			             'e10:downloadedi0e10:incompletei' . ($scrape[1]+0) . 'ee';
 		}
 		// full scrape
-		else
-		{
+		else {
 			// scrape
 			$sql = 'SELECT ' .
 				// info_hash, total seeders and leechers
@@ -617,8 +576,7 @@ class peertracker
 	}
 
 	// tracker statistics
-	public static function stats()
-	{
+	public static function stats() {
 		// statistics
 		$stats = self::$api->fetch_once(
 			// select seeders and leechers
@@ -630,8 +588,7 @@ class peertracker
 		) OR tracker_error('failed to retrieve tracker statistics');
 
 		// output format
-		switch ($_GET['stats'])
-		{
+		switch ($_GET['stats']) {
 			// xml
 			case 'xml':
 				header('Content-Type: text/xml');

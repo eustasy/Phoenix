@@ -1,50 +1,44 @@
 <?php
 
-// Enviroment Runtime //////////////////////////////////////////////////////////////////////////////
+// This file defines all the classes and functions we will need.
+// Since it defines things, we need to make sure it isn't loaded twice.
+require_once __DIR__.'/phoenix.php';
 
-// load tracker core
-require './phoenix.php';
+// Open Database
+phoenix::open();
 
-// Verify Request //////////////////////////////////////////////////////////////////////////////////
+// IF STATS
+if ( isset($_GET['stats']) ) {
 
-// tracker statistics
-if (isset($_GET['stats']))
-{
-	// open database
-	peertracker::open();
+	// Display Statistics
+	phoenix::stats();
 
-	// display stats
-	peertracker::stats();
+// END IF STATS
+// IF NOT STATS
+} else {
 
-	// close database
-	peertracker::close();
+	// IF MAGIC QUOTES
+	if ( get_magic_quotes_gpc() ) {
+		// Strip auto-escaped data.
+		$_GET['info_hash'] = stripslashes($_GET['info_hash']);
+	} // END IF MAGIC QUOTES
 
-	// exit immediately
-	exit;
-}
+	// 20-bytes - info_hash
+	// sha-1 hash of torrent being tracked
+	if (
+		!isset($_GET['info_hash']) ||
+		strlen($_GET['info_hash']) != 20
+	) {
+		// full scrape disabled
+		if (!$_SERVER['tracker']['full_scrape']) exit;
+		// full scrape enabled
+		else unset($_GET['info_hash']);
+	}
 
-// strip auto-escaped data
-if (get_magic_quotes_gpc()) $_GET['info_hash'] = stripslashes($_GET['info_hash']);
+	// Perform a Scrape
+	phoenix::scrape();
 
-// 20-bytes - info_hash
-// sha-1 hash of torrent being tracked
-if (!isset($_GET['info_hash']) || strlen($_GET['info_hash']) != 20)
-{
-	// full scrape disabled
-	if (!$_SERVER['tracker']['full_scrape']) exit;
-	// full scrape enabled
-	else unset($_GET['info_hash']);
-}
+} // END IF NOT STATS
 
-// Handle Request //////////////////////////////////////////////////////////////////////////////////
-
-// open database
-peertracker::open();
-
-// perform scrape
-peertracker::scrape();
-
-// close database
-peertracker::close();
-
-?>
+// Close Database
+phoenix::close();
