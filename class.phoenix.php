@@ -1,5 +1,7 @@
 <?php
 
+// TODO Honour private setting.
+
 // Phoenix Core
 class phoenix {
 
@@ -66,7 +68,6 @@ class phoenix {
 
 	// insert new peer
 	public static function new_peer() {
-		// insert peer
 		self::$api->query(
 			// insert into the peers table
 			"INSERT IGNORE INTO `{$_SERVER['tracker']['db_prefix']}peers` " .
@@ -78,7 +79,7 @@ class phoenix {
 			self::$api->escape_sql(pack('Nn', ip2long($_GET['ip']), $_GET['port'])) . "', " .
 			// dotted decimal string ip, integer port, integer state and unix timestamp updated
 			"'{$_GET['ip']}', {$_GET['port']}, {$_SERVER['tracker']['seeding']}, " . time() . '); '
-		) OR tracker_error('failed to add new peer data');
+		) OR tracker_error('Failed to add new peer.');
 	}
 
 	// full peer update

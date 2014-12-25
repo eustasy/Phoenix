@@ -31,7 +31,7 @@ $_SERVER['tracker'] = array(
 	// General Tracker Options
 	'open_tracker'      => true,          /* track anything announced to it */
 	'announce_interval' => 1800,          /* how often client will send requests */
-	'min_interval'      => 900,           /* how often client can force requests */
+	'min_interval'      => 600,           /* how often client can force requests */
 	'default_peers'     => 50,            /* default # of peers to announce */
 	'max_peers'         => 100,           /* max # of peers to announce */
 
@@ -40,7 +40,7 @@ $_SERVER['tracker'] = array(
 	'force_compact'     => false,         /* force compact announces only */
 	'full_scrape'       => false,         /* allow scrapes without info_hash */
 	'random_limit'      => 500,           /* if peers > #, use alternate SQL RAND() */
-	'clean_idle_peers'  => 10,            /* tweaks % of time tracker attempts idle peer removal */
+	'clean_idle_peers'  => 1,             /* tweaks % of time tracker attempts idle peer removal */
 	                                      /* if you have a busy tracker, you may adjust this */
 	                                      /* example: 10 = 10%, 20 = 5%, 50 = 2%, 100 = 1% */
 
@@ -49,7 +49,7 @@ $_SERVER['tracker'] = array(
 	'db_host'           => 'localhost',   /* ip or hostname to mysql server */
 	'db_user'           => 'root',        /* username used to connect to mysql */
 	'db_pass'           => '',            /* password used to connect to mysql */
-	'db_name'           => 'phoenix', /* name of the Phoenix database */
+	'db_name'           => 'phoenix',     /* name of the Phoenix database */
 
 	// Advanced Database Options
 	'db_prefix'         => 'pt_',         /* name prefixes for the Phoenix tables */

@@ -19,6 +19,9 @@ if (
 ) {
 	tracker_error('Torrent Hash is invalid.');
 
+// TODO
+// Check torrent is allowed when private.
+
 } else if (
 	// 20-bytes - peer_id
 	// client generated unique peer identifier
@@ -70,11 +73,11 @@ if (
 
 	// string - ip - optional
 	// ip address the peer requested to use
+	// TODO Add IPv6 Support
 	if (
 		isset($_GET['ip']) &&
 		$_SERVER['tracker']['external_ip']
 	) {
-		// TODO Add IPv6 Support
 		// dotted decimal only
 		$_GET['ip'] = trim($_GET['ip'],'::ffff:');
 		if ( !ip2long($_GET['ip']) ) {
@@ -82,8 +85,10 @@ if (
 		}
 	// set ip to connected client
 	} else if ( isset($_SERVER['REMOTE_ADDR']) ) {
-		$_GET['ip'] = trim($_SERVER['REMOTE_ADDR'],'::ffff:');
-		// TODO Why doesn't this need the ip2long logic like above?
+		$_GET['ip'] = trim($_SERVER['REMOTE_ADDR'], '::ffff:');
+		if ( !ip2long($_SERVER['REMOTE_ADDR']) ) {
+			tracker_error('Invalid IP, dotted decimal only. No IPv6.');
+		}
 	// cannot locate suitable ip, must abort
 	} else {
 		tracker_error('Could not locate clients IP.');
@@ -106,14 +111,14 @@ if (
 	$_GET['info_hash'] = phoenix::$api->escape_sql($_GET['info_hash']);
 	$_GET['peer_id']   = phoenix::$api->escape_sql($_GET['peer_id']);
 
-	// Announce Peers
-	phoenix::peers();
-
 	// Track Client
 	phoenix::event();
 
 	// Clean Up
 	phoenix::clean();
+
+	// Announce Peers
+	phoenix::peers();
 
 	// Close Database
 	phoenix::close();

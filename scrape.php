@@ -35,6 +35,9 @@ if ( isset($_GET['stats']) ) {
 		else unset($_GET['info_hash']);
 	}
 
+	// TODO
+	// Check torrent is allowed when private.
+
 	// Perform a Scrape
 	phoenix::scrape();
 
