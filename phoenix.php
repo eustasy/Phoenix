@@ -636,7 +636,7 @@ class peertracker
 			case 'xml':
 				header('Content-Type: text/xml');
 				echo '<?xml version="1.0" encoding="ISO-8859-1"?>' .
-				     '<tracker version="$Id: tracker.mysql.php 164 2010-01-23 22:08:58Z trigunflame $">' .
+				     '<tracker version="$Id: phoenix.php 164 2010-01-23 22:08:58Z trigunflame $">' .
 				     '<peers>' . number_format($stats[0] + $stats[1]) . '</peers>' .
 				     '<seeders>' . number_format($stats[0]) . '</seeders>' .
 				     '<leechers>' . number_format($stats[1]) . '</leechers>' .
@@ -646,7 +646,7 @@ class peertracker
 			// json
 			case 'json':
 				header('Content-Type: text/javascript');
-				echo '{"tracker":{"version":"$Id: tracker.mysql.php 164 2010-01-23 22:08:58Z trigunflame $",' .
+				echo '{"tracker":{"version":"$Id: phoenix.php 164 2010-01-23 22:08:58Z trigunflame $",' .
 				     '"peers": "' . number_format($stats[0] + $stats[1]) . '",' .
 					 '"seeders":"' . number_format($stats[0]) . '",' .
 					 '"leechers":"' . number_format($stats[1]) . '",' .
@@ -656,7 +656,7 @@ class peertracker
 			// standard
 			default:
 				echo '<!doctype html><html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8">' .
-				     '<title>Phoenix: $Id: tracker.mysql.php 164 2010-01-23 22:08:58Z trigunflame $</title>' .
+				     '<title>Phoenix: $Id: phoenix.php 164 2010-01-23 22:08:58Z trigunflame $</title>' .
 					 '<body><pre>' . number_format($stats[0] + $stats[1]) .
 				     ' peers (' . number_format($stats[0]) . ' seeders + ' . number_format($stats[1]) .
 				     ' leechers) in ' . number_format($stats[2]) . ' torrents</pre></body></html>';
