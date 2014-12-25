@@ -1,12 +1,15 @@
-# Phoenix - Simple, Efficient and Fast BitTorrent Tracker
-### Based on PeerTracker
+# Phoenix
+Simple, Efficient and Fast BitTorrent Tracker
 
+Based on [PeerTracker](https://github.com/JonnyJD/peertracker)
 
 ## What Do You Need?
+
 ### Required
 * Apache, Nginx, OR lighttpd.
 * PHP >= 5
 * MySQL >= 4.1
+
 ### Recommended
 * PHP >= 5.3
 * MySQL >= 5.1 OR MariaDB >= 5
@@ -20,8 +23,7 @@
 
 These same steps should be followed for whichever database system you choose to use.
 
-Step by Step Install Guide
---------------------------------------------------------------------------------------
+## Step by Step Install Guide
 1. upload ./help.php to your tracker's document directory.
 2. run the uploaded script from your site.
    * example:

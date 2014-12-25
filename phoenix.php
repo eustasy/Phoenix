@@ -1,5 +1,13 @@
 <?php
 
+// error level
+error_reporting(E_ERROR | E_PARSE);
+//error_reporting(E_ALL & ~E_WARNING);
+//error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
+
+// ignore disconnects
+ignore_user_abort(true);
+
 // License Information /////////////////////////////////////////////////////////////////////////////
 
 /*
