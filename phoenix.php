@@ -71,6 +71,7 @@ $_SERVER['tracker'] = array(
 	// Advanced Database Options
 	'db_prefix'         => '',            /* name prefixes for the Phoenix tables */
 	'db_persist'        => false,         /* use persistent connections if available. */
+	'db_reset'          => true,          /* allow database to be reset in admin */
 
 );
 

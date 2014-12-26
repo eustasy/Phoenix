@@ -151,8 +151,14 @@ function optimizeMySQL()
 // Handle Database Actions
 if (isset($_GET['do'])) {
 	// MySQL
-	if ($_GET['do'] == 'setup') setupMySQL();
-	else if ($_GET['do'] == 'optimize') optimizeMySQL();
+	if (
+		$_GET['do'] == 'setup' &&
+		$_SERVER['tracker']['db_name']
+	) {
+		setupMySQL();
+	} else if ($_GET['do'] == 'optimize') {
+		optimizeMySQL();
+	}
 }
 
 ?>
@@ -271,8 +277,14 @@ if (isset($_GET['do'])) {
 		// Check Database is installed.
 		// Buttons should be POST form submits to prevent repeat on reload.
 		// Buttons should disable on click to prevent double submission.
+		if ( $_SERVER['tracker']['db_name'] ) {
+			echo '
+			<p class="text-left">Install, Upgrade and Reset <a class="button background-belize-hole color-clouds float-right" href="?do=setup">Setup</a></p>';
+		} else {
+			echo '
+			<p class="text-left color-asbestos">Install, Upgrade and Reset <span class="button background-clouds float-right">Disabled</span></p>';
+		}
 		echo '
-		<p class="text-left">Install, Upgrade and Reset <a class="button background-belize-hole color-clouds float-right" href="?do=setup">Setup</a></p>
 		<p class="text-left">Check, Analyze, Repair and Optimize <a class="button background-belize-hole color-clouds float-right" href="?do=optimize">Optimize</a></p>';
 
 	}
