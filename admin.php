@@ -55,13 +55,13 @@ function setupMySQL()
 				"`name` varchar(5) NOT NULL," .
 				"`value` int(10) unsigned NOT NULL" .
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
-		))
+		) &&
 		phoenix::$api->query(
 			"CREATE TABLE IF NOT EXISTS `{$_SERVER['tracker']['db_prefix']}torrents` (" .
 				"`name` varchar(255) NOT NULL," .
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
-		))
-	{
+		)
+	) {
 		// Check Table
 		phoenix::$api->query('CHECK TABLE `'.$_SERVER['tracker']['db_prefix'].'peers`');
 		// no errors, hopefully???
