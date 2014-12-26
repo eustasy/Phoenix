@@ -18,8 +18,3 @@ A modern fork of [PeerTracker](https://github.com/JonnyJD/peertracker), a lightw
 2. Upload all the `.php` files to your server.
 4. Load `admin.php` in your browser and run the `Setup` option.
 5. Delete `admin.php` from your server.
-
-## Misc Credits:
-The project icon is (to my knowledge) licensed under the Creative Commons,
-Attribution-Noncommercial-No Derivative Works 3.0. Whomever designed it,
-feel free to contact me and I will give appropriate credit to said person.
