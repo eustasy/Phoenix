@@ -235,17 +235,34 @@ class phoenix {
 
 		// scrape info_hash
 		if (isset($_GET['info_hash'])) {
-			// scrape
-			$scrape = self::$api->fetch_once(
-				// select total seeders and leechers
-				'SELECT SUM(state=1), SUM(state=0) ' .
-				// from peers
-				"FROM `{$_SERVER['tracker']['db_prefix']}peers` " .
-				// that match info_hash
-				'WHERE info_hash=\''.self::$api->escape_sql($_GET['info_hash']).'\''
-			) OR tracker_error('Unable to scrape the requested torrent.');
-			// 20-byte info_hash, integer complete, integer downloaded, integer incomplete
-			$response .= '20:'.$_GET['info_hash'].'d8:completei'.($scrape[0]+0).'e10:downloadedi0e10:incompletei'.($scrape[1]+0).'ee';
+
+			if ( isset($_GET['json']) ) {
+				// scrape
+				$scrape = self::$api->fetch_once(
+					// select total seeders and leechers
+					'SELECT SUM(state=1), SUM(state=0) ' .
+					// from peers
+					"FROM `{$_SERVER['tracker']['db_prefix']}peers` " .
+					// that match info_hash
+					'WHERE HEX(`info_hash`)=\''.self::$api->escape_sql($_GET['info_hash']).'\''
+				) OR tracker_error('Unable to scrape the requested torrent.');
+				header('Content-Type: application/json');
+				echo '{"torrent":{"info_hash":"'.$_GET['info_hash'].'","peers":"'.number_format($scrape[0]+$scrape[1]+0).'","seeders":"'.number_format($scrape[0]+0).'","leechers":"'.number_format($scrape[1]+0).'"}}';
+				exit;
+			} else {
+				// scrape
+				$scrape = self::$api->fetch_once(
+					// select total seeders and leechers
+					'SELECT SUM(state=1), SUM(state=0) ' .
+					// from peers
+					"FROM `{$_SERVER['tracker']['db_prefix']}peers` " .
+					// that match info_hash
+					'WHERE info_hash=\''.self::$api->escape_sql($_GET['info_hash']).'\''
+				) OR tracker_error('Unable to scrape the requested torrent.');
+				// 20-byte info_hash, integer complete, integer downloaded, integer incomplete
+				$response .= '20:'.$_GET['info_hash'].'d8:completei'.($scrape[0]+0).'e10:downloadedi0e10:incompletei'.($scrape[1]+0).'ee';
+			}
+
 		// full scrape
 		} else {
 			// scrape

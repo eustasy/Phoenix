@@ -26,17 +26,10 @@ if ( isset($_GET['stats']) ) {
 	if (
 		// 20-bytes - info_hash
 		// sha-1 hash of torrent being tracked
-		(
-			isset($_GET['info_hash']) &&
-			strlen($_GET['info_hash']) == 20
-		) ||
+		isset($_GET['info_hash']) ||
 		// full scrape enabled
 		$_SERVER['tracker']['full_scrape']
 	) {
-
-		if ( isset($_GET['info_hash']) && strlen($_GET['info_hash']) != 20) {
-			unset($_GET['info_hash']);
-		}
 
 		// TODO
 		// Check torrent is allowed when running as a private tracker.
