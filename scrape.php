@@ -23,23 +23,28 @@ if ( isset($_GET['stats']) ) {
 		$_GET['info_hash'] = stripslashes($_GET['info_hash']);
 	} // END IF MAGIC QUOTES
 
-	// 20-bytes - info_hash
-	// sha-1 hash of torrent being tracked
 	if (
-		!isset($_GET['info_hash']) ||
-		strlen($_GET['info_hash']) != 20
-	) {
-		// full scrape disabled
-		if (!$_SERVER['tracker']['full_scrape']) exit;
+		// 20-bytes - info_hash
+		// sha-1 hash of torrent being tracked
+		(
+			isset($_GET['info_hash']) &&
+			strlen($_GET['info_hash']) == 20
+		) ||
 		// full scrape enabled
-		else unset($_GET['info_hash']);
+		$_SERVER['tracker']['full_scrape']
+	) {
+
+		if ( isset($_GET['info_hash']) && strlen($_GET['info_hash']) != 20) {
+			unset($_GET['info_hash']);
+		}
+
+		// TODO
+		// Check torrent is allowed when running as a private tracker.
+
+		// Perform a Scrape
+		phoenix::scrape();
+
 	}
-
-	// TODO
-	// Check torrent is allowed when private.
-
-	// Perform a Scrape
-	phoenix::scrape();
 
 } // END IF NOT STATS
 

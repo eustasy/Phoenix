@@ -314,6 +314,7 @@ if (isset($_GET['do'])) {
 		}
 
 		// TODO
+		// Check Database is installed.
 		// Buttons should be POST form submits to prevent repeat on reload.
 		// Buttons should disable on click to prevent double submission.
 		echo '

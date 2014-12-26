@@ -60,7 +60,7 @@ class phoenix_mysqli {
 	// return compact peers
 	public function peers_compact($sql, &$peers) {
 		// fetch peers
-		$query = $this->db->query($sql) OR tracker_error('failed to select compact peers');
+		$query = $this->db->query($sql) OR tracker_error('Failed to select compact peers.');
 
 		// build response
 		while($peer = $query->fetch_row()) $peers .= $peer[0];
@@ -72,10 +72,12 @@ class phoenix_mysqli {
 	// return dictionary peers
 	public function peers_dictionary($sql, &$response) {
 		// fetch peers
-		$query = $this->db->query($sql) OR tracker_error('failed to select peers');
+		$query = $this->db->query($sql) OR tracker_error('Failed to select peers.');
 
 		// dotted decimal string ip, 20-byte peer_id, integer port
-		while($peer = $query->fetch_row()) $response .= 'd2:ip' . strlen($peer[1]) . ":{$peer[1]}" . "7:peer id20:{$peer[0]}4:porti{$peer[2]}ee";
+		while($peer = $query->fetch_row()) {
+			$response .= 'd2:ip' . strlen($peer[1]) . ":{$peer[1]}" . "7:peer id20:{$peer[0]}4:porti{$peer[2]}ee";
+		}
 
 		// cleanup
 		$query->close();
@@ -84,10 +86,12 @@ class phoenix_mysqli {
 	// return dictionary peers without peer_id
 	public function peers_dictionary_no_peer_id($sql, &$response) {
 		// fetch peers
-		$query = $this->db->query($sql) OR tracker_error('failed to select peers');
+		$query = $this->db->query($sql) OR tracker_error('Failed to select peers.');
 
 		// dotted decimal string ip, integer port
-		while($peer = $query->fetch_row()) $response .= 'd2:ip' . strlen($peer[0]) . ":{$peer[0]}4:porti{$peer[1]}ee";
+		while($peer = $query->fetch_row()) {
+			$response .= 'd2:ip'.strlen($peer[0]).":{$peer[0]}4:porti{$peer[1]}ee";
+		}
 
 		// cleanup
 		$query->close();
@@ -95,11 +99,14 @@ class phoenix_mysqli {
 
 	// full scrape of all torrents
 	public function full_scrape($sql, &$response) {
+
 		// fetch scrape
-		$query = $this->db->query($sql) OR tracker_error('unable to perform a full scrape');
+		$query = $this->db->query($sql) OR tracker_error('Unable to perform a full scrape.');
 
 		// 20-byte info_hash, integer complete, integer downloaded, integer incomplete
-		while ($scrape = $query->fetch_row()) $response .= "20:{$scrape[0]}d8:completei{$scrape[1]}e10:downloadedi0e10:incompletei{$scrape[2]}ee";
+		while ($scrape = $query->fetch_row()) {
+			$response .= "20:{$scrape[0]}d8:completei{$scrape[1]}e10:downloadedi0e10:incompletei{$scrape[2]}ee";
+		}
 
 		// cleanup
 		$query->close();

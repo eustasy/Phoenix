@@ -1,7 +1,5 @@
 <?php
 
-// TODO Honour private setting.
-
 // Phoenix Core
 class phoenix {
 
@@ -281,13 +279,15 @@ class phoenix {
 			"FROM `{$_SERVER['tracker']['db_prefix']}peers` "
 		) OR tracker_error('failed to retrieve tracker statistics');
 
+		$phoenix_version = 'Phoenix 165 2014-12-25 23:03:00Z eustasy';
+
 		// output format
 		switch ($_GET['stats']) {
 			// xml
 			case 'xml':
 				header('Content-Type: text/xml');
 				echo '<?xml version="1.0" encoding="ISO-8859-1"?>' .
-				     '<tracker version="$Id: phoenix.php 164 2010-01-23 22:08:58Z trigunflame $">' .
+				     '<tracker version="$Id: '.$phoenix_version.' $">' .
 				     '<peers>' . number_format($stats[0] + $stats[1]) . '</peers>' .
 				     '<seeders>' . number_format($stats[0]) . '</seeders>' .
 				     '<leechers>' . number_format($stats[1]) . '</leechers>' .
@@ -297,7 +297,7 @@ class phoenix {
 			// json
 			case 'json':
 				header('Content-Type: text/javascript');
-				echo '{"tracker":{"version":"$Id: phoenix.php 164 2010-01-23 22:08:58Z trigunflame $",' .
+				echo '{"tracker":{"version":"$Id: '.$phoenix_version.' $",' .
 				     '"peers": "' . number_format($stats[0] + $stats[1]) . '",' .
 					 '"seeders":"' . number_format($stats[0]) . '",' .
 					 '"leechers":"' . number_format($stats[1]) . '",' .
@@ -307,7 +307,7 @@ class phoenix {
 			// standard
 			default:
 				echo '<!doctype html><html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8">' .
-				     '<title>Phoenix: $Id: phoenix.php 164 2010-01-23 22:08:58Z trigunflame $</title>' .
+				     '<title>Phoenix: $Id: '.$phoenix_version.' $</title>' .
 					 '<body><pre>' . number_format($stats[0] + $stats[1]) .
 				     ' peers (' . number_format($stats[0]) . ' seeders + ' . number_format($stats[1]) .
 				     ' leechers) in ' . number_format($stats[2]) . ' torrents</pre></body></html>';

@@ -73,7 +73,10 @@ if (
 
 	// string - ip - optional
 	// ip address the peer requested to use
+
 	// TODO Add IPv6 Support
+	// http://bittorrent.org/beps/bep_0007.html
+
 	if (
 		isset($_GET['ip']) &&
 		$_SERVER['tracker']['external_ip']

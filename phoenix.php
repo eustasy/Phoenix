@@ -4,6 +4,18 @@
  * Phoenix - A modern fork of PeerTracker, a lightweight PHP/SQL BitTorrent Tracker.
  * Copyright 2015 Phoenix Team
  *
+ * magnet:
+	?xt=urn:btih:5c5978d6a76b960bb0504433ff6b408b183ebf38
+	&dn=elementaryos-stable-amd64.20130810.iso
+	&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80%2Fannounce
+	&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce
+	&tr=http%3A%2F%2F127.0.0.1%2Fphoenix%2Fannounce.php
+	&xs=http%3A%2F%2Felementaryos.org%2Fdownloads%2Felementaryos-stable-amd64.20130810.iso.torrent
+	&ws=http%3A%2F%2Fsuberb-sea2.dl.sourceforge.net%2Fproject%2Felementaryos%2Fstable%2Felementaryos-stable-amd64.20130810.iso
+	&ws=http%3A%2F%2Fignum.dl.sourceforge.net%2Fproject%2Felementaryos%2Fstable%2Felementaryos-stable-amd64.20130810.iso
+	&ws=http%3A%2F%2Fheanet.dl.sourceforge.net%2Fproject%2Felementaryos%2Fstable%2Felementaryos-stable-amd64.20130810.iso
+	&ws=http%3A%2F%2Fcitylan.dl.sourceforge.net%2Fproject%2Felementaryos%2Fstable%2Felementaryos-stable-amd64.20130810.iso
+ *
  * Phoenix is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -52,8 +64,9 @@ $_SERVER['tracker'] = array(
 	'db_name'           => 'phoenix',     /* name of the Phoenix database */
 
 	// Advanced Database Options
-	'db_prefix'         => 'pt_',         /* name prefixes for the Phoenix tables */
+	'db_prefix'         => '',            /* name prefixes for the Phoenix tables */
 	'db_persist'        => false,         /* use persistent connections if available. */
+
 );
 
 // Override the default database variables with this.
