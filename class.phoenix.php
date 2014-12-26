@@ -242,15 +242,12 @@ class phoenix {
 				// from peers
 				"FROM `{$_SERVER['tracker']['db_prefix']}peers` " .
 				// that match info_hash
-				"WHERE info_hash='" . self::$api->escape_sql($_GET['info_hash']) . "'"
-			) OR tracker_error('unable to scrape the requested torrent');
-
+				'WHERE info_hash=\''.self::$api->escape_sql($_GET['info_hash']).'\''
+			) OR tracker_error('Unable to scrape the requested torrent.');
 			// 20-byte info_hash, integer complete, integer downloaded, integer incomplete
-			$response .= "20:{$_GET['info_hash']}d8:completei" . ($scrape[0]+0) .
-			             'e10:downloadedi0e10:incompletei' . ($scrape[1]+0) . 'ee';
-		}
+			$response .= '20:'.$_GET['info_hash'].'d8:completei'.($scrape[0]+0).'e10:downloadedi0e10:incompletei'.($scrape[1]+0).'ee';
 		// full scrape
-		else {
+		} else {
 			// scrape
 			$sql = 'SELECT ' .
 				// info_hash, total seeders and leechers
@@ -259,7 +256,6 @@ class phoenix {
 				"FROM `{$_SERVER['tracker']['db_prefix']}peers` " .
 				// grouped by info_hash
 				'GROUP BY info_hash';
-
 			// build response
 			self::$api->full_scrape($sql, $response);
 		}
@@ -270,12 +266,13 @@ class phoenix {
 
 	// tracker statistics
 	public static function stats() {
+
 		// statistics
 		$stats = self::$api->fetch_once(
 			// select seeders and leechers
-			'SELECT SUM(state=1), SUM(state=0), ' .
+			'SELECT SUM(state=1), SUM(state=0), '.
 			// unique torrents
-			'COUNT(DISTINCT info_hash) ' .
+			'COUNT(DISTINCT info_hash) '.
 			// from peers
 			"FROM `{$_SERVER['tracker']['db_prefix']}peers` "
 		) OR tracker_error('failed to retrieve tracker statistics');

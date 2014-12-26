@@ -55,7 +55,7 @@ $_SERVER['tracker'] = array(
 	// Advanced Tracker Options
 	'external_ip'       => true,          /* allow client to specify ip address */
 	'force_compact'     => false,         /* force compact announces only */
-	'full_scrape'       => false,         /* allow scrapes without info_hash */
+	'full_scrape'       => true,         /* allow scrapes without info_hash */
 	'random_limit'      => 500,           /* if peers > #, use alternate SQL RAND() */
 	'clean_idle_peers'  => 1,             /* tweaks % of time tracker attempts idle peer removal */
 	                                      /* if you have a busy tracker, you may adjust this */

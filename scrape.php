@@ -44,6 +44,8 @@ if ( isset($_GET['stats']) ) {
 		// Perform a Scrape
 		phoenix::scrape();
 
+	} else {
+		tracker_error('Torrent Hash is invalid.');
 	}
 
 } // END IF NOT STATS

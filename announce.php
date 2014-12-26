@@ -89,7 +89,7 @@ if (
 	// set ip to connected client
 	} else if ( isset($_SERVER['REMOTE_ADDR']) ) {
 		$_GET['ip'] = trim($_SERVER['REMOTE_ADDR'], '::ffff:');
-		if ( !ip2long($_SERVER['REMOTE_ADDR']) ) {
+		if ( !ip2long($_GET['ip']) ) {
 			tracker_error('Invalid IP, dotted decimal only. No IPv6.');
 		}
 	// cannot locate suitable ip, must abort
