@@ -282,6 +282,16 @@ class phoenix {
 	}
 
 	// tracker statistics
+	public static function allowed_torrents() {
+		$response = array();
+		$stats = self::$api->array_build(
+			'SELECT `info_hash` FROM `'.$_SERVER['tracker']['db_prefix'].'torrents`',
+			$response
+		) OR tracker_error('Failed to retrieve allowed torrents.');
+		return $response;
+	}
+
+	// tracker statistics
 	public static function stats() {
 
 		// statistics

@@ -19,8 +19,13 @@ if (
 ) {
 	tracker_error('Torrent Hash is invalid.');
 
-// TODO
 // Check torrent is allowed when private.
+} else if (
+	!$_SERVER['tracker']['open_tracker'] &&
+	!in_array(bin2hex($_GET['info_hash']), $torrents) &&
+	!in_array($_GET['info_hash'], $torrents)
+) {
+	tracker_error('Torrent is not allowed.');
 
 } else if (
 	// 20-bytes - peer_id
@@ -55,7 +60,10 @@ if (
 	// send a compact peer response
 	// http://bittorrent.org/beps/bep_0023.html
 	if (
-		!isset($_GET['compact']) ||
+		(
+			isset($_GET['compact']) &&
+			intval($_GET['compact']) > 0
+		) ||
 		$_SERVER['tracker']['force_compact']
 	) {
 		$_GET['compact'] = 1;

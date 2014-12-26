@@ -44,16 +44,11 @@ class phoenix_mysqli {
 		return $this->db->query($sql);
 	}
 
-	// return one row
+	// Return one row
 	public function fetch_once($sql) {
-		// execute query
 		$query = $this->db->query($sql) OR tracker_error($this->db->error);
 		$result = $query->fetch_row();
-
-		// cleanup
 		$query->close();
-
-		// return
 		return $result;
 	}
 
@@ -85,30 +80,33 @@ class phoenix_mysqli {
 
 	// return dictionary peers without peer_id
 	public function peers_dictionary_no_peer_id($sql, &$response) {
-		// fetch peers
 		$query = $this->db->query($sql) OR tracker_error('Failed to select peers.');
-
 		// dotted decimal string ip, integer port
 		while($peer = $query->fetch_row()) {
 			$response .= 'd2:ip'.strlen($peer[0]).":{$peer[0]}4:porti{$peer[1]}ee";
 		}
-
-		// cleanup
 		$query->close();
 	}
 
 	// full scrape of all torrents
 	public function full_scrape($sql, &$response) {
-
-		// fetch scrape
 		$query = $this->db->query($sql) OR tracker_error('Unable to perform a full scrape.');
-
 		// 20-byte info_hash, integer complete, integer downloaded, integer incomplete
 		while ($scrape = $query->fetch_row()) {
 			$response .= "20:{$scrape[0]}d8:completei{$scrape[1]}e10:downloadedi0e10:incompletei{$scrape[2]}ee";
 		}
-
-		// cleanup
 		$query->close();
 	}
+
+	// list allowed torrents
+	public function array_build($sql, &$response) {
+		$query = $this->db->query($sql) OR tracker_error('Unable to find allowed torrents.');
+		// 20-byte info_hash, integer complete, integer downloaded, integer incomplete
+		while ($torrent = $query->fetch_row()) {
+			$response[] = $torrent[0];
+		}
+		$query->close();
+		return $response;
+	}
+
 }

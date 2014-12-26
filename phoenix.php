@@ -4,23 +4,6 @@
  * Phoenix - A modern fork of PeerTracker, a lightweight PHP/SQL BitTorrent Tracker.
  * Copyright 2015 Phoenix Team
  *
- * magnet:
- 	HASH
-	?xt=urn:btih:5c5978d6a76b960bb0504433ff6b408b183ebf38
-	NAME
-	&dn=elementaryos-stable-amd64.20130810.iso
-	TRACKERS
-	&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80%2Fannounce
-	&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce
-	&tr=http%3A%2F%2F127.0.0.1%2Fphoenix%2Fannounce.php
-	TORRENT
-	&xs=http%3A%2F%2Felementaryos.org%2Fdownloads%2Felementaryos-stable-amd64.20130810.iso.torrent
-	DATA
-	&ws=http%3A%2F%2Fsuberb-sea2.dl.sourceforge.net%2Fproject%2Felementaryos%2Fstable%2Felementaryos-stable-amd64.20130810.iso
-	&ws=http%3A%2F%2Fignum.dl.sourceforge.net%2Fproject%2Felementaryos%2Fstable%2Felementaryos-stable-amd64.20130810.iso
-	&ws=http%3A%2F%2Fheanet.dl.sourceforge.net%2Fproject%2Felementaryos%2Fstable%2Felementaryos-stable-amd64.20130810.iso
-	&ws=http%3A%2F%2Fcitylan.dl.sourceforge.net%2Fproject%2Felementaryos%2Fstable%2Felementaryos-stable-amd64.20130810.iso
- *
  * Phoenix is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -75,6 +58,11 @@ $_SERVER['tracker'] = array(
 
 );
 
+// fatal error, stop execution
+function tracker_error($error) {
+	exit('d14:Failure Reason'.strlen($error). ":{$error}e");
+}
+
 // Override the default database variables with this.
 if ( is_readable(__DIR__.'/config.php') ) {
 	include __DIR__.'/config.php';
@@ -84,17 +72,18 @@ if ( is_readable(__DIR__.'/config.php') ) {
 if ( is_readable(__DIR__.'/class.mysqli.php') ) {
 	include __DIR__.'/class.mysqli.php';
 } else {
-	// TODO Error
+	tracker_error('Could not load MySQLi Class.');
 }
 
 // Override the default database variables with this.
 if ( is_readable(__DIR__.'/class.phoenix.php') ) {
 	include __DIR__.'/class.phoenix.php';
 } else {
-	// TODO Error
+	tracker_error('Could not load Phoenix Class.');
 }
 
-// fatal error, stop execution
-function tracker_error($error) {
-	exit('d14:Failure Reason'.strlen($error). ":{$error}e");
+if ( !$_SERVER['tracker']['open_tracker'] ) {
+	phoenix::open();
+	$torrents = phoenix::allowed_torrents($torrents);
+	phoenix::close();
 }

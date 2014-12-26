@@ -1,5 +1,7 @@
 <?php
 
+header('Access-Control-Allow-Origin: *');
+
 // This file defines all the classes and functions we will need.
 // Since it defines things, we need to make sure it isn't loaded twice.
 require_once __DIR__.'/phoenix.php';
@@ -24,21 +26,24 @@ if ( isset($_GET['stats']) ) {
 	} // END IF MAGIC QUOTES
 
 	if (
-		// 20-bytes - info_hash
-		// sha-1 hash of torrent being tracked
-		isset($_GET['info_hash']) ||
-		// full scrape enabled
-		$_SERVER['tracker']['full_scrape']
+		(
+			// 20-bytes - info_hash
+			// sha-1 hash of torrent being tracked
+			isset($_GET['info_hash']) ||
+			// full scrape enabled
+			$_SERVER['tracker']['full_scrape']
+		) && (
+			$_SERVER['tracker']['open_tracker'] ||
+			in_array(bin2hex($_GET['info_hash']), $torrents) ||
+			in_array($_GET['info_hash'], $torrents)
+		)
 	) {
-
-		// TODO
-		// Check torrent is allowed when running as a private tracker.
 
 		// Perform a Scrape
 		phoenix::scrape();
 
 	} else {
-		tracker_error('Torrent Hash is invalid.');
+		tracker_error('Torrent Hash is not allowed.');
 	}
 
 } // END IF NOT STATS

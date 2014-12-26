@@ -1,33 +1,6 @@
 <?php
 
-// License Information /////////////////////////////////////////////////////////////////////////////
-
-/*
- * Phoenix - OpenSource BitTorrent Tracker
- * Copyright 2015 Phoenix Team
- *
- * Phoenix is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Phoenix is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Phoenix.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-// Note ////////////////////////////////////////////////////////////////////////////////////////////
-
-// this 'admin.php' script is by no means an especially efficient or clean script.
-// for the time being, it gets the job done. it may be cleaned up at a later time.
-
 // TODO Secure
-
-// Enviroment Runtime //////////////////////////////////////////////////////////////////////////////
 
 // error level
 error_reporting(E_ERROR | E_PARSE);
@@ -83,10 +56,14 @@ function setupMySQL()
 				"`value` int(10) unsigned NOT NULL" .
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
 		))
+		phoenix::$api->query(
+			"CREATE TABLE IF NOT EXISTS `{$_SERVER['tracker']['db_prefix']}torrents` (" .
+				"`name` varchar(255) NOT NULL," .
+			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
+		))
 	{
 		// Check Table
 		phoenix::$api->query('CHECK TABLE `'.$_SERVER['tracker']['db_prefix'].'peers`');
-
 		// no errors, hopefully???
 		$_GET['message'] = 'Your MySQL Tracker Database has been setup.';
 	}
