@@ -35,38 +35,6 @@ error_reporting(E_ERROR | E_PARSE);
 // ignore disconnects
 ignore_user_abort(true);
 
-// Locate File Path
-function findFile($dir, $file)
-{
-	// open dir & scan dir
-	if (!$h = @opendir($dir)) return false;
-	while (false !== ($f = readdir($h)))
-	{
-		// filter
-		if ($f != '.' && $f != '..')
-		{
-			// file match
-			if ($f == $file)
-			{
-				// found
-				$_GET['found_file_path'] = $dir . '/' . $f;
-				return true;
-			}
-			// scan dir
-			elseif (
-				// dir check
-				is_dir($dir . '/' . $f) &&
-				// file found?
-				findFile($dir . '/' . $f, $file) === true
-			) return true;
-		}
-	}
-	@closedir($h);
-
-	// nothing found
-	return false;
-}
-
 // MySQL Setup
 function setupMySQL()
 {
@@ -76,14 +44,6 @@ function setupMySQL()
 	if (is_readable('./phoenix.php'))
 	{
 		// require
-		require './phoenix.php';
-	}
-	// unfortunately, it does not seem the file is located in the current
-	// directory, we will recurse the paths below and attempt to locate it
-	elseif (findFile(realpath('.'), 'phoenix.php'))
-	{
-		// require
-		chdir(dirname($_GET['found_file_path']));
 		require './phoenix.php';
 	}
 	// unable to find the file, might as well quit
@@ -147,14 +107,6 @@ function optimizeMySQL()
 	if (is_readable('./phoenix.php'))
 	{
 		// require
-		require './phoenix.php';
-	}
-	// unfortunately, it does not seem the file is located in the current
-	// directory, we will recurse the paths below and attempt to locate it
-	elseif (findFile(realpath('.'), 'phoenix.php'))
-	{
-		// require
-		chdir(dirname($_GET['found_file_path']));
 		require './phoenix.php';
 	}
 	// unable to find the file, might as well quit
@@ -306,10 +258,10 @@ if (isset($_GET['do'])) {
 		<h1>Utilities</h1>';
 
 		// Messages
-		if ( isset($_GET['notice']) && isset($_GET['message']) ) {
+		if ( isset($_GET['message']) ) {
 			echo '
 			<div class="box background-wisteria color-clouds">
-				<h3><div class="status '.$_GET['notice'].'">'.$_GET['message'].'</div></h3>
+				<h3>'.$_GET['message'].'</div></h3>
 			</div>';
 		}
 
