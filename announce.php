@@ -48,7 +48,7 @@ if (
 	) {
 		$_SERVER['tracker']['seeding'] = ($_GET['left'] > 0 ? 0 : 1);
 	} else {
-		tracker_error('client data left field is invalid');
+		$_SERVER['tracker']['seeding'] = 0;
 	}
 
 	// integer boolean - compact - optional
