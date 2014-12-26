@@ -1,0 +1,18 @@
+# https://ashrise.com/
+https://tracker.ashrise.com/announce
+
+# https://demonii.com/
+udp://open.demonii.com:1337/announce
+
+# DOWN !?
+# http://openbittorrent.com/
+udp://tracker.openbittorrent.com:80/announce
+
+# http://publicbt.org/
+udp://tracker.publicbt.com:80/announce
+
+# http://istole.it/
+udp://tracker.istole.it:80/announce
+
+# http://ccc.de/
+udp://tracker.ccc.de:80
