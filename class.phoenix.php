@@ -34,10 +34,10 @@ class phoenix {
 			);
 
 			// first clean cycle?
-			if (($last[0] + 0) == 0) {
+			if ( ($last[0] + 0) == 0 ) {
 				self::$api->query(
 					// set tasks value prune to current unix timestamp
-					"REPLACE INTO `{$_SERVER['tracker']['db_prefix']}tasks` VALUES('prune', {$time})"
+					"REPLACE INTO `{$_SERVER['tracker']['db_prefix']}tasks` VALUES ('prune', {$time})"
 				) OR tracker_error('could not perform maintenance');
 
 				self::$api->query(
@@ -48,7 +48,7 @@ class phoenix {
 				) OR tracker_error('could not perform maintenance');
 			}
 			// prune idle peers
-			else if (($last[0] + $_SERVER['tracker']['announce_interval']) < $time) {
+			else if ( ($last[0] + $_SERVER['tracker']['announce_interval']) < $time) {
 				self::$api->query(
 					// set tasks value prune to current unix timestamp
 					"UPDATE `{$_SERVER['tracker']['db_prefix']}tasks` SET value={$time} WHERE name='prune'"
@@ -140,6 +140,7 @@ class phoenix {
 			case 'completed':
 				// force seeding status
 				$_SERVER['tracker']['seeding'] = 1;
+				// TODO Count completion.
 			// client started download
 			case 'started':
 			// client continuing download
