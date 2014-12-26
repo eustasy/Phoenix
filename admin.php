@@ -22,8 +22,10 @@
 
 // Note ////////////////////////////////////////////////////////////////////////////////////////////
 
-// this 'help.php' script is by no means an especially efficient or clean script.
+// this 'admin.php' script is by no means an especially efficient or clean script.
 // for the time being, it gets the job done. it may be cleaned up at a later time.
+
+// TODO Secure
 
 // Enviroment Runtime //////////////////////////////////////////////////////////////////////////////
 
@@ -149,8 +151,8 @@ function optimizeMySQL()
 // Handle Database Actions
 if (isset($_GET['do'])) {
 	// MySQL
-	if ($_GET['do'] == 'setup_mysql') setupMySQL();
-	else if ($_GET['do'] == 'optimize_mysql') optimizeMySQL();
+	if ($_GET['do'] == 'setup') setupMySQL();
+	else if ($_GET['do'] == 'optimize') optimizeMySQL();
 }
 
 ?>
@@ -270,8 +272,8 @@ if (isset($_GET['do'])) {
 		// Buttons should be POST form submits to prevent repeat on reload.
 		// Buttons should disable on click to prevent double submission.
 		echo '
-		<p class="text-left">Install, Upgrade and Reset <a class="button background-belize-hole color-clouds float-right" href="./help.php?do=setup_mysql">Setup MySQL</a></p>
-		<p class="text-left">Check, Analyze, Repair and Optimize <a class="button background-belize-hole color-clouds float-right" href="./help.php?do=optimize_mysql">Optimize MySQL</a></p>';
+		<p class="text-left">Install, Upgrade and Reset <a class="button background-belize-hole color-clouds float-right" href="?do=setup">Setup</a></p>
+		<p class="text-left">Check, Analyze, Repair and Optimize <a class="button background-belize-hole color-clouds float-right" href="?do=optimize">Optimize</a></p>';
 
 	}
 
