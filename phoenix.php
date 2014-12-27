@@ -66,9 +66,10 @@ if ( is_readable(__DIR__.'/config.php') ) {
 }
 
 require_once __DIR__.'/function.tracker.error.php';
-require_once __DIR__.'/function.tracker.error.php';
-require_once __DIR__.'/class.mysqli.php';
-require_once __DIR__.'/class.phoenix.php';
+// require_once __DIR__.'/function.tracker.stats.php';
+// require_once __DIR__.'/once.db.connect.php';
+// require_once __DIR__.'/class.mysqli.php';
+// require_once __DIR__.'/class.phoenix.php';
 
 header('Access-Control-Allow-Origin: *');
 

@@ -3,47 +3,6 @@
 // MySQLi Database API
 class phoenix_mysqli {
 
-	// database connection
-	public $db;
-
-	// connect to database
-	public function __construct() {
-
-		// IF persistent connection
-		if ( $settings['db_persist']) {
-			$settings['db_host'] = 'p:'.$settings['db_host'];
-		}
-
-		// attempt to connect
-		$this->db = new mysqli(
-			$settings['db_host'],
-			$settings['db_user'],
-			$settings['db_pass'],
-			$settings['db_name']
-		);
-
-		// error out if something happened
-		if ($this->db->connect_errno) tracker_error(
-			$this->db->connect_errno . ' - ' .
-			$this->db->connect_error
-		);
-	}
-
-	// close database connection
-	public function __destruct() {
-		$this->db->close();
-	}
-
-	// make sql safe
-	public function escape_sql($sql) {
-		return $this->db->real_escape_string($sql);
-	}
-
-	// query database
-	public function query($sql) {
-		return $this->db->query($sql);
-	}
-
 	// Return one row
 	public function fetch_once($sql) {
 		$query = $this->db->query($sql) OR tracker_error($this->db->error);
@@ -56,10 +15,10 @@ class phoenix_mysqli {
 	public function peers_compact($sql, &$peers) {
 		// fetch peers
 		$query = $this->db->query($sql) OR tracker_error('Failed to select compact peers.');
-
 		// build response
-		while($peer = $query->fetch_row()) $peers .= $peer[0];
-
+		while($peer = $query->fetch_row()) {
+			$peers .= $peer[0];
+		}
 		// cleanup
 		$query->close();
 	}

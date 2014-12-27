@@ -1,17 +1,16 @@
 <?php
 
-// This file defines all the classes and functions we will need.
+// This file defines all the functions we will need.
 // Since it defines things, we need to make sure it isn't loaded twice.
 require_once __DIR__.'/phoenix.php';
-
-// Open Database
-phoenix::open();
 
 // IF STATS
 if ( isset($_GET['stats']) ) {
 
-	// Display Statistics
-	phoenix::stats();
+	require_once __DIR__.'/once.db.connect.php';
+	require_once __DIR__.'/function.mysqli.fetch.once.php';
+	require_once __DIR__.'/function.tracker.stats.php';
+	tracker_stats();
 
 // END IF STATS
 // IF NOT STATS
@@ -38,13 +37,10 @@ if ( isset($_GET['stats']) ) {
 	) {
 
 		// Perform a Scrape
-		phoenix::scrape();
+		//phoenix::scrape();
 
 	} else {
 		tracker_error('Torrent Hash is not allowed.');
 	}
 
 } // END IF NOT STATS
-
-// Close Database
-phoenix::close();

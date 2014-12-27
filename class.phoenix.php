@@ -250,16 +250,20 @@ class phoenix {
 				exit;
 			} else {
 				// scrape
-				$scrape = self::$api->fetch_once(
+				$scrape = mysqli_fetch_once(
 					// select total seeders and leechers
 					'SELECT SUM(state=1), SUM(state=0) ' .
 					// from peers
 					"FROM `{$settings['db_prefix']}peers` " .
 					// that match info_hash
 					'WHERE info_hash=\''.self::$api->escape_sql($_GET['info_hash']).'\''
-				) OR tracker_error('Unable to scrape the requested torrent.');
-				// 20-byte info_hash, integer complete, integer downloaded, integer incomplete
-				$response .= '20:'.$_GET['info_hash'].'d8:completei'.($scrape[0]+0).'e10:downloadedi0e10:incompletei'.($scrape[1]+0).'ee';
+				)
+				if ( !$scrape ) {
+					tracker_error('Unable to scrape the requested torrent.');
+				} else {
+					// 20-byte info_hash, integer complete, integer downloaded, integer incomplete
+					$response .= '20:'.$_GET['info_hash'].'d8:completei'.($scrape[0]+0).'e10:downloadedi0e10:incompletei'.($scrape[1]+0).'ee';
+				}
 			}
 
 		// full scrape
@@ -290,51 +294,5 @@ class phoenix {
 		return $response;
 	}
 
-	// tracker statistics
-	public static function stats() {
-
-		// statistics
-		$stats = self::$api->fetch_once(
-			// select seeders and leechers
-			'SELECT SUM(state=1), SUM(state=0), '.
-			// unique torrents
-			'COUNT(DISTINCT info_hash) '.
-			// from peers
-			"FROM `{$settings['db_prefix']}peers` "
-		) OR tracker_error('failed to retrieve tracker statistics');
-
-		$phoenix_version = 'Phoenix 165 2014-12-25 23:03:00Z eustasy';
-
-		// output format
-		switch ($_GET['stats']) {
-			// xml
-			case 'xml':
-				header('Content-Type: text/xml');
-				echo '<?xml version="1.0" encoding="ISO-8859-1"?>' .
-				     '<tracker version="$Id: '.$phoenix_version.' $">' .
-				     '<peers>' . number_format($stats[0] + $stats[1]) . '</peers>' .
-				     '<seeders>' . number_format($stats[0]) . '</seeders>' .
-				     '<leechers>' . number_format($stats[1]) . '</leechers>' .
-				     '<torrents>' . number_format($stats[2]) . '</torrents></tracker>';
-				break;
-
-			// json
-			case 'json':
-				header('Content-Type: text/javascript');
-				echo '{"tracker":{"version":"$Id: '.$phoenix_version.' $",' .
-				     '"peers": "' . number_format($stats[0] + $stats[1]) . '",' .
-					 '"seeders":"' . number_format($stats[0]) . '",' .
-					 '"leechers":"' . number_format($stats[1]) . '",' .
-				     '"torrents":"' . number_format($stats[2]) . '"}}';
-				break;
-
-			// standard
-			default:
-				echo '<!doctype html><html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8">' .
-				     '<title>Phoenix: $Id: '.$phoenix_version.' $</title>' .
-					 '<body><pre>' . number_format($stats[0] + $stats[1]) .
-				     ' peers (' . number_format($stats[0]) . ' seeders + ' . number_format($stats[1]) .
-				     ' leechers) in ' . number_format($stats[2]) . ' torrents</pre></body></html>';
-		}
-	}
+	
 }

@@ -7,11 +7,10 @@ require_once __DIR__.'/phoenix.php';
 // MySQL Setup
 function setupMySQL() {
 
-	// open db
-	phoenix::open();
-
-	// setup
+	require_once __DIR__.'/once.db.connect.php';
+	
 	if (
+		
 		phoenix::$api->query("DROP TABLE IF EXISTS `{$settings['db_prefix']}peers`") &&
 		phoenix::$api->query(
 			"CREATE TABLE IF NOT EXISTS `{$settings['db_prefix']}peers` (" .
@@ -57,7 +56,7 @@ function setupMySQL() {
 function optimizeMySQL() {
 
 	// open db
-	phoenix::open();
+	require_once __DIR__.'/once.db.connect.php';
 
 	// optimize
 	if (
@@ -198,7 +197,7 @@ if (isset($_GET['do'])) {
 		// Tables Exist
 		$tables = array('peers', 'tasks', 'torrents');
 		$actual = 0;
-		phoenix::open();
+		require_once __DIR__.'/once.db.connect.php';
 		foreach ( $tables as $table ) {
 			$sql = 'SELECT * FROM `information_schema`.`TABLES`';
 			$sql .= " WHERE TABLE_SCHEMA = '{$settings['db_name']}' AND TABLE_NAME = '{$settings['db_prefix']}{$table}'";
