@@ -3,14 +3,6 @@
 // MySQLi Database API
 class phoenix_mysqli {
 
-	// Return one row
-	public function fetch_once($sql) {
-		$query = $this->db->query($sql) OR tracker_error($this->db->error);
-		$result = $query->fetch_row();
-		$query->close();
-		return $result;
-	}
-
 	// return compact peers
 	public function peers_compact($sql, &$peers) {
 		// fetch peers
@@ -49,11 +41,7 @@ class phoenix_mysqli {
 
 	// full scrape of all torrents
 	public function full_scrape($sql, &$response) {
-		$query = $this->db->query($sql) OR tracker_error('Unable to perform a full scrape.');
-		// 20-byte info_hash, integer complete, integer downloaded, integer incomplete
-		while ($scrape = $query->fetch_row()) {
-			$response .= "20:{$scrape[0]}d8:completei{$scrape[1]}e10:downloadedi0e10:incompletei{$scrape[2]}ee";
-		}
+		
 		$query->close();
 	}
 

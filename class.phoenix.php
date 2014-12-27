@@ -3,21 +3,6 @@
 // Phoenix Core
 class phoenix {
 
-	// Database API
-	public static $api;
-
-	// Open a Database Connection
-	public static function open() {
-		self::$api = (
-			new phoenix_mysqli()
-		);
-	}
-
-	// close database connection
-	public static function close() {
-		// trigger __destruct()
-		self::$api = null;
-	}
 
 	// database cleanup
 	public static function clean() {
@@ -268,16 +253,7 @@ class phoenix {
 
 		// full scrape
 		} else {
-			// scrape
-			$sql = 'SELECT ' .
-				// info_hash, total seeders and leechers
-				'info_hash, SUM(state=1), SUM(state=0) ' .
-				// from peers
-				"FROM `{$settings['db_prefix']}peers` " .
-				// grouped by info_hash
-				'GROUP BY info_hash';
-			// build response
-			self::$api->full_scrape($sql, $response);
+			
 		}
 
 		// send response
