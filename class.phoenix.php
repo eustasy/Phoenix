@@ -140,7 +140,6 @@ class phoenix {
 			case 'completed':
 				// force seeding status
 				$_SERVER['tracker']['seeding'] = 1;
-				// TODO Count completion.
 			// client started download
 			case 'started':
 			// client continuing download
