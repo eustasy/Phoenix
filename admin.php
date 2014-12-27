@@ -10,26 +10,10 @@ error_reporting(E_ERROR | E_PARSE);
 // ignore disconnects
 ignore_user_abort(true);
 
+require_once __DIR__.'/phoenix.php';
+
 // MySQL Setup
-function setupMySQL()
-{
-	// we need to locate phoenix.php
-	// first, try the most obvious location.. which should be in the
-	// same directory as the ./help.php file being ran
-	if (is_readable('./phoenix.php'))
-	{
-		// require
-		require './phoenix.php';
-	}
-	// unable to find the file, might as well quit
-	else
-	{
-		$_GET['notice'] = 'no';
-		$_GET['message'] = '' .
-			"Could not locate the <em>phoenix.php</em> file. " .
-			"Make sure all of the necessary tracker files have been uploaded. ";
-		return;
-	}
+function setupMySQL() {
 
 	// open db
 	phoenix::open();
@@ -78,25 +62,7 @@ function setupMySQL()
 }
 
 // MySQL Optimizer
-function optimizeMySQL()
-{
-	// we need to locate phoenix.php
-	// first, try the most obvious location.. which should be in the
-	// same directory as the ./help.php file being ran
-	if (is_readable('./phoenix.php'))
-	{
-		// require
-		require './phoenix.php';
-	}
-	// unable to find the file, might as well quit
-	else
-	{
-		$_GET['notice'] = 'no';
-		$_GET['message'] = '' .
-			"Could not locate the <em>phoenix.php</em> file. " .
-			"Make sure all of the necessary tracker files have been uploaded. ";
-		return;
-	}
+function optimizeMySQL() {
 
 	// open db
 	phoenix::open();
@@ -237,6 +203,31 @@ if (isset($_GET['do'])) {
 		<p class="color-asbestos">MySQL Version: '.$mysql_version.'</p>';
 		$mysql_compat = true;
 
+		// Tables Exist
+		$tables = array('peers', 'tasks', 'torrents');
+		$actual = 0;
+		phoenix::open();
+		foreach ( $tables as $table ) {
+			$sql = 'SELECT * FROM `information_schema`.`TABLES`';
+			$sql .= " WHERE TABLE_SCHEMA = '{$_SERVER['tracker']['db_name']}' AND TABLE_NAME = '{$_SERVER['tracker']['db_prefix']}{$table}'";
+			$result = phoenix::$api->query($sql);
+			if ( !$result->num_rows ) {
+				echo '
+		<p class="box background-pomegranate color-clouds">The table "'.$table.'" is not installed.</td>';
+			} else {
+				$actual += $result->num_rows;
+			}
+		}
+		phoenix::close();
+		if ( count($tables) == $actual ) {
+			echo '
+		<p class="box background-green-sea color-clouds">All your tables are installed.</td>';
+			$tables = true;
+		} else {
+			$tables = false;
+		}
+
+
 		// Database Utilities
 		echo '
 		<br>
@@ -251,7 +242,6 @@ if (isset($_GET['do'])) {
 		}
 
 		// TODO
-		// Check Database is installed.
 		// Buttons should be POST form submits to prevent repeat on reload.
 		// Buttons should disable on click to prevent double submission.
 		if ( $_SERVER['tracker']['db_name'] ) {
