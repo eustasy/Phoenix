@@ -19,14 +19,14 @@
 */
 
 // error level
-error_reporting(E_ERROR | E_PARSE);
-//error_reporting(E_ALL & ~E_WARNING);
-//error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
+error_reporting(E_ALL);
+// error_reporting(E_ALL & ~E_WARNING);
+// error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
 
-// ignore disconnects
+// Ignore Disconnects
 ignore_user_abort(true);
 
-$_SERVER['tracker'] = array(
+$settings = array(
 
 	// General Tracker Options
 	'open_tracker'      => true,          /* track anything announced to it */
@@ -58,31 +58,21 @@ $_SERVER['tracker'] = array(
 
 );
 
-// fatal error, stop execution
-function tracker_error($error) {
-	exit('d14:Failure Reason'.strlen($error). ":{$error}e");
-}
+////	DO NOT MODIFY BELOW THIS POINT
 
 // Override the default database variables with this.
 if ( is_readable(__DIR__.'/config.php') ) {
 	include __DIR__.'/config.php';
 }
 
-// Override the default database variables with this.
-if ( is_readable(__DIR__.'/class.mysqli.php') ) {
-	include __DIR__.'/class.mysqli.php';
-} else {
-	tracker_error('Could not load MySQLi Class.');
-}
+require_once __DIR__.'/function.tracker.error.php';
+require_once __DIR__.'/function.tracker.error.php';
+require_once __DIR__.'/class.mysqli.php';
+require_once __DIR__.'/class.phoenix.php';
 
-// Override the default database variables with this.
-if ( is_readable(__DIR__.'/class.phoenix.php') ) {
-	include __DIR__.'/class.phoenix.php';
-} else {
-	tracker_error('Could not load Phoenix Class.');
-}
+header('Access-Control-Allow-Origin: *');
 
-if ( !$_SERVER['tracker']['open_tracker'] ) {
+if ( !$settings['open_tracker'] ) {
 	phoenix::open();
 	$torrents = phoenix::allowed_torrents($torrents);
 	phoenix::close();

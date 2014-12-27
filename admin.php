@@ -2,14 +2,6 @@
 
 // TODO Secure
 
-// error level
-error_reporting(E_ERROR | E_PARSE);
-//error_reporting(E_ALL & ~E_WARNING);
-//error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
-
-// ignore disconnects
-ignore_user_abort(true);
-
 require_once __DIR__.'/phoenix.php';
 
 // MySQL Setup
@@ -20,9 +12,9 @@ function setupMySQL() {
 
 	// setup
 	if (
-		phoenix::$api->query("DROP TABLE IF EXISTS `{$_SERVER['tracker']['db_prefix']}peers`") &&
+		phoenix::$api->query("DROP TABLE IF EXISTS `{$settings['db_prefix']}peers`") &&
 		phoenix::$api->query(
-			"CREATE TABLE IF NOT EXISTS `{$_SERVER['tracker']['db_prefix']}peers` (" .
+			"CREATE TABLE IF NOT EXISTS `{$settings['db_prefix']}peers` (" .
 				"`info_hash` binary(20) NOT NULL," .
 				"`peer_id` binary(20) NOT NULL," .
 				"`compact` binary(6) NOT NULL," .
@@ -33,21 +25,21 @@ function setupMySQL() {
 				"PRIMARY KEY (`info_hash`,`peer_id`)" .
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
 		) &&
-		phoenix::$api->query("DROP TABLE IF EXISTS `{$_SERVER['tracker']['db_prefix']}tasks`") &&
+		phoenix::$api->query("DROP TABLE IF EXISTS `{$settings['db_prefix']}tasks`") &&
 		phoenix::$api->query(
-			"CREATE TABLE IF NOT EXISTS `{$_SERVER['tracker']['db_prefix']}tasks` (" .
+			"CREATE TABLE IF NOT EXISTS `{$settings['db_prefix']}tasks` (" .
 				"`name` varchar(5) NOT NULL," .
 				"`value` int(10) unsigned NOT NULL" .
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
 		) &&
 		phoenix::$api->query(
-			"CREATE TABLE IF NOT EXISTS `{$_SERVER['tracker']['db_prefix']}torrents` (" .
+			"CREATE TABLE IF NOT EXISTS `{$settings['db_prefix']}torrents` (" .
 				"`name` varchar(255) NOT NULL," .
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
 		)
 	) {
 		// Check Table
-		phoenix::$api->query('CHECK TABLE `'.$_SERVER['tracker']['db_prefix'].'peers`');
+		phoenix::$api->query('CHECK TABLE `'.$settings['db_prefix'].'peers`');
 		// no errors, hopefully???
 		$_GET['message'] = 'Your MySQL Tracker Database has been setup.';
 	}
@@ -69,10 +61,10 @@ function optimizeMySQL() {
 
 	// optimize
 	if (
-		phoenix::$api->query("CHECK TABLE `{$_SERVER['tracker']['db_prefix']}peers`") &&
-		phoenix::$api->query("ANALYZE TABLE `{$_SERVER['tracker']['db_prefix']}peers`") &&
-		phoenix::$api->query("REPAIR TABLE `{$_SERVER['tracker']['db_prefix']}peers`") &&
-		phoenix::$api->query("OPTIMIZE TABLE `{$_SERVER['tracker']['db_prefix']}peers`")
+		phoenix::$api->query("CHECK TABLE `{$settings['db_prefix']}peers`") &&
+		phoenix::$api->query("ANALYZE TABLE `{$settings['db_prefix']}peers`") &&
+		phoenix::$api->query("REPAIR TABLE `{$settings['db_prefix']}peers`") &&
+		phoenix::$api->query("OPTIMIZE TABLE `{$settings['db_prefix']}peers`")
 	)
 	{
 		// no errors, hopefully???
@@ -96,7 +88,7 @@ if (isset($_GET['do'])) {
 	// MySQL
 	if (
 		$_GET['do'] == 'setup' &&
-		$_SERVER['tracker']['db_name']
+		$settings['db_name']
 	) {
 		setupMySQL();
 	} else if ($_GET['do'] == 'optimize') {
@@ -209,7 +201,7 @@ if (isset($_GET['do'])) {
 		phoenix::open();
 		foreach ( $tables as $table ) {
 			$sql = 'SELECT * FROM `information_schema`.`TABLES`';
-			$sql .= " WHERE TABLE_SCHEMA = '{$_SERVER['tracker']['db_name']}' AND TABLE_NAME = '{$_SERVER['tracker']['db_prefix']}{$table}'";
+			$sql .= " WHERE TABLE_SCHEMA = '{$settings['db_name']}' AND TABLE_NAME = '{$settings['db_prefix']}{$table}'";
 			$result = phoenix::$api->query($sql);
 			if ( !$result->num_rows ) {
 				echo '
@@ -244,7 +236,7 @@ if (isset($_GET['do'])) {
 		// TODO
 		// Buttons should be POST form submits to prevent repeat on reload.
 		// Buttons should disable on click to prevent double submission.
-		if ( $_SERVER['tracker']['db_name'] ) {
+		if ( $settings['db_name'] ) {
 			echo '
 			<p class="text-left">Install, Upgrade and Reset <a class="button background-belize-hole color-clouds float-right" href="?do=setup">Setup</a></p>';
 		} else {

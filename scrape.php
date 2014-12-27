@@ -1,7 +1,5 @@
 <?php
 
-header('Access-Control-Allow-Origin: *');
-
 // This file defines all the classes and functions we will need.
 // Since it defines things, we need to make sure it isn't loaded twice.
 require_once __DIR__.'/phoenix.php';
@@ -31,9 +29,9 @@ if ( isset($_GET['stats']) ) {
 			// sha-1 hash of torrent being tracked
 			isset($_GET['info_hash']) ||
 			// full scrape enabled
-			$_SERVER['tracker']['full_scrape']
+			$settings['full_scrape']
 		) && (
-			$_SERVER['tracker']['open_tracker'] ||
+			$settings['open_tracker'] ||
 			in_array(bin2hex($_GET['info_hash']), $torrents) ||
 			in_array($_GET['info_hash'], $torrents)
 		)

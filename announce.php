@@ -21,7 +21,7 @@ if (
 
 // Check torrent is allowed when private.
 } else if (
-	!$_SERVER['tracker']['open_tracker'] &&
+	!$settings['open_tracker'] &&
 	!in_array(bin2hex($_GET['info_hash']), $torrents) &&
 	!in_array($_GET['info_hash'], $torrents)
 ) {
@@ -51,9 +51,9 @@ if (
 		isset($_GET['left']) &&
 		is_numeric($_GET['left'])
 	) {
-		$_SERVER['tracker']['seeding'] = ($_GET['left'] > 0 ? 0 : 1);
+		$settings['seeding'] = ($_GET['left'] > 0 ? 0 : 1);
 	} else {
-		$_SERVER['tracker']['seeding'] = 0;
+		$settings['seeding'] = 0;
 	}
 
 	// integer boolean - compact - optional
@@ -64,7 +64,7 @@ if (
 			isset($_GET['compact']) &&
 			intval($_GET['compact']) > 0
 		) ||
-		$_SERVER['tracker']['force_compact']
+		$settings['force_compact']
 	) {
 		$_GET['compact'] = 1;
 	} else {
@@ -87,7 +87,7 @@ if (
 
 	if (
 		isset($_GET['ip']) &&
-		$_SERVER['tracker']['external_ip']
+		$settings['external_ip']
 	) {
 		// dotted decimal only
 		$_GET['ip'] = trim($_GET['ip'],'::ffff:');
@@ -108,9 +108,9 @@ if (
 	// integer - numwant - optional
 	// number of peers that the client has requested
 	if ( !isset($_GET['numwant']) ) {
-		$_GET['numwant'] = $_SERVER['tracker']['default_peers'];
-	} else if ( ( $_GET['numwant'] + 0 ) > $_SERVER['tracker']['max_peers'] ) {
-		$_GET['numwant'] = $_SERVER['tracker']['max_peers'];
+		$_GET['numwant'] = $settings['default_peers'];
+	} else if ( ( $_GET['numwant'] + 0 ) > $settings['max_peers'] ) {
+		$_GET['numwant'] = $settings['max_peers'];
 	} else {
 		$_GET['numwant'] += 0;
 	}

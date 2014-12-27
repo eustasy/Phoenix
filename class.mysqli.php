@@ -10,16 +10,16 @@ class phoenix_mysqli {
 	public function __construct() {
 
 		// IF persistent connection
-		if ( $_SERVER['tracker']['db_persist']) {
-			$_SERVER['tracker']['db_host'] = 'p:'.$_SERVER['tracker']['db_host'];
+		if ( $settings['db_persist']) {
+			$settings['db_host'] = 'p:'.$settings['db_host'];
 		}
 
 		// attempt to connect
 		$this->db = new mysqli(
-			$_SERVER['tracker']['db_host'],
-			$_SERVER['tracker']['db_user'],
-			$_SERVER['tracker']['db_pass'],
-			$_SERVER['tracker']['db_name']
+			$settings['db_host'],
+			$settings['db_user'],
+			$settings['db_pass'],
+			$settings['db_name']
 		);
 
 		// error out if something happened
