@@ -8,37 +8,37 @@ require_once __DIR__.'/phoenix.php';
 function setupMySQL() {
 
 	require_once __DIR__.'/once.db.connect.php';
-	
+
 	if (
-		
-		phoenix::$api->query("DROP TABLE IF EXISTS `{$settings['db_prefix']}peers`") &&
-		phoenix::$api->query(
+		mysqli_query($connection, "DROP TABLE IF EXISTS `{$settings['db_prefix']}peers`") &&
+		mysqli_query($connection,
 			"CREATE TABLE IF NOT EXISTS `{$settings['db_prefix']}peers` (" .
 				"`info_hash` binary(20) NOT NULL," .
 				"`peer_id` binary(20) NOT NULL," .
 				"`compact` binary(6) NOT NULL," .
 				"`ip` char(15) NOT NULL," .
 				"`port` smallint(5) unsigned NOT NULL," .
+				"`left` int(1000) unsigned NOT NULL DEFAULT '-1'," .
 				"`state` tinyint(1) unsigned NOT NULL DEFAULT '0'," .
 				"`updated` int(10) unsigned NOT NULL," .
 				"PRIMARY KEY (`info_hash`,`peer_id`)" .
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
 		) &&
-		phoenix::$api->query("DROP TABLE IF EXISTS `{$settings['db_prefix']}tasks`") &&
-		phoenix::$api->query(
+		mysqli_query($connection, "DROP TABLE IF EXISTS `{$settings['db_prefix']}tasks`") &&
+		mysqli_query($connection,
 			"CREATE TABLE IF NOT EXISTS `{$settings['db_prefix']}tasks` (" .
 				"`name` varchar(5) NOT NULL," .
 				"`value` int(10) unsigned NOT NULL" .
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
 		) &&
-		phoenix::$api->query(
+		mysqli_query($connection,
 			"CREATE TABLE IF NOT EXISTS `{$settings['db_prefix']}torrents` (" .
 				"`name` varchar(255) NOT NULL," .
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
 		)
 	) {
 		// Check Table
-		phoenix::$api->query('CHECK TABLE `'.$settings['db_prefix'].'peers`');
+		mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'peers`');
 		// no errors, hopefully???
 		$_GET['message'] = 'Your MySQL Tracker Database has been setup.';
 	}
@@ -48,22 +48,19 @@ function setupMySQL() {
 		$_GET['message'] = 'Could not setup the MySQL Database.';
 	}
 
-	phoenix::close();
-
 }
 
 // MySQL Optimizer
 function optimizeMySQL() {
 
-	// open db
 	require_once __DIR__.'/once.db.connect.php';
 
 	// optimize
 	if (
-		phoenix::$api->query("CHECK TABLE `{$settings['db_prefix']}peers`") &&
-		phoenix::$api->query("ANALYZE TABLE `{$settings['db_prefix']}peers`") &&
-		phoenix::$api->query("REPAIR TABLE `{$settings['db_prefix']}peers`") &&
-		phoenix::$api->query("OPTIMIZE TABLE `{$settings['db_prefix']}peers`")
+		mysqli_query($connection, "CHECK TABLE `{$settings['db_prefix']}peers`") &&
+		mysqli_query($connection, "ANALYZE TABLE `{$settings['db_prefix']}peers`") &&
+		mysqli_query($connection, "REPAIR TABLE `{$settings['db_prefix']}peers`") &&
+		mysqli_query($connection, "OPTIMIZE TABLE `{$settings['db_prefix']}peers`")
 	)
 	{
 		// no errors, hopefully???
@@ -77,8 +74,6 @@ function optimizeMySQL() {
 		$_GET['message'] = 'Could not optimize the MySQL Database.';
 	}
 
-	// close
-	phoenix::close();
 }
 
 
@@ -201,7 +196,7 @@ if (isset($_GET['do'])) {
 		foreach ( $tables as $table ) {
 			$sql = 'SELECT * FROM `information_schema`.`TABLES`';
 			$sql .= " WHERE TABLE_SCHEMA = '{$settings['db_name']}' AND TABLE_NAME = '{$settings['db_prefix']}{$table}'";
-			$result = phoenix::$api->query($sql);
+			$result = mysqli_query($connection, $sql);
 			if ( !$result->num_rows ) {
 				echo '
 		<p class="box background-pomegranate color-clouds">The table "'.$table.'" is not installed.</td>';

@@ -136,12 +136,12 @@ if (
 	require_once __DIR__.'/function.peer.event.php';
 	peer_event();
 
-	// TODO RESUME FROM HERE ////////////////////////////////////////////////////////////////////////
-
 	// Clean Up
-	phoenix::clean();
+	require_once __DIR__.'/function.tracker.clean.php';
+	tracker_clean();
 
 	// Announce Peers
-	phoenix::peers();
+	require_once __DIR__.'/function.torrent.announce.php';
+	torrent_announce();
 
 }

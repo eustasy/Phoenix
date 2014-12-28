@@ -40,9 +40,9 @@ $settings = array(
 	'force_compact'     => false,         /* force compact announces only */
 	'full_scrape'       => true,          /* allow scrapes without info_hash */
 	'random_limit'      => 500,           /* if peers > #, use alternate SQL RAND() */
-	'clean_idle_peers'  => 1,             /* tweaks % of time tracker attempts idle peer removal */
+	'clean_idle_peers'  => 10,            /* tweaks % of time tracker attempts idle peer removal */
 	                                      /* if you have a busy tracker, you may adjust this */
-	                                      /* example: 10 = 10%, 20 = 5%, 50 = 2%, 100 = 1% */
+	                                      /* example: 1 = 1%, 10 = 10%, 50 = 50%, 100 = every time */
 
 	// General Database Options
 	// Can be better overridden with a config.php file.
@@ -65,15 +65,14 @@ if ( is_readable(__DIR__.'/config.php') ) {
 	include __DIR__.'/config.php';
 }
 
+// require_once __DIR__.'/once.db.connect.php';
 require_once __DIR__.'/function.tracker.error.php';
 // require_once __DIR__.'/function.tracker.stats.php';
-// require_once __DIR__.'/once.db.connect.php';
-// require_once __DIR__.'/class.mysqli.php';
-// require_once __DIR__.'/class.phoenix.php';
 
 header('Access-Control-Allow-Origin: *');
 
 if ( !$settings['open_tracker'] ) {
+	// TODO
 	require_once __DIR__.'/function.tracker.allowed.php';
 	$torrents = tracker_allowed($torrents);
 }
