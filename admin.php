@@ -7,44 +7,81 @@ require_once __DIR__.'/phoenix.php';
 // MySQL Setup
 function setupMySQL() {
 
-	require_once __DIR__.'/once.db.connect.php';
+	global $connection, $settings;
 
-	if (
-		mysqli_query($connection, "DROP TABLE IF EXISTS `{$settings['db_prefix']}peers`") &&
-		mysqli_query($connection,
-			"CREATE TABLE IF NOT EXISTS `{$settings['db_prefix']}peers` (" .
-				"`info_hash` binary(20) NOT NULL," .
-				"`peer_id` binary(20) NOT NULL," .
-				"`compact` binary(6) NOT NULL," .
-				"`ip` char(15) NOT NULL," .
-				"`port` smallint(5) unsigned NOT NULL," .
-				"`left` int(1000) unsigned NOT NULL DEFAULT '-1'," .
-				"`state` tinyint(1) unsigned NOT NULL DEFAULT '0'," .
-				"`updated` int(10) unsigned NOT NULL," .
-				"PRIMARY KEY (`info_hash`,`peer_id`)" .
-			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
-		) &&
-		mysqli_query($connection, "DROP TABLE IF EXISTS `{$settings['db_prefix']}tasks`") &&
-		mysqli_query($connection,
-			"CREATE TABLE IF NOT EXISTS `{$settings['db_prefix']}tasks` (" .
-				"`name` varchar(5) NOT NULL," .
-				"`value` int(10) unsigned NOT NULL" .
-			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
-		) &&
-		mysqli_query($connection,
-			"CREATE TABLE IF NOT EXISTS `{$settings['db_prefix']}torrents` (" .
-				"`name` varchar(255) NOT NULL," .
-			") ENGINE=MyISAM DEFAULT CHARSET=latin1"
-		)
-	) {
-		// Check Table
-		mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'peers`');
-		// no errors, hopefully???
-		$_GET['message'] = 'Your MySQL Tracker Database has been setup.';
+	require_once __DIR__.'/once.db.connect.php';
+	$success = true;
+
+	$result = mysqli_query($connection, 'DROP TABLE IF EXISTS `'.$settings['db_prefix'].'peers`');
+	if ( !$result ) {
+		echo mysqli_error($connection);
+		$success = false;
 	}
-	// error
-	else
-	{
+	$result = mysqli_query($connection, 'DROP TABLE IF EXISTS `'.$settings['db_prefix'].'tasks`');
+	if ( !$result ) {
+		echo mysqli_error($connection);
+		$success = false;
+	}
+	$result = mysqli_query($connection, 'DROP TABLE IF EXISTS `'.$settings['db_prefix'].'torrents`');
+	if ( !$result ) {
+		echo mysqli_error($connection);
+		$success = false;
+	}
+	$result = mysqli_query($connection,
+		'CREATE TABLE IF NOT EXISTS `'.$settings['db_prefix'].'peers` (' .
+			'`info_hash` binary(20) NOT NULL,' .
+			'`peer_id` binary(20) NOT NULL,' .
+			'`compact` binary(6) NOT NULL,' .
+			'`ip` char(15) NOT NULL,' .
+			'`port` smallint(5) unsigned NOT NULL,' .
+			'`left` int(100) unsigned NOT NULL DEFAULT \'0\',' .
+			'`state` tinyint(1) unsigned NOT NULL DEFAULT \'0\',' .
+			'`updated` int(10) unsigned NOT NULL,' .
+			'PRIMARY KEY (`info_hash`,`peer_id`)' .
+		') ENGINE=MyISAM DEFAULT CHARSET=latin1'
+	);
+	if ( !$result ) {
+		echo mysqli_error($connection);
+		$success = false;
+	}
+	$result = mysqli_query($connection,
+		'CREATE TABLE IF NOT EXISTS `'.$settings['db_prefix'].'tasks` (' .
+			'`name` varchar(5) NOT NULL,' .
+			'`value` int(10) unsigned NOT NULL' .
+		') ENGINE=MyISAM DEFAULT CHARSET=latin1'
+	);
+	if ( !$result ) {
+		echo mysqli_error($connection);
+		$success = false;
+	}
+	$result = mysqli_query($connection,
+		'CREATE TABLE IF NOT EXISTS `'.$settings['db_prefix'].'torrents` (' .
+			'`name` varchar(255) NOT NULL' .
+		') ENGINE=MyISAM DEFAULT CHARSET=latin1'
+	);
+	if ( !$result ) {
+		echo mysqli_error($connection);
+		$success = false;
+	}
+	$result = mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'peers`');
+	if ( !$result ) {
+		echo mysqli_error($connection);
+		$success = false;
+	}
+	$result = mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'tasks`');
+	if ( !$result ) {
+		echo mysqli_error($connection);
+		$success = false;
+	}
+	$result = mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'torrents`');
+	if ( !$result ) {
+		echo mysqli_error($connection);
+		$success = false;
+	}
+
+	if ( $success ) {
+		$_GET['message'] = 'Your MySQL Tracker Database has been setup.';
+	} else {
 		$_GET['message'] = 'Could not setup the MySQL Database.';
 	}
 
@@ -53,24 +90,27 @@ function setupMySQL() {
 // MySQL Optimizer
 function optimizeMySQL() {
 
+	global $connection, $settings;
+
 	require_once __DIR__.'/once.db.connect.php';
 
 	// optimize
 	if (
-		mysqli_query($connection, "CHECK TABLE `{$settings['db_prefix']}peers`") &&
-		mysqli_query($connection, "ANALYZE TABLE `{$settings['db_prefix']}peers`") &&
-		mysqli_query($connection, "REPAIR TABLE `{$settings['db_prefix']}peers`") &&
-		mysqli_query($connection, "OPTIMIZE TABLE `{$settings['db_prefix']}peers`")
-	)
-	{
-		// no errors, hopefully???
-		$_GET['notice'] = 'yes';
+		mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'peers`') &&
+		mysqli_query($connection, 'ANALYZE TABLE `'.$settings['db_prefix'].'peers`') &&
+		mysqli_query($connection, 'REPAIR TABLE `'.$settings['db_prefix'].'peers`') &&
+		mysqli_query($connection, 'OPTIMIZE TABLE `'.$settings['db_prefix'].'peers`') &&
+		mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'tasks') &&
+		mysqli_query($connection, 'ANALYZE TABLE `'.$settings['db_prefix'].'tasks') &&
+		mysqli_query($connection, 'REPAIR TABLE `'.$settings['db_prefix'].'tasks') &&
+		mysqli_query($connection, 'OPTIMIZE TABLE `'.$settings['db_prefix'].'tasks') &&
+		mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'torrents') &&
+		mysqli_query($connection, 'ANALYZE TABLE `'.$settings['db_prefix'].'torrents') &&
+		mysqli_query($connection, 'REPAIR TABLE `'.$settings['db_prefix'].'torrents') &&
+		mysqli_query($connection, 'OPTIMIZE TABLE `'.$settings['db_prefix'].'torrents')
+	) {
 		$_GET['message'] = 'Your MySQL Tracker Database has been optimized.';
-	}
-	// error
-	else
-	{
-		$_GET['notice'] = 'no';
+	} else {
 		$_GET['message'] = 'Could not optimize the MySQL Database.';
 	}
 
@@ -194,17 +234,17 @@ if (isset($_GET['do'])) {
 		$actual = 0;
 		require_once __DIR__.'/once.db.connect.php';
 		foreach ( $tables as $table ) {
-			$sql = 'SELECT * FROM `information_schema`.`TABLES`';
-			$sql .= " WHERE TABLE_SCHEMA = '{$settings['db_name']}' AND TABLE_NAME = '{$settings['db_prefix']}{$table}'";
+			$sql = 'SELECT * FROM `information_schema`.`TABLES` ';
+			$sql .= 'WHERE TABLE_SCHEMA = \''.$settings['db_name'].'\' AND TABLE_NAME = \''.$settings['db_prefix'].$table.'\'';
 			$result = mysqli_query($connection, $sql);
-			if ( !$result->num_rows ) {
+			$count = mysqli_num_rows($result);
+			if ( !$count ) {
 				echo '
 		<p class="box background-pomegranate color-clouds">The table "'.$table.'" is not installed.</td>';
 			} else {
-				$actual += $result->num_rows;
+				$actual += $count;
 			}
 		}
-		phoenix::close();
 		if ( count($tables) == $actual ) {
 			echo '
 		<p class="box background-green-sea color-clouds">All your tables are installed.</td>';
@@ -230,15 +270,17 @@ if (isset($_GET['do'])) {
 		// TODO
 		// Buttons should be POST form submits to prevent repeat on reload.
 		// Buttons should disable on click to prevent double submission.
-		if ( $settings['db_name'] ) {
+		if ( $settings['db_reset'] ) {
 			echo '
-			<p class="text-left">Install, Upgrade and Reset <a class="button background-belize-hole color-clouds float-right" href="?do=setup">Setup</a></p>';
+			<p class="text-left">Install, Upgrade and Reset <a class="button background-belize-hole color-clouds float-right" href="?do=setup">Setup</a></p>
+			<p class="text-left">Check, Analyze, Repair and Optimize <a class="button background-belize-hole color-clouds float-right" href="?do=optimize">Optimize</a></p>';
 		} else {
 			echo '
-			<p class="text-left color-asbestos">Install, Upgrade and Reset <span class="button background-clouds float-right">Disabled</span></p>';
+			<p class="text-left color-asbestos">Install, Upgrade and Reset <span class="button background-clouds float-right">Disabled</span></p>
+			<p class="text-left">Check, Analyze, Repair and Optimize <a class="button background-belize-hole color-clouds float-right" href="?do=optimize">Optimize</a></p>
+			<p class="box background-pomegranate color-clouds">You should set $settings[\'db_reset\'] to false to disable resets,<br>
+			or delete <code>admin.php</code> when you\'re up and running.</td>';
 		}
-		echo '
-		<p class="text-left">Check, Analyze, Repair and Optimize <a class="button background-belize-hole color-clouds float-right" href="?do=optimize">Optimize</a></p>';
 
 	}
 
