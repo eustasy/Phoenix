@@ -7,15 +7,22 @@ require_once __DIR__.'/phoenix.php';
 // IF MAGIC QUOTES
 if ( get_magic_quotes_gpc() ) {
 	// Strip auto-escaped data.
-	$_GET['info_hash'] = stripslashes($_GET['info_hash']);
-	$_GET['peer_id'] = stripslashes($_GET['peer_id']);
+	if ( isset($_GET['info_hash']) ) {
+		$_GET['info_hash'] = stripslashes($_GET['info_hash']);
+	}
+	if ( isset($_GET['peer_id']) ) {
+		$_GET['peer_id'] = stripslashes($_GET['peer_id']);
+	}
 } // END IF MAGIC QUOTES
 
 if (
 	// 20-bytes - info_hash
 	// sha-1 hash of torrent metainfo
 	!isset($_GET['info_hash']) ||
-	strlen($_GET['info_hash']) != 20
+	(
+		strlen($_GET['info_hash']) != 20 &&
+		strlen($_GET['info_hash']) != 40
+	)
 ) {
 	tracker_error('Torrent Hash is invalid.');
 
@@ -47,12 +54,17 @@ if (
 
 	// integer - left
 	// number of bytes left for the peer to download
-	if (
-		isset($_GET['left']) &&
-		is_numeric($_GET['left'])
-	) {
-		$settings['seeding'] = ($_GET['left'] > 0 ? 0 : 1);
+	if ( isset($_GET['left']) ) {
+		if (
+			is_numeric($_GET['left']) &&
+			$_GET['left'] == 0
+		) {
+			$settings['seeding'] = 1;
+		} else {
+			$settings['seeding'] = 0;
+		}
 	} else {
+		$_GET['left'] = -1;
 		$settings['seeding'] = 0;
 	}
 
@@ -68,7 +80,7 @@ if (
 	) {
 		$_GET['compact'] = 1;
 	} else {
-		$_GET['compact'] += 0;
+		$_GET['compact'] = 0;
 	}
 
 	// integer boolean - no_peer_id - optional
@@ -76,7 +88,7 @@ if (
 	if ( !isset($_GET['no_peer_id']) ) {
 		$_GET['no_peer_id'] = 0;
 	} else {
-		$_GET['no_peer_id'] += 0;
+		$_GET['no_peer_id'] = intval($_GET['no_peer_id']);
 	}
 
 	// string - ip - optional
@@ -109,29 +121,27 @@ if (
 	// number of peers that the client has requested
 	if ( !isset($_GET['numwant']) ) {
 		$_GET['numwant'] = $settings['default_peers'];
-	} else if ( ( $_GET['numwant'] + 0 ) > $settings['max_peers'] ) {
+	} else if ( intval($_GET['numwant']) > $settings['max_peers'] ) {
 		$_GET['numwant'] = $settings['max_peers'];
 	} else {
-		$_GET['numwant'] += 0;
+		$_GET['numwant'] = intval($_GET['numwant']);
 	}
 
-	// Open Database
-	phoenix::open();
-
 	// Make info_hash & peer_id SQL friendly
-	$_GET['info_hash'] = phoenix::$api->escape_sql($_GET['info_hash']);
-	$_GET['peer_id']   = phoenix::$api->escape_sql($_GET['peer_id']);
+	require_once __DIR__.'/once.db.connect.php';
+	$_GET['info_hash'] = mysqli_real_escape_string($connection, $_GET['info_hash']);
+	$_GET['peer_id']   = mysqli_real_escape_string($connection, $_GET['peer_id']);
 
 	// Track Client
-	phoenix::event();
+	require_once __DIR__.'/function.peer.event.php';
+	peer_event();
+
+	// TODO RESUME FROM HERE ////////////////////////////////////////////////////////////////////////
 
 	// Clean Up
 	phoenix::clean();
 
 	// Announce Peers
 	phoenix::peers();
-
-	// Close Database
-	phoenix::close();
 
 }

@@ -74,7 +74,6 @@ require_once __DIR__.'/function.tracker.error.php';
 header('Access-Control-Allow-Origin: *');
 
 if ( !$settings['open_tracker'] ) {
-	phoenix::open();
-	$torrents = phoenix::allowed_torrents($torrents);
-	phoenix::close();
+	require_once __DIR__.'/function.tracker.allowed.php';
+	$torrents = tracker_allowed($torrents);
 }

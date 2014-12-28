@@ -49,22 +49,6 @@ class phoenix {
 		}
 	}
 
-	// insert new peer
-	public static function new_peer() {
-		self::$api->query(
-			// insert into the peers table
-			"INSERT IGNORE INTO `{$settings['db_prefix']}peers` " .
-			// table columns
-			'(info_hash, peer_id, compact, ip, port, state, updated) ' .
-			// 20-byte info_hash, 20-byte peer_id
-			"VALUES ('{$_GET['info_hash']}', '{$_GET['peer_id']}', '" .
-			// 6-byte compacted peer info
-			self::$api->escape_sql(pack('Nn', ip2long($_GET['ip']), $_GET['port'])) . "', " .
-			// dotted decimal string ip, integer port, integer state and unix timestamp updated
-			"'{$_GET['ip']}', {$_GET['port']}, {$settings['seeding']}, " . time() . '); '
-		) OR tracker_error('Failed to add new peer.');
-	}
-
 	// full peer update
 	public static function update_peer() {
 		// update peer
@@ -72,7 +56,7 @@ class phoenix {
 			// update the peers table
 			"UPDATE `{$settings['db_prefix']}peers` " .
 			// set the 6-byte compacted peer info
-			"SET compact='" . self::$api->escape_sql(pack('Nn', ip2long($_GET['ip']), $_GET['port'])) .
+			"SET compact='" . mysqli_real_escape_string($connection, pack('Nn', ip2long($_GET['ip']), $_GET['port'])) .
 			// dotted decimal string ip, integer port
 			"', ip='{$_GET['ip']}', port={$_GET['port']}, " .
 			// integer state and unix timestamp updated
@@ -80,69 +64,6 @@ class phoenix {
 			// that matches the given info_hash and peer_id
 			" WHERE info_hash='{$_GET['info_hash']}' AND peer_id='{$_GET['peer_id']}'"
 		) OR tracker_error('failed to update peer data');
-	}
-
-	// update peers last access time
-	public static function update_last_access() {
-		// update peer
-		self::$api->query(
-			// set updated to the current unix timestamp
-			"UPDATE `{$settings['db_prefix']}peers` SET updated=" . time() .
-			// that matches the given info_hash and peer_id
-			" WHERE info_hash='{$_GET['info_hash']}' AND peer_id='{$_GET['peer_id']}'"
-		) OR tracker_error('failed to update peers last access');
-	}
-
-	// remove existing peer
-	public static function delete_peer() {
-		// delete peer
-		self::$api->query(
-			// delete a peer from the peers table
-			"DELETE FROM `{$settings['db_prefix']}peers` " .
-			// that matches the given info_hash and peer_id
-			"WHERE info_hash='{$_GET['info_hash']}' AND peer_id='{$_GET['peer_id']}'"
-		) OR tracker_error('failed to remove peer data');
-	}
-
-	// tracker event handling
-	public static function event() {
-		// execute peer select
-		$pState = self::$api->fetch_once(
-			// select a peer from the peers table
-			"SELECT ip, port, state FROM `{$settings['db_prefix']}peers` " .
-			// that matches the given info_hash and peer_id
-			"WHERE info_hash='{$_GET['info_hash']}' AND peer_id='{$_GET['peer_id']}'"
-		);
-
-		// process tracker event
-		switch ((isset($_GET['event']) ? $_GET['event'] : false)) {
-			// client gracefully exited
-			case 'stopped':
-				// remove peer
-				if (isset($pState[2])) self::delete_peer();
-				break;
-			// client completed download
-			case 'completed':
-				// force seeding status
-				$settings['seeding'] = 1;
-			// client started download
-			case 'started':
-			// client continuing download
-			default:
-				// new peer
-				if (!isset($pState[2])) self::new_peer();
-				// peer status
-				else if (
-					// check that ip addresses match
-					$pState[0] != $_GET['ip'] ||
-					// check that listening ports match
-					($pState[1]+0) != $_GET['port'] ||
-					// check whether seeding status match
-					($pState[2]+0) != $settings['seeding']
-				) self::update_peer();
-				// update time
-				else self::update_last_access();
-		}
 	}
 
 	// tracker peer list
@@ -212,54 +133,6 @@ class phoenix {
 		unset($peers);
 	}
 
-	// tracker scrape
-	public static function scrape() {
-		// scrape response
-		$response = 'd5:filesd';
-
-		// scrape info_hash
-		if (isset($_GET['info_hash'])) {
-
-			if ( isset($_GET['json']) ) {
-				// scrape
-				$scrape = self::$api->fetch_once(
-					// select total seeders and leechers
-					'SELECT SUM(state=1), SUM(state=0) ' .
-					// from peers
-					"FROM `{$settings['db_prefix']}peers` " .
-					// that match info_hash
-					'WHERE HEX(`info_hash`)=\''.self::$api->escape_sql($_GET['info_hash']).'\''
-				) OR tracker_error('Unable to scrape the requested torrent.');
-				header('Content-Type: application/json');
-				echo '{"torrent":{"info_hash":"'.$_GET['info_hash'].'","peers":"'.number_format($scrape[0]+$scrape[1]+0).'","seeders":"'.number_format($scrape[0]+0).'","leechers":"'.number_format($scrape[1]+0).'"}}';
-				exit;
-			} else {
-				// scrape
-				$scrape = mysqli_fetch_once(
-					// select total seeders and leechers
-					'SELECT SUM(state=1), SUM(state=0) ' .
-					// from peers
-					"FROM `{$settings['db_prefix']}peers` " .
-					// that match info_hash
-					'WHERE info_hash=\''.self::$api->escape_sql($_GET['info_hash']).'\''
-				)
-				if ( !$scrape ) {
-					tracker_error('Unable to scrape the requested torrent.');
-				} else {
-					// 20-byte info_hash, integer complete, integer downloaded, integer incomplete
-					$response .= '20:'.$_GET['info_hash'].'d8:completei'.($scrape[0]+0).'e10:downloadedi0e10:incompletei'.($scrape[1]+0).'ee';
-				}
-			}
-
-		// full scrape
-		} else {
-			
-		}
-
-		// send response
-		echo $response . 'ee';
-	}
-
 	// tracker statistics
 	public static function allowed_torrents() {
 		$response = array();
@@ -270,5 +143,5 @@ class phoenix {
 		return $response;
 	}
 
-	
+
 }
