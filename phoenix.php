@@ -19,14 +19,14 @@
 */
 
 // error level
-error_reporting(E_ERROR | E_PARSE);
-//error_reporting(E_ALL & ~E_WARNING);
-//error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
+error_reporting(E_ALL);
+// error_reporting(E_ALL & ~E_WARNING);
+// error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
 
-// ignore disconnects
+// Ignore Disconnects
 ignore_user_abort(true);
 
-$_SERVER['tracker'] = array(
+$settings = array(
 
 	// General Tracker Options
 	'open_tracker'      => true,          /* track anything announced to it */
@@ -38,11 +38,11 @@ $_SERVER['tracker'] = array(
 	// Advanced Tracker Options
 	'external_ip'       => true,          /* allow client to specify ip address */
 	'force_compact'     => false,         /* force compact announces only */
-	'full_scrape'       => false,         /* allow scrapes without info_hash */
+	'full_scrape'       => true,          /* allow scrapes without info_hash */
 	'random_limit'      => 500,           /* if peers > #, use alternate SQL RAND() */
-	'clean_idle_peers'  => 1,             /* tweaks % of time tracker attempts idle peer removal */
+	'clean_idle_peers'  => 10,            /* tweaks % of time tracker attempts idle peer removal */
 	                                      /* if you have a busy tracker, you may adjust this */
-	                                      /* example: 10 = 10%, 20 = 5%, 50 = 2%, 100 = 1% */
+	                                      /* example: 1 = 1%, 10 = 10%, 50 = 50%, 100 = every time */
 
 	// General Database Options
 	// Can be better overridden with a config.php file.
@@ -58,32 +58,20 @@ $_SERVER['tracker'] = array(
 
 );
 
-// fatal error, stop execution
-function tracker_error($error) {
-	exit('d14:Failure Reason'.strlen($error). ":{$error}e");
-}
+////	DO NOT MODIFY BELOW THIS POINT
 
 // Override the default database variables with this.
 if ( is_readable(__DIR__.'/config.php') ) {
 	include __DIR__.'/config.php';
 }
 
-// Override the default database variables with this.
-if ( is_readable(__DIR__.'/class.mysqli.php') ) {
-	include __DIR__.'/class.mysqli.php';
-} else {
-	tracker_error('Could not load MySQLi Class.');
-}
+// require_once __DIR__.'/once.db.connect.php';
+require_once __DIR__.'/function.tracker.error.php';
+// require_once __DIR__.'/function.tracker.stats.php';
 
-// Override the default database variables with this.
-if ( is_readable(__DIR__.'/class.phoenix.php') ) {
-	include __DIR__.'/class.phoenix.php';
-} else {
-	tracker_error('Could not load Phoenix Class.');
-}
+header('Access-Control-Allow-Origin: *');
 
-if ( !$_SERVER['tracker']['open_tracker'] ) {
-	phoenix::open();
-	$torrents = phoenix::allowed_torrents($torrents);
-	phoenix::close();
+if ( !$settings['open_tracker'] ) {
+	require_once __DIR__.'/function.tracker.allowed.php';
+	$torrents = tracker_allowed();
 }
