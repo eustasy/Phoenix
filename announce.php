@@ -21,8 +21,7 @@ if (
 	!isset($_GET['info_hash']) ||
 	(
 		strlen($_GET['info_hash']) != 20 &&
-		strlen($_GET['info_hash']) != 40 &&
-		strlen(utf8_decode($_GET['info_hash'])) != 20
+		strlen($_GET['info_hash']) != 40
 	)
 ) {
 	tracker_error('Torrent Hash is invalid.');
