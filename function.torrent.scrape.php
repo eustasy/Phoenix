@@ -36,11 +36,11 @@ function torrent_scrape($torrent) {
 			header('Content-Type: text/xml');
 			echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
 					'<torrent>'.
-					'	<info_hash>'.$torrent           .'</info_hash>'.
-					'	<seeders>'  .$stats['seeders']  .'</seeders>'.
-					'	<leechers>' .$stats['leechers'] .'</leechers>'.
-					'	<peers>'    .$scrape['peers']   .'</peers>'.
-					'	<downloads>'.$stats['downloads'].'</downloads>'.
+						'<info_hash>'.$torrent            .'</info_hash>'.
+						'<seeders>'  .$scrape['seeders']  .'</seeders>'.
+						'<leechers>' .$scrape['leechers'] .'</leechers>'.
+						'<peers>'    .$scrape['peers']    .'</peers>'.
+						'<downloads>'.$scrape['downloads'].'</downloads>'.
 					'</torrent>';
 
 		// JSON

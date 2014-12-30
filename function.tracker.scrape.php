@@ -6,7 +6,7 @@ function tracker_scrape() {
 
 	require_once __DIR__.'/once.db.connect.php';
 
-	$scrape = mysqli_query(
+	$tracker = mysqli_query(
 		$connection,
 		// select info_hash, total seeders and leechers
 		'SELECT '.
@@ -19,17 +19,55 @@ function tracker_scrape() {
 		'GROUP BY `info_hash`'
 	);
 
-	if ( !$scrape ) {
+	if ( !$tracker ) {
 		tracker_error('Unable to scrape the tracker.');
 	} else {
 
-		// TODO Rewrite to arrays and then loop through them to allow JSON or XML output.
-		// TODO Downloaded count.
-		$response = 'd5:filesd';
-		while ( $data = mysqli_fetch_assoc($scrape) ) {
-			$response .= '20:'.$data['torrent'].'d8:completei'.$data['seeders'].'e10:downloadedi0e10:incompletei'.$data['leechers'].'ee';
+		// XML
+		if ( isset($_GET['xml']) ) {
+			header('Content-Type: text/xml');
+			echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
+					'<tracker>';
+			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
+				// TODO Downloaded count.
+				$scrape['downloads'] = 0;
+				$scrape['peers'] = $scrape['seeders'] + $scrape['leechers'];
+				echo '<torrent>'.
+							'<info_hash>'.bin2hex($scrape['torrent']).'</info_hash>'.
+							'<seeders>'  .$scrape['seeders']  .'</seeders>'.
+							'<leechers>' .$scrape['leechers'] .'</leechers>'.
+							'<peers>'    .$scrape['peers']    .'</peers>'.
+							'<downloads>'.$scrape['downloads'].'</downloads>'.
+						'</torrent>';
+			}
+			echo '</tracker>';
+
+		// JSON
+		} else if ( isset($_GET['json']) ) {
+			header('Content-Type: application/json');
+			$json = array();
+			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
+				// TODO Downloaded count.
+				$scrape['downloads'] = 0;
+				$scrape['peers'] = $scrape['seeders'] + $scrape['leechers'];
+				$json[bin2hex($scrape['torrent'])] = array(
+					'seeders'   => $scrape['seeders'],
+					'leechers'  => $scrape['leechers'],
+					'peers'     => $scrape['peers'],
+					'downloads' => $scrape['downloads'],
+				);
+			}
+			echo json_encode($json);
+
+		} else {
+			$response = 'd5:filesd';
+			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
+				// TODO Downloaded count.
+				$scrape['downloads'] = 0;
+				$response .= '20:'.$scrape['torrent'].'d8:completei'.$scrape['seeders'].'e10:downloadedi'.$scrape['downloads'].'e10:incompletei'.$scrape['leechers'].'ee';
+			}
+			echo $response.'ee';
 		}
-		echo $response.'ee';
 
 	}
 
