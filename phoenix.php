@@ -25,6 +25,7 @@ error_reporting(E_ALL);
 
 // Ignore Disconnects
 ignore_user_abort(true);
+ini_set('default_charset', 'utf-8');
 
 $settings = array(
 
@@ -37,7 +38,7 @@ $settings = array(
 
 	// Advanced Tracker Options
 	'external_ip'       => true,          /* allow client to specify ip address */
-	'force_compact'     => false,         /* force compact announces only */
+	'default_compact'     => false,       /* force compact announces only */
 	'full_scrape'       => true,          /* allow scrapes without info_hash */
 	'random_limit'      => 500,           /* if peers > #, use alternate SQL RAND() */
 	'clean_idle_peers'  => 10,            /* tweaks % of time tracker attempts idle peer removal */

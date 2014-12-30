@@ -21,7 +21,8 @@ if (
 	!isset($_GET['info_hash']) ||
 	(
 		strlen($_GET['info_hash']) != 20 &&
-		strlen($_GET['info_hash']) != 40
+		strlen($_GET['info_hash']) != 40 &&
+		strlen(utf8_decode($_GET['info_hash'])) != 20
 	)
 ) {
 	tracker_error('Torrent Hash is invalid.');
@@ -52,6 +53,11 @@ if (
 
 } else {
 
+	// Handle HEX info_hashes
+	if ( strlen($_GET['info_hash']) == 40 ) {
+		$_GET['info_hash'] = hex2bin($_GET['info_hash']);
+	}
+
 	// integer - left
 	// number of bytes left for the peer to download
 	if ( isset($_GET['left']) ) {
@@ -76,7 +82,10 @@ if (
 			isset($_GET['compact']) &&
 			intval($_GET['compact']) > 0
 		) ||
-		$settings['force_compact']
+		(
+			!isset($_GET['compact']) &&
+			$settings['default_compact']
+		)
 	) {
 		$_GET['compact'] = 1;
 	} else {
@@ -95,7 +104,7 @@ if (
 	// ip address the peer requested to use
 
 	// TODO Add IPv6 Support
-	// http://bittorrent.org/beps/bep_0007.html
+	// https://github.com/eustasy/phoenix/issues/3
 
 	if (
 		isset($_GET['ip']) &&

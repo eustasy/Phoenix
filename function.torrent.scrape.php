@@ -29,6 +29,9 @@ function torrent_scrape($torrent) {
 
 		// TODO Downloaded count.
 		$scrape['downloads'] = 0;
+		$scrape['seeders'] = intval($scrape['seeders']);
+		$scrape['leechers'] = intval($scrape['leechers']);
+		$scrape['downloads'] = intval($scrape['downloads']);
 		$scrape['peers'] = $scrape['seeders'] + $scrape['leechers'];
 
 		// XML

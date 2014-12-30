@@ -25,12 +25,19 @@ function tracker_stats() {
 
 		$phoenix_version = 'Phoenix Procedural 2 2014-12-27 23:03:00Z eustasy';
 
+		$stats['seeders'] = intval($stats['seeders']);
+		$stats['leechers'] = intval($stats['leechers']);
+		$stats['torrents'] = intval($stats['torrents']);
+		// TODO Downloads (actual and in output)
+		$stats['downloads'] = intval($stats['downloads']);
+		$stats['peers'] = $stats['seeders']+$stats['leechers'];
+
 		// XML
 		if ( isset($_GET['xml']) ) {
 			header('Content-Type: text/xml');
 			echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
 				 '<tracker version="$Id: '.$phoenix_version.' $">'.
-				 '<peers>'.$stats['seeders'] + $stats['leechers'].'</peers>'.
+				 '<peers>'.$stats['peers'].'</peers>'.
 				 '<seeders>'.$stats['seeders'].'</seeders>'.
 				 '<leechers>'.$stats['leechers'].'</leechers>'.
 				 '<torrents>'.$stats['torrents'].'</torrents></tracker>';
