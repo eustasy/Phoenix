@@ -26,24 +26,24 @@ function tracker_stats() {
 		$phoenix_version = 'Phoenix Procedural 2 2014-12-27 23:03:00Z eustasy';
 
 		// XML
-		if ( isset($_GET['format']) && $_GET['format'] == 'xml' ) {
+		if ( isset($_GET['xml']) ) {
 			header('Content-Type: text/xml');
-			echo '<?xml version="1.0" encoding="ISO-8859-1"?>'.
+			echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
 				 '<tracker version="$Id: '.$phoenix_version.' $">'.
-				 '<peers>'.number_format($stats['seeders'] + $stats['leechers']).'</peers>'.
-				 '<seeders>'.number_format($stats['seeders']).'</seeders>'.
-				 '<leechers>'.number_format($stats['leechers']).'</leechers>'.
-				 '<torrents>'.number_format($stats['torrents']).'</torrents></tracker>';
+				 '<peers>'.$stats['seeders'] + $stats['leechers'].'</peers>'.
+				 '<seeders>'.$stats['seeders'].'</seeders>'.
+				 '<leechers>'.$stats['leechers'].'</leechers>'.
+				 '<torrents>'.$stats['torrents'].'</torrents></tracker>';
 
 		// JSON
-		} else if ( isset($_GET['format']) && $_GET['format'] == 'json' ) {
+		} else if ( isset($_GET['json']) ) {
 				header('Content-Type: application/json');
 				echo '{"tracker":{'.
 					'version":"$Id: '.$phoenix_version.' $",'.
-					'"peers": "'.number_format($stats['seeders'] + $stats['leechers']).'",'.
-					'"seeders":"'.number_format($stats['seeders']).'",'.
-					'"leechers":"'.number_format($stats['leechers']).'",'.
-					'"torrents":"'.number_format($stats['torrents']).'"}}';
+					'"peers": "'.$stats['seeders'] + $stats['leechers'].'",'.
+					'"seeders":"'.$stats['seeders'].'",'.
+					'"leechers":"'.$stats['leechers'].'",'.
+					'"torrents":"'.$stats['torrents'].'"}}';
 
 		// HTML
 		} else {
