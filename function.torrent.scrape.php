@@ -7,9 +7,6 @@ function torrent_scrape() {
 	require_once __DIR__.'/once.db.connect.php';
 	require_once __DIR__.'/function.mysqli.fetch.once.php';
 
-	// $_GET['info_hash'] = mysqli_real_escape_string($connection, $_GET['info_hash']);
-	// $_GET['info_hash'] = utf8_encode(hex2bin($_GET['info_hash']));
-
 	// select seeders and leechers
 	$query = 'SELECT '.
 		'`info_hash`,'.
@@ -19,12 +16,9 @@ function torrent_scrape() {
 	'FROM `'.$settings['db_prefix'].'peers` ';
 	if ( strlen($_GET['info_hash']) == 20 ) {
 		// Assume BINARY
-		$query .= 'WHERE `info_hash`=\''.$_GET['info_hash'].'\'';
-	} else {
-		// Assume HEX
-		// $query .= 'WHERE HEX(`info_hash`)=\''.$_GET['info_hash'].'\'';
-		$query .= 'WHERE HEX(`info_hash`)=\''.$_GET['info_hash'].'\'';
+		$_GET['info_hash'] = bin2hex($_GET['info_hash']);
 	}
+	$query .= 'WHERE HEX(`info_hash`)=\''.$_GET['info_hash'].'\'';
 
 	$scrape = mysqli_fetch_once($query);
 
