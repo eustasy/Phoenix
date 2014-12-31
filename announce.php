@@ -42,14 +42,6 @@ if (
 ) {
 	tracker_error('Peer ID is invalid.');
 
-} else if (
-	// integer - port
-	// port the client is accepting connections from
-	!isset($_GET['port']) ||
-	!is_numeric($_GET['port'])
-) {
-	tracker_error('Client listening port is invalid.');
-
 } else {
 
 	// Handle HEX info_hashes
@@ -101,28 +93,46 @@ if (
 
 	// string - ip - optional
 	// ip address the peer requested to use
+	if (
+		!isset($_GET['ip']) ||
+		!$settings['external_ip']
+	) {
+		if ( isset($_SERVER['REMOTE_ADDR']) ) {
+			$_GET['ip'] =$_SERVER['REMOTE_ADDR'];
+			if ( !ip2long($_GET['ip']) ) {
+				tracker_error('Invalid IP, dotted decimal only. No IPv6.');
+			}
+		} else if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
+			$_GET['ip'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		} else if ( isset($_SERVER['HTTP_CLIENT_IP']) ) {
+			$_GET['ip'] = $_SERVER['HTTP_CLIENT_IP'];
+		} else {
+			tracker_error('Could not locate clients IP.');
+		}
+	}
 
 	// TODO Add IPv6 Support
 	// https://github.com/eustasy/phoenix/issues/3
 
+	// Sanatize the IPv4 address.
+	$_GET['ip'] = trim($_GET['ip'],'::ffff:');
+	if ( strpos($_GET['ip'], ':') !== false ) {
+		$_GET['ip'] = explode(':', $_GET['ip']);
+		$_GET['port'] = $_GET['ip'][1];
+		$_GET['ip'] = $_GET['ip'][0];
+	}
+	if ( !ip2long($_GET['ip']) ) {
+		tracker_error('Invalid IP, dotted decimal only. No IPv6.');
+	}
+
+	// There should be a port by now.
 	if (
-		isset($_GET['ip']) &&
-		$settings['external_ip']
+		// integer - port
+		// port the client is accepting connections from
+		!isset($_GET['port']) ||
+		!is_numeric($_GET['port'])
 	) {
-		// dotted decimal only
-		$_GET['ip'] = trim($_GET['ip'],'::ffff:');
-		if ( !ip2long($_GET['ip']) ) {
-			tracker_error('Invalid IP, dotted decimal only. No IPv6.');
-		}
-	// set ip to connected client
-	} else if ( isset($_SERVER['REMOTE_ADDR']) ) {
-		$_GET['ip'] = trim($_SERVER['REMOTE_ADDR'], '::ffff:');
-		if ( !ip2long($_GET['ip']) ) {
-			tracker_error('Invalid IP, dotted decimal only. No IPv6.');
-		}
-	// cannot locate suitable ip, must abort
-	} else {
-		tracker_error('Could not locate clients IP.');
+		tracker_error('Client listening port is invalid.');
 	}
 
 	// integer - numwant - optional
