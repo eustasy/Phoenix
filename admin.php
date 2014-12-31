@@ -4,10 +4,13 @@
 
 require_once __DIR__.'/phoenix.php';
 
-// MySQL Setup
-function setupMySQL() {
+if (
+	isset($_POST['process']) &&
+	$_POST['process'] == 'setup' &&
+	$settings['db_reset']
+) {
 
-	global $connection, $settings;
+	// MySQL Setup
 
 	require_once __DIR__.'/once.db.connect.php';
 	$success = true;
@@ -85,16 +88,11 @@ function setupMySQL() {
 		$_GET['message'] = 'Could not setup the MySQL Database.';
 	}
 
-}
-
-// MySQL Optimizer
-function optimizeMySQL() {
-
-	global $connection, $settings;
-
+} else if (
+	isset($_POST['process']) &&
+	$_POST['process'] == 'optimize'
+) {
 	require_once __DIR__.'/once.db.connect.php';
-
-	// optimize
 	if (
 		mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'peers`') &&
 		mysqli_query($connection, 'ANALYZE TABLE `'.$settings['db_prefix'].'peers`') &&
@@ -113,30 +111,22 @@ function optimizeMySQL() {
 	} else {
 		$_GET['message'] = 'Could not optimize the MySQL Database.';
 	}
-
 }
 
-
-// Handle Database Actions
-if (isset($_GET['do'])) {
-	// MySQL
-	if (
-		$_GET['do'] == 'setup' &&
-		$settings['db_name']
-	) {
-		setupMySQL();
-	} else if ($_GET['do'] == 'optimize') {
-		optimizeMySQL();
-	}
-}
-
-?>
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html lang="en">
 <head>
 	<title>Phoenix Diagnostics and Utilities</title>
 	<meta charset="UTF-8">
-	<link rel="stylesheet" href="//cdn.jsdelivr.net/g/normalize,colors.css">
+	<script src="https://cdn.jsdelivr.net/g/jquery"></script>
+	<script>
+		$(document).ready(function(){
+			$('.mysql').submit(function() {
+				$('input[type="submit"]').attr('disabled','disabled');
+			});
+		});
+	</script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/g/normalize,colors.css">
 	<style>
 		body {
 			margin: 0 auto;
@@ -156,12 +146,22 @@ if (isset($_GET['do'])) {
 		a {
 			text-decoration: none;
 		}
+		input {
+			border: none;
+		}
+		input:disabled {
+			background: #ecf0f1;
+			color: #7f8c8d;
+		}
 		.box {
 			padding: 1em;
 		}
 		.button {
 			border-radius: .2em;
 			padding: .3em;
+		}
+		.clear {
+			clear: both;
 		}
 		.float-left {
 			float: left;
@@ -267,20 +267,28 @@ if (isset($_GET['do'])) {
 			</div>';
 		}
 
-		// TODO
-		// Buttons should be POST form submits to prevent repeat on reload.
-		// Buttons should disable on click to prevent double submission.
 		if ( $settings['db_reset'] ) {
 			echo '
-			<p class="text-left">Install, Upgrade and Reset <a class="button background-belize-hole color-clouds float-right" href="?do=setup">Setup</a></p>
-			<p class="text-left">Check, Analyze, Repair and Optimize <a class="button background-belize-hole color-clouds float-right" href="?do=optimize">Optimize</a></p>';
+			<form class="mysql" action="" method="POST">
+				<p class="box background-pomegranate color-clouds">You should set $settings[\'db_reset\'] to false to disable resets,<br>
+				or delete <code>admin.php</code> when you\'re up and running.</p>
+				<p class="float-left text-left">Install, Upgrade and Reset</p>
+				<input type="hidden" name="process" value="setup">
+				<input class="button background-belize-hole color-clouds float-right" type="submit" name="submit" value="Setup">
+				<div class="clear"></div>
+			</form>';
 		} else {
 			echo '
-			<p class="text-left color-asbestos">Install, Upgrade and Reset <span class="button background-clouds float-right">Disabled</span></p>
-			<p class="text-left">Check, Analyze, Repair and Optimize <a class="button background-belize-hole color-clouds float-right" href="?do=optimize">Optimize</a></p>
-			<p class="box background-pomegranate color-clouds">You should set $settings[\'db_reset\'] to false to disable resets,<br>
-			or delete <code>admin.php</code> when you\'re up and running.</td>';
+				<p class="text-left color-asbestos">Install, Upgrade and Reset <span class="button background-clouds float-right">Disabled</span></p>
+				<div class="clear"></div>';
 		}
+		echo '
+			<form class="mysql" action="" method="POST">
+				<p class="float-left text-left">Check, Analyze, Repair and Optimize</p>
+				<input type="hidden" name="process" value="optimize">
+				<input class="button background-belize-hole color-clouds float-right" type="submit" name="submit" value="Optimize">
+				<div class="clear"></div>
+			</form>';
 
 	}
 
