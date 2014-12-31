@@ -11,6 +11,7 @@ function tracker_clean() {
 		$time = time();
 
 		$clean = mysqli_query(
+			$connection,
 			// Delete Peers that have been idle twice the announce interval.
 			'DELETE FROM `'.$settings['db_prefix'].'peers` WHERE `updated` < '.
 			'\''. ( $time - ( $settings['announce_interval'] * 2 ) ) .'\''

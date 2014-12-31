@@ -1,24 +1,29 @@
 <?php
 
-function torrent_scrape($torrent) {
+function torrent_scrape() {
 
 	global $connection, $settings;
 
 	require_once __DIR__.'/once.db.connect.php';
 	require_once __DIR__.'/function.mysqli.fetch.once.php';
 
+	// $_GET['info_hash'] = mysqli_real_escape_string($connection, $_GET['info_hash']);
+	// $_GET['info_hash'] = utf8_encode(hex2bin($_GET['info_hash']));
+
 	// select seeders and leechers
 	$query = 'SELECT '.
-	'SUM(`state`=\'1\') AS `seeders`, '.
-	'SUM(`state`=\'0\') AS `leechers` '.
+		'`info_hash`,'.
+		'SUM(`state`=\'1\') AS `seeders`, '.
+		'SUM(`state`=\'0\') AS `leechers` '.
 	// from peers
 	'FROM `'.$settings['db_prefix'].'peers` ';
-	if ( strlen($torrent) == 20 ) {
+	if ( strlen($_GET['info_hash']) == 20 ) {
 		// Assume BINARY
-		$query .= 'WHERE `info_hash`=\''.$torrent.'\'';
+		$query .= 'WHERE `info_hash`=\''.$_GET['info_hash'].'\'';
 	} else {
 		// Assume HEX
-		$query .= 'WHERE HEX(`info_hash`)=\''.$torrent.'\'';
+		// $query .= 'WHERE HEX(`info_hash`)=\''.$_GET['info_hash'].'\'';
+		$query .= 'WHERE HEX(`info_hash`)=\''.$_GET['info_hash'].'\'';
 	}
 
 	$scrape = mysqli_fetch_once($query);
@@ -39,7 +44,7 @@ function torrent_scrape($torrent) {
 			header('Content-Type: text/xml');
 			echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
 					'<torrent>'.
-						'<info_hash>'.$torrent            .'</info_hash>'.
+						'<info_hash>'.$_GET['info_hash']  .'</info_hash>'.
 						'<seeders>'  .$scrape['seeders']  .'</seeders>'.
 						'<leechers>' .$scrape['leechers'] .'</leechers>'.
 						'<peers>'    .$scrape['peers']    .'</peers>'.
@@ -52,7 +57,7 @@ function torrent_scrape($torrent) {
 			echo json_encode(
 				array(
 					'torrent' => array(
-						'info_hash' => $torrent,
+						'info_hash' => $_GET['info_hash'],
 						'seeders'   => $scrape['seeders'],
 						'leechers'  => $scrape['leechers'],
 						'peers'     => $scrape['peers'],
@@ -62,7 +67,7 @@ function torrent_scrape($torrent) {
 			);
 
 		} else {
-			echo 'd5:filesd'.strlen($torrent).':'.$torrent.'d8:completei'.$scrape['seeders'].'e10:downloadedi'.$scrape['downloads'].'e10:incompletei'.$scrape['leechers'].'ee';
+			echo 'd5:filesd20:'.$scrape['info_hash'].'d8:completei'.$scrape['seeders'].'e10:downloadedi'.$scrape['downloads'].'e10:incompletei'.$scrape['leechers'].'eeee';
 		}
 
 	}

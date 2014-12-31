@@ -25,7 +25,7 @@ error_reporting(E_ALL);
 
 // Ignore Disconnects
 ignore_user_abort(true);
-ini_set('default_charset', 'utf-8');
+ini_set('default_charset', 'iso-8859-1');
 
 $settings = array(
 

@@ -42,7 +42,7 @@ if ( isset($_GET['stats']) ) {
 	) {
 		// Perform a Scrape on the torrent.
 		require_once __DIR__.'/function.torrent.scrape.php';
-		torrent_scrape($_GET['info_hash']);
+		torrent_scrape();
 	// END IF SCRAPE
 
 	// IF FULL SCRAPE
