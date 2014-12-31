@@ -38,7 +38,7 @@ $settings = array(
 
 	// Advanced Tracker Options
 	'external_ip'       => true,          /* allow client to specify ip address */
-	'default_compact'     => false,       /* force compact announces only */
+	'default_compact'   => true,          /* force compact announces only */
 	'full_scrape'       => true,          /* allow scrapes without info_hash */
 	'random_limit'      => 500,           /* if peers > #, use alternate SQL RAND() */
 	'clean_idle_peers'  => 10,            /* tweaks % of time tracker attempts idle peer removal */
@@ -48,18 +48,20 @@ $settings = array(
 	// General Database Options
 	// Can be better overridden with a config.php file.
 	'db_host'           => 'localhost',   /* ip or hostname to mysql server */
-	'db_user'           => 'root',        /* username used to connect to mysql */
+	'db_user'           => 'phoenix',        /* username used to connect to mysql */
 	'db_pass'           => '',            /* password used to connect to mysql */
 	'db_name'           => 'phoenix',     /* name of the Phoenix database */
 
 	// Advanced Database Options
-	'db_prefix'         => '',            /* name prefixes for the Phoenix tables */
-	'db_persist'        => false,         /* use persistent connections if available. */
-	'db_reset'          => true,          /* allow database to be reset in admin */
+	'db_prefix'         => '',           /* name prefixes for the Phoenix tables */
+	'db_persist'        => true,         /* use persistent connections if available. */
+	'db_reset'          => true,         /* allow database to be reset in admin */
 
 );
 
 ////	DO NOT MODIFY BELOW THIS POINT
+
+header('Access-Control-Allow-Origin: *');
 
 // Override the default database variables with this.
 if ( is_readable(__DIR__.'/config.php') ) {
@@ -69,8 +71,6 @@ if ( is_readable(__DIR__.'/config.php') ) {
 // require_once __DIR__.'/once.db.connect.php';
 require_once __DIR__.'/function.tracker.error.php';
 // require_once __DIR__.'/function.tracker.stats.php';
-
-header('Access-Control-Allow-Origin: *');
 
 if ( !$settings['open_tracker'] ) {
 	require_once __DIR__.'/function.tracker.allowed.php';

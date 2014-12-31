@@ -8,8 +8,9 @@ function mysqli_array_build($sql) {
 
 	$result = mysqli_query($connection, $sql);
 	if ( !$result ) {
-		return false;
+		tracker_error('Failed to build array.');
 	} else {
+		$response = array();
 		while ( $thing = mysqli_fetch_array($result) ) {
 			$response[] = $thing[0];
 		}
