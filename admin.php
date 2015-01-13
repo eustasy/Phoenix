@@ -59,7 +59,8 @@ if (
 	}
 	$result = mysqli_query($connection,
 		'CREATE TABLE IF NOT EXISTS `'.$settings['db_prefix'].'torrents` (' .
-			'`name` varchar(255) NOT NULL' .
+			'`name` varchar(255) NOT NULL,' .
+			'`info_hash` varchar(40) NOT NULL' .
 		') ENGINE=MyISAM DEFAULT CHARSET=latin1'
 	);
 	if ( !$result ) {
