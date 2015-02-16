@@ -13,30 +13,20 @@ if ( isset($_GET['stats']) ) {
 // IF NOT STATS
 } else {
 
-	// IF MAGIC QUOTES
-	if (
-		isset($_GET['info_hash']) &&
-		get_magic_quotes_gpc()
-	) {
-		// Strip auto-escaped data.
-		$_GET['info_hash'] = stripslashes($_GET['info_hash']);
-	} // END IF MAGIC QUOTES
-
 	// IF SCRAPE
 	if (
-		// info_hash
-		// sha-1 hash of torrent being tracked
-		// sometimes binary, sometimes not.
+		////	info_hash
+		// Optional
+		// 40 Characters
+		// Hexadecimal
+		////	IF Allowed
+		// Tracker is Open
+		// OR
+		// Torrent is Allowed
 		isset($_GET['info_hash']) &&
-		(
-			strlen($_GET['info_hash']) == 20 ||
-			strlen($_GET['info_hash']) == 40
-		) &&
+		strlen($_GET['info_hash']) == 40 &&
 		(
 			$settings['open_tracker'] ||
-			// BINARY is allowed.
-			in_array(bin2hex($_GET['info_hash']), $torrents) ||
-			// HEX is allowed.
 			in_array($_GET['info_hash'], $torrents)
 		)
 	) {

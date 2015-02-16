@@ -14,12 +14,7 @@ function torrent_scrape() {
 		'SUM(`state`=\'0\') AS `leechers` '.
 	// from peers
 	'FROM `'.$settings['db_prefix'].'peers` ';
-	if ( strlen($_GET['info_hash']) == 20 ) {
-		// Assume BINARY
-		$_GET['info_hash'] = bin2hex($_GET['info_hash']);
-	}
-	$query .= 'WHERE HEX(`info_hash`)=\''.$_GET['info_hash'].'\'';
-
+	$query .= 'WHERE `info_hash`=\''.$_GET['info_hash'].'\'';
 	$scrape = mysqli_fetch_once($query);
 
 	if ( !$scrape ) {

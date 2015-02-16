@@ -47,7 +47,7 @@ function torrent_announce() {
 
 			// IF Compact
 			if ( $_GET['compact'] ) {
-				$peers .= $peer['compact'];
+				$peers .= hex2bin($peer['compact']);
 			// END IF Compact
 
 			// IF No Peer ID
@@ -57,7 +57,7 @@ function torrent_announce() {
 
 			// IF Normal
 			} else {
-				$response .= 'd2:ip'.strlen($peer['ip']).':'.$peer['ip'].'7:peer id20:'.$peer['peer_id'].'4:porti'.$peer['port'].'ee';
+				$response .= 'd2:ip'.strlen($peer['ip']).':'.$peer['ip'].'7:peer id20:'.hex2bin($peer['peer_id']).'4:porti'.$peer['port'].'ee';
 			} // END IF Normal
 
 		}

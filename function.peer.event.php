@@ -14,18 +14,18 @@ function peer_event() {
 		'WHERE `info_hash`=\''.$_GET['info_hash'].'\' AND `peer_id`=\''.$_GET['peer_id'].'\''
 	);
 
-	if ( !$peer ) {
-		// HOOK NEW DOWNLOAD
-	}
-
 	// IF Event
 	if ( isset($_GET['event']) ) {
 
 		// IF Peer Exited
 		if ( $_GET['event'] == 'stopped' ) {
 			if ( $peer ) {
-				require_once __DIR__.'/function.peer.new.php';
+				require_once __DIR__.'/function.peer.delete.php';
 				peer_delete();
+				// HOOK PEER DELETE
+				if ( is_readable(__DIR__.'/hook.peer.delete.php') ) {
+					include __DIR__.'/hook.peer.delete.php';
+				}
 			}
 			exit;
 		// END IF Peer Exited
@@ -35,12 +35,10 @@ function peer_event() {
 			// Force Seeding Status
 			$settings['seeding'] = 1;
 			// HOOK DOWNLOAD COMPLETE
+			if ( is_readable(__DIR__.'/hook.download.complete.php') ) {
+				include __DIR__.'/hook.download.complete.php';
+			}
 		} // END IF Peer Completed
-
-		// IF Peer Started
-		// } else if ( $_GET['event'] == 'started' ) {
-			// this should never happen
-		// IF Peer Started
 
 	} // END IF Event
 
@@ -57,12 +55,20 @@ function peer_event() {
 	) {
 		require_once __DIR__.'/function.peer.new.php';
 		peer_new();
+		// HOOK PEER NEW/CHANGE
+		if ( is_readable(__DIR__.'/hook.peer.change.php') ) {
+			include __DIR__.'/hook.peer.change.php';
+		}
 	// END Any Change
 
 	// IF Unchanged
 	} else {
 		require_once __DIR__.'/function.peer.access.php';
 		peer_access();
+		// HOOK PEER ACCESS
+		if ( is_readable(__DIR__.'/hook.peer.access.php') ) {
+			include __DIR__.'/hook.peer.access.php';
+		}
 	} // END IF Unchanged
 
 }

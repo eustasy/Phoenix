@@ -1,6 +1,6 @@
 <?php
 
-function peer_new() {
+function peer_delete() {
 
 	global $connection, $settings;
 

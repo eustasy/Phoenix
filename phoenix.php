@@ -18,7 +18,7 @@
  * along with Phoenix.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// error level
+// Error Level
 error_reporting(E_ALL);
 // error_reporting(E_ALL & ~E_WARNING);
 // error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
@@ -27,45 +27,39 @@ error_reporting(E_ALL);
 ignore_user_abort(true);
 ini_set('default_charset', 'iso-8859-1');
 
-$settings = array(
+// IF MAGIC QUOTES
+if ( get_magic_quotes_gpc() ) {
+	// Strip auto-escaped data.
+	if ( isset($_GET['info_hash']) ) {
+		$_GET['info_hash'] = stripslashes($_GET['info_hash']);
+	}
+	if ( isset($_GET['peer_id']) ) {
+		$_GET['peer_id'] = stripslashes($_GET['peer_id']);
+	}
+} // END IF MAGIC QUOTES
 
-	// General Tracker Options
-	'open_tracker'      => true,          /* track anything announced to it */
-	'announce_interval' => 1800,          /* how often client will send requests */
-	'min_interval'      => 600,           /* how often client can force requests */
-	'default_peers'     => 50,            /* default # of peers to announce */
-	'max_peers'         => 100,           /* max # of peers to announce */
+// IF BINARY
+if (
+	isset($_GET['info_hash']) &&
+	strlen($_GET['info_hash']) == 20
+) {
+	$_GET['info_hash'] = bin2hex($_GET['info_hash']);
+}
+if (
+	isset($_GET['peer_id']) &&
+	strlen($_GET['peer_id']) == 20
+) {
+	$_GET['peer_id'] = bin2hex($_GET['peer_id']);
+}
+// END IF BINARY
 
-	// Advanced Tracker Options
-	'external_ip'       => true,          /* allow client to specify ip address */
-	'default_compact'   => true,          /* force compact announces only */
-	'full_scrape'       => true,          /* allow scrapes without info_hash */
-	'random_limit'      => 500,           /* if peers > #, use alternate SQL RAND() */
-	'clean_idle_peers'  => 10,            /* tweaks % of time tracker attempts idle peer removal */
-	                                      /* if you have a busy tracker, you may adjust this */
-	                                      /* example: 1 = 1%, 10 = 10%, 50 = 50%, 100 = every time */
-
-	// General Database Options
-	// Can be better overridden with a config.php file.
-	'db_host'           => 'localhost',   /* ip or hostname to mysql server */
-	'db_user'           => 'phoenix',        /* username used to connect to mysql */
-	'db_pass'           => '',            /* password used to connect to mysql */
-	'db_name'           => 'phoenix',     /* name of the Phoenix database */
-
-	// Advanced Database Options
-	'db_prefix'         => '',           /* name prefixes for the Phoenix tables */
-	'db_persist'        => true,         /* use persistent connections if available. */
-	'db_reset'          => true,         /* allow database to be reset in admin */
-
-);
-
-////	DO NOT MODIFY BELOW THIS POINT
-
+// Allow Access from Anywhere
 header('Access-Control-Allow-Origin: *');
 
 // Override the default database variables with this.
-if ( is_readable(__DIR__.'/config.php') ) {
-	include __DIR__.'/config.php';
+include __DIR__.'/settings.default.php';
+if ( is_readable(__DIR__.'/settings.custom.php') ) {
+	include __DIR__.'/settings.custom.php';
 }
 
 // require_once __DIR__.'/once.db.connect.php';

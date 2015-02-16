@@ -11,12 +11,12 @@ function peer_new() {
 		'REPLACE INTO `'.$settings['db_prefix'].'peers` '.
 		'(`info_hash`, `peer_id`, `compact`, `ip`, `port`, `left`, `state`, `updated`) '.
 		'VALUES ('.
-			// 20-byte info_hash, pre-escaped
+			// 40-byte info_hash in HEX
 			'\''.$_GET['info_hash'].'\', '.
-			// 20-byte peer_id, pre-escaped
+			// 40-byte peer_id in HEX
 			'\''.$_GET['peer_id'].'\', '.
-			// 6-byte compacted peer info
-			'\''.mysqli_real_escape_string($connection, pack('Nn', ip2long($_GET['ip']), $_GET['port'])).'\', '.
+			// 12-byte compacted peer info
+			'\''.bin2hex(pack('Nn', ip2long($_GET['ip']), $_GET['port'])).'\', '.
 			// dotted decimal string ip
 			'\''.$_GET['ip'].'\', '.
 			// integer port

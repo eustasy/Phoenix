@@ -23,13 +23,14 @@ function tracker_stats() {
 		tracker_error('Unable to get stats.');
 	} else {
 
-		$phoenix_version = 'Phoenix Procedural 2 2014-12-27 23:03:00Z eustasy';
+		$phoenix_version = 'Phoenix Procedural 1.3 2015-02-16 20:44:00Z eustasy';
 
 		$stats['seeders'] = intval($stats['seeders']);
 		$stats['leechers'] = intval($stats['leechers']);
 		$stats['torrents'] = intval($stats['torrents']);
 		// TODO Downloads (actual and in output)
-		$stats['downloads'] = intval($stats['downloads']);
+		$stats['downloads'] = 0;
+		// $stats['downloads'] = intval($stats['downloads']);
 		$stats['peers'] = $stats['seeders']+$stats['leechers'];
 
 		// XML
@@ -45,18 +46,23 @@ function tracker_stats() {
 		// JSON
 		} else if ( isset($_GET['json']) ) {
 				header('Content-Type: application/json');
-				echo '{"tracker":{'.
-					'version":"$Id: '.$phoenix_version.' $",'.
-					'"peers": "'.$stats['seeders'] + $stats['leechers'].'",'.
-					'"seeders":"'.$stats['seeders'].'",'.
-					'"leechers":"'.$stats['leechers'].'",'.
-					'"torrents":"'.$stats['torrents'].'"}}';
+				echo json_encode(
+					array(
+						'tracker' => array(
+							'version' => '$Id: '.$phoenix_version.' $,',
+							'peers' => $stats['peers'],
+							'seeders' => $stats['seeders'],
+							'leechers' => $stats['leechers'],
+							'torrents' => $stats['torrents'],
+						),
+					)
+				);
 
 		// HTML
 		} else {
 				echo '<!DocType html><html><head><meta charset="UTF-8">'.
 					 '<title>Phoenix: $Id: '.$phoenix_version.' $</title>'.
-					 '<body><pre>'.number_format($stats['seeders'] + $stats['leechers']).
+					 '<body><pre>'.number_format($stats['peers']).
 					 ' peers ('.number_format($stats['seeders']).' seeders + '.number_format($stats['leechers']).
 					 ' leechers) in '.number_format($stats['torrents']).' torrents</pre></body></html>';
 		}

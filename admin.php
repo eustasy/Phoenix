@@ -32,9 +32,9 @@ if (
 	}
 	$result = mysqli_query($connection,
 		'CREATE TABLE IF NOT EXISTS `'.$settings['db_prefix'].'peers` (' .
-			'`info_hash` binary(20) NOT NULL,' .
-			'`peer_id` binary(20) NOT NULL,' .
-			'`compact` binary(6) NOT NULL,' .
+			'`info_hash` varchar(40) NOT NULL,' .
+			'`peer_id` varchar(40) NOT NULL,' .
+			'`compact` varchar(12) NOT NULL,' .
 			'`ip` char(15) NOT NULL,' .
 			'`port` smallint(5) unsigned NOT NULL,' .
 			'`left` int(100) unsigned NOT NULL DEFAULT \'0\',' .
@@ -185,7 +185,8 @@ if (
 <?php
 
 	echo '
-	<h1>Compatibility Check</h1>';
+	<h1>Compatibility Check</h1>
+	<p class="text-center color-9">Phoenix v.1.3</p>';
 
 	// PHP Version
 	$php_version = PHP_VERSION;

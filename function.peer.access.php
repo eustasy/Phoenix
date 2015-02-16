@@ -16,7 +16,7 @@ function peer_access() {
 	if ( $peer_access ) {
 		return true;
 	} else {
-		tracker_error('failed to update peers last access');
+		tracker_error('Failed to update peers last access.');
 	}
 
 }

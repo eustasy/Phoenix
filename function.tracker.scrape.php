@@ -10,7 +10,7 @@ function tracker_scrape() {
 		$connection,
 		// select info_hash, total seeders and leechers
 		'SELECT '.
-		'`info_hash` AS `torrent`, '.
+		'`info_hash`, '.
 		'SUM(`state`=\'1\') AS `seeders`, '.
 		'SUM(`state`=\'0\') AS `leechers` '.
 		// from peers
@@ -33,7 +33,7 @@ function tracker_scrape() {
 				$scrape['downloads'] = 0;
 				$scrape['peers'] = $scrape['seeders'] + $scrape['leechers'];
 				echo '<torrent>'.
-							'<info_hash>'.bin2hex($scrape['torrent']) .'</info_hash>'.
+							'<info_hash>'.$scrape['info_hash']          .'</info_hash>'.
 							'<seeders>'  .intval($scrape['seeders'])  .'</seeders>'.
 							'<leechers>' .intval($scrape['leechers']) .'</leechers>'.
 							'<peers>'    .intval($scrape['peers'])    .'</peers>'.
@@ -50,7 +50,7 @@ function tracker_scrape() {
 				// TODO Downloaded count.
 				$scrape['downloads'] = 0;
 				$scrape['peers'] = $scrape['seeders'] + $scrape['leechers'];
-				$json[bin2hex($scrape['torrent'])] = array(
+				$json[$scrape['info_hash']] = array(
 					'seeders'   => intval( $scrape['seeders']),
 					'leechers'  => intval( $scrape['leechers']),
 					'peers'     => intval( $scrape['peers']),
@@ -64,7 +64,7 @@ function tracker_scrape() {
 			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
 				// TODO Downloaded count.
 				$scrape['downloads'] = 0;
-				$response .= '20:'.$scrape['torrent'].'d8:completei'.intval($scrape['seeders']).'e10:downloadedi'.intval($scrape['downloads']).'e10:incompletei'.intval($scrape['leechers']).'ee';
+				$response .= '20:'.hex2bin($scrape['info_hash']).'d8:completei'.intval($scrape['seeders']).'e10:downloadedi'.intval($scrape['downloads']).'e10:incompletei'.intval($scrape['leechers']).'ee';
 			}
 			echo $response.'ee';
 		}
