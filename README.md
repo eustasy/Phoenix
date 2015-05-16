@@ -5,12 +5,13 @@ A modern fork of [PeerTracker](https://github.com/JonnyJD/peertracker), a lightw
 
 ### Required
 * Apache, Nginx, OR lighttpd.
-* PHP >= 5
-* MySQL >= 4.1
+* [A supported version of PHP](http://php.net/supported-versions.php)
+* MySQL >= 4.1 OR MariaDB
 
 ### Recommended
-* PHP >= 5.3
-* MySQL >= 5.1 OR MariaDB >= 5
+* Nginx (latest Stable)
+* PHP 5.6
+* MariaDB
 
 ## Install Guide
 1. Copy `settings.default.php` to `settings.custom.php`
