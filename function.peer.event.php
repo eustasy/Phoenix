@@ -34,6 +34,9 @@ function peer_event() {
 		} else if ( $_GET['event'] == 'completed' ) {
 			// Force Seeding Status
 			$settings['seeding'] = 1;
+			// Increment downloads
+			require_once __DIR__.'/function.peer.completed.php';
+			peer_completed();
 			// HOOK DOWNLOAD COMPLETE
 			if ( is_readable(__DIR__.'/hook.download.complete.php') ) {
 				include __DIR__.'/hook.download.complete.php';

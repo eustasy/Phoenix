@@ -19,6 +19,13 @@ function tracker_stats() {
 		'FROM `'.$settings['db_prefix'].'peers`'
 	);
 
+	// Downloads
+	$downloads = mysqli_fetch_once(
+		'SELECT '.
+		'SUM(`downloads`) AS `downloads` '.
+		'FROM `'.$settings['db_prefix'].'torrents`'
+	);
+
 	if ( !$stats ) {
 		tracker_error('Unable to get stats.');
 	} else {
@@ -28,9 +35,7 @@ function tracker_stats() {
 		$stats['seeders'] = intval($stats['seeders']);
 		$stats['leechers'] = intval($stats['leechers']);
 		$stats['torrents'] = intval($stats['torrents']);
-		// TODO Downloads (actual and in output)
-		$stats['downloads'] = 0;
-		// $stats['downloads'] = intval($stats['downloads']);
+		$stats['downloads'] = intval($downloads['downloads']);
 		$stats['peers'] = $stats['seeders']+$stats['leechers'];
 
 		// XML
@@ -41,7 +46,8 @@ function tracker_stats() {
 				 '<peers>'.$stats['peers'].'</peers>'.
 				 '<seeders>'.$stats['seeders'].'</seeders>'.
 				 '<leechers>'.$stats['leechers'].'</leechers>'.
-				 '<torrents>'.$stats['torrents'].'</torrents></tracker>';
+				 '<torrents>'.$stats['torrents'].'</torrents>'.
+				 '<downloads>'.$stats['downloads'].'</downloads></tracker>';
 
 		// JSON
 		} else if ( isset($_GET['json']) ) {
@@ -54,6 +60,7 @@ function tracker_stats() {
 							'seeders' => $stats['seeders'],
 							'leechers' => $stats['leechers'],
 							'torrents' => $stats['torrents'],
+							'downloads' => $stats['downloads'],
 						),
 					)
 				);
@@ -64,7 +71,8 @@ function tracker_stats() {
 					 '<title>Phoenix: $Id: '.$phoenix_version.' $</title>'.
 					 '<body><pre>'.number_format($stats['peers']).
 					 ' peers ('.number_format($stats['seeders']).' seeders + '.number_format($stats['leechers']).
-					 ' leechers) in '.number_format($stats['torrents']).' torrents</pre></body></html>';
+					 ' leechers) in '.number_format($stats['torrents']).' torrents and'.
+					 ' '.number_format($stats['downloads']).' downloads completed.</pre></body></html>';
 		}
 
 	}
