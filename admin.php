@@ -59,7 +59,7 @@ if (
 	}
 	$result = mysqli_query($connection,
 		'CREATE TABLE IF NOT EXISTS `'.$settings['db_prefix'].'torrents` (' .
-			//'`name` varchar(255) NOT NULL,' .			// it seems useless
+			'`name` varchar(255) NULL,' .
 			'`info_hash` varchar(40) NOT NULL,' .
 			'`downloads` int(10) unsigned NOT NULL DEFAULT \'0\',' .
 			'PRIMARY KEY (`info_hash`)' .
