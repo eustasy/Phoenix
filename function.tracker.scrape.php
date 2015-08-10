@@ -10,11 +10,14 @@ function tracker_scrape() {
 		$connection,
 		// select info_hash, total seeders and leechers
 		'SELECT '.
-		'`info_hash`, '.
-		'SUM(`state`=\'1\') AS `seeders`, '.
-		'SUM(`state`=\'0\') AS `leechers` '.
+		'`p`.`info_hash` AS `info_hash`, '.
+		'SUM(`p`.`state`=\'1\') AS `seeders`, '.
+		'SUM(`p`.`state`=\'0\') AS `leechers`, '.
+		'`t`.`downloads` AS `downloads` '.
 		// from peers
-		'FROM `'.$settings['db_prefix'].'peers` '.
+		'FROM `'.$settings['db_prefix'].'peers` AS `p` '.
+		'LEFT JOIN `'.$settings['db_prefix'].'torrents` AS `t` '.
+		'ON `p`.`info_hash`=`t`.`info_hash` '.
 		// grouped by info_hash
 		'GROUP BY `info_hash`'
 	);
@@ -29,8 +32,6 @@ function tracker_scrape() {
 			echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
 					'<tracker>';
 			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
-				// TODO Downloaded count.
-				$scrape['downloads'] = 0;
 				$scrape['peers'] = $scrape['seeders'] + $scrape['leechers'];
 				echo '<torrent>'.
 							'<info_hash>'.$scrape['info_hash']          .'</info_hash>'.
@@ -47,8 +48,6 @@ function tracker_scrape() {
 			header('Content-Type: application/json');
 			$json = array();
 			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
-				// TODO Downloaded count.
-				$scrape['downloads'] = 0;
 				$scrape['peers'] = $scrape['seeders'] + $scrape['leechers'];
 				$json[$scrape['info_hash']] = array(
 					'seeders'   => intval( $scrape['seeders']),
@@ -62,8 +61,6 @@ function tracker_scrape() {
 		} else {
 			$response = 'd5:filesd';
 			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
-				// TODO Downloaded count.
-				$scrape['downloads'] = 0;
 				$response .= '20:'.hex2bin($scrape['info_hash']).'d8:completei'.intval($scrape['seeders']).'e10:downloadedi'.intval($scrape['downloads']).'e10:incompletei'.intval($scrape['leechers']).'ee';
 			}
 			echo $response.'ee';

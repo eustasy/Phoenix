@@ -10,19 +10,20 @@ function torrent_scrape() {
 	// select seeders and leechers
 	$query = '
 		SELECT
-			`info_hash`,
-			SUM(`state`=\'1\') AS `seeders`,
-			SUM(`state`=\'0\') AS `leechers`
-		FROM `'.$settings['db_prefix'].'peers`
-		WHERE `info_hash`=\''.$_GET['info_hash'].'\';';
+			`p`.`info_hash` AS `info_hash`,
+			SUM(`p`.`state`=\'1\') AS `seeders`,
+			SUM(`p`.`state`=\'0\') AS `leechers`,
+			`t`.`downloads` AS `downloads`
+		FROM `'.$settings['db_prefix'].'peers` AS `p`
+			LEFT JOIN `'.$settings['db_prefix'].'torrents` AS `t`
+			ON `p`.`info_hash`=`t`.`info_hash`
+		WHERE `p`.`info_hash`=\''.$_GET['info_hash'].'\';';
 	$scrape = mysqli_fetch_once($query);
 
 	if ( !$scrape ) {
 		tracker_error('Unable to scrape for that torrent.');
 	} else {
 
-		// TODO Downloaded count.
-		$scrape['downloads'] = 0;
 		$scrape['seeders'] = intval($scrape['seeders']);
 		$scrape['leechers'] = intval($scrape['leechers']);
 		$scrape['downloads'] = intval($scrape['downloads']);
