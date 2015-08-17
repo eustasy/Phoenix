@@ -35,8 +35,6 @@ if (
 	tracker_error('Peer ID is invalid.');
 
 } else {
-	$stderr = fopen('php://stderr', 'w');
-
 	// Determine if the client is using IPv4 or IPv6
 
 	// If we're honoring X_FORWARDED_FOR, we check and use that first
@@ -63,8 +61,6 @@ if (
 	} else {
 		tracker_error('Unknown IP family!');
 	}
-
-	fwrite($stderr, "Got client IP: $client_ip and family $client_ip_family\n");
 
 	// Handle IP processing depending on our client family
 	if ( $client_ip_family === "ipv6" ) {
@@ -99,11 +95,6 @@ if (
 			validate_ipv6();
 		}
 	}
-
-	fwrite($stderr, "IPv4 addr: ".$_GET['ipv4'].'\n');
-	fwrite($stderr, "IPv4 port: ".$_GET['portv4'].'\n');
-	fwrite($stderr, "IPv6 addr: ".$_GET['ipv6'].'\n');
-	fwrite($stderr, "IPv6 port: ".$_GET['portv6'].'\n');
 
 	////	Left
 	// Optional

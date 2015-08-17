@@ -1,8 +1,6 @@
 <?php
 
 function validate_ipv6() {
-	$stderr = fopen('php://stderr', 'w');
-
 	// If we get an IPv6 parameter, use that, else, use client's address
 	// The IPv6 address can either be in the form of:
 	// dead:beef::1234 - i.e., raw address, in which case we use port=
@@ -17,7 +15,6 @@ function validate_ipv6() {
 		if ( isset($_GET['port']) && is_numeric($_GET['port']) ) {
 			$_GET['portv6'] = $_GET['port'];
 		} else {
-			fwrite($stderr, "Bad port, bailing out\n");
 			tracker_error('Did not get port and was not specified via ipv6=');
 		}
 	} else {
