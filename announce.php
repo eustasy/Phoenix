@@ -2,6 +2,7 @@
 
 // Load Phoenix Core
 require_once __DIR__.'/phoenix.php';
+require_once __DIR__.'/function.annouce.validate.php';
 
 ////	info_hash
 // Required
@@ -34,59 +35,75 @@ if (
 	tracker_error('Peer ID is invalid.');
 
 } else {
+	$stderr = fopen('php://stderr', 'w');
 
-	////	IF EXTERNAL IP ONLY
-	// IF not ip set
-	// OR
-	// IF external ips not allowed
-	if (
-		!isset($_GET['ip']) ||
-		!$settings['external_ip']
-	) {
-		if ( isset($_SERVER['REMOTE_ADDR']) ) {
-			$_GET['ip'] =$_SERVER['REMOTE_ADDR'];
-			if ( !ip2long($_GET['ip']) ) {
-				tracker_error('Invalid IP, dotted decimal only. No IPv6.');
-			}
-		} else if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
-			$_GET['ip'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
-		} else if ( isset($_SERVER['HTTP_CLIENT_IP']) ) {
-			$_GET['ip'] = $_SERVER['HTTP_CLIENT_IP'];
-		} else {
-			tracker_error('Could not locate clients IP.');
+	// Determine if the client is using IPv4 or IPv6
+
+	// If we're honoring X_FORWARDED_FOR, we check and use that first
+	// if its present
+	if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $settings['honor_xff']) {
+		$client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+	} else if ( isset($_SERVER['HTTP_CLIENT_IP']) && $settings['honor_xff']) {
+		$client_ip = $_SERVER['HTTP_CLIENT_IP'];
+	} else if ( isset($_SERVER['REMOTE_ADDR']) ) {
+		$client_ip = $_SERVER['REMOTE_ADDR'];
+	} else {
+		tracker_error('Unable to obtain client IP');
+	}
+
+	// Ok, our behavior changes depending if we're being contacted via IPv4 or IPv6
+
+	// filter_var VALIDATE_IP works with raw IPs, which should be what we always get
+	// in this case. It will fall over with port encoded IPv6 adddresses
+
+	if (filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+		$client_ip_family = "ipv4";
+	} else if (filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+		$client_ip_family= "ipv6";
+	} else {
+		tracker_error('Unknown IP family!');
+	}
+
+	fwrite($stderr, "Got client IP: $client_ip and family $client_ip_family\n");
+
+	// Handle IP processing depending on our client family
+	if ( $client_ip_family === "ipv6" ) {
+		// If we don't get ipv6 explicately, then copy it from
+		// client_ip
+		if ( !isset($_GET['ipv6']) ) {
+			$_GET['ipv6'] = $client_ip;
 		}
-	} // END IF EXTERNAL IP ONLY
 
-	////	ip
-	// Required
-	// A String representing the IPv4 Address the peer can be found on.
-	$_GET['ip'] = trim($_GET['ip'],'::ffff:');
-	if ( strpos($_GET['ip'], ':') !== false ) {
-		$_GET['ip'] = explode(':', $_GET['ip']);
-		$_GET['port'] = $_GET['ip'][1];
-		$_GET['ip'] = $_GET['ip'][0];
+		validate_ipv6();
+
+		// Handle getting a v4 address ...
+		if ( isset($_GET['ipv4']) ) {
+			validate_ipv4();
+		}
+	} else {
+		// Connection is via IPv4, but may include v6 information
+		// we ignore a ipv4= tag if we're connecting via v4
+
+		if ( !isset($_GET['ip']) || !$settings['external_ip']) {
+			$_GET['ip'] = $client_ip;
+		}
+
+		// FOr sanity sake, move this to its own variable
+		$_GET['ipv4'] = $_GET['ip'];
+
+		// Validate the IP address
+		validate_ipv4();
+
+		// if we got a v6 flag, praise it
+		if ( isset($_GET['ipv6']) ) {
+			validate_ipv6();
+		}
 	}
 
-	// TODO Add IPv6 Support
-	// https://github.com/eustasy/phoenix/issues/3
-	if ( !ip2long($_GET['ip']) ) {
-		tracker_error('Invalid IP, dotted decimal only. No IPv6.');
-	}
-
-	// BEGIN OPTIONAL ITEMS
-
-	////	port
-	// Required
-	// An integer representing the port the peer is using.
-	if (
-		// integer - port
-		// port the client is accepting connections from
-		!isset($_GET['port']) ||
-		!is_numeric($_GET['port'])
-	) {
-		tracker_error('Client listening port is invalid.');
-	}
-	$_GET['port'] = intval($_GET['port']);
+	fwrite($stderr, "IPv4 addr: ".$_GET['ipv4'].'\n');
+	fwrite($stderr, "IPv4 port: ".$_GET['portv4'].'\n');
+	fwrite($stderr, "IPv6 addr: ".$_GET['ipv6'].'\n');
+	fwrite($stderr, "IPv6 port: ".$_GET['portv6'].'\n');
 
 	////	Left
 	// Optional
