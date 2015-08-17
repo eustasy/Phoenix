@@ -50,13 +50,18 @@ function peer_event() {
 		// No Existing Peer
 		!$peer ||
 		// IP has changed.
-		$peer['ip'] != $_GET['ip'] ||
+		$peer['ipv4'] != $_GET['ipv4'] ||
+		$peer['ipv6'] != $_GET['ipv6'] ||
 		// Port has changed.
-		$peer['port'] != $_GET['port'] ||
+		$peer['portv4'] != $_GET['portv4'] ||
+		$peer['portv6'] != $_GET['portv6'] ||
 		// check whether seeding status match
 		$peer['state'] != $settings['seeding']
 	) {
 		require_once __DIR__.'/function.peer.new.php';
+		require_once __DIR__.'/function.peer.delete.php';
+		// Delete and reload the peer
+		peer_delete();
 		peer_new();
 		// HOOK PEER NEW/CHANGE
 		if ( is_readable(__DIR__.'/hook.peer.change.php') ) {
