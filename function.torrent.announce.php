@@ -32,6 +32,7 @@ function torrent_announce() {
 	// IF Compact
 	if ( $_GET['compact'] ) {
 		$peers = '';
+		$peersv6 = '';
 	// END IF Compact
 
 	// IF Not Compact
@@ -47,17 +48,30 @@ function torrent_announce() {
 
 			// IF Compact
 			if ( $_GET['compact'] ) {
-				$peers .= hex2bin($peer['compact']);
+				if ( $peer['compact'] != null ) {
+					$peers .= hex2bin($peer['compact']);
+				}
+				if ( $peer['compactv6'] != null ) {
+					$peersv6 .= hex2bin($peer['compactv6']);
+				}
 			// END IF Compact
 
 			// IF No Peer ID
 			} else if ( $_GET['no_peer_id'] ) {
-				$response .= 'd2:ip'.strlen($peer['ip']).':'.$peer['ip'].'4:porti'.$peer['port'].'ee';
+				if ( $peer['ipv4'] != null ) {
+					$response .= 'd2:ip'.strlen($peer['ip']).':'.$peer['ip'].'4:porti'.$peer['portv4'].'ee';
+				} elseif ( $peer['ipv6'] != null ) {
+					$response .= 'd2:ip'.strlen($peer['ipv6']).':'.$peer['ipv6'].'4:porti'.$peer['portv6'].'ee';
+				}
 			// END IF No Peer ID
 
 			// IF Normal
 			} else {
-				$response .= 'd2:ip'.strlen($peer['ip']).':'.$peer['ip'].'7:peer id20:'.hex2bin($peer['peer_id']).'4:porti'.$peer['port'].'ee';
+				if ( $peer['ip'] != null ) {
+					$response .= 'd2:ip'.strlen($peer['ipv4']).':'.$peer['ipv4'].'7:peer id20:'.hex2bin($peer['peer_id']).'4:porti'.$peer['portv4'].'ee';
+				} elseif ( $peer['ipv6'] != null ) {
+					$response .= 'd2:ip'.strlen($peer['ipv6']).':'.$peer['ipv6'].'7:peer id20:'.hex2bin($peer['peer_id']).'4:porti'.$peer['portv6'].'ee';
+				}
 			} // END IF Normal
 
 		}
@@ -67,6 +81,7 @@ function torrent_announce() {
 	if ( $_GET['compact'] ) {
 		// 6-byte compacted peer info
 		$response .= strlen($peers).':'.$peers;
+		$response .= '6:peers6'.strlen($peersv6).':'.$peersv6;
 	// END IF Compact
 
 	// IF Not Compact
