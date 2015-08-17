@@ -36,7 +36,9 @@ if (
 			'`peer_id` varchar(40) NOT NULL,' .
 			'`compact` varchar(12) NOT NULL,' .
 			'`ip` char(15) NOT NULL,' .
+			'`ip6` char(39) NOT NULL DEFAULT \'0\',' .
 			'`port` smallint(5) unsigned NOT NULL,' .
+			'`port6` smallint(5) unsigned NOT NULL,' .
 			'`left` int(100) unsigned NOT NULL DEFAULT \'0\',' .
 			'`state` tinyint(1) unsigned NOT NULL DEFAULT \'0\',' .
 			'`updated` int(10) unsigned NOT NULL,' .
