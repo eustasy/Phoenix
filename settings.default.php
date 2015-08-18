@@ -23,6 +23,10 @@ $settings = array(
 	'clean_idle_peers'  => 10,           /* tweaks % of time tracker attempts idle peer removal */
 	                                     /* if you have a busy tracker, you may adjust this */
 	                                     /* example: 1 = 1%, 10 = 10%, 50 = 50%, 100 = every time */
+	'honor_xff'        => false,          /* If this server is behind a frontend proxy, the client IP */
+					     /* will come in the form of a X-Forwarded-For. This option */
+					     /* should only be set if your frontend proxy properly handles */
+					     /* and filters XFF, else it allows for trivial IP spoofing */
 
 	// General Database Options
 	// Can be better overridden with a settings.custom.php file.
