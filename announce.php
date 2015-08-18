@@ -55,15 +55,15 @@ if (
 	// in this case. It will fall over with port encoded IPv6 adddresses
 
 	if (filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-		$client_ip_family = "ipv4";
+		$client_ip_family = 'ipv4';
 	} else if (filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-		$client_ip_family= "ipv6";
+		$client_ip_family= 'ipv6';
 	} else {
 		tracker_error('Unknown IP family!');
 	}
 
 	// Handle IP processing depending on our client family
-	if ( $client_ip_family === "ipv6" ) {
+	if ( $client_ip_family === 'ipv6' ) {
 		// If we don't get ipv6 explicately, then copy it from
 		// client_ip
 		if ( !isset($_GET['ipv6']) ) {
