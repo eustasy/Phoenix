@@ -20,7 +20,7 @@ function tracker_clean() {
 			tracker_error('Could not perform maintenance.');
 		}
 
-		$task = mysqli_query('REPLACE INTO `'.$settings['db_prefix'].'tasks` (`name`, `value`) VALUES (\'prune\', \''.$time.'\')');
+		$task = mysqli_query('REPLACE INTO `'.$settings['db_prefix'].'tasks` (`name`, `value`) VALUES (\'prune\', \''.$time.'\');');
 		if ( !$task ) {
 			tracker_error('Could not set last maintenance time.');
 		}
