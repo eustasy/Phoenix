@@ -42,7 +42,8 @@ if (
 			'`portv6` smallint(5) unsigned NOT NULL,' .
 			'`left` int(100) unsigned NOT NULL DEFAULT \'0\',' .
 			'`state` tinyint(1) unsigned NOT NULL DEFAULT \'0\',' .
-			'`updated` int(10) unsigned NOT NULL' .
+			'`updated` int(10) unsigned NOT NULL,' .
+			'PRIMARY KEY (`info_hash`,`peer_id`)' .
 		') ENGINE=MyISAM DEFAULT CHARSET=latin1'
 	);
 	if ( !$result ) {

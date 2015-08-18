@@ -59,9 +59,6 @@ function peer_event() {
 		$peer['state'] != $settings['seeding']
 	) {
 		require_once __DIR__.'/function.peer.new.php';
-		require_once __DIR__.'/function.peer.delete.php';
-		// Delete and reload the peer
-		peer_delete();
 		peer_new();
 		// HOOK PEER NEW/CHANGE
 		if ( is_readable(__DIR__.'/hook.peer.change.php') ) {

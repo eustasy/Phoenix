@@ -12,7 +12,7 @@ function peer_new() {
 		$compactv4 = bin2hex(pack('Nn', ip2long($_GET['ipv4']), $_GET['portv4']));
 	}
 	if ( isset($_GET['ipv6'])) {
-		$compactv6 = bin2hex( inet_pton($_GET['ipv6']) . pack('n', $_GET['portv6']) );
+		$compactv6 = bin2hex(inet_pton($_GET['ipv6']).pack('n', $_GET['portv6']));
 	}
 
 	$peer_new = mysqli_query(

@@ -4,6 +4,7 @@ function validate_ipv6() {
 	// If we get an IPv6 parameter, use that, else, use client's address
 	// The IPv6 address can either be in the form of:
 	// dead:beef::1234 - i.e., raw address, in which case we use port=
+	// [dead:beef::1234] - Enclosed address, also use port= here
 	// -or-
 	// [dead:beef::1234]:12345 - i.e., enbedded port. Unfortunately
 	// PHP has no functions for handling IPv6 addresses so we'll
@@ -35,14 +36,15 @@ function validate_ipv6() {
 		}
 
 		// Got the address, fish the port if its there
-		if ( (strlen($v6_adr)+2) == strlen($_GET['ipv6']) ) {
+		if ( (strlen($v6_addr)+2) == strlen($_GET['ipv6']) ) {
 			// Port wasn't included, copy it from port= if its there ...
 			if ( isset($_GET['port']) && is_numeric($_GET['port']) ) {
 				$_GET['portv6'] = $_GET['port'];
 			} else {
-				tracker_error('Invalid port specification');
+				tracker_error('Did not get port, and was not specified via ipv6, or was not a valid integer');
 			}
 			$_GET['ipv6'] = $v6_addr;
+			return;
 		}
 
 		// Try to get the port from the end of the string
