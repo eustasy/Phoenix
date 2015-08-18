@@ -34,9 +34,12 @@ if (
 		'CREATE TABLE IF NOT EXISTS `'.$settings['db_prefix'].'peers` (' .
 			'`info_hash` varchar(40) NOT NULL,' .
 			'`peer_id` varchar(40) NOT NULL,' .
-			'`compact` varchar(12) NOT NULL,' .
-			'`ip` char(15) NOT NULL,' .
-			'`port` smallint(5) unsigned NOT NULL,' .
+			'`compactv4` varchar(12) NOT NULL,' .
+			'`compactv6` varchar(36) NOT NULL,' .
+			'`ipv4` char(15) NOT NULL DEFAULT \'0\',' .
+			'`ipv6` char(39) NOT NULL DEFAULT \'0\',' .
+			'`portv4` smallint(5) unsigned NOT NULL,' .
+			'`portv6` smallint(5) unsigned NOT NULL,' .
 			'`left` int(100) unsigned NOT NULL DEFAULT \'0\',' .
 			'`state` tinyint(1) unsigned NOT NULL DEFAULT \'0\',' .
 			'`updated` int(10) unsigned NOT NULL,' .
