@@ -30,7 +30,7 @@ function tracker_stats() {
 		tracker_error('Unable to get stats.');
 	} else {
 
-		$phoenix_version = 'Phoenix Procedural 1.3 2015-02-16 20:44:00Z eustasy';
+		$phoenix_version = 'Phoenix Procedural v.1.4 2015-08-18 22:48:00Z eustasy';
 
 		$stats['seeders'] = intval($stats['seeders']);
 		$stats['leechers'] = intval($stats['leechers']);

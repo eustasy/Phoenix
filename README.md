@@ -1,4 +1,4 @@
-# Phoenix v1.3
+# Phoenix v.1.4
 A modern fork of [PeerTracker](https://github.com/JonnyJD/peertracker), a lightweight PHP/SQL BitTorrent Tracker.
 It is not backwards compatible in most ways, and drops SQLite support.
 
@@ -8,11 +8,6 @@ It is not backwards compatible in most ways, and drops SQLite support.
 * Apache, Nginx, OR lighttpd.
 * [A supported version of PHP](http://php.net/supported-versions.php)
 * MySQL >= 4.1 OR MariaDB
-
-### Recommended
-* Nginx (latest Stable)
-* PHP 5.6
-* MariaDB
 
 ## Install Guide
 1. Copy `settings.default.php` to `settings.custom.php`
