@@ -28,7 +28,7 @@ $settings = array(
 	// Can be better overridden with a settings.custom.php file.
 	'db_host'           => 'localhost',  /* ip or hostname to mysql server */
 	'db_user'           => 'phoenix',    /* username used to connect to mysql */
-	'db_pass'           => '',           /* password used to connect to mysql */
+	'db_pass'           => 'Password1',  /* password used to connect to mysql */
 	'db_name'           => 'phoenix',    /* name of the Phoenix database */
 
 	// Advanced Database Options
