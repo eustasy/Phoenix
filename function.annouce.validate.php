@@ -40,7 +40,7 @@ function validate_ipv6() {
 			if ( isset($_GET['port']) && is_numeric($_GET['port']) ) {
 				$_GET['portv6'] = $_GET['port'];
 			} else {
-				tracker_error('Invalid port specification');
+				tracker_error('Did not get port, and was not specified via ipv6, or was not a valid integer');
 			}
 			$_GET['ipv6'] = $v6_addr;
 		}
