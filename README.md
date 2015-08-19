@@ -14,4 +14,4 @@ It is not backwards compatible in most ways, and drops SQLite support.
 2. Edit the variables in `settings.custom.php`
 2. Upload all the `.php` files to your server.
 4. Load `admin.php` in your browser and run the `Setup` option.
-5. Delete `admin.php` from your server.
+5. Add `$settings['db_reset'] = false;` to the end of `settings.custom.php`, OR delete `admin.php` from your server.
