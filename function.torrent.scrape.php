@@ -57,7 +57,8 @@ function torrent_scrape() {
 			);
 
 		} else {
-			$echo = 'd
+			if ( isset($_GET['verbose']) ) {
+				echo 'd
 	5:files
 	d
 		20:'.hex2bin($_GET['info_hash']).'
@@ -71,10 +72,8 @@ function torrent_scrape() {
 		e
 	e
 e';
-			if ( isset($_GET['verbose']) ) {
-				echo $echo;
 			} else {
-				echo preg_replace('/\s+/', '', $echo);
+				echo 'd5:filesd20:'.hex2bin($_GET['info_hash']).'d8:completei'.$scrape['seeders'].'e10:downloadedi'.$scrape['downloads'].'e10:incompletei'.$scrape['leechers'].'eeee';
 			}
 		}
 
