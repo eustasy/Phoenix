@@ -57,24 +57,7 @@ function torrent_scrape() {
 			);
 
 		} else {
-			if ( isset($_GET['verbose']) ) {
-				echo 'd
-	5:files
-	d
-		20:'.hex2bin($_GET['info_hash']).'
-		d
-			8:complete
-			i'.$scrape['seeders'].'e
-			10:downloaded
-			i'.$scrape['downloads'].'e
-			10:incomplete
-			i'.$scrape['leechers'].'e
-		e
-	e
-e';
-			} else {
-				echo 'd5:filesd20:'.hex2bin($_GET['info_hash']).'d8:completei'.$scrape['seeders'].'e10:downloadedi'.$scrape['downloads'].'e10:incompletei'.$scrape['leechers'].'eeee';
-			}
+			echo 'd5:filesd20:'.hex2bin($_GET['info_hash']).'d8:completei'.$scrape['seeders'].'e10:downloadedi'.$scrape['downloads'].'e10:incompletei'.$scrape['leechers'].'eeee';
 		}
 
 	}
