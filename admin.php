@@ -195,7 +195,7 @@ if (
 
 	echo '
 	<h1>Compatibility Check</h1>
-	<p class="text-center color-9">Phoenix v.1.4</p>';
+	<p class="text-center color-9">Phoenix v.2.0</p>';
 
 	// PHP Version
 	$php_version = PHP_VERSION;

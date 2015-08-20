@@ -1,5 +1,13 @@
 # Phoenix Changelog
 
+## v.2.0 - 20/08/2015 - Unification
+FEATURE: Adds support for IPv6 ([#3](https://github.com/eustasy/phoenix/issues/3)).
+IMPROVES: More tasks are logged.
+BUGFIX: Task names being trimmed.
+BUGFIX: Task being duplicated.
+BUGFIX: Certain torrents binary hash is malformed due to a poorly implemented "verbose" mode ([#14](https://github.com/eustasy/phoenix/issues/14)).
+REMOVES: Verbose mode for torrent scraping. JSON and XML are still available.
+
 ## v.1.4 - 18/08/2015 - Totalitarian
 * BUGFIX: Fixes scrape counts of torrents by encoding hashes in their binary format.
 * BUGFIX: Fixes issue where cleaning was never logged.

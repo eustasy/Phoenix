@@ -1,4 +1,4 @@
-# Phoenix v.1.4
+# Phoenix v.2.0
 A modern fork of [PeerTracker](https://github.com/JonnyJD/peertracker), a lightweight PHP/SQL BitTorrent Tracker.
 It is not backwards compatible in most ways, and drops SQLite support.
 
