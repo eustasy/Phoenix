@@ -2,13 +2,11 @@
 
 function tracker_clean() {
 
-	global $connection, $settings;
+	global $connection, $settings, $time;
 
 	require_once __DIR__.'/once.db.connect.php';
 
 	if ( mt_rand(1, 100) <= $settings['clean_idle_peers'] ) {
-
-		$time = time();
 
 		$clean = mysqli_query(
 			$connection,
