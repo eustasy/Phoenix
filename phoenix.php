@@ -27,6 +27,8 @@ error_reporting(E_ALL);
 ignore_user_abort(true);
 ini_set('default_charset', 'iso-8859-1');
 
+$time = time();
+
 // IF MAGIC QUOTES
 if ( get_magic_quotes_gpc() ) {
 	// Strip auto-escaped data.

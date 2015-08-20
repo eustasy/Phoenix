@@ -52,8 +52,9 @@ if (
 	}
 	$result = mysqli_query($connection,
 		'CREATE TABLE IF NOT EXISTS `'.$settings['db_prefix'].'tasks` (' .
-			'`name` varchar(5) NOT NULL,' .
-			'`value` int(10) unsigned NOT NULL' .
+			'`name` varchar(16) NOT NULL,' .
+			'`value` int(10) NOT NULL,' .
+			'PRIMARY KEY (`name`)' .
 		') ENGINE=MyISAM DEFAULT CHARSET=latin1'
 	);
 	if ( !$result ) {
@@ -90,6 +91,7 @@ if (
 
 	if ( $success ) {
 		$_GET['message'] = 'Your MySQL Tracker Database has been setup.';
+		$task = mysqli_query($connection, 'REPLACE INTO `'.$settings['db_prefix'].'tasks` (`name`, `value`) VALUES (\'install\', \''.$time.'\');');
 	} else {
 		$_GET['message'] = 'Could not setup the MySQL Database.';
 	}
@@ -114,6 +116,7 @@ if (
 		mysqli_query($connection, 'OPTIMIZE TABLE `'.$settings['db_prefix'].'torrents')
 	) {
 		$_GET['message'] = 'Your MySQL Tracker Database has been optimized.';
+		$task = mysqli_query($connection, 'REPLACE INTO `'.$settings['db_prefix'].'tasks` (`name`, `value`) VALUES (\'optimize\', \''.$time.'\');');
 	} else {
 		$_GET['message'] = 'Could not optimize the MySQL Database.';
 	}
