@@ -1,11 +1,11 @@
 <?php
 
+// IF database is configured
 if (
 	!empty($settings['db_host']) &&
 	!empty($settings['db_user']) &&
 	!empty($settings['db_name'])
 ) {
-
 	// IF persistent connection
 	if ( $settings['db_persist']) {
 		$settings['db_host'] = 'p:'.$settings['db_host'];

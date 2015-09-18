@@ -2,7 +2,7 @@
 
 function mysqli_fetch_once($query) {
 
-	global $connection, $settings;
+	global $connection;
 
 	$result = mysqli_query($connection, $query);
 	if (
