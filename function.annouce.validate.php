@@ -67,5 +67,3 @@ function validate_ipv4() {
 		$_GET['portv4'] = $_GET['port'];
 	}
 }
-
-?>
