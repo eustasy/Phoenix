@@ -27,6 +27,7 @@ function peer_event() {
 					include __DIR__.'/hook.peer.delete.php';
 				}
 			}
+			// EXIT Only because the client does not require any data.
 			exit;
 		// END IF Peer Exited
 
