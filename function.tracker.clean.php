@@ -12,7 +12,7 @@ function tracker_clean() {
 			$connection,
 			// Delete Peers that have been idle twice the announce interval.
 			'DELETE FROM `'.$settings['db_prefix'].'peers` WHERE `updated` < '.
-			'\''. ( $time - ( $settings['announce_interval'] * 2 ) ) .'\''
+			'\''. ( $time - ( $settings['announce_interval'] * 2 ) ) .'\';'
 		);
 		if ( !$clean ) {
 			tracker_error('Could not perform maintenance.');

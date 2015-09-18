@@ -10,7 +10,7 @@ function peer_access() {
 		$connection,
 		'UPDATE `'.$settings['db_prefix'].'peers` '.
 		'SET `updated`=\''.time().'\', `left`=\''.$_GET['left'].'\' '.
-		'WHERE `info_hash`=\''.$_GET['info_hash'].'\' AND `peer_id`=\''.$_GET['peer_id'].'\''
+		'WHERE `info_hash`=\''.$_GET['info_hash'].'\' AND `peer_id`=\''.$_GET['peer_id'].'\';'
 	);
 
 	if ( $peer_access ) {

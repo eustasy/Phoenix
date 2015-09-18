@@ -16,14 +16,14 @@ function tracker_stats() {
 		// unique torrents
 		'COUNT(DISTINCT info_hash) AS `torrents` '.
 		// from peers
-		'FROM `'.$settings['db_prefix'].'peers`'
+		'FROM `'.$settings['db_prefix'].'peers`;'
 	);
 
 	// Downloads
 	$downloads = mysqli_fetch_once(
 		'SELECT '.
 		'SUM(`downloads`) AS `downloads` '.
-		'FROM `'.$settings['db_prefix'].'torrents`'
+		'FROM `'.$settings['db_prefix'].'torrents`;'
 	);
 
 	if ( !$stats ) {

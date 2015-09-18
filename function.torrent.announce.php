@@ -10,7 +10,7 @@ function torrent_announce() {
 	$response = 'd8:intervali' . $settings['announce_interval'].'e12:min intervali' . $settings['min_interval'].'e5:peers';
 
 	require_once __DIR__.'/function.mysqli.fetch.once.php';
-	$peer_count = mysqli_fetch_once('SELECT COUNT(*) AS `count` FROM `'.$settings['db_prefix'].'peers` WHERE `info_hash`=\''.$_GET['info_hash'].'\'');
+	$peer_count = mysqli_fetch_once('SELECT COUNT(*) AS `count` FROM `'.$settings['db_prefix'].'peers` WHERE `info_hash`=\''.$_GET['info_hash'].'\';');
 	if ( !$peer_count ) {
 		$peer_count = 0;
 	} else {
@@ -22,11 +22,11 @@ function torrent_announce() {
 	// IF there are more peers than requested,
 	// only return the ones we need.
 	if ( $peer_count > $_GET['numwant'] ) {
-		$sql .= ' LIMIT '.$_GET['numwant'].' OFFSET '.mt_rand(0, ($peer_count-$_GET['numwant']));
+		$sql .= ' LIMIT '.$_GET['numwant'].' OFFSET '.mt_rand(0, ($peer_count-$_GET['numwant'])).';';
 
 	// IF there are more peers than the random limit.
 	} else if ( $peer_count > $settings['random_limit'] ) {
-		$sql .= ' ORDER BY RAND()';
+		$sql .= ' ORDER BY RAND();';
 	}
 
 	// IF Compact

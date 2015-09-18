@@ -3,6 +3,32 @@
 // TODO Secure
 
 require_once __DIR__.'/phoenix.php';
+require_once __DIR__.'/once.db.connect.php';
+
+function optimize_table($table) {
+	global $connetion;
+	$result = mysqli_query(
+		$connection,
+		'CHECK TABLE `'.$settings['db_prefix'].$table.'`;'.
+		'ANALYZE TABLE `'.$settings['db_prefix'].$table.'`;'.
+		'REPAIR TABLE `'.$settings['db_prefix'].$table.'`;'.
+		'OPTIMIZE TABLE `'.$settings['db_prefix'].$table.'`;'.
+	);
+	if ( !$result ) {
+		echo mysqli_error($connection);
+		return false;
+	}
+	return true;
+}
+
+function task($task, $value){
+	$task = mysqli_query($connection, 'REPLACE INTO `'.$settings['db_prefix'].'tasks` (`name`, `value`) VALUES (\''.$task.\', \''.$value.'\');');
+	if ( $task ) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 if (
 	isset($_POST['process']) &&
@@ -11,25 +37,26 @@ if (
 ) {
 
 	// MySQL Setup
-
-	require_once __DIR__.'/once.db.connect.php';
 	$success = true;
 
-	$result = mysqli_query($connection, 'DROP TABLE IF EXISTS `'.$settings['db_prefix'].'peers`');
-	if ( !$result ) {
-		echo mysqli_error($connection);
+	function drop_table($table) {
+		global $connetion;
+		$result = mysqli_query($connection, 'DROP TABLE IF EXISTS `'.$settings['db_prefix'].$table.'`;');
+		if ( !$result ) {
+			echo mysqli_error($connection);
+			return false;
+		}
+		return true;
+	}
+	
+	if (
+		!drop_table('peers') ||
+		!drop_table('tasks') ||
+		!drop_table('torrents')
+	) {
 		$success = false;
 	}
-	$result = mysqli_query($connection, 'DROP TABLE IF EXISTS `'.$settings['db_prefix'].'tasks`');
-	if ( !$result ) {
-		echo mysqli_error($connection);
-		$success = false;
-	}
-	$result = mysqli_query($connection, 'DROP TABLE IF EXISTS `'.$settings['db_prefix'].'torrents`');
-	if ( !$result ) {
-		echo mysqli_error($connection);
-		$success = false;
-	}
+
 	$result = mysqli_query($connection,
 		'CREATE TABLE IF NOT EXISTS `'.$settings['db_prefix'].'peers` (' .
 			'`info_hash` varchar(40) NOT NULL,' .
@@ -44,7 +71,7 @@ if (
 			'`state` tinyint(1) unsigned NOT NULL DEFAULT \'0\',' .
 			'`updated` int(10) unsigned NOT NULL,' .
 			'PRIMARY KEY (`info_hash`,`peer_id`)' .
-		') ENGINE=MyISAM DEFAULT CHARSET=latin1'
+		') ENGINE=MyISAM DEFAULT CHARSET=latin1;'
 	);
 	if ( !$result ) {
 		echo mysqli_error($connection);
@@ -55,7 +82,7 @@ if (
 			'`name` varchar(16) NOT NULL,' .
 			'`value` int(10) NOT NULL,' .
 			'PRIMARY KEY (`name`)' .
-		') ENGINE=MyISAM DEFAULT CHARSET=latin1'
+		') ENGINE=MyISAM DEFAULT CHARSET=latin1;'
 	);
 	if ( !$result ) {
 		echo mysqli_error($connection);
@@ -67,31 +94,26 @@ if (
 			'`info_hash` varchar(40) NOT NULL,' .
 			'`downloads` int(10) unsigned NOT NULL DEFAULT \'0\',' .
 			'PRIMARY KEY (`info_hash`)' .
-		') ENGINE=MyISAM DEFAULT CHARSET=latin1'
+		') ENGINE=MyISAM DEFAULT CHARSET=latin1;'
 	);
 	if ( !$result ) {
 		echo mysqli_error($connection);
 		$success = false;
 	}
-	$result = mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'peers`');
-	if ( !$result ) {
-		echo mysqli_error($connection);
-		$success = false;
-	}
-	$result = mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'tasks`');
-	if ( !$result ) {
-		echo mysqli_error($connection);
-		$success = false;
-	}
-	$result = mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'torrents`');
-	if ( !$result ) {
-		echo mysqli_error($connection);
+	
+	if (
+		optimize_table('peers') &&
+		optimize_table('tasks') &&
+		optimize_table('torrents')
+	) {
+		task('optimize', $time);
+	} else {
 		$success = false;
 	}
 
 	if ( $success ) {
 		$_GET['message'] = 'Your MySQL Tracker Database has been setup.';
-		$task = mysqli_query($connection, 'REPLACE INTO `'.$settings['db_prefix'].'tasks` (`name`, `value`) VALUES (\'install\', \''.$time.'\');');
+		task('install', $time);
 	} else {
 		$_GET['message'] = 'Could not setup the MySQL Database.';
 	}
@@ -100,23 +122,13 @@ if (
 	isset($_POST['process']) &&
 	$_POST['process'] == 'optimize'
 ) {
-	require_once __DIR__.'/once.db.connect.php';
 	if (
-		mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'peers`') &&
-		mysqli_query($connection, 'ANALYZE TABLE `'.$settings['db_prefix'].'peers`') &&
-		mysqli_query($connection, 'REPAIR TABLE `'.$settings['db_prefix'].'peers`') &&
-		mysqli_query($connection, 'OPTIMIZE TABLE `'.$settings['db_prefix'].'peers`') &&
-		mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'tasks') &&
-		mysqli_query($connection, 'ANALYZE TABLE `'.$settings['db_prefix'].'tasks') &&
-		mysqli_query($connection, 'REPAIR TABLE `'.$settings['db_prefix'].'tasks') &&
-		mysqli_query($connection, 'OPTIMIZE TABLE `'.$settings['db_prefix'].'tasks') &&
-		mysqli_query($connection, 'CHECK TABLE `'.$settings['db_prefix'].'torrents') &&
-		mysqli_query($connection, 'ANALYZE TABLE `'.$settings['db_prefix'].'torrents') &&
-		mysqli_query($connection, 'REPAIR TABLE `'.$settings['db_prefix'].'torrents') &&
-		mysqli_query($connection, 'OPTIMIZE TABLE `'.$settings['db_prefix'].'torrents')
+		optimize_table('peers') &&
+		optimize_table('tasks') &&
+		optimize_table('torrents')
 	) {
 		$_GET['message'] = 'Your MySQL Tracker Database has been optimized.';
-		$task = mysqli_query($connection, 'REPLACE INTO `'.$settings['db_prefix'].'tasks` (`name`, `value`) VALUES (\'optimize\', \''.$time.'\');');
+		task('optimize', $time);
 	} else {
 		$_GET['message'] = 'Could not optimize the MySQL Database.';
 	}
@@ -242,10 +254,14 @@ if (
 		// Tables Exist
 		$tables = array('peers', 'tasks', 'torrents');
 		$actual = 0;
-		require_once __DIR__.'/once.db.connect.php';
+		
 		foreach ( $tables as $table ) {
-			$sql = 'SELECT * FROM `information_schema`.`TABLES` ';
-			$sql .= 'WHERE TABLE_SCHEMA = \''.$settings['db_name'].'\' AND TABLE_NAME = \''.$settings['db_prefix'].$table.'\'';
+			
+			$sql = 'SELECT TABLE_NAME '.
+			'FROM `information_schema`.`TABLES` '.
+			'WHERE TABLE_SCHEMA = \''.$settings['db_name'].'\' '.
+			'AND TABLE_NAME = \''.$settings['db_prefix'].$table.'\';';
+			
 			$result = mysqli_query($connection, $sql);
 			$count = mysqli_num_rows($result);
 			if ( !$count ) {

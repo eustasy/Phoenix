@@ -7,7 +7,7 @@ function tracker_allowed() {
 	require_once __DIR__.'/once.db.connect.php';
 
 	require_once __DIR__.'/function.mysqli.array.build.php';
-	$torrents = mysqli_array_build('SELECT `info_hash` FROM `'.$settings['db_prefix'].'torrents`');
+	$torrents = mysqli_array_build('SELECT `info_hash` FROM `'.$settings['db_prefix'].'torrents`;');
 	if ( !$torrents ) {
 		tracker_error('No torrents allowed at this time.');
 	} else {

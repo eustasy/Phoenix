@@ -19,7 +19,7 @@ function tracker_scrape() {
 		'LEFT JOIN `'.$settings['db_prefix'].'torrents` AS `t` '.
 		'ON `p`.`info_hash`=`t`.`info_hash` '.
 		// grouped by info_hash
-		'GROUP BY `info_hash`'
+		'GROUP BY `info_hash`;'
 	);
 
 	if ( !$tracker ) {
