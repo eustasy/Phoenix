@@ -7,7 +7,6 @@ function tracker_clean() {
 	require_once __DIR__.'/once.db.connect.php';
 
 	if ( mt_rand(1, 100) <= $settings['clean_idle_peers'] ) {
-
 		$clean = mysqli_query(
 			$connection,
 			// Delete Peers that have been idle twice the announce interval.
@@ -18,7 +17,10 @@ function tracker_clean() {
 			tracker_error('Could not perform maintenance.');
 		}
 
-		$task = mysqli_query($connection, 'REPLACE INTO `'.$settings['db_prefix'].'tasks` (`name`, `value`) VALUES (\'prune\', \''.$time.'\');');
+		$task = mysqli_query(
+			$connection,
+			'REPLACE INTO `'.$settings['db_prefix'].'tasks` (`name`, `value`) VALUES (\'prune\', \''.$time.'\');'
+		);
 		if ( !$task ) {
 			tracker_error('Could not set last maintenance time.');
 		}

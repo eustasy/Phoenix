@@ -33,7 +33,7 @@ function tracker_scrape() {
 			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
 				$scrape['peers'] = $scrape['seeders'] + $scrape['leechers'];
 				echo '<torrent>'.
-							'<info_hash>'.$scrape['info_hash']          .'</info_hash>'.
+							'<info_hash>'.$scrape['info_hash']        .'</info_hash>'.
 							'<seeders>'  .intval($scrape['seeders'])  .'</seeders>'.
 							'<leechers>' .intval($scrape['leechers']) .'</leechers>'.
 							'<peers>'    .intval($scrape['peers'])    .'</peers>'.
@@ -60,9 +60,9 @@ function tracker_scrape() {
 		// Bencode
 		// TODO Check dictionary in iteration.
 		} else {
-			$response = 'd5:filesd';
+			$response = 'd5:files';
 			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
-				$response .= '20:'.hex2bin($scrape['info_hash']).
+				$response .= 'd20:'.hex2bin($scrape['info_hash']).
 					'd8:completei'.intval($scrape['seeders']).
 					'e10:downloadedi'.intval($scrape['downloads']).
 					'e10:incompletei'.intval($scrape['leechers']).

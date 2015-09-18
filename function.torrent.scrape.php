@@ -2,7 +2,7 @@
 
 function torrent_scrape() {
 
-	global $connection, $settings;
+	global $settings;
 
 	require_once __DIR__.'/once.db.connect.php';
 	require_once __DIR__.'/function.mysqli.fetch.once.php';
@@ -22,8 +22,8 @@ function torrent_scrape() {
 
 	if ( !$scrape ) {
 		tracker_error('Unable to scrape for that torrent.');
-	} else {
 
+	} else {
 		$scrape['seeders'] = intval($scrape['seeders']);
 		$scrape['leechers'] = intval($scrape['leechers']);
 		$scrape['downloads'] = intval($scrape['downloads']);
@@ -57,7 +57,12 @@ function torrent_scrape() {
 			);
 
 		} else {
-			echo 'd5:filesd20:'.hex2bin($_GET['info_hash']).'d8:completei'.$scrape['seeders'].'e10:downloadedi'.$scrape['downloads'].'e10:incompletei'.$scrape['leechers'].'eeee';
+			echo 'd5:files'.
+				'd20:'.hex2bin($_GET['info_hash']).
+				'd8:completei'.$scrape['seeders'].
+				'e10:downloadedi'.$scrape['downloads'].
+				'e10:incompletei'.$scrape['leechers'].
+				'eeee';
 		}
 
 	}
