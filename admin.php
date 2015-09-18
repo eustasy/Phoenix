@@ -38,7 +38,6 @@ if (
 	$_POST['process'] == 'setup' &&
 	$settings['db_reset']
 ) {
-
 	// MySQL Setup
 	$success = true;
 
@@ -51,7 +50,7 @@ if (
 		}
 		return true;
 	}
-	
+
 	if (
 		!drop_table('peers') ||
 		!drop_table('tasks') ||
@@ -225,7 +224,8 @@ if (
 	// >= 5.0
 	} else if ( version_compare(PHP_VERSION, '5.0.0', '>=') ) {
 		echo '
-		<p class="box background-sun-flower color-midnight-blue">Your PHP version is >= 5.0, but < 5.3. We recommend updating to PHP >= 5.3</td>
+		<p class="box background-sun-flower color-midnight-blue">Your PHP version is >= 5.0, but < 5.3.
+		We recommend updating to PHP >= 5.3</p]>
 		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
 		$php_compat = 'Partial';
 
@@ -245,7 +245,6 @@ if (
 
 	// Yes MySQL
 	} else {
-
 		// Version
 		$mysql_version = mysqli_get_client_info();
 		$mysql_version = trim(substr($mysql_version, 0, strpos($mysql_version, '-')), 'mysqlnd ');
@@ -259,7 +258,6 @@ if (
 		$actual = 0;
 		
 		foreach ( $tables as $table ) {
-			
 			$sql = 'SELECT TABLE_NAME '.
 			'FROM `information_schema`.`TABLES` '.
 			'WHERE TABLE_SCHEMA = \''.$settings['db_name'].'\' '.
@@ -299,7 +297,9 @@ if (
 		if ( $settings['db_reset'] ) {
 			echo '
 			<form class="mysql" action="" method="POST">
-				<p class="box background-pomegranate color-clouds">You should set $settings[\'db_reset\'] to false to disable resets,<br>
+				<p class="box background-pomegranate color-clouds">You should set
+				<code>$settings[\'db_reset\']</code>
+				to false to disable resets,<br>
 				or delete <code>admin.php</code> when you\'re up and running.</p>
 				<p class="float-left text-left">Install, Upgrade and Reset</p>
 				<input type="hidden" name="process" value="setup">
@@ -308,7 +308,8 @@ if (
 			</form>';
 		} else {
 			echo '
-				<p class="text-left color-asbestos">Install, Upgrade and Reset <span class="button background-clouds float-right">Disabled</span></p>
+				<p class="text-left color-asbestos">Install, Upgrade and Reset
+				<span class="button background-clouds float-right">Disabled</span></p>
 				<div class="clear"></div>';
 		}
 		echo '
