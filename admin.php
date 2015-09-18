@@ -3,6 +3,7 @@
 // TODO Secure
 
 require_once __DIR__.'/phoenix.php';
+require_once __DIR__.'/function.task.php';
 require_once __DIR__.'/once.db.connect.php';
 
 function optimize_table($table) {
@@ -19,18 +20,6 @@ function optimize_table($table) {
 		return false;
 	}
 	return true;
-}
-
-function task($task, $value){
-	$task = mysqli_query(
-		$connection,
-		'REPLACE INTO `'.$settings['db_prefix'].'tasks` (`name`, `value`) VALUES (\''.$task.\', \''.$value.'\');'
-	);
-	if ( $task ) {
-		return true;
-	} else {
-		return false;
-	}
 }
 
 if (
