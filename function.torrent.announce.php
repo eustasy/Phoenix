@@ -7,7 +7,9 @@ function torrent_announce() {
 	require_once __DIR__.'/once.db.connect.php';
 
 	// begin response
-	$response = 'd8:intervali' . $settings['announce_interval'].'e12:min intervali' . $settings['min_interval'].'e5:peers';
+	$response = 'd8:intervali'.$settings['announce_interval'].
+		'e12:min intervali'.$settings['min_interval'].
+		'e5:peers';
 
 	require_once __DIR__.'/function.mysqli.fetch.once.php';
 	$sql = 'SELECT COUNT(*) AS `count` FROM `'.$settings['db_prefix'].'peers` '.
@@ -56,24 +58,26 @@ function torrent_announce() {
 					$peersv6 .= hex2bin($peer['compactv6']);
 				}
 			// END IF Compact
-			
-			// IF IPv4
-			if ( $peer['ipv4'] != null ) {
-				$response .= 'd2:ip'.strlen($peer['ipv4']).':'.$peer['ipv4'].
-					'4:porti'.$peer['portv4'];
-			// IF IPv6
-			} else if ( $peer['ipv6'] != null ) {
-				$response .= 'd2:ip'.strlen($peer['ipv6']).':'.$peer['ipv6'].
-					'4:porti'.$peer['portv6'];
+
+			} else {
+				// IF IPv4
+				if ( $peer['ipv4'] != null ) {
+					$response .= 'd2:ip'.strlen($peer['ipv4']).':'.$peer['ipv4'].
+						'4:porti'.$peer['portv4'];
+				// IF IPv6
+				} else if ( $peer['ipv6'] != null ) {
+					$response .= 'd2:ip'.strlen($peer['ipv6']).':'.$peer['ipv6'].
+						'4:porti'.$peer['portv6'];
+				}
+
+				// IF Peer ID
+				if ( !$_GET['no_peer_id'] ) {
+					$response .= '7:peer id20:'.hex2bin($peer['peer_id']);
+				} // END IF Peer ID
+
+				$response .= 'ee';
+
 			}
-
-			// IF Peer ID
-			if ( !$_GET['no_peer_id'] ) {
-				$response .= '7:peer id20:'.hex2bin($peer['peer_id']);
-			} // END IF Peer ID
-			
-			$response .= 'ee';
-
 		}
 	}
 

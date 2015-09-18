@@ -7,18 +7,12 @@ require_once __DIR__.'/function.task.php';
 require_once __DIR__.'/once.db.connect.php';
 
 function optimize_table($table) {
-	global $connetion;
-	$result = mysqli_query(
-		$connection,
-		'CHECK TABLE `'.$settings['db_prefix'].$table.'`;'.
+	global $connection, $settings;
+	$sql = 'CHECK TABLE `'.$settings['db_prefix'].$table.'`;'.
 		'ANALYZE TABLE `'.$settings['db_prefix'].$table.'`;'.
 		'REPAIR TABLE `'.$settings['db_prefix'].$table.'`;'.
-		'OPTIMIZE TABLE `'.$settings['db_prefix'].$table.'`;'.
-	);
-	if ( !$result ) {
-		echo mysqli_error($connection);
-		return false;
-	}
+		'OPTIMIZE TABLE `'.$settings['db_prefix'].$table.'`;';
+	mysqli_multi_query($connection, $sql, MYSQLI_STORE_RESULT);
 	return true;
 }
 
@@ -31,9 +25,10 @@ if (
 	$success = true;
 
 	function drop_table($table) {
-		global $connetion;
+		global $connection;
 		$result = mysqli_query($connection, 'DROP TABLE IF EXISTS `'.$settings['db_prefix'].$table.'`;');
 		if ( !$result ) {
+			var_dump($result);
 			echo mysqli_error($connection);
 			return false;
 		}
@@ -91,7 +86,7 @@ if (
 		echo mysqli_error($connection);
 		$success = false;
 	}
-	
+
 	if (
 		optimize_table('peers') &&
 		optimize_table('tasks') &&
@@ -245,13 +240,13 @@ if (
 		// Tables Exist
 		$tables = array('peers', 'tasks', 'torrents');
 		$actual = 0;
-		
+
 		foreach ( $tables as $table ) {
 			$sql = 'SELECT TABLE_NAME '.
 			'FROM `information_schema`.`TABLES` '.
 			'WHERE TABLE_SCHEMA = \''.$settings['db_name'].'\' '.
 			'AND TABLE_NAME = \''.$settings['db_prefix'].$table.'\';';
-			
+
 			$result = mysqli_query($connection, $sql);
 			$count = mysqli_num_rows($result);
 			if ( !$count ) {
