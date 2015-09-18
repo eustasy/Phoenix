@@ -12,7 +12,6 @@ if ( isset($_GET['stats']) ) {
 
 // IF NOT STATS
 } else {
-
 	// IF SCRAPE
 	if (
 		////	info_hash

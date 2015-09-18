@@ -25,7 +25,6 @@ function tracker_scrape() {
 	if ( !$tracker ) {
 		tracker_error('Unable to scrape the tracker.');
 	} else {
-
 		// XML
 		if ( isset($_GET['xml']) ) {
 			header('Content-Type: text/xml');
@@ -58,10 +57,16 @@ function tracker_scrape() {
 			}
 			echo json_encode($json);
 
+		// Bencode
+		// TODO Check dictionary in iteration.
 		} else {
 			$response = 'd5:filesd';
 			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
-				$response .= '20:'.hex2bin($scrape['info_hash']).'d8:completei'.intval($scrape['seeders']).'e10:downloadedi'.intval($scrape['downloads']).'e10:incompletei'.intval($scrape['leechers']).'ee';
+				$response .= '20:'.hex2bin($scrape['info_hash']).
+					'd8:completei'.intval($scrape['seeders']).
+					'e10:downloadedi'.intval($scrape['downloads']).
+					'e10:incompletei'.intval($scrape['leechers']).
+					'ee';
 			}
 			echo $response.'ee';
 		}

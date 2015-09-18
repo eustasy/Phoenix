@@ -16,7 +16,6 @@ function peer_event() {
 
 	// IF Event
 	if ( isset($_GET['event']) ) {
-
 		// IF Peer Exited
 		if ( $_GET['event'] == 'stopped' ) {
 			if ( $peer ) {

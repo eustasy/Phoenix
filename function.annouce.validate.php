@@ -58,7 +58,7 @@ function validate_ipv6() {
 }
 
 function validate_ipv4() {
-	$_GET['ipv4'] = trim($_GET['ipv4'],'::ffff:');
+	$_GET['ipv4'] = trim($_GET['ipv4'], '::ffff:');
 	if ( strpos($_GET['ipv4'], ':') !== false ) {
 		$_GET['ipv4'] = explode(':', $_GET['ipv4']);
 		$_GET['portv4'] = $_GET['ipv4'][1];
