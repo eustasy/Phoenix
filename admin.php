@@ -25,7 +25,7 @@ if (
 	$success = true;
 
 	function drop_table($table) {
-		global $connection;
+		global $connection, $settings;
 		$result = mysqli_query($connection, 'DROP TABLE IF EXISTS `'.$settings['db_prefix'].$table.'`;');
 		if ( !$result ) {
 			var_dump($result);
