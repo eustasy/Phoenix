@@ -59,5 +59,5 @@ require_once __DIR__.'/function.tracker.error.php';
 
 if ( !$settings['open_tracker'] ) {
 	require_once __DIR__.'/function.tracker.allowed.php';
-	$torrents = tracker_allowed();
+	$allowed_torrents = tracker_allowed($connection, $settings);
 }

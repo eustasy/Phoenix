@@ -7,7 +7,7 @@ require_once __DIR__.'/phoenix.php';
 // IF STATS
 if ( isset($_GET['stats']) ) {
 	require_once __DIR__.'/function.tracker.stats.php';
-	tracker_stats();
+	tracker_stats($connection, $settings);
 // END IF STATS
 
 // IF NOT STATS
@@ -26,7 +26,7 @@ if ( isset($_GET['stats']) ) {
 		strlen($_GET['info_hash']) == 40 &&
 		(
 			$settings['open_tracker'] ||
-			in_array($_GET['info_hash'], $torrents)
+			in_array($_GET['info_hash'], $allowed_torrents)
 		)
 	) {
 		// Perform a Scrape on the torrent.

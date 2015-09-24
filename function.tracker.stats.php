@@ -1,10 +1,9 @@
 <?php
 
-function tracker_stats() {
+function tracker_stats($connection, $settings) {
 
 	global $connection, $settings;
 
-	require_once __DIR__.'/once.db.connect.php';
 	require_once __DIR__.'/function.mysqli.fetch.once.php';
 
 	// Statistics

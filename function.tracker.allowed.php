@@ -1,17 +1,12 @@
 <?php
 
-function tracker_allowed() {
-
-	global $connection, $settings;
-
-	require_once __DIR__.'/once.db.connect.php';
-
+function tracker_allowed($connection, $settings) {
 	require_once __DIR__.'/function.mysqli.array.build.php';
-	$torrents = mysqli_array_build('SELECT `info_hash` FROM `'.$settings['db_prefix'].'torrents`;');
-	if ( !$torrents ) {
+	$sql = 'SELECT `info_hash` FROM `'.$settings['db_prefix'].'torrents`;';
+	$allowed_torrents = mysqli_array_build($connection, $sql);
+	if ( !$allowed_torrents ) {
 		tracker_error('No torrents allowed at this time.');
 	} else {
-		return $torrents;
+		return $allowed_torrents;
 	}
-
 }

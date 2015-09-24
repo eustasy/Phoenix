@@ -1,11 +1,6 @@
 <?php
 
-function mysqli_array_build($sql) {
-
-	global $connection, $settings;
-
-	require_once __DIR__.'/once.db.connect.php';
-
+function mysqli_array_build($connection, $sql) {
 	$result = mysqli_query($connection, $sql);
 	if ( !$result ) {
 		tracker_error('Failed to build array.');
@@ -16,5 +11,4 @@ function mysqli_array_build($sql) {
 		}
 		return $response;
 	}
-
 }

@@ -20,7 +20,7 @@ if (
 // Torrent is Allowed
 } else if (
 	!$settings['open_tracker'] &&
-	!in_array($_GET['info_hash'], $torrents)
+	!in_array($_GET['info_hash'], $allowed_torrents)
 ) {
 	tracker_error('Torrent is not allowed.');
 
