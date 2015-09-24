@@ -30,6 +30,8 @@ ini_set('default_charset', 'iso-8859-1');
 
 $time = time();
 
+// TODO Sanatize everything
+// once.input.sanatize.php
 // IF BINARY
 if (
 	isset($_GET['info_hash']) &&

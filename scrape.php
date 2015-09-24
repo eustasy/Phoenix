@@ -31,14 +31,14 @@ if ( isset($_GET['stats']) ) {
 	) {
 		// Perform a Scrape on the torrent.
 		require_once __DIR__.'/function.torrent.scrape.php';
-		torrent_scrape();
+		torrent_scrape($connection, $settings);
 	// END IF SCRAPE
 
 	// IF FULL SCRAPE
 	} else if ( $settings['full_scrape'] ) {
 		// Scrape the full tracker.
 		require_once __DIR__.'/function.tracker.scrape.php';
-		tracker_scrape();
+		tracker_scrape($connection, $settings);
 	// END IF FULL SCRAPE
 
 	// IF NOT ALLOWED TO SCRAPE

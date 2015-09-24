@@ -1,10 +1,7 @@
 <?php
 
-function mysqli_fetch_once($query) {
-
-	global $connection;
-
-	$result = mysqli_query($connection, $query);
+function mysqli_fetch_once($connection, $sql) {
+	$result = mysqli_query($connection, $sql);
 	if (
 		$result &&
 		mysqli_num_rows($result)
@@ -13,5 +10,4 @@ function mysqli_fetch_once($query) {
 	} else {
 		return false;
 	}
-
 }

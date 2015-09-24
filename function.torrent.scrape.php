@@ -1,14 +1,11 @@
 <?php
 
-function torrent_scrape() {
+function torrent_scrape($connection, $settings) {
 
-	global $connection, $settings;
-
-	require_once __DIR__.'/once.db.connect.php';
 	require_once __DIR__.'/function.mysqli.fetch.once.php';
 
 	// select seeders and leechers
-	$query = '
+	$sql = '
 		SELECT
 			`p`.`info_hash` AS `info_hash`,
 			SUM(`p`.`state`=\'1\') AS `seeders`,
@@ -18,7 +15,7 @@ function torrent_scrape() {
 			LEFT JOIN `'.$settings['db_prefix'].'torrents` AS `t`
 			ON `p`.`info_hash`=`t`.`info_hash`
 		WHERE `p`.`info_hash`=\''.$_GET['info_hash'].'\';';
-	$scrape = mysqli_fetch_once($query);
+	$scrape = mysqli_fetch_once($connection, $sql);
 
 	if ( !$scrape ) {
 		tracker_error('Unable to scrape for that torrent.');

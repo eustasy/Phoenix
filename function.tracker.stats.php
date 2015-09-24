@@ -2,30 +2,29 @@
 
 function tracker_stats($connection, $settings) {
 
-	global $connection, $settings;
-
 	require_once __DIR__.'/function.mysqli.fetch.once.php';
 
 	// Statistics
-	$stats = mysqli_fetch_once(
+	$sql = 'SELECT '.
 		// select seeders and leechers
-		'SELECT '.
 		'SUM(`state`=\'1\') AS `seeders`, '.
 		'SUM(`state`=\'0\') AS `leechers`, '.
 		// unique torrents
 		'COUNT(DISTINCT info_hash) AS `torrents` '.
 		// from peers
-		'FROM `'.$settings['db_prefix'].'peers`;'
-	);
+		'FROM `'.$settings['db_prefix'].'peers`;';
+	$stats = mysqli_fetch_once($connection, $sql);
 
 	// Downloads
-	$downloads = mysqli_fetch_once(
-		'SELECT '.
+	$sql = 'SELECT '.
 		'SUM(`downloads`) AS `downloads` '.
-		'FROM `'.$settings['db_prefix'].'torrents`;'
-	);
+		'FROM `'.$settings['db_prefix'].'torrents`;';
+	$downloads = mysqli_fetch_once($connection, $sql);
 
-	if ( !$stats ) {
+	if (
+		!$stats ||
+		!$downloads
+	) {
 		tracker_error('Unable to get stats.');
 
 	} else {

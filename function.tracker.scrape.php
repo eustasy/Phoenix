@@ -1,12 +1,8 @@
 <?php
 
-function tracker_scrape() {
+function tracker_scrape($connection, $settings) {
 
-	global $connection, $settings;
-
-	require_once __DIR__.'/once.db.connect.php';
-
-	$tracker = mysqli_query(
+	$tracker_scrape = mysqli_query(
 		$connection,
 		// select info_hash, total seeders and leechers
 		'SELECT '.
@@ -22,7 +18,7 @@ function tracker_scrape() {
 		'GROUP BY `info_hash`;'
 	);
 
-	if ( !$tracker ) {
+	if ( !$tracker_scrape ) {
 		tracker_error('Unable to scrape the tracker.');
 	} else {
 		// XML
@@ -30,7 +26,7 @@ function tracker_scrape() {
 			header('Content-Type: text/xml');
 			echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
 					'<tracker>';
-			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
+			while ( $scrape = mysqli_fetch_assoc($tracker_scrape) ) {
 				$scrape['peers'] = $scrape['seeders'] + $scrape['leechers'];
 				echo '<torrent>'.
 							'<info_hash>'.$scrape['info_hash']        .'</info_hash>'.
@@ -46,7 +42,7 @@ function tracker_scrape() {
 		} else if ( isset($_GET['json']) ) {
 			header('Content-Type: application/json');
 			$json = array();
-			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
+			while ( $scrape = mysqli_fetch_assoc($tracker_scrape) ) {
 				$scrape['peers'] = $scrape['seeders'] + $scrape['leechers'];
 				$json[$scrape['info_hash']] = array(
 					'seeders'   => intval( $scrape['seeders']),
@@ -61,7 +57,7 @@ function tracker_scrape() {
 		// TODO Check dictionary in iteration.
 		} else {
 			$response = 'd5:files';
-			while ( $scrape = mysqli_fetch_assoc($tracker) ) {
+			while ( $scrape = mysqli_fetch_assoc($tracker_scrape) ) {
 				$response .= 'd20:'.hex2bin($scrape['info_hash']).
 					'd8:completei'.intval($scrape['seeders']).
 					'e10:downloadedi'.intval($scrape['downloads']).
