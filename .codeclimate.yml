@@ -16,7 +16,7 @@ engines:
 # to turn on an engine, add it here and set enabled to `true`
 # to turn off an engine, set enabled to `false` or remove it
   rubocop:
-    enabled: false
+    enabled: true
   golint:
     enabled: true
   gofmt:
@@ -33,16 +33,24 @@ engines:
 # For more details see here:
 # http://docs.codeclimate.com/article/289-configuring-your-repository-via-codeclimate-yml#platform
 
-# ratings:
-#   paths:
-#   - app/**
-#   - lib/**
-#   - "**.rb"
-#   - "**.go"
+# Note: If the ratings key is not specified, this will result in a 0.0 GPA on your dashboard.
+
+ratings:
+  paths:
+    - "**.conf"
+    - "**.css"
+    - "**.js"
+    - "**.json"
+    - "**.md"
+    - "**.phar"
+    - "**.php"
+    - "**.sh"
+    - "**.xml"
 
 # You can globally exclude files from being analyzed by any engine using the
 # exclude_paths key.
 
-#exclude_paths:
-#- spec/**/*
-#- vendor/**/*
+exclude_paths:
+  - "_libs/**"
+  - "**.min.css"
+  - "**.min.js"
