@@ -22,23 +22,13 @@
 error_reporting(E_ALL);
 // error_reporting(E_ALL & ~E_WARNING);
 // error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
+// error_reporting(0);
 
 // Ignore Disconnects
 ignore_user_abort(true);
 ini_set('default_charset', 'iso-8859-1');
 
 $time = time();
-
-// IF MAGIC QUOTES
-if ( get_magic_quotes_gpc() ) {
-	// Strip auto-escaped data.
-	if ( isset($_GET['info_hash']) ) {
-		$_GET['info_hash'] = stripslashes($_GET['info_hash']);
-	}
-	if ( isset($_GET['peer_id']) ) {
-		$_GET['peer_id'] = stripslashes($_GET['peer_id']);
-	}
-} // END IF MAGIC QUOTES
 
 // IF BINARY
 if (
@@ -64,9 +54,8 @@ if ( is_readable(__DIR__.'/settings.custom.php') ) {
 	include __DIR__.'/settings.custom.php';
 }
 
-// require_once __DIR__.'/once.db.connect.php';
+require_once __DIR__.'/once.db.connect.php';
 require_once __DIR__.'/function.tracker.error.php';
-// require_once __DIR__.'/function.tracker.stats.php';
 
 if ( !$settings['open_tracker'] ) {
 	require_once __DIR__.'/function.tracker.allowed.php';
