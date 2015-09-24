@@ -1,10 +1,6 @@
 <?php
 
-function peer_new() {
-
-	global $connection, $settings;
-
-	require_once __DIR__.'/once.db.connect.php';
+function peer_new($connection, $settings, $time) {
 
 	$compactv4 = '';
 	$compactv6 = '';
@@ -38,7 +34,7 @@ function peer_new() {
 			// integer state
 			'\''.$settings['seeding'].'\', '.
 			// unix timestamp
-			'\''.time().'\''.
+			'\''.$time.'\''.
 		');'
 	);
 

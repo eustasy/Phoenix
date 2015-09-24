@@ -1,13 +1,11 @@
 <?php
 
-function peer_event() {
+function peer_event($connection, $settings, $time) {
 
-	global $connection, $settings;
-
-	require_once __DIR__.'/once.db.connect.php';
 	require_once __DIR__.'/function.mysqli.fetch.once.php';
 
 	$peer = mysqli_fetch_once(
+		$connection,
 		// SELECT the Peer
 		'SELECT * FROM `'.$settings['db_prefix'].'peers` '.
 		// that matches the given info_hash and peer_id
@@ -20,7 +18,7 @@ function peer_event() {
 		if ( $_GET['event'] == 'stopped' ) {
 			if ( $peer ) {
 				require_once __DIR__.'/function.peer.delete.php';
-				peer_delete();
+				peer_delete($connection, $settings);
 				// HOOK PEER DELETE
 				if ( is_readable(__DIR__.'/hook.peer.delete.php') ) {
 					include __DIR__.'/hook.peer.delete.php';
@@ -36,7 +34,7 @@ function peer_event() {
 			$settings['seeding'] = 1;
 			// Increment downloads
 			require_once __DIR__.'/function.peer.completed.php';
-			peer_completed();
+			peer_completed($connection, $settings);
 			// HOOK DOWNLOAD COMPLETE
 			if ( is_readable(__DIR__.'/hook.download.complete.php') ) {
 				include __DIR__.'/hook.download.complete.php';
@@ -59,7 +57,7 @@ function peer_event() {
 		$peer['state'] != $settings['seeding']
 	) {
 		require_once __DIR__.'/function.peer.new.php';
-		peer_new();
+		peer_new($connection, $settings, $time);
 		// HOOK PEER NEW/CHANGE
 		if ( is_readable(__DIR__.'/hook.peer.change.php') ) {
 			include __DIR__.'/hook.peer.change.php';
@@ -69,7 +67,7 @@ function peer_event() {
 	// IF Unchanged
 	} else {
 		require_once __DIR__.'/function.peer.access.php';
-		peer_access();
+		peer_access($connection, $settings, $time);
 		// HOOK PEER ACCESS
 		if ( is_readable(__DIR__.'/hook.peer.access.php') ) {
 			include __DIR__.'/hook.peer.access.php';

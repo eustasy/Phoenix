@@ -1,11 +1,6 @@
 <?php
 
-function peer_completed() {
-
-	global $connection, $settings;
-
-	require_once __DIR__.'/once.db.connect.php';
-
+function peer_completed($connection, $settings) {
 	mysqli_query(
 		$connection,
 		'INSERT INTO `'.$settings['db_prefix'].'torrents` '.
@@ -20,9 +15,7 @@ function peer_completed() {
 			// if exists then increment
 			'`downloads`=`downloads`+1;'
 	);
-
-	// Silent fail
-	//tracker_error('Failed to update downloads count.');
+	// Silently fail
+	// tracker_error('Failed to update downloads count.');
 	return true;
-
 }

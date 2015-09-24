@@ -1,20 +1,17 @@
 <?php
 
-function torrent_announce() {
+function torrent_announce($connection, $settings) {
 
-	global $connection, $settings;
-
-	require_once __DIR__.'/once.db.connect.php';
+	require_once __DIR__.'/function.mysqli.fetch.once.php';
 
 	// begin response
 	$response = 'd8:intervali'.$settings['announce_interval'].
 		'e12:min intervali'.$settings['min_interval'].
 		'e5:peers';
 
-	require_once __DIR__.'/function.mysqli.fetch.once.php';
 	$sql = 'SELECT COUNT(*) AS `count` FROM `'.$settings['db_prefix'].'peers` '.
 		'WHERE `info_hash`=\''.$_GET['info_hash'].'\';';
-	$peer_count = mysqli_fetch_once($sql);
+	$peer_count = mysqli_fetch_once($connection, $sql);
 	if ( !$peer_count ) {
 		$peer_count = 0;
 	} else {

@@ -168,7 +168,7 @@ if (
 
 	// Track Client
 	require_once __DIR__.'/function.peer.event.php';
-	peer_event();
+	peer_event($connection, $settings, $time);
 
 	// Clean Up
 	require_once __DIR__.'/function.tracker.clean.php';
@@ -176,6 +176,6 @@ if (
 
 	// Announce Peers
 	require_once __DIR__.'/function.torrent.announce.php';
-	torrent_announce();
+	torrent_announce($connection, $settings);
 
 }
