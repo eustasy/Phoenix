@@ -139,10 +139,15 @@ if (
 	// Optional
 	// An integer representing a boolean.
 	// Defines whether or not to omit peer_id in dictionary announce response.
-	if ( !isset($_GET['no_peer_id']) ) {
-		$_GET['no_peer_id'] = 0;
+	if (
+		(
+			isset($_GET['no_peer_id']) &&
+			intval($_GET['no_peer_id']) > 0
+		)
+	) {
+		$_GET['no_peer_id'] = 1;
 	} else {
-		$_GET['no_peer_id'] = intval($_GET['no_peer_id']);
+		$_GET['no_peer_id'] = 0;
 	}
 
 	////	numwant
@@ -161,16 +166,13 @@ if (
 
 	// END OPTIONAL ITEMS
 
-	// Connect
-	require_once __DIR__.'/once.db.connect.php';
-
 	// Track Client
 	require_once __DIR__.'/function.peer.event.php';
 	peer_event();
 
 	// Clean Up
 	require_once __DIR__.'/function.tracker.clean.php';
-	tracker_clean();
+	tracker_clean($connection, $settings, $time);
 
 	// Announce Peers
 	require_once __DIR__.'/function.torrent.announce.php';

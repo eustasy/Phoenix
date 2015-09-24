@@ -56,8 +56,9 @@ if ( is_readable(__DIR__.'/settings.custom.php') ) {
 	include __DIR__.'/settings.custom.php';
 }
 
-require_once __DIR__.'/once.db.connect.php';
 require_once __DIR__.'/function.tracker.error.php';
+// DB_Connect must be loaded after tracker_error and settings.
+require_once __DIR__.'/once.db.connect.php';
 
 if ( !$settings['open_tracker'] ) {
 	require_once __DIR__.'/function.tracker.allowed.php';

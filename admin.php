@@ -4,17 +4,8 @@
 
 require_once __DIR__.'/phoenix.php';
 require_once __DIR__.'/function.task.php';
-require_once __DIR__.'/once.db.connect.php';
-
-function optimize_table($table) {
-	global $connection, $settings;
-	$sql = 'CHECK TABLE `'.$settings['db_prefix'].$table.'`;'.
-		'ANALYZE TABLE `'.$settings['db_prefix'].$table.'`;'.
-		'REPAIR TABLE `'.$settings['db_prefix'].$table.'`;'.
-		'OPTIMIZE TABLE `'.$settings['db_prefix'].$table.'`;';
-	mysqli_multi_query($connection, $sql, MYSQLI_STORE_RESULT);
-	return true;
-}
+require_once __DIR__.'/function.mysqli.optimize.table.php';
+require_once __DIR__.'/function.mysqli.drop.table.php';
 
 if (
 	isset($_POST['process']) &&
@@ -24,21 +15,10 @@ if (
 	// MySQL Setup
 	$success = true;
 
-	function drop_table($table) {
-		global $connection, $settings;
-		$result = mysqli_query($connection, 'DROP TABLE IF EXISTS `'.$settings['db_prefix'].$table.'`;');
-		if ( !$result ) {
-			var_dump($result);
-			echo mysqli_error($connection);
-			return false;
-		}
-		return true;
-	}
-
 	if (
-		!drop_table('peers') ||
-		!drop_table('tasks') ||
-		!drop_table('torrents')
+		!drop_table($connection, $settings, 'peers') ||
+		!drop_table($connection, $settings, 'tasks') ||
+		!drop_table($connection, $settings, 'torrents')
 	) {
 		$success = false;
 	}
@@ -88,18 +68,18 @@ if (
 	}
 
 	if (
-		optimize_table('peers') &&
-		optimize_table('tasks') &&
-		optimize_table('torrents')
+		optimize_table($connection, $settings, 'peers') &&
+		optimize_table($connection, $settings, 'tasks') &&
+		optimize_table($connection, $settings, 'torrents')
 	) {
-		task('optimize', $time);
+		task($connection, $settings, 'optimize', $time);
 	} else {
 		$success = false;
 	}
 
 	if ( $success ) {
 		$_GET['message'] = 'Your MySQL Tracker Database has been setup.';
-		task('install', $time);
+		task($connection, $settings, 'install', $time);
 	} else {
 		$_GET['message'] = 'Could not setup the MySQL Database.';
 	}
@@ -109,12 +89,12 @@ if (
 	$_POST['process'] == 'optimize'
 ) {
 	if (
-		optimize_table('peers') &&
-		optimize_table('tasks') &&
-		optimize_table('torrents')
+		optimize_table($connection, $settings, 'peers') &&
+		optimize_table($connection, $settings, 'tasks') &&
+		optimize_table($connection, $settings, 'torrents')
 	) {
 		$_GET['message'] = 'Your MySQL Tracker Database has been optimized.';
-		task('optimize', $time);
+		task($connection, $settings, 'optimize', $time);
 	} else {
 		$_GET['message'] = 'Could not optimize the MySQL Database.';
 	}

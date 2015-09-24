@@ -1,11 +1,7 @@
 <?php
 
-function tracker_clean() {
-
-	global $connection, $settings, $time;
-
+function tracker_clean($connection, $settings, $time) {
 	require_once __DIR__.'/function.task.php';
-	require_once __DIR__.'/once.db.connect.php';
 
 	if ( mt_rand(1, 100) <= $settings['clean_idle_peers'] ) {
 		$clean = mysqli_query(
@@ -18,7 +14,7 @@ function tracker_clean() {
 			tracker_error('Could not perform maintenance.');
 		}
 
-		$task = task('prune', $time);
+		$task = task($connection, $settings, 'prune', $time);
 		if ( !$task ) {
 			tracker_error('Could not set last maintenance time.');
 		}
