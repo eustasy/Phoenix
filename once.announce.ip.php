@@ -9,23 +9,23 @@
 
 $addresses = array();
 
-if ( isset($_GET['ip']) {
+if ( isset($_GET['ip']) ) {
 	$addresses[] = $_GET['ip'];
 }
-if ( isset($_GET['ipv4']) {
+if ( isset($_GET['ipv4']) ) {
 	$addresses[] = $_GET['ipv4'];
 }
-if ( isset($_GET['ipv6']) {
+if ( isset($_GET['ipv6']) ) {
 	$addresses[] = $_GET['ipv6'];
 }
 if ( isset($_SERVER['REMOTE_ADDR']) ) {
 	$addresses[] = $_SERVER['REMOTE_ADDR'];
 }
 // If we're honoring X_FORWARDED_FOR, we check and use that first if its present.
-if ( isset($_SERVER['HTTP_CLIENT_IP']) && $settings['honor_xff']) {
+if ( isset($_SERVER['HTTP_CLIENT_IP']) && $settings['honor_xff'] ) {
 	$addresses[] = $_SERVER['HTTP_CLIENT_IP'];
 }
-if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $settings['honor_xff']) {
+if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $settings['honor_xff'] ) {
 	$addresses[] = $_SERVER['HTTP_X_FORWARDED_FOR'];
 }
 
