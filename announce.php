@@ -34,7 +34,6 @@ if (
 	tracker_error('Peer ID is invalid.');
 
 } else {
-
 	// IP Addresses & Port
 	require_once __DIR__.'/once.announce.ip.php';
 	$peer['ipv4'] = $_GET['ipv4'];
