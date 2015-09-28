@@ -5,7 +5,8 @@
 [![Travis CI](https://travis-ci.org/eustasy/phoenix.svg)](https://travis-ci.org/eustasy/phoenix)
 
 A modern fork of [PeerTracker](https://github.com/JonnyJD/peertracker), a lightweight PHP/SQL BitTorrent Tracker.
-It is not backwards compatible in most ways, and drops SQLite support.
+
+It is not backwards compatible.
 
 ## What Do You Need?
 
@@ -20,3 +21,7 @@ It is not backwards compatible in most ways, and drops SQLite support.
 2. Upload all the `.php` files to your server.
 4. Load `admin.php` in your browser and run the `Setup` option.
 5. Add `$settings['db_reset'] = false;` to the end of `settings.custom.php`, OR delete `admin.php` from your server.
+
+## Roadmap
+* Sanatize super-globals variables
+* Automated Tests
