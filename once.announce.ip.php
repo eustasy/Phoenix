@@ -48,7 +48,7 @@ if (
 }
 
 foreach ( $addresses as $address ) {
-
+	// Check IPv4
 	if ( !$peer['ipv4'] ) {
 		// Trim IPv6 Padding
 		$address_ipv4 = trim($address, '::ffff:');
@@ -66,9 +66,7 @@ foreach ( $addresses as $address ) {
 			}
 		}
 	}
-
-	$address_port = false;
-
+	// Check IPv6
 	if ( !$peer['ipv6'] ) {
 		$address_ipv6 = $address;
 		// Try and find a port
@@ -92,10 +90,10 @@ foreach ( $addresses as $address ) {
 
 }
 
-if ( $peer['port'] && !$peer['portv4'] )
+if ( $peer['port'] && !$peer['portv4'] ) {
 	$peer['portv4'] = $peer['port'];
 }
-if ( $peer['port'] && !$peer['portv6'] )
+if ( $peer['port'] && !$peer['portv6'] ) {
 	$peer['portv6'] = $peer['port'];
 }
 
