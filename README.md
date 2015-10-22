@@ -21,7 +21,3 @@ It is not backwards compatible.
 2. Upload all the `.php` files to your server.
 4. Load `admin.php` in your browser and run the `Setup` option.
 5. Add `$settings['db_reset'] = false;` to the end of `settings.custom.php`, OR delete `admin.php` from your server.
-
-## Roadmap
-* Sanatize super-globals variables
-* Automated Tests
