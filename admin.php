@@ -1,6 +1,7 @@
 <?php
 
-// TODO Secure
+// This page is not secure.
+// It should not be deployed in a production environment.
 
 require_once __DIR__.'/phoenix.php';
 require_once __DIR__.'/function.task.php';
