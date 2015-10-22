@@ -54,17 +54,20 @@ function tracker_scrape($connection, $settings) {
 			echo json_encode($json);
 
 		// Bencode
-		// TODO Check dictionary in iteration.
 		} else {
-			$response = 'd5:files';
+			$response = 'd'.
+				'5:files';
 			while ( $scrape = mysqli_fetch_assoc($tracker_scrape) ) {
-				$response .= 'd20:'.hex2bin($scrape['info_hash']).
-					'd8:completei'.intval($scrape['seeders']).
-					'e10:downloadedi'.intval($scrape['downloads']).
-					'e10:incompletei'.intval($scrape['leechers']).
-					'ee';
+				$response .= 'd'.
+					'20:'.hex2bin($scrape['info_hash']).
+					'd'.
+						'8:complete'.'i'.intval($scrape['seeders']).'e'.
+						'10:downloaded'.'i'.intval($scrape['downloads']).'e'.
+						'10:incomplete'.'i'.intval($scrape['leechers']).'e'.
+					'e'.
+				'e';
 			}
-			echo $response.'ee';
+			echo $response.'e';
 		}
 
 	}
