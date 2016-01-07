@@ -13,7 +13,7 @@ It is not backwards compatible.
 ### Required
 * Apache, Nginx, OR lighttpd.
 * [A supported version of PHP](http://php.net/supported-versions.php)
-* MySQL >= 4.1 OR MariaDB
+* A MySQLI supported database, such as MySQL >= 4.1 OR MariaDB.
 
 ## Install Guide
 1. Copy `settings.default.php` to `settings.custom.php`
