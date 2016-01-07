@@ -30,12 +30,19 @@ if ( strlen($peer['info_hash']) != 40 ) {
 
 } else {
 	// IP Addresses & Port
-	require_once __DIR__.'/once.announce.ip.php';
-	$peer['ipv4'] = $_GET['ipv4'];
-	$peer['ipv6'] = $_GET['ipv6'];
-	$peer['port'] = $_GET['port'];
-	$peer['portv4'] = $_GET['portv4'];
-	$peer['portv6'] = $_GET['portv6'];
+	require_once __DIR__.'/once.input.sanatize.address.php';
+	if (
+		(
+			!$peer['ipv4'] &&
+			!$peer['portv4']
+		) ||
+		(
+			!$peer['ipv6'] &&
+			!$peer['portv6']
+		)
+	) {
+		tracker_error('Unable to get IP and Port');
+	}
 
 	// Optional Items
 	require_once __DIR__.'/once.announce.optional.php';
