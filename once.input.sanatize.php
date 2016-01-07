@@ -77,14 +77,6 @@
 // $_GET['no_peer_id']
 // $_GET['numwant']
 
-////    once.db.connect.php
-// $_GET['info_hash']
-// $_GET['peer_id']
-
-////    phoenix.php
-// $_GET['info_hash']
-// $_GET['peer_id']
-
 ////    scrape.php
 // $_GET['stats']
 // $_GET['info_hash']
