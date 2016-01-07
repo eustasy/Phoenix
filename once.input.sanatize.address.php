@@ -7,8 +7,24 @@
 // [dead:beef::1234] &port= 12345
 // [dead:beef::1234]:12345
 
-$addresses = array();
+$peer['ipv4'] = false;
+$peer['ipv6'] = false;
+$peer['port'] = false;
+$peer['portv4'] = false;
+$peer['portv6'] = false;
 
+
+////	Port
+// Set the port if it's that easy.
+if (
+	isset($_GET['port']) &&
+	is_int($_GET['port'])
+) {
+	$peer['port'] = $_GET['port'];
+}
+
+////	Find Possibles
+// List all possible addresses.
 if ( isset($_GET['ip']) ) {
 	$addresses[] = $_GET['ip'];
 }
@@ -22,31 +38,28 @@ if ( isset($_SERVER['REMOTE_ADDR']) ) {
 	$addresses[] = $_SERVER['REMOTE_ADDR'];
 }
 // If we're honoring X_FORWARDED_FOR, we check and use that first if its present.
-if ( isset($_SERVER['HTTP_CLIENT_IP']) && $settings['honor_xff'] ) {
+if (
+	isset($_SERVER['HTTP_CLIENT_IP']) &&
+	$settings['honor_xff']
+) {
 	$addresses[] = $_SERVER['HTTP_CLIENT_IP'];
 }
-if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $settings['honor_xff'] ) {
+if (
+	isset($_SERVER['HTTP_X_FORWARDED_FOR']) &&
+	$settings['honor_xff']
+) {
 	$addresses[] = $_SERVER['HTTP_X_FORWARDED_FOR'];
 }
-
 // Error if we can't find any addresses.
 if ( !count($addresses) ) {
 	tracker_error('Unable to obtain client IP');
 }
+// Reverse so we prioritise
+$addresses = array_reverse($addresses);
 
-$peer['ipv4'] = false;
-$peer['ipv6'] = false;
-$peer['port'] = false;
-$peer['portv4'] = false;
-$peer['portv6'] = false;
-
-if (
-	isset($_GET['port']) &&
-	is_int($_GET['port'])
-) {
-	$peer['port'] = $_GET['port'];
-}
-
+////	Find Definites
+// Find the highest possible rank for
+// IPv4 and IPv6, plus their associated ports.
 foreach ( $addresses as $address ) {
 	// Check IPv4
 	if ( !$peer['ipv4'] ) {
