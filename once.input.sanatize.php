@@ -76,20 +76,3 @@
 ////    scrape.php
 // $_GET['stats']
 // $_GET['info_hash']
-
-
-
-// IF BINARY
-if (
-    isset($_GET['info_hash']) &&
-    strlen($_GET['info_hash']) == 20
-) {
-    $_GET['info_hash'] = bin2hex($_GET['info_hash']);
-}
-if (
-    isset($_GET['peer_id']) &&
-    strlen($_GET['peer_id']) == 20
-) {
-    $_GET['peer_id'] = bin2hex($_GET['peer_id']);
-}
-// END IF BINARY
