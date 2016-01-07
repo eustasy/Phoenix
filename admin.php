@@ -3,14 +3,14 @@
 // This page is not secure.
 // It should not be deployed in a production environment.
 
+require_once __DIR__.'/once.input.sanatize.admin.php';
 require_once __DIR__.'/phoenix.php';
 require_once __DIR__.'/function.task.php';
 require_once __DIR__.'/function.mysqli.optimize.table.php';
 require_once __DIR__.'/function.mysqli.drop.table.php';
 
 if (
-	isset($_POST['process']) &&
-	$_POST['process'] == 'setup' &&
+	$Sanatized['POST']['process'] == 'setup' &&
 	$settings['db_reset']
 ) {
 	// MySQL Setup
@@ -79,25 +79,22 @@ if (
 	}
 
 	if ( $success ) {
-		$_GET['message'] = 'Your MySQL Tracker Database has been setup.';
+		$Message = 'Your MySQL Tracker Database has been setup.';
 		task($connection, $settings, 'install', $time);
 	} else {
-		$_GET['message'] = 'Could not setup the MySQL Database.';
+		$Message = 'Could not setup the MySQL Database.';
 	}
 
-} else if (
-	isset($_POST['process']) &&
-	$_POST['process'] == 'optimize'
-) {
+} else if ( $Sanatized['POST']['process'] == 'optimize' ) {
 	if (
 		optimize_table($connection, $settings, 'peers') &&
 		optimize_table($connection, $settings, 'tasks') &&
 		optimize_table($connection, $settings, 'torrents')
 	) {
-		$_GET['message'] = 'Your MySQL Tracker Database has been optimized.';
+		$Message = 'Your MySQL Tracker Database has been optimized.';
 		task($connection, $settings, 'optimize', $time);
 	} else {
-		$_GET['message'] = 'Could not optimize the MySQL Database.';
+		$Message = 'Could not optimize the MySQL Database.';
 	}
 }
 
@@ -251,11 +248,11 @@ if (
 		<br>
 		<h1>Utilities</h1>';
 
-		// Messages
-		if ( isset($_GET['message']) ) {
+		// $Messages
+		if ( isset($Message) ) {
 			echo '
 			<div class="box background-wisteria color-clouds">
-				<h3>'.$_GET['message'].'</div></h3>
+				<h3>'.$Message.'</div></h3>
 			</div>';
 		}
 
