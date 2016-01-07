@@ -1,8 +1,6 @@
 <?php
 
 ////	announce.php
-// $_GET['info_hash']
-// $_GET['peer_id']
 // $_GET['ipv4']
 // $_GET['ipv6']
 // $_GET['port']
