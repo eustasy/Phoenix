@@ -43,6 +43,52 @@
 // $_GET['peer_id']
 // $_GET['left']
 
+////	function.torrent.announce.php
+// $_GET['info_hash']
+// $_GET['numwant']
+// $_GET['compact']
+// $_GET['no_peer_id']
+
+////    function.torrent.scrape.php
+// $_GET['info_hash']
+// $_GET['xml']
+// $_GET['json']
+
+////    function.tracker.scrape.php
+// $_GET['xml']
+// $_GET['json']
+
+////    function.tracker.stats.php
+// $_GET['xml']
+// $_GET['json']
+
+////    once.announce.ip.php
+// $_GET['ip']
+// $_GET['ipv4']
+// $_GET['ipv6']
+// $_SERVER['REMOTE_ADDR']
+// $_SERVER['HTTP_CLIENT_IP']
+// $_SERVER['HTTP_X_FORWARDED_FOR']
+// $_GET['port']
+
+////    once.announce.optional.php
+// $_GET['left']
+// $_GET['compact']
+// $_GET['no_peer_id']
+// $_GET['numwant']
+
+////    once.db.connect.php
+// $_GET['info_hash']
+// $_GET['peer_id']
+
+////    phoenix.php
+// $_GET['info_hash']
+// $_GET['peer_id']
+
+////    scrape.php
+// $_GET['stats']
+// $_GET['info_hash']
+
 
 
 // IF BINARY
