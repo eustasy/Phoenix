@@ -17,10 +17,6 @@ if (
 		tracker_error('Connection Failed. Tracker may be mis-configured. '.mysqli_connect_error($connection));
 	}
 
-	// SQL injection protection
-	$_GET['info_hash'] = mysqli_real_escape_string($connection, $_GET['info_hash']);
-	$_GET['peer_id']   = mysqli_real_escape_string($connection, $_GET['peer_id']);
-
 } else {
 	tracker_error('Connection Failed. Tracker is not configured.');
 }
