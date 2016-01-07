@@ -96,16 +96,3 @@ if ( $peer['port'] && !$peer['portv4'] ) {
 if ( $peer['port'] && !$peer['portv6'] ) {
 	$peer['portv6'] = $peer['port'];
 }
-
-if (
-	(
-		!$peer['ipv4'] &&
-		!$peer['portv4']
-	) ||
-	(
-		!$peer['ipv6'] &&
-		!$peer['portv6']
-	)
-) {
-	tracker_error('Unable to get IP and Port');
-}
