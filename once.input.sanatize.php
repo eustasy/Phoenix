@@ -1,12 +1,5 @@
 <?php
 
-////	announce.php
-// $_GET['ipv4']
-// $_GET['ipv6']
-// $_GET['port']
-// $_GET['portv4']
-// $_GET['portv6']
-
 ////	function.peer.access.php
 // $_GET['left']
 // $_GET['info_hash']
@@ -55,15 +48,6 @@
 ////    function.tracker.stats.php
 // $_GET['xml']
 // $_GET['json']
-
-////    once.announce.ip.php
-// $_GET['ip']
-// $_GET['ipv4']
-// $_GET['ipv6']
-// $_SERVER['REMOTE_ADDR']
-// $_SERVER['HTTP_CLIENT_IP']
-// $_SERVER['HTTP_X_FORWARDED_FOR']
-// $_GET['port']
 
 ////    once.announce.optional.php
 // $_GET['left']
