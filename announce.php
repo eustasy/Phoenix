@@ -2,24 +2,22 @@
 
 // Load Phoenix Core
 require_once __DIR__.'/phoenix.php';
+require_once __DIR__.'/once.input.sanatize.tracker.php';
 
-////	info_hash
+////	IF info_hash Valid
 // Required
 // 40 Characters
 // Hexadecimal
-if (
-	!isset($_GET['info_hash']) ||
-	strlen($_GET['info_hash']) != 40
-) {
+if ( strlen($Sanatized['GET']['info_hash']) != 40 ) {
 	tracker_error('Info Hash is invalid.');
 
 ////	IF Allowed
-// Tracker is Open
-// OR
-// Torrent is Allowed
+// Tracker is not Open
+// AND
+// Torrent is not Allowed
 } else if (
 	!$settings['open_tracker'] &&
-	!in_array($_GET['info_hash'], $allowed_torrents)
+	!in_array($Sanatized['GET']['info_hash'], $allowed_torrents)
 ) {
 	tracker_error('Torrent is not allowed.');
 
@@ -27,10 +25,7 @@ if (
 // Required
 // 40 Characters
 // Hexadecimal
-} else if (
-	!isset($_GET['peer_id']) ||
-	strlen($_GET['peer_id']) != 40
-) {
+} else if ( strlen($Sanatized['GET']['peer_id'] ) != 40) {
 	tracker_error('Peer ID is invalid.');
 
 } else {
