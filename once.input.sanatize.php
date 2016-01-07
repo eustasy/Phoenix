@@ -1,9 +1,5 @@
 <?php
 
-////	admin.php
-// $_POST['process']
-// $_GET['message']
-
 ////	announce.php
 // $_GET['info_hash']
 // $_GET['peer_id']
