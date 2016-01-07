@@ -8,7 +8,7 @@ require_once __DIR__.'/once.input.sanatize.tracker.php';
 // Required
 // 40 Characters
 // Hexadecimal
-if ( strlen($Sanatized['GET']['info_hash']) != 40 ) {
+if ( strlen($peer['info_hash']) != 40 ) {
 	tracker_error('Info Hash is invalid.');
 
 ////	IF Allowed
@@ -17,7 +17,7 @@ if ( strlen($Sanatized['GET']['info_hash']) != 40 ) {
 // Torrent is not Allowed
 } else if (
 	!$settings['open_tracker'] &&
-	!in_array($Sanatized['GET']['info_hash'], $allowed_torrents)
+	!in_array($peer['info_hash'], $allowed_torrents)
 ) {
 	tracker_error('Torrent is not allowed.');
 
@@ -25,7 +25,7 @@ if ( strlen($Sanatized['GET']['info_hash']) != 40 ) {
 // Required
 // 40 Characters
 // Hexadecimal
-} else if ( strlen($Sanatized['GET']['peer_id'] ) != 40) {
+} else if ( strlen($peer['peer_id'] ) != 40) {
 	tracker_error('Peer ID is invalid.');
 
 } else {
