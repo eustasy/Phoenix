@@ -22,11 +22,11 @@ if ( isset($_GET['stats']) ) {
 		// Tracker is Open
 		// OR
 		// Torrent is Allowed
-		isset($_GET['info_hash']) &&
-		strlen($_GET['info_hash']) == 40 &&
+		isset($peer['info_hash']) &&
+		strlen($peer['info_hash']) == 40 &&
 		(
 			$settings['open_tracker'] ||
-			in_array($_GET['info_hash'], $allowed_torrents)
+			in_array($peer['info_hash'], $allowed_torrents)
 		)
 	) {
 		// Perform a Scrape on the torrent.
@@ -45,7 +45,7 @@ if ( isset($_GET['stats']) ) {
 	} else {
 
 		// IF ERROR TORRENT
-		if ( isset($_GET['info_hash']) ) {
+		if ( isset($peer['info_hash']) ) {
 			tracker_error('Torrent is not allowed.');
 		// END IF ERROR TORRENT
 
