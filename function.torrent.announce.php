@@ -69,7 +69,7 @@ function torrent_announce($connection, $settings, $peer) {
 
 				// IF Peer ID
 				if ( !$peer['no_peer_id'] ) {
-					$response .= '7:peer id20:'.hex2bin($reutrn['peer_id']);
+					$response .= '7:peer id20:'.hex2bin($return['peer_id']);
 				} // END IF Peer ID
 
 				$response .= 'ee';
