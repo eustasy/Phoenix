@@ -28,7 +28,6 @@ function tracker_stats($connection, $settings) {
 		tracker_error('Unable to get stats.');
 
 	} else {
-		$phoenix_version = 'Phoenix Procedural v.2.0 2015-08-20 14:22:00Z eustasy';
 
 		$stats['seeders'] = intval($stats['seeders']);
 		$stats['leechers'] = intval($stats['leechers']);
@@ -40,7 +39,7 @@ function tracker_stats($connection, $settings) {
 		if ( isset($_GET['xml']) ) {
 			header('Content-Type: text/xml');
 			echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
-				 '<tracker version="$Id: '.$phoenix_version.' $">'.
+				 '<tracker version="$Id: '.$settings['phoenix_version'].' $">'.
 				 '<peers>'.$stats['peers'].'</peers>'.
 				 '<seeders>'.$stats['seeders'].'</seeders>'.
 				 '<leechers>'.$stats['leechers'].'</leechers>'.
@@ -53,7 +52,7 @@ function tracker_stats($connection, $settings) {
 				echo json_encode(
 					array(
 						'tracker' => array(
-							'version' => '$Id: '.$phoenix_version.' $,',
+							'version' => '$Id: '.$settings['phoenix_version'].' $,',
 							'peers' => $stats['peers'],
 							'seeders' => $stats['seeders'],
 							'leechers' => $stats['leechers'],
@@ -66,7 +65,7 @@ function tracker_stats($connection, $settings) {
 		// HTML
 		} else {
 				echo '<!DocType html><html><head><meta charset="UTF-8">'.
-					 '<title>Phoenix: $Id: '.$phoenix_version.' $</title>'.
+					 '<title>Phoenix: $Id: '.$settings['phoenix_version'].' $</title>'.
 					 '<body><pre>'.number_format($stats['peers']).
 					 ' peers ('.number_format($stats['seeders']).' seeders + '.number_format($stats['leechers']).
 					 ' leechers) in '.number_format($stats['torrents']).' torrents and'.
