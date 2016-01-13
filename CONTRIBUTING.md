@@ -1,4 +1,4 @@
-# Web Server
+# Contributing
 
 ## Setting Up
 
