@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/function.sanatize.maybe_binary_to_hex.php';
+require_once __DIR__.'/function.sanitise.maybe_binary_to_hex.php';
 
 ////	$_GET['info_hash']
 // TODO: Handle Multiples
