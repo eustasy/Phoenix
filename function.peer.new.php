@@ -1,14 +1,14 @@
 <?php
 
-function peer_new($connection, $settings, $time) {
+function peer_new($connection, $settings, $time, $peer) {
 
 	$compactv4 = '';
 	$compactv6 = '';
-	if ( isset($_GET['ipv4'])) {
-		$compactv4 = bin2hex(pack('Nn', ip2long($_GET['ipv4']), $_GET['portv4']));
+	if ( isset($peer['ipv4'])) {
+		$compactv4 = bin2hex(pack('Nn', ip2long($peer['ipv4']), $peer['portv4']));
 	}
 	if ( isset($_GET['ipv6'])) {
-		$compactv6 = bin2hex(inet_pton($_GET['ipv6']).pack('n', $_GET['portv6']));
+		$compactv6 = bin2hex(inet_pton($peer['ipv6']).pack('n', $peer['portv6']));
 	}
 
 	$peer_new = mysqli_query(
@@ -17,22 +17,22 @@ function peer_new($connection, $settings, $time) {
 		'(`info_hash`, `peer_id`, `compactv4`, `compactv6`, `ipv4`, `ipv6`, `portv4`,`portv6`, `left`, `state`, `updated`) '.
 		'VALUES ('.
 			// 40-byte info_hash in HEX
-			'\''.$_GET['info_hash'].'\', '.
+			'\''.$peer['info_hash'].'\', '.
 			// 40-byte peer_id in HEX
-			'\''.$_GET['peer_id'].'\', '.
+			'\''.$peer['peer_id'].'\', '.
 			// 12-byte compacted peer info
 			'\''.$compactv4.'\', '.
 			'\''.$compactv6.'\', '.
 			// dotted decimal string ip
-			'\''.$_GET['ipv4'].'\', '.
-			'\''.$_GET['ipv6'].'\', '.
+			'\''.$peer['ipv4'].'\', '.
+			'\''.$peer['ipv6'].'\', '.
 			// integer port
-			'\''.$_GET['portv4'].'\', '.
-			'\''.$_GET['portv6'].'\', '.
+			'\''.$peer['portv4'].'\', '.
+			'\''.$peer['portv6'].'\', '.
 			// integer left
-			'\''.$_GET['left'].'\', '.
+			'\''.$peer['left'].'\', '.
 			// integer state
-			'\''.$settings['seeding'].'\', '.
+			'\''.$peer['state'].'\', '.
 			// unix timestamp
 			'\''.$time.'\''.
 		');'
