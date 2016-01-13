@@ -1,10 +1,7 @@
 <?php
 
-////	Example Content for `settings.custom.php`
-// $settings['db_pass'] = 'Longer passwords are stronger passwords.';
-
-////	DO NOT MODIFY BELOW THIS POINT
-// That is what `settings.custom.php` is for.
+////	DO NOT MODIFY `settings.default.php`
+// Copy to `settings.custom.php` and modify there.
 
 $settings = array(
 
@@ -39,5 +36,7 @@ $settings = array(
 	'db_prefix'         => '',           /* name prefixes for the Phoenix tables */
 	'db_persist'        => true,         /* use persistent connections if available. */
 	'db_reset'          => true,         /* allow database to be reset in admin */
+
+	'phoenix_version'  => 'Phoenix Procedural v.2.0 2015-08-20 14:22:00Z eustasy',
 
 );
