@@ -1,6 +1,6 @@
 <?php
 
-function torrent_scrape($connection, $settings) {
+function torrent_scrape($connection, $settings, $peer) {
 
 	require_once __DIR__.'/function.mysqli.fetch.once.php';
 
