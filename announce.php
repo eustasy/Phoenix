@@ -45,7 +45,7 @@ if ( strlen($peer['info_hash']) != 40 ) {
 	}
 
 	// Optional Items
-	require_once __DIR__.'/once.announce.optional.php';
+	require_once __DIR__.'/once.input.sanatize.optional.php';
 
 	// Track Client
 	require_once __DIR__.'/function.peer.event.php';
