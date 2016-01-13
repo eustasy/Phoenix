@@ -49,7 +49,7 @@ if ( strlen($peer['info_hash']) != 40 ) {
 
 	// Track Client
 	require_once __DIR__.'/function.peer.event.php';
-	peer_event($connection, $settings, $time);
+	peer_event($connection, $settings, $time, $peer);
 
 	// Clean Up
 	require_once __DIR__.'/function.tracker.clean.php';
