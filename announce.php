@@ -2,7 +2,7 @@
 
 // Load Phoenix Core
 require_once __DIR__.'/phoenix.php';
-require_once __DIR__.'/once.input.sanatize.tracker.php';
+require_once __DIR__.'/once.sanatize.tracker.php';
 
 ////	IF info_hash Valid
 // Required
@@ -30,7 +30,7 @@ if ( strlen($peer['info_hash']) != 40 ) {
 
 } else {
 	// IP Addresses & Port
-	require_once __DIR__.'/once.input.sanatize.address.php';
+	require_once __DIR__.'/once.sanatize.announce.address.php';
 	if (
 		(
 			!$peer['ipv4'] &&
@@ -45,7 +45,7 @@ if ( strlen($peer['info_hash']) != 40 ) {
 	}
 
 	// Optional Items
-	require_once __DIR__.'/once.input.sanatize.optional.php';
+	require_once __DIR__.'/once.sanatize.announce.optional.php';
 
 	// Track Client
 	require_once __DIR__.'/function.peer.event.php';
