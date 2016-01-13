@@ -3,7 +3,7 @@
 // This file defines all the functions we will need.
 // Since it defines things, we need to make sure it isn't loaded twice.
 require_once __DIR__.'/phoenix.php';
-require_once __DIR__.'/once.sanatize.tracker.php';
+require_once __DIR__.'/once.sanitise.tracker.php';
 
 // IF STATS
 if ( isset($_GET['stats']) ) {
