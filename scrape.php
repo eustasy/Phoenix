@@ -23,7 +23,7 @@ if ( isset($_GET['stats']) ) {
 	) {
 		// Perform a Scrape on the torrent.
 		require_once __DIR__.'/function.torrent.scrape.php';
-		torrent_scrape($connection, $settings);
+		torrent_scrape($connection, $settings, $peer);
 	// END IF SCRAPE
 
 	// IF FULL SCRAPE
