@@ -28,7 +28,6 @@ function tracker_stats($connection, $settings) {
 		tracker_error('Unable to get stats.');
 
 	} else {
-
 		$stats['seeders'] = intval($stats['seeders']);
 		$stats['leechers'] = intval($stats['leechers']);
 		$stats['torrents'] = intval($stats['torrents']);
