@@ -66,14 +66,16 @@ if ( $result ) {
 
 ## Git
 
+Please use descriptive commit descriptions when possible.
+
 ### Make a new branch and push it to GitHub.
 ```bash
-git checkout -b feature_branch_name
-git push -u origin feature_branch_name
+git checkout -b fix-issue-number
+git push -u origin fix-issue-number
 ```
 
 ### Merge from master
 ```bash
-git checkout feature_branch_name
+git checkout fix-issue-number
 git merge master
 ```
