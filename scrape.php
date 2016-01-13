@@ -35,7 +35,6 @@ if ( isset($_GET['stats']) ) {
 
 	// IF NOT ALLOWED TO SCRAPE
 	} else {
-
 		// IF ERROR TORRENT
 		if ( isset($peer['info_hash']) ) {
 			tracker_error('Torrent is not allowed.');
