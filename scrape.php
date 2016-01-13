@@ -3,6 +3,7 @@
 // This file defines all the functions we will need.
 // Since it defines things, we need to make sure it isn't loaded twice.
 require_once __DIR__.'/phoenix.php';
+require_once __DIR__.'/once.sanatize.tracker.php';
 
 // IF STATS
 if ( isset($_GET['stats']) ) {
@@ -14,16 +15,7 @@ if ( isset($_GET['stats']) ) {
 } else {
 	// IF SCRAPE
 	if (
-		////	info_hash
-		// Optional
-		// 40 Characters
-		// Hexadecimal
-		////	IF Allowed
-		// Tracker is Open
-		// OR
-		// Torrent is Allowed
-		isset($peer['info_hash']) &&
-		strlen($peer['info_hash']) == 40 &&
+		$peer['info_hash'] &&
 		(
 			$settings['open_tracker'] ||
 			in_array($peer['info_hash'], $allowed_torrents)
