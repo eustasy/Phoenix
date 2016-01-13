@@ -9,14 +9,14 @@ if (
 ) {
 	if ( $_GET['left'] == 0 ) {
 		$peer['left'] = 0;
-		$settings['seeding'] = 1;
+		$peer['state'] = 1;
 	} else {
 		$peer['left'] = intval($_GET['left']);
-		$settings['seeding'] = 0;
+		$peer['state'] = 0;
 	}
 } else {
 	$peer['left'] = -1;
-	$settings['seeding'] = 0;
+	$peer['state'] = 0;
 }
 
 ////	compact
