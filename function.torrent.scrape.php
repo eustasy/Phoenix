@@ -14,7 +14,7 @@ function torrent_scrape($connection, $settings) {
 		FROM `'.$settings['db_prefix'].'peers` AS `p`
 			LEFT JOIN `'.$settings['db_prefix'].'torrents` AS `t`
 			ON `p`.`info_hash`=`t`.`info_hash`
-		WHERE `p`.`info_hash`=\''.$_GET['info_hash'].'\';';
+		WHERE `p`.`info_hash`=\''.$peer['info_hash'].'\';';
 	$scrape = mysqli_fetch_once($connection, $sql);
 
 	if ( !$scrape ) {
@@ -31,7 +31,7 @@ function torrent_scrape($connection, $settings) {
 			header('Content-Type: text/xml');
 			echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
 					'<torrent>'.
-						'<info_hash>'.$_GET['info_hash']  .'</info_hash>'.
+						'<info_hash>'.$peer['info_hash']  .'</info_hash>'.
 						'<seeders>'  .$scrape['seeders']  .'</seeders>'.
 						'<leechers>' .$scrape['leechers'] .'</leechers>'.
 						'<peers>'    .$scrape['peers']    .'</peers>'.
@@ -44,7 +44,7 @@ function torrent_scrape($connection, $settings) {
 			echo json_encode(
 				array(
 					'torrent' => array(
-						'info_hash' => $_GET['info_hash'],
+						'info_hash' => $peer['info_hash'],
 						'seeders'   => $scrape['seeders'],
 						'leechers'  => $scrape['leechers'],
 						'peers'     => $scrape['peers'],
@@ -55,7 +55,7 @@ function torrent_scrape($connection, $settings) {
 
 		} else {
 			echo 'd5:files'.
-				'd20:'.hex2bin($_GET['info_hash']).
+				'd20:'.hex2bin($peer['info_hash']).
 				'd8:completei'.$scrape['seeders'].
 				'e10:downloadedi'.$scrape['downloads'].
 				'e10:incompletei'.$scrape['leechers'].
