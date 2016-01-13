@@ -1,6 +1,6 @@
 <?php
 
-function torrent_announce($connection, $settings) {
+function torrent_announce($connection, $settings, $peer) {
 
 	require_once __DIR__.'/function.mysqli.fetch.once.php';
 
