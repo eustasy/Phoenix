@@ -10,7 +10,7 @@ require_once __DIR__.'/function.mysqli.optimize.table.php';
 require_once __DIR__.'/function.mysqli.drop.table.php';
 
 if (
-	$Sanatized['POST']['process'] == 'setup' &&
+	$Process == 'setup' &&
 	$settings['db_reset']
 ) {
 	// MySQL Setup
@@ -85,7 +85,7 @@ if (
 		$Message = 'Could not setup the MySQL Database.';
 	}
 
-} else if ( $Sanatized['POST']['process'] == 'optimize' ) {
+} else if ( $Process == 'optimize' ) {
 	if (
 		optimize_table($connection, $settings, 'peers') &&
 		optimize_table($connection, $settings, 'tasks') &&
