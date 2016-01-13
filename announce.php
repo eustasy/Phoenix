@@ -57,6 +57,6 @@ if ( strlen($peer['info_hash']) != 40 ) {
 
 	// Announce Peers
 	require_once __DIR__.'/function.torrent.announce.php';
-	torrent_announce($connection, $settings);
+	torrent_announce($connection, $settings, $peer);
 
 }
