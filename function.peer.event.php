@@ -31,7 +31,7 @@ function peer_event($connection, $settings, $time, $peer) {
 		// IF Peer Completed
 		} else if ( $_GET['event'] == 'completed' ) {
 			// Force Seeding Status
-			$settings['seeding'] = 1;
+			$peer['state'] = 1;
 			// Increment downloads
 			require_once __DIR__.'/function.peer.completed.php';
 			peer_completed($connection, $settings, $peer);
@@ -54,7 +54,7 @@ function peer_event($connection, $settings, $time, $peer) {
 		$peer['portv4'] != $peer['old']['portv4'] ||
 		$peer['portv6'] != $peer['old']['portv6'] ||
 		// check whether seeding status match
-		$settings['seeding'] != $peer['old']['state']
+		$peer['state'] != $peer['old']['state']
 	) {
 		require_once __DIR__.'/function.peer.new.php';
 		peer_new($connection, $settings, $time, $peer);
