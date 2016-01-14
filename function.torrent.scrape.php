@@ -14,7 +14,16 @@ function torrent_scrape($connection, $settings, $peer) {
 		FROM `'.$settings['db_prefix'].'peers` AS `p`
 			LEFT JOIN `'.$settings['db_prefix'].'torrents` AS `t`
 			ON `p`.`info_hash`=`t`.`info_hash`
-		WHERE `p`.`info_hash`=\''.$peer['info_hash'].'\';';
+		WHERE ';
+
+	foreach ( $peer['info_hashes'] as $count => $info_hash ) {
+		if ( $count > 0 ) {
+			$sql .= ' OR';
+		}
+		$sql .= ' `p`.`info_hash`=\''.$info_hash.'\'';
+	}
+	$sql .= ';';
+
 	$scrape = mysqli_fetch_once($connection, $sql);
 
 	if ( !$scrape ) {
