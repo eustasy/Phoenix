@@ -24,51 +24,63 @@ function torrent_scrape($connection, $settings, $peer) {
 	}
 	$sql .= ';';
 
-	$scrape = mysqli_fetch_once($connection, $sql);
+	$results = mysqli_query($connection, $sql);
 
-	if ( !$scrape ) {
+	if ( !$results ) {
 		tracker_error('Unable to scrape for that torrent.');
 
 	} else {
-		$scrape['seeders'] = intval($scrape['seeders']);
-		$scrape['leechers'] = intval($scrape['leechers']);
-		$scrape['downloads'] = intval($scrape['downloads']);
-		$scrape['peers'] = $scrape['seeders'] + $scrape['leechers'];
+		while ( $torrent = mysqli_fetch_assoc($results) ) {
+			$scrape[$torrent['info_hash']]['info_hash'] = intval($torrent['info_hash']);
+			$scrape[$torrent['info_hash']]['seeders']   = intval($torrent['seeders']);
+			$scrape[$torrent['info_hash']]['leechers']  = intval($torrent['leechers']);
+			$scrape[$torrent['info_hash']]['downloads'] = intval($torrent['downloads']);
+			$scrape[$torrent['info_hash']]['peers']     = intval($torrent['seeders']) + intval($torrent['leechers']);
+		}
 
 		// XML
 		if ( isset($_GET['xml']) ) {
 			header('Content-Type: text/xml');
-			echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
-					'<torrent>'.
-						'<info_hash>'.$peer['info_hash']  .'</info_hash>'.
-						'<seeders>'  .$scrape['seeders']  .'</seeders>'.
-						'<leechers>' .$scrape['leechers'] .'</leechers>'.
-						'<peers>'    .$scrape['peers']    .'</peers>'.
-						'<downloads>'.$scrape['downloads'].'</downloads>'.
-					'</torrent>';
+			$xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+			foreach ( $scrape as $torrent ) {
+				$xml .= '<torrent>'.
+					'<info_hash>'.$torrent['info_hash'].'</info_hash>'.
+					'<seeders>'  .$torrent['seeders']  .'</seeders>'.
+					'<leechers>' .$torrent['leechers'] .'</leechers>'.
+					'<peers>'    .$torrent['peers']    .'</peers>'.
+					'<downloads>'.$torrent['downloads'].'</downloads>'.
+				'</torrent>';
+			}
+			echo $xml;
 
 		// JSON
 		} else if ( isset($_GET['json']) ) {
 			header('Content-Type: application/json');
-			echo json_encode(
-				array(
-					'torrent' => array(
-						'info_hash' => $peer['info_hash'],
-						'seeders'   => $scrape['seeders'],
-						'leechers'  => $scrape['leechers'],
-						'peers'     => $scrape['peers'],
-						'downloads' => $scrape['downloads'],
-					),
-				)
-			);
+			foreach ( $scrape as $torrent ) {
+				$json[$torrent['info_hash']] = array(
+					'info_hash' => $torrent['info_hash'],
+					'seeders'   => $torrent['seeders'],
+					'leechers'  => $torrent['leechers'],
+					'peers'     => $torrent['peers'],
+					'downloads' => $torrent['downloads'],
+				);
+			}
+			echo json_encode($json);
 
 		} else {
-			echo 'd5:files'.
-				'd20:'.hex2bin($peer['info_hash']).
-				'd8:completei'.$scrape['seeders'].
-				'e10:downloadedi'.$scrape['downloads'].
-				'e10:incompletei'.$scrape['leechers'].
-				'eeee';
+			$bencode = 'd'.
+				'5:files';
+			foreach ( $scrape as $torrent ) {
+				$bencode .= 'd'.
+					'20:'.hex2bin($torrent['info_hash']).
+					'd'.
+						'8:complete'.'i'.$torrent['seeders'].'e'.
+						'10:downloaded'.'i'.$torrent['downloads'].'e'.
+						'10:incomplete'.'i'.$torrent['leechers'].'e'.
+					'e'.
+				'e';
+			}
+			echo $bencode.'e';
 		}
 
 	}
