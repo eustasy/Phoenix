@@ -19,6 +19,7 @@ script:
   - ./normal-checks/php.sh
   - php normal-checks/json.php
   - php normal-checks/xml.php
+  - php _functions/phoenix/test.tracker.clean.php
 
 notifications:
   email:
