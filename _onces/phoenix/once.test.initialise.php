@@ -5,7 +5,7 @@ $test_db = mysqli_connect('127.0.0.1', 'root', '', 'phoenix');
 if ( !$test_db ) {
 	exit('Failed to connect to database for testing.');
 }
-$query = 'CREATE USER '.$settings['db_user'].'@localhost IDENTIFIED BY \''.$settings['db_pass'].'\';';
+$query = 'CREATE USER IF NOT EXISTS '.$settings['db_user'].'@localhost IDENTIFIED BY \''.$settings['db_pass'].'\';';
 $query .= 'GRANT ALL PRIVILEGES ON *.* TO '.$settings['db_user'].'@localhost;';
 $query .= 'FLUSH PRIVILEGES;';
 // TODO Deduplicate
