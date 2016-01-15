@@ -6,5 +6,5 @@ if ( !$test_db ) {
 }
 $query = 'CREATE USER phoenix@localhost IDENTIFIED BY \'Password1\';';
 $query .= 'GRANT ALL PRIVILEGES ON *.* TO phoenix@localhost;';
-$query .= 'FLUSH PRIVILEGES;'';
+$query .= 'FLUSH PRIVILEGES;';
 mysqli_multi_query($test_db, $query);
