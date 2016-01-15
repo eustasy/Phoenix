@@ -17,7 +17,7 @@ services:
   - mysql
 
 before_script:
-  - sh -c "mysql -e 'CREATE DATABASE IF NOT EXISTS `phoenix`;'"
+  - sh -c "mysql -e 'CREATE DATABASE IF NOT EXISTS phoenix;'"
   - sh -c "mysql -e 'CREATE USER phoenix@localhost IDENTIFIED BY 'Password1';'"
   - sh -c "mysql -e 'GRANT ALL PRIVILEGES ON *.* TO phoenix@localhost;'"
   - sh -c "mysql -e 'FLUSH PRIVILEGES;'"
