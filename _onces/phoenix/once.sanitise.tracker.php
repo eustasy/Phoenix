@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/function.sanitise.maybe_binary_to_hex.php';
+require_once $settings['functions'].'function.sanitise.maybe_binary_to_hex.php';
 
 ////	$_GET['info_hash']
 // IF 20 Character Binay, convert to 40 Character Hex

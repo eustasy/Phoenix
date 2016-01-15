@@ -1,7 +1,7 @@
 <?php
 
 function tracker_clean($connection, $settings, $time) {
-	require_once __DIR__.'/function.task.php';
+	require_once $settings['functions'].'function.task.php';
 
 	if ( mt_rand(1, 100) <= $settings['clean_idle_peers'] ) {
 		$clean = mysqli_query(

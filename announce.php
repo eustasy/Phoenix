@@ -1,8 +1,8 @@
 <?php
 
 // Load Phoenix Core
-require_once __DIR__.'/phoenix.php';
-require_once __DIR__.'/once.sanitise.tracker.php';
+require_once __DIR__.'/_phoenix.php';
+require_once $settings['onces'].'once.sanitise.tracker.php';
 
 ////	IF info_hash Valid
 // Required
@@ -30,7 +30,7 @@ if ( strlen($peer['info_hash']) != 40 ) {
 
 } else {
 	// IP Addresses & Port
-	require_once __DIR__.'/once.sanitise.announce.address.php';
+	require_once $settings['onces'].'once.sanitise.announce.address.php';
 	if (
 		(
 			!$peer['ipv4'] &&
@@ -45,18 +45,18 @@ if ( strlen($peer['info_hash']) != 40 ) {
 	}
 
 	// Optional Items
-	require_once __DIR__.'/once.sanitise.announce.optional.php';
+	require_once $settings['onces'].'once.sanitise.announce.optional.php';
 
 	// Track Client
-	require_once __DIR__.'/function.peer.event.php';
+	require_once $settings['functions'].'function.peer.event.php';
 	peer_event($connection, $settings, $time, $peer);
 
 	// Clean Up
-	require_once __DIR__.'/function.tracker.clean.php';
+	require_once $settings['functions'].'function.tracker.clean.php';
 	tracker_clean($connection, $settings, $time);
 
 	// Announce Peers
-	require_once __DIR__.'/function.torrent.announce.php';
+	require_once $settings['functions'].'function.torrent.announce.php';
 	torrent_announce($connection, $settings, $peer);
 
 }

@@ -2,7 +2,7 @@
 
 function tracker_stats($connection, $settings) {
 
-	require_once __DIR__.'/function.mysqli.fetch.once.php';
+	require_once $settings['functions'].'function.mysqli.fetch.once.php';
 
 	// Statistics
 	$sql = 'SELECT '.

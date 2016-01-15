@@ -28,7 +28,7 @@ $hello = array(
 	'final_key' => 3
 );
 
-require_once __DIR__.'/function.super_function.php';
+require_once $settings['functions'].'function.super_function.php';
 $result = super_function($hello, $world);
 
 if ( $result ) {

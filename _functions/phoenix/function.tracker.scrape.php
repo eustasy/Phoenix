@@ -41,7 +41,6 @@ function tracker_scrape($connection, $settings) {
 		// JSON
 		} else if ( isset($_GET['json']) ) {
 			header('Content-Type: application/json');
-			$json = array();
 			while ( $scrape = mysqli_fetch_assoc($tracker_scrape) ) {
 				$scrape['peers'] = $scrape['seeders'] + $scrape['leechers'];
 				$json[$scrape['info_hash']] = array(

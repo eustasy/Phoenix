@@ -2,7 +2,7 @@
 
 function torrent_announce($connection, $settings, $peer) {
 
-	require_once __DIR__.'/function.mysqli.fetch.once.php';
+	require_once $settings['functions'].'function.mysqli.fetch.once.php';
 
 	// begin response
 	$response = 'd8:intervali'.$settings['announce_interval'].

@@ -16,8 +16,8 @@ It is not backwards compatible.
 * A MySQLI supported database, such as MySQL >= 4.1 OR MariaDB.
 
 ## Install Guide
-1. Copy `settings.default.php` to `settings.custom.php`
-2. Edit the variables in `settings.custom.php`
+1. Copy `_settings/phoenix.default.php` to `_settings/phoenix.custom.php`
+2. Edit the variables in `_settings/phoenix.custom.php`
 2. Upload all the `.php` files to your server.
 4. Load `admin.php` in your browser and run the `Setup` option.
-5. Add `$settings['db_reset'] = false;` to the end of `settings.custom.php`, OR delete `admin.php` from your server.
+5. Add `$settings['db_reset'] = false;` to the end of `_settings/phoenix.custom.php`, OR delete `admin.php` from your server.
