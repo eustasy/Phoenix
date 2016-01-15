@@ -1,11 +1,12 @@
 <?php
 
+require_once __DIR__.'/../../_settings/phoenix.default.php';
 $test_db = mysqli_connect('127.0.0.1', 'root', '', 'phoenix');
 if ( !$test_db ) {
 	exit('Failed to connect to database for testing.');
 }
-$query = 'CREATE USER phoenix@localhost IDENTIFIED BY \'Password1\';';
-$query .= 'GRANT ALL PRIVILEGES ON *.* TO phoenix@localhost;';
+$query = 'CREATE USER '.$settings['db_user'].'@localhost IDENTIFIED BY \''.$settings['db_pass'].'\';';
+$query .= 'GRANT ALL PRIVILEGES ON *.* TO '.$settings['db_user'].'@localhost;';
 $query .= 'FLUSH PRIVILEGES;';
 // TODO Deduplicate
 $query .= 'CREATE TABLE IF NOT EXISTS `phoenix`.`'.$settings['db_prefix'].'peers` (' .
