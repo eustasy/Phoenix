@@ -29,10 +29,10 @@ $settings['onces']     = $settings['root'].'_onces/phoenix/';
 $settings['settings']  = $settings['root'].'_settings/phoenix/';
 
 // Error Level
-// error_reporting(E_ALL);
+error_reporting(E_ALL);
 // error_reporting(E_ALL & ~E_WARNING);
 // error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
-error_reporting(0);
+// error_reporting(0);
 
 // Ignore Disconnects
 ignore_user_abort(true);
