@@ -5,11 +5,10 @@ $test_db = mysqli_connect('127.0.0.1', 'root', '', 'phoenix');
 if ( !$test_db ) {
 	exit('Failed to connect to database for testing.');
 }
-$query = 'CREATE USER IF NOT EXISTS '.$settings['db_user'].'@localhost IDENTIFIED BY \''.$settings['db_pass'].'\';';
-$query .= 'GRANT ALL PRIVILEGES ON *.* TO '.$settings['db_user'].'@localhost;';
-$query .= 'FLUSH PRIVILEGES;';
+$queries[] = 'GRANT ALL ON `phoenix`.* TO '.$settings['db_user'].'@localhost IDENTIFIED BY \''.$settings['db_pass'].'\';';
+$queries[] = 'FLUSH PRIVILEGES;';
 // TODO Deduplicate
-$query .= 'CREATE TABLE IF NOT EXISTS `phoenix`.`'.$settings['db_prefix'].'peers` (' .
+$queries[] = 'CREATE TABLE IF NOT EXISTS `phoenix`.`'.$settings['db_prefix'].'peers` (' .
 			'`info_hash` varchar(40) NOT NULL,' .
 			'`peer_id` varchar(40) NOT NULL,' .
 			'`compactv4` varchar(12) NOT NULL,' .
@@ -23,20 +22,22 @@ $query .= 'CREATE TABLE IF NOT EXISTS `phoenix`.`'.$settings['db_prefix'].'peers
 			'`updated` int(10) unsigned NOT NULL,' .
 			'PRIMARY KEY (`info_hash`,`peer_id`)' .
 		') ENGINE=MyISAM DEFAULT CHARSET=latin1;';
-$query .= 'CREATE TABLE IF NOT EXISTS `phoenix`.`'.$settings['db_prefix'].'tasks` (' .
+$queries[] = 'CREATE TABLE IF NOT EXISTS `phoenix`.`'.$settings['db_prefix'].'tasks` (' .
 			'`name` varchar(16) NOT NULL,' .
 			'`value` int(10) NOT NULL,' .
 			'PRIMARY KEY (`name`)' .
 		') ENGINE=MyISAM DEFAULT CHARSET=latin1;';
-$query .= 'CREATE TABLE IF NOT EXISTS `phoenix`.`'.$settings['db_prefix'].'torrents` (' .
+$queries[] = 'CREATE TABLE IF NOT EXISTS `phoenix`.`'.$settings['db_prefix'].'torrents` (' .
 			'`name` varchar(255) NULL,' .
 			'`info_hash` varchar(40) NOT NULL,' .
 			'`downloads` int(10) unsigned NOT NULL DEFAULT \'0\',' .
 			'PRIMARY KEY (`info_hash`)' .
 		') ENGINE=MyISAM DEFAULT CHARSET=latin1;';
-$result = mysqli_multi_query($test_db, $query);
-echo 'Test initialised: ';
-var_dump($result);
-if ( !$result ) {
-	echo 'Error #'.mysqli_errno($test_db).': "'.mysqli_error($test_db).'"';
+foreach ( $queries as $query ) {
+	$result = mysqli_query($test_db, $query);
+	echo 'Test initialised: ';
+	var_dump($result);
+	if ( !$result ) {
+		echo 'Error #'.mysqli_errno($test_db).': "'.mysqli_error($test_db).'"';
+	}
 }
