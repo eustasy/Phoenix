@@ -26,7 +26,7 @@ $settings['root'] = __DIR__.'/';
 $settings['functions'] = $settings['root'].'_functions/phoenix/';
 $settings['hooks']     = $settings['root'].'_hooks/phoenix/';
 $settings['onces']     = $settings['root'].'_onces/phoenix/';
-$settings['settings']  = $settings['root'].'_settings/phoenix/';
+$settings['settings']  = $settings['root'].'_settings/';
 
 // Error Level
 error_reporting(E_ALL);
