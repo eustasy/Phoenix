@@ -3,7 +3,8 @@
 require_once __DIR__.'/../../_settings/phoenix.default.php';
 $test_db = mysqli_connect('127.0.0.1', 'root', '', 'phoenix');
 if ( !$test_db ) {
-	exit('Failed to connect to database for testing.');
+	echo 'Failed to connect to database for testing.';
+	$failure = true;
 }
 $queries[] = 'GRANT ALL ON `phoenix`.* TO '.$settings['db_user'].'@localhost IDENTIFIED BY \''.$settings['db_pass'].'\';';
 $queries[] = 'FLUSH PRIVILEGES;';
@@ -39,5 +40,9 @@ foreach ( $queries as $query ) {
 	var_dump($result);
 	if ( !$result ) {
 		echo 'Error #'.mysqli_errno($test_db).': "'.mysqli_error($test_db).'"';
+		$failure = true;
 	}
+}
+if ( $failure ) {
+	exit(1);
 }
