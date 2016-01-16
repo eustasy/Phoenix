@@ -43,6 +43,6 @@ foreach ( $queries as $query ) {
 		$failure = true;
 	}
 }
-if ( $failure ) {
+if ( !empty($failure) ) {
 	exit(1);
 }
