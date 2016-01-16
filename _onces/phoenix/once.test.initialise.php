@@ -34,4 +34,6 @@ $query .= 'CREATE TABLE IF NOT EXISTS `phoenix`.`'.$settings['db_prefix'].'torre
 			'`downloads` int(10) unsigned NOT NULL DEFAULT \'0\',' .
 			'PRIMARY KEY (`info_hash`)' .
 		') ENGINE=MyISAM DEFAULT CHARSET=latin1;';
-mysqli_multi_query($test_db, $query);
+$result = mysqli_multi_query($test_db, $query);
+echo 'Test initialised: ';
+var_dump($result);
