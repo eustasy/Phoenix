@@ -37,3 +37,6 @@ $query .= 'CREATE TABLE IF NOT EXISTS `phoenix`.`'.$settings['db_prefix'].'torre
 $result = mysqli_multi_query($test_db, $query);
 echo 'Test initialised: ';
 var_dump($result);
+if ( !$result ) {
+	echo 'Error #'.mysqli_errno($test_db).': "'.mysqli_error($test_db).'"';
+}
