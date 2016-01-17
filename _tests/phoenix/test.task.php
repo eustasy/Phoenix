@@ -1,8 +1,10 @@
 <?php
 
+echo 'Starting Test: Task';
 require_once $settings['functions'].'function.task.php';
 $result = task($connection, $settings, '__TASK__', 1);
 if ( !$result ) {
 	echo 'Error: Test for Function "task" failed.';
 	exit(1);
 }
+echo 'Finished Test: Task';
