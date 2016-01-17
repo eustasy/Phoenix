@@ -3,6 +3,7 @@
 ////	Glob Recursive Function
 // Glob Recursively to a Pattern
 function glob_recursive($Pattern, $Flags = 0, $Strip_Underscore = false) {
+	global $settings;
 	$Return = array();
 	// Search in the Current Directory
 	foreach ( glob($Pattern, $Flags) as $File) {
@@ -31,6 +32,7 @@ function glob_recursive($Pattern, $Flags = 0, $Strip_Underscore = false) {
 }
 
 function require_all_once($Directory) {
+	global $settings;
 	foreach (glob_recursive($Directory.'*.php') as $File) {
 		require_once $File;
 	}
