@@ -36,5 +36,5 @@ function require_all_once($Directory) {
 	}
 }
 
-require_once __DIR__.'/../../_phoenix.php';
+require_once __DIR__.'/../_phoenix.php';
 require_all_once(__DIR__.'/phoenix/');
