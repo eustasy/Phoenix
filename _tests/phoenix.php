@@ -8,4 +8,3 @@ foreach ( $tests as $test) {
 	require_once $test;
 	echo 'Ending Test: '.$test.PHP_EOL;
 }
-var_dump($tests);
