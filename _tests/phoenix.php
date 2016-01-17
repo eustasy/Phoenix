@@ -31,7 +31,6 @@ function glob_recursive($Pattern, $Flags = 0, $Strip_Underscore = false) {
 }
 
 function require_all_once($Directory) {
-	global $Sitewide;
 	foreach (glob_recursive($Directory.'*.php') as $File) {
 		require_once $File;
 	}
