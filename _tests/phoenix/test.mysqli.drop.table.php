@@ -1,6 +1,5 @@
 <?php
 
-$failure = false;
 require_once $settings['functions'].'function.mysqli.drop.table.php';
 
 $create = 'CREATE TABLE `__TEST__` ( `id` int(10) );';
