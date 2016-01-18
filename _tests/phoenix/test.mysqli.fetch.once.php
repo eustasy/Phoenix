@@ -15,8 +15,8 @@ $result = mysqli_query($connection, $insert);
 
 $result = mysqli_fetch_once($connection, $sql);
 $count = count($result);
-if ( $count != 3 ) {
-	echo 'Error: Query for 3 items returned '.$count.PHP_EOL;
+if ( $count != 1 ) {
+	echo 'Error: Query returned '.$count.' items.'.PHP_EOL;
 	$failure = true;
 }
 
