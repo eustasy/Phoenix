@@ -1,7 +1,7 @@
 <?php
 
 $failure = false;
-require_once $settings['functions'].'function.mysqli_array_build.php';
+require_once $settings['functions'].'function.mysqli.array.build.php';
 
 $select = 'SELECT `info_hash` FROM `'.$settings['db_prefix'].'torrents`;';
 $result = mysqli_array_build($connection, $select);
