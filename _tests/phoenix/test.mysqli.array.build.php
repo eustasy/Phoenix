@@ -23,3 +23,6 @@ if ( $count != 3 ) {
 if ( $failure ) {
 	exit(1);
 }
+
+$insert = 'DELETE FROM `'.$settings['db_prefix'].'torrents` WHERE `info_hash` LIKE \'__TEST_%\';';
+$result = mysqli_query($connection, $insert);
