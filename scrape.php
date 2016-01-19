@@ -7,8 +7,7 @@ require_once $settings['onces'].'once.sanitise.tracker.php';
 
 // IF STATS
 if ( isset($_GET['stats']) ) {
-	require_once $settings['functions'].'function.tracker.stats.php';
-	tracker_stats($connection, $settings);
+		require_once $settings['onces'].'once.stats.tracker.php';
 // END IF STATS
 
 // IF NOT STATS
@@ -22,15 +21,13 @@ if ( isset($_GET['stats']) ) {
 		)
 	) {
 		// Perform a Scrape on the torrent.
-		require_once $settings['functions'].'function.torrent.scrape.php';
-		torrent_scrape($connection, $settings, $peer);
+		require_once $settings['onces'].'once.scrape.torrent.php';
 	// END IF SCRAPE
 
 	// IF FULL SCRAPE
 	} else if ( $settings['full_scrape'] ) {
 		// Scrape the full tracker.
-		require_once $settings['functions'].'function.tracker.scrape.php';
-		tracker_scrape($connection, $settings);
+		require_once $settings['onces'].'once.scrape.tracker.php';
 	// END IF FULL SCRAPE
 
 	// IF NOT ALLOWED TO SCRAPE
