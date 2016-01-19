@@ -48,15 +48,17 @@ if ( strlen($peer['info_hash']) != 40 ) {
 	require_once $settings['onces'].'once.sanitise.announce.optional.php';
 
 	// Track Client
-	require_once $settings['functions'].'function.peer.event.php';
-	peer_event($connection, $settings, $time, $peer);
+	require_once $settings['onces'].'once.announce.peer.event.php';
 
 	// Clean Up
-	require_once $settings['functions'].'function.tracker.clean.php';
-	tracker_clean($connection, $settings, $time);
+	// TODO Move mt_rand to a request-wide variable
+	// TODO Optional as part of _cron
+	if ( mt_rand(1, 100) <= $settings['clean_idle_peers'] ) {
+		require_once $settings['functions'].'function.tracker.clean.php';
+		tracker_clean($connection, $settings, $time);
+	}
 
 	// Announce Peers
-	require_once $settings['functions'].'function.torrent.announce.php';
-	torrent_announce($connection, $settings, $peer);
+	require_once $settings['onces'].'once.announce.torrent.php';
 
 }

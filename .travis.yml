@@ -3,7 +3,6 @@
 language: php
 
 php:
-  - 5.5
   - 5.6
   - 7.0
   - hhvm
@@ -12,13 +11,20 @@ matrix:
   allow_failures:
     - php: hhvm
 
+# TODO https://docs.travis-ci.com/user/database-setup/#MariaDB
+services:
+  - mysql
+
 before_script:
+  - sh -c "mysql -e 'CREATE DATABASE IF NOT EXISTS phoenix;'"
+  - php _onces/phoenix/once.test.initialise.php
   - git clone https://github.com/eustasy/normal-checks.git
 
 script:
   - ./normal-checks/php.sh
   - php normal-checks/json.php
   - php normal-checks/xml.php
+  - php _tests/phoenix.php
 
 notifications:
   email:

@@ -10,8 +10,10 @@ function maybe_binary_to_hex($binary) {
 			$binary = bin2hex($binary);
 		}
 		// END IF BINARY
-		return htmlentities($binary, ENT_QUOTES, 'UTF-8');
-	} else {
-		return false;
+		$binary = htmlentities($binary, ENT_QUOTES, 'UTF-8');
+		if ( strlen($binary) == 40 ) {
+			return $binary;
+		}
 	}
+	return false;
 }
