@@ -54,8 +54,8 @@ if ( strlen($peer['info_hash']) != 40 ) {
 	// TODO Move mt_rand to a request-wide variable
 	// TODO Optional as part of _cron
 	if ( mt_rand(1, 100) <= $settings['clean_idle_peers'] ) {
-		require_once $settings['functions'].'function.tracker.clean.php';
-		tracker_clean($connection, $settings, $time);
+		require_once $settings['functions'].'function.task.clean.php';
+		task_clean($connection, $settings, $time);
 	}
 
 	// Announce Peers

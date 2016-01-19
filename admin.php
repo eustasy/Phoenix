@@ -5,8 +5,6 @@
 
 require_once __DIR__.'/_phoenix.php';
 require_once $settings['onces'].'once.sanitise.admin.php';
-require_once $settings['functions'].'function.task.php';
-require_once $settings['functions'].'function.mysqli.optimize.table.php';
 require_once $settings['functions'].'function.mysqli.drop.table.php';
 
 if (
@@ -68,31 +66,26 @@ if (
 		$success = false;
 	}
 
-	if (
-		optimize_table($connection, $settings, 'peers') &&
-		optimize_table($connection, $settings, 'tasks') &&
-		optimize_table($connection, $settings, 'torrents')
-	) {
-		task($connection, $settings, 'optimize', $time);
-	} else {
-		$success = false;
-	}
-
 	if ( $success ) {
 		$Message = 'Your MySQL Tracker Database has been setup.';
+		require_once $settings['functions'].'function.task.log.php';
 		task($connection, $settings, 'install', $time);
 	} else {
 		$Message = 'Could not setup the MySQL Database.';
 	}
 
+} else if ( $Process == 'clean' ) {
+	require_once $settings['functions'].'function.task.clean.php';
+	if ( task_clean($connection, $settings, $time) ) {
+		$Message = 'The peers list has been cleaned.';
+	} else {
+		$Message = 'Could not clean the peers list.';
+	}
+
 } else if ( $Process == 'optimize' ) {
-	if (
-		optimize_table($connection, $settings, 'peers') &&
-		optimize_table($connection, $settings, 'tasks') &&
-		optimize_table($connection, $settings, 'torrents')
-	) {
+	require_once $settings['functions'].'function.task.optimize.php';
+	if ( task_optimize($connection, $settings, $time) ) {
 		$Message = 'Your MySQL Tracker Database has been optimized.';
-		task($connection, $settings, 'optimize', $time);
 	} else {
 		$Message = 'Could not optimize the MySQL Database.';
 	}
@@ -274,6 +267,13 @@ if (
 				<span class="button background-clouds float-right">Disabled</span></p>
 				<div class="clear"></div>';
 		}
+		echo '
+			<form class="mysql" action="" method="POST">
+				<p class="float-left text-left">Clean out redundant peers</p>
+				<input type="hidden" name="process" value="clean">
+				<input class="button background-belize-hole color-clouds float-right" type="submit" name="submit" value="Clean">
+				<div class="clear"></div>
+			</form>';
 		echo '
 			<form class="mysql" action="" method="POST">
 				<p class="float-left text-left">Check, Analyze, Repair and Optimize</p>
