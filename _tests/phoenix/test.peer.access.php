@@ -20,5 +20,5 @@ mysqli_query($connection, $delete);
 
 if ( $result['left'] != 2 ) {
 	echo 'Result did not equal 2, it equaled '.$result['left'].PHP_EOL;
-	exit(1);
+	$failure = true;
 }

@@ -12,4 +12,14 @@ $peer['port'] = false;
 $peer['portv4'] = false;
 $peer['portv6'] = false;
 
-peer_new($connection, $settings, $time, $peer);
+$result = peer_new($connection, $settings, $time, $peer);
+if ( !$result ) {
+	echo 'Error: Did not create peer.'.PHP_EOL;
+	$failure = true;
+}
+
+$result = peer_new($connection, $settings, $time, $peer);
+if ( !$result ) {
+	echo 'Error: Did not replace peer.'.PHP_EOL;
+	$failure = true;
+}

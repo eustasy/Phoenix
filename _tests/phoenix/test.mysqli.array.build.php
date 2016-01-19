@@ -1,6 +1,5 @@
 <?php
 
-$failure = false;
 require_once $settings['functions'].'function.mysqli.array.build.php';
 
 $select = 'SELECT `info_hash` FROM `'.$settings['db_prefix'].'torrents`;';
@@ -22,7 +21,3 @@ if ( $count != 3 ) {
 
 $delete = 'DELETE FROM `'.$settings['db_prefix'].'torrents` WHERE `info_hash` LIKE \'__TEST_%\';';
 mysqli_query($connection, $delete);
-
-if ( $failure ) {
-	exit(1);
-}

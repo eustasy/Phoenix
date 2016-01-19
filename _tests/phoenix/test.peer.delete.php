@@ -19,5 +19,5 @@ mysqli_query($connection, $delete);
 
 if ( $result ) {
 	echo 'Peer does not appear to have been deleted.'.PHP_EOL;
-	exit(1);
+	$failure = true;
 }

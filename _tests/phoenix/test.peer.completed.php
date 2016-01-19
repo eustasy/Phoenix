@@ -11,5 +11,5 @@ mysqli_query($connection, $delete);
 
 if ( !$result ) {
 	echo 'Function did not execute successfully.'.PHP_EOL;
-	exit(1);
+	$failure = true;
 }

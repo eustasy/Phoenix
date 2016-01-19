@@ -10,6 +10,6 @@ $result = tracker_clean($connection, $settings, $time);
 // run a clean on the tracker.
 
 if ( !$result ) {
-	echo 'Error: Test for Function "task" failed.';
-	exit(1);
+	echo 'Error: Test for Function "task" failed.'.PHP_EOL;
+	$failure = true;
 }

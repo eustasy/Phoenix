@@ -8,6 +8,6 @@ $delete = 'DELETE FROM `'.$settings['db_prefix'].'tasks` WHERE `name` LIKE \'__T
 mysqli_query($connection, $delete);
 
 if ( !$result ) {
-	echo 'Error: Test for Function "task" failed.';
-	exit(1);
+	echo 'Error: Test for Function "task" failed.'.PHP_EOL;
+	$failure = true;
 }

@@ -8,5 +8,5 @@ mysqli_query($connection, $create);
 $result = drop_table($connection, $settings, '__TEST__');
 if ( !$result ) {
 	echo 'Error: Empty query was not empty.'.PHP_EOL;
-	exit(1);
+	$failure = true;
 }
