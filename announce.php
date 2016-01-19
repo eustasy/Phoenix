@@ -51,9 +51,10 @@ if ( strlen($peer['info_hash']) != 40 ) {
 	require_once $settings['onces'].'once.announce.peer.event.php';
 
 	// Clean Up
-	// TODO Move mt_rand to a request-wide variable
-	// TODO Optional as part of _cron
-	if ( mt_rand(1, 100) <= $settings['clean_idle_peers'] ) {
+	if (
+		!$settings['clean_with_cron'] &&
+		$chance <= $settings['clean_with_requests']
+	) {
 		require_once $settings['functions'].'function.task.clean.php';
 		task_clean($connection, $settings, $time);
 	}

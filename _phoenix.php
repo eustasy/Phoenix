@@ -28,7 +28,7 @@ $settings['hooks']     = $settings['root'].'_hooks/phoenix/';
 $settings['onces']     = $settings['root'].'_onces/phoenix/';
 $settings['settings']  = $settings['root'].'_settings/';
 
-// Error Level
+////	Error Level
 error_reporting(E_ALL);
 // error_reporting(E_ALL & ~E_WARNING);
 // error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
@@ -39,6 +39,7 @@ ignore_user_abort(true);
 ini_set('default_charset', 'iso-8859-1');
 
 $time = time();
+$chance = mt_rand(1, 100);
 
 // Allow Access from Anywhere
 header('Access-Control-Allow-Origin: *');
