@@ -19,7 +19,13 @@ function task_optimize($connection, $settings, $time, $table = false, $and_defau
 			'REPAIR TABLE `'.$settings['db_prefix'].$table.'`;'.
 			'OPTIMIZE TABLE `'.$settings['db_prefix'].$table.'`;';
 	}
-	$result = mysqli_multi_query($connection, $sql, MYSQLI_STORE_RESULT);
+	$result = mysqli_multi_query($connection, $sql);
+	if ( $result ) {
+		while ( mysqli_more_results($connection) ) {
+			mysqli_next_result($connection);
+			mysqli_store_result($connection);
+		}
+	}
 
 	if ( $result ) {
 		$task = task_log($connection, $settings, 'optimize', $time);
