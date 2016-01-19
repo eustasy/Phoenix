@@ -28,7 +28,7 @@ function task_optimize($connection, $settings, $time, $table = false, $and_defau
 	}
 
 	if ( $result ) {
-		$task = task_log($connection, $settings, 'optimize', $time);
+		task_log($connection, $settings, 'optimize', $time);
 	}
 
 	return $result;
