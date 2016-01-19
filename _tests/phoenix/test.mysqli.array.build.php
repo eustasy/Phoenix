@@ -11,7 +11,7 @@ if ( !empty($result) ) {
 }
 
 $insert = 'INSERT INTO `'.$settings['db_prefix'].'torrents` ( `info_hash` ) VALUES (\'__TEST_1__\'),  (\'__TEST_2__\'),  (\'__TEST_3__\');';
-$result = mysqli_query($connection, $insert);
+mysqli_query($connection, $insert);
 
 $result = mysqli_array_build($connection, $select);
 $count = count($result);
@@ -20,9 +20,9 @@ if ( $count != 3 ) {
 	$failure = true;
 }
 
+$delete = 'DELETE FROM `'.$settings['db_prefix'].'torrents` WHERE `info_hash` LIKE \'__TEST_%\';';
+mysqli_query($connection, $delete);
+
 if ( $failure ) {
 	exit(1);
 }
-
-$insert = 'DELETE FROM `'.$settings['db_prefix'].'torrents` WHERE `info_hash` LIKE \'__TEST_%\';';
-$result = mysqli_query($connection, $insert);
