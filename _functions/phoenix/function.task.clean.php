@@ -12,7 +12,7 @@ function task_clean($connection, $settings, $time) {
 	// TODO Also clean out possible test items.
 
 	if ( $clean ) {
-		$task = task_log($connection, $settings, 'clean', $time);
+		task_log($connection, $settings, 'clean', $time);
 	}
 
 	return $clean;
