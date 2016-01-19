@@ -48,8 +48,7 @@ if ( strlen($peer['info_hash']) != 40 ) {
 	require_once $settings['onces'].'once.sanitise.announce.optional.php';
 
 	// Track Client
-	require_once $settings['functions'].'function.peer.event.php';
-	peer_event($connection, $settings, $time, $peer);
+	require_once $settings['onces'].'once.announce.peer.event.php';
 
 	// Clean Up
 	// TODO Move mt_rand to a request-wide variable

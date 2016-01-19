@@ -4,10 +4,10 @@ function peer_new($connection, $settings, $time, $peer) {
 
 	$compactv4 = '';
 	$compactv6 = '';
-	if ( isset($peer['ipv4'])) {
+	if ( !empty($peer['ipv4'])) {
 		$compactv4 = bin2hex(pack('Nn', ip2long($peer['ipv4']), $peer['portv4']));
 	}
-	if ( isset($peer['ipv6'])) {
+	if ( !empty($peer['ipv6'])) {
 		$compactv6 = bin2hex(inet_pton($peer['ipv6']).pack('n', $peer['portv6']));
 	}
 
