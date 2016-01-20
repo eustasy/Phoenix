@@ -230,9 +230,6 @@ if (
 		if ( count($tables) == $actual ) {
 			echo '
 		<p class="box background-green-sea color-clouds">All your tables are installed.</td>';
-			$tables = true;
-		} else {
-			$tables = false;
 		}
 
 
@@ -281,7 +278,8 @@ if (
 				<input class="button background-belize-hole color-clouds float-right" type="submit" name="submit" value="Optimize">
 				<div class="clear"></div>
 			</form>';
-		$query_table_size = 'SELECT data_length AS `Data`, index_length AS `Indexes`, sum( data_length + index_length ) AS `Total`, sum( data_free ) AS `Free` FROM information_schema.TABLES WHERE table_schema = \'__TABLE_NAME__\' GROUP BY table_schema';
+
+		$query_table_size = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \'phoenix\' AND `table_name` = \'__TABLE_NAME__\' GROUP BY `table_schema`;';
 		foreach ( $tables as $table ) {
 			$size = str_replace('__TABLE_NAME__', $settings['db_prefix'].$table, $query_table_size);
 			$size = mysqli_query($connection, $size, MYSQLI_STORE_RESULT);
@@ -289,10 +287,11 @@ if (
 				$table_size[$table] = mysqli_fetch_assoc($size);
 			} else {
 				// TODO Error here.
+				// echo mysqli_error($connection);
 			}
 		}
-		echo '<pre>';
-		var_dump($table_size);
+		echo '<pre class="text-left">';
+		echo json_encode($table_size, JSON_PRETTY_PRINT);
 		echo '</pre>';
 
 	}
