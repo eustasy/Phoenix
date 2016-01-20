@@ -138,6 +138,12 @@ if (
 			border-radius: .2em;
 			padding: .3em;
 		}
+		p .button {
+			margin-top: -.3em;
+		}
+		.button.p-like {
+			margin: 0.7em 0;
+		}
 		.clear {
 			clear: both;
 		}
@@ -230,8 +236,10 @@ if (
 		if ( count($tables) == $actual ) {
 			echo '
 		<p class="box background-green-sea color-clouds">All your tables are installed.</td>';
+			$tables_installed = true;
+		} else {
+			$tables_installed = false;
 		}
-
 
 		// Database Utilities
 		echo '
@@ -253,35 +261,37 @@ if (
 				<code>$settings[\'db_reset\']</code>
 				to false to disable resets,<br>
 				or delete <code>admin.php</code> when you\'re up and running.</p>
-				<p class="float-left text-left">Install, Upgrade and Reset</p>
+				<p class="float-left text-left">Install, Upgrade, and Reset</p>
 				<input type="hidden" name="process" value="setup">
 				<input class="button background-belize-hole color-clouds float-right" type="submit" name="submit" value="Setup">
 				<div class="clear"></div>
 			</form>';
 		} else {
 			echo '
-				<p class="text-left color-asbestos">Install, Upgrade and Reset
+				<p class="text-left color-asbestos">Install, Upgrade, and Reset
 				<span class="button background-clouds float-right">Disabled</span></p>
 				<div class="clear"></div>';
 		}
-		echo '
-			<form class="mysql" action="" method="POST">
-				<p class="float-left text-left">Clean out redundant peers</p>
-				<input type="hidden" name="process" value="clean">
-				<input class="button background-belize-hole color-clouds float-right" type="submit" name="submit" value="Clean">
-				<div class="clear"></div>
-			</form>';
-		echo '
-			<form class="mysql" action="" method="POST">
-				<p class="float-left text-left">Check, Analyze, Repair and Optimize</p>
-				<input type="hidden" name="process" value="optimize">
-				<input class="button background-belize-hole color-clouds float-right" type="submit" name="submit" value="Optimize">
-				<div class="clear"></div>
-			</form>';
+		if ( $tables_installed ) {
+			echo '
+				<form class="mysql" action="" method="POST">
+					<p class="float-left text-left">Clean out redundant peers</p>
+					<input type="hidden" name="process" value="clean">
+					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Clean">
+					<div class="clear"></div>
+				</form>';
+			echo '
+				<form class="mysql" action="" method="POST">
+					<p class="float-left text-left">Check, Analyze, Repair, and Optimize</p>
+					<input type="hidden" name="process" value="optimize">
+					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Optimize">
+					<div class="clear"></div>
+				</form>';
+		}
 
-		$query_table_size = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \'phoenix\' AND `table_name` = \'__TABLE_NAME__\' GROUP BY `table_schema`;';
+		$table_size_query = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \'phoenix\' AND `table_name` = \'__TABLE_NAME__\' GROUP BY `table_schema`;';
 		foreach ( $tables as $table ) {
-			$size = str_replace('__TABLE_NAME__', $settings['db_prefix'].$table, $query_table_size);
+			$size = str_replace('__TABLE_NAME__', $settings['db_prefix'].$table, $table_size_query);
 			$size = mysqli_query($connection, $size, MYSQLI_STORE_RESULT);
 			if ( $size ) {
 				$table_size[$table] = mysqli_fetch_assoc($size);
@@ -290,8 +300,12 @@ if (
 				// echo mysqli_error($connection);
 			}
 		}
+		$database_size = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \'phoenix\' GROUP BY `table_schema`;';
+		$database_size = mysqli_query($connection, $database_size, MYSQLI_STORE_RESULT);
+		$database_size = mysqli_fetch_assoc($database_size);
 		echo '<pre class="text-left">';
 		echo json_encode($table_size, JSON_PRETTY_PRINT);
+		echo json_encode($database_size, JSON_PRETTY_PRINT);
 		echo '</pre>';
 
 	}
