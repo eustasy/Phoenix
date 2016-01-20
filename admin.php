@@ -170,17 +170,17 @@ if (
 	$php_version = PHP_VERSION;
 
 	// >= 5.3
-	if ( version_compare(PHP_VERSION, '5.3.0', '>=') ) {
+	if ( version_compare(PHP_VERSION, '5.5.0', '>=') ) {
 		echo '
-		<p class="box background-green-sea color-clouds">Your PHP version is >= 5.3</td>
+		<p class="box background-green-sea color-clouds">Your PHP version is >= 5.5</td>
 		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
 		$php_compat = true;
 
 	// >= 5.0
 	} else if ( version_compare(PHP_VERSION, '5.0.0', '>=') ) {
 		echo '
-		<p class="box background-sun-flower color-midnight-blue">Your PHP version is >= 5.0, but < 5.3.
-		We recommend updating to PHP >= 5.3</p]>
+		<p class="box background-sun-flower color-midnight-blue">Your PHP version is >= 5.0, but < 5.5.
+		We recommend updating to PHP >= 5.5</p]>
 		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
 		$php_compat = 'Partial';
 
@@ -281,6 +281,19 @@ if (
 				<input class="button background-belize-hole color-clouds float-right" type="submit" name="submit" value="Optimize">
 				<div class="clear"></div>
 			</form>';
+		$query_table_size = 'SELECT data_length AS `Data`, index_length AS `Indexes`, sum( data_length + index_length ) AS `Total`, sum( data_free ) AS `Free` FROM information_schema.TABLES WHERE table_schema = \'__TABLE_NAME__\' GROUP BY table_schema';
+		foreach ( $tables as $table ) {
+			$size = str_replace('__TABLE_NAME__', $settings['db_prefix'].$table, $query_table_size);
+			$size = mysqli_query($connection, $size, MYSQLI_STORE_RESULT);
+			if ( $size ) {
+				$table_size[$table] = mysqli_fetch_assoc($size);
+			} else {
+				// TODO Error here.
+			}
+		}
+		echo '<pre>';
+		var_dump($table_size);
+		echo '</pre>';
 
 	}
 
