@@ -254,7 +254,7 @@ if (
 		$database_size = mysqli_query($connection, $database_size, MYSQLI_STORE_RESULT);
 		$database_size = mysqli_fetch_assoc($database_size);
 		echo '
-		<p class="box background-green-sea color-clouds">All your tables are installed. Their current size is '.$database_size['Total'].'</td>';
+		<p class="box background-green-sea color-clouds">All your tables are installed. Their current size is '.$database_size['Total'].' bytes.</td>';
 
 		// Database Utilities
 		echo '
