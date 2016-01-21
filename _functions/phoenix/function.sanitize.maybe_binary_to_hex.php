@@ -1,6 +1,7 @@
 <?php
 
 function maybe_binary_to_hex($binary) {
+	$binary = urldecode($binary);
 	if (
 		strlen($binary) == 20 ||
 		strlen($binary) == 40

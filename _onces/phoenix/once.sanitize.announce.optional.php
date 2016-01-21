@@ -3,11 +3,8 @@
 ////	Left
 // Optional
 // An integer representing the remaining bytes to download.
-if (
-	isset($_GET['left']) &&
-	is_int($_GET['left'])
-) {
-	if ( $_GET['left'] == 0 ) {
+if ( isset($_GET['left']) ) {
+	if ( intval($_GET['left']) == 0 ) {
 		$peer['left'] = 0;
 		$peer['state'] = 1;
 	} else {

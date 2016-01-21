@@ -71,7 +71,7 @@ foreach ( $addresses as $address ) {
 		// Validate
 		if ( filter_var($address_ipv4, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ) {
 			$peer['ipv4'] = $address_ipv4;
-			if ( !$peer['portv4'] && is_int($address_portv4) ) {
+			if ( !$peer['portv4'] && !empty($address_portv4) && is_int($address_portv4) ) {
 				$peer['portv4'] = $address_portv4;
 			}
 		}
@@ -92,7 +92,7 @@ foreach ( $addresses as $address ) {
 		// Validate
 		if ( filter_var($address_ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ) {
 			$peer['ipv6'] = $address_ipv6;
-			if ( !$peer['portv6'] && is_int($address_portv6) ) {
+			if ( !$peer['portv6'] && !empty($address_portv6) && is_int($address_portv6) ) {
 				$peer['portv6'] = $address_portv6;
 			}
 		}
