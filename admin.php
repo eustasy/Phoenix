@@ -238,7 +238,7 @@ if (
 		} else {
 			$tables_installed = false;
 		}
-		
+
 		$table_size_query = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \'phoenix\' AND `table_name` = \'__TABLE_NAME__\' GROUP BY `table_schema`;';
 		foreach ( $tables as $table ) {
 			$size = str_replace('__TABLE_NAME__', $settings['db_prefix'].$table, $table_size_query);
