@@ -11,15 +11,17 @@ It is not backwards compatible.
 ## Installation
 
 ### What Do You Need?
+
+#### Required
 * PHP >= 5.3
 * A MySQLI supported database, such as MySQL >= 4.1
 
-### Recommended
+#### Recommended
 * Nginx >= 1.8.0, Apache, OR lighttpd.
 * [A supported version of PHP](http://php.net/supported-versions.php)
 * MySQL >= 5.5 OR MariaDB >= 5.5
 
-### _Really_ Recommended
+#### _Really_ Recommended
 * Nginx >= 1.8.0
 * [The latest version of PHP](http://php.net/supported-versions.php)
 * MariaDB >= 10
