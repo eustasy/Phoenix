@@ -18,7 +18,7 @@
  * along with Phoenix.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$settings['phoenix_version'] = 'Phoenix Procedural v.2.0 2015-08-20 14:22:00Z eustasy';
+$settings['phoenix_version'] = 'Phoenix Procedural v.3.0 2016-01-21 22:32:00Z eustasy';
 
 // If the root isn't a directory up, modify that here.
 $settings['root'] = __DIR__.'/';

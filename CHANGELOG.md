@@ -1,5 +1,21 @@
 # Phoenix Changelog
 
+## v.3.0 - 21/01/2016 - Sanitized
+* FEATURE: Adds multi-torrent scraping ([#19](https://github.com/eustasy/phoenix/issues/19)).
+* FEATURE: Optionally replace tasks with cron jobs ([#22](https://github.com/eustasy/phoenix/issues/22)).
+* FEATURE: Adds unit-tests for functions ([#17](https://github.com/eustasy/phoenix/issues/17)).
+* FEATURE: Adds normalized checks.
+* IMPROVES: Sanitizes super-globals before use ([#16](https://github.com/eustasy/phoenix/issues/16)).
+* IMPROVES: Documented hook files ([#23](https://github.com/eustasy/phoenix/issues/23)).
+* IMPROVES: Removes duplicated variables ([#20](https://github.com/eustasy/phoenix/issues/20)).
+* IMPROVES: Moved to puff-style structure ([#18](https://github.com/eustasy/phoenix/issues/18)).
+* IMPROVES: IP detection, especially when reporting IPv4 _and_ IPv6.
+* IMPROVES: Adds database size to `admin.php`
+* BUGFIX: Variables should be named in international english ([#21](https://github.com/eustasy/phoenix/issues/21)).
+* BUGFIX: Fix compact reporting for IPv4.
+* BUGFIX: Fix full-tracker scraping.
+* REMOVES: Nothing.
+
 ## v.2.0 - 20/08/2015 - Unification
 * FEATURE: Adds support for IPv6 ([#3](https://github.com/eustasy/phoenix/issues/3)).
 * IMPROVES: More tasks are logged.
