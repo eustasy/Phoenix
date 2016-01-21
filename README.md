@@ -8,14 +8,15 @@ A modern fork of [PeerTracker](https://github.com/JonnyJD/peertracker), a lightw
 
 It is not backwards compatible.
 
-## What Do You Need?
+## Installation
 
-### Required
+### What Do You Need?
+
 * Apache, Nginx, OR lighttpd.
 * [A supported version of PHP](http://php.net/supported-versions.php)
 * A MySQLI supported database, such as MySQL >= 4.1 OR MariaDB.
 
-## Install Guide
+### Install Guide
 1. Copy `_settings/phoenix.default.php` to `_settings/phoenix.custom.php`
 2. Edit the variables in `_settings/phoenix.custom.php`
 2. Upload all the `.php` files to your server.

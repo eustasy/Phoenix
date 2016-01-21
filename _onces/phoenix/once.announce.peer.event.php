@@ -17,9 +17,9 @@ if ( isset($_GET['event']) ) {
 		if ( $peer ) {
 			require_once $settings['functions'].'function.peer.delete.php';
 			peer_delete($connection, $settings, $peer);
-			// HOOK PEER DELETE
-			if ( is_readable($settings['hooks'].'phoenix.peer.delete.php') ) {
-				include $settings['hooks'].'phoenix.peer.delete.php';
+			// HOOK PEER STOPPED
+			if ( is_readable($settings['hooks'].'phoenix.peer.stopped.php') ) {
+				include $settings['hooks'].'phoenix.peer.stopped.php';
 			}
 		}
 		// EXIT Only because the client does not require any data.
@@ -57,8 +57,14 @@ if (
 	require_once $settings['functions'].'function.peer.new.php';
 	peer_new($connection, $settings, $time, $peer);
 	// HOOK PEER NEW/CHANGE
-	if ( is_readable($settings['hooks'].'phoenix.peer.change.php') ) {
-		include $settings['hooks'].'phoenix.peer.change.php';
+	if ( $peer['old'] ) {
+		if ( is_readable($settings['hooks'].'phoenix.peer.change.php') ) {
+			include $settings['hooks'].'phoenix.peer.change.php';
+		}
+	} else {
+		if ( is_readable($settings['hooks'].'phoenix.peer.new.php') ) {
+			include $settings['hooks'].'phoenix.peer.new.php';
+		}
 	}
 // END Any Change
 
