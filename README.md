@@ -11,10 +11,18 @@ It is not backwards compatible.
 ## Installation
 
 ### What Do You Need?
+* PHP >= 5.3
+* A MySQLI supported database, such as MySQL >= 4.1
 
-* Apache, Nginx, OR lighttpd.
+### Recommended
+* Nginx >= 1.8.0, Apache, OR lighttpd.
 * [A supported version of PHP](http://php.net/supported-versions.php)
-* A MySQLI supported database, such as MySQL >= 4.1 OR MariaDB.
+* MySQL >= 5.5 OR MariaDB >= 5.5
+
+### _Really_ Recommended
+* Nginx >= 1.8.0
+* [The latest version of PHP](http://php.net/supported-versions.php)
+* MariaDB >= 10
 
 ### Install Guide
 1. Copy `_settings/phoenix.default.php` to `_settings/phoenix.custom.php`
