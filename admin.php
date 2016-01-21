@@ -245,16 +245,19 @@ if (
 			$size = mysqli_query($connection, $size, MYSQLI_STORE_RESULT);
 			if ( $size ) {
 				$table_size[$table] = mysqli_fetch_assoc($size);
-			} else {
-				// TODO Error here.
-				// echo mysqli_error($connection);
 			}
 		}
 		$database_size = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \'phoenix\' GROUP BY `table_schema`;';
 		$database_size = mysqli_query($connection, $database_size, MYSQLI_STORE_RESULT);
-		$database_size = mysqli_fetch_assoc($database_size);
+		if ( $database_size ) {
+			$database_size = mysqli_fetch_assoc($database_size);
+		}
 		echo '
-		<p class="box background-green-sea color-clouds">All your tables are installed. Their current size is '.$database_size['Total'].' bytes.</td>';
+		<p class="box background-green-sea color-clouds">All your tables are installed.';
+		if ( $database_size ) {
+			echo 'Their current size is '.$database_size['Total'].' bytes.';
+		}
+		echo '</td>';
 
 		// Database Utilities
 		echo '
