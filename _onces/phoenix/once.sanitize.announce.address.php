@@ -16,11 +16,8 @@ $peer['portv6'] = false;
 
 ////	Port
 // Set the port if it's that easy.
-if (
-	isset($_GET['port']) &&
-	is_int($_GET['port'])
-) {
-	$peer['port'] = $_GET['port'];
+if ( isset($_GET['port']) ) {
+	$peer['port'] = intval($_GET['port']);
 }
 
 ////	Find Possibles

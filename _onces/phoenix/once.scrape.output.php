@@ -1,11 +1,22 @@
 <?php
 
+while ( $peer = mysqli_fetch_assoc($peers) ) {
+	$scrape[$peer['info_hash']]['info_hash'] = $peer['info_hash'];
+	$scrape[$peer['info_hash']]['seeders']   = $peer['seeders'];
+	$scrape[$peer['info_hash']]['leechers']  = $peer['leechers'];
+}
+
 while ( $torrent = mysqli_fetch_assoc($torrents) ) {
-	$scrape[$torrent['info_hash']]['info_hash'] = intval($torrent['info_hash']);
+	$scrape[$torrent['info_hash']]['info_hash'] = $torrent['info_hash'];
+	$scrape[$torrent['info_hash']]['downloads'] = $torrent['downloads'];
+}
+
+foreach ( $scrape as $torrent ) {
+	$scrape[$torrent['info_hash']]['info_hash'] = $torrent['info_hash'];
 	$scrape[$torrent['info_hash']]['seeders']   = intval($torrent['seeders']);
 	$scrape[$torrent['info_hash']]['leechers']  = intval($torrent['leechers']);
-	$scrape[$torrent['info_hash']]['downloads'] = intval($torrent['downloads']);
 	$scrape[$torrent['info_hash']]['peers']     = intval($torrent['seeders']) + intval($torrent['leechers']);
+	$scrape[$torrent['info_hash']]['downloads'] = intval($torrent['downloads']);
 }
 
 // XML
