@@ -36,7 +36,7 @@ $queries[] = 'CREATE TABLE IF NOT EXISTS `phoenix`.`'.$settings['db_prefix'].'to
 		') ENGINE=MyISAM DEFAULT CHARSET=latin1;';
 foreach ( $queries as $query ) {
 	$result = mysqli_query($test_db, $query);
-	echo 'Test initialised: ';
+	echo 'Test initialized: ';
 	var_dump($result);
 	if ( !$result ) {
 		echo 'Error #'.mysqli_errno($test_db).': "'.mysqli_error($test_db).'"';

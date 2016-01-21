@@ -17,7 +17,7 @@ services:
 
 before_script:
   - sh -c "mysql -e 'CREATE DATABASE IF NOT EXISTS phoenix;'"
-  - php _onces/phoenix/once.test.initialise.php
+  - php _onces/phoenix/once.test.initialize.php
   - git clone https://github.com/eustasy/normal-checks.git
 
 script:
