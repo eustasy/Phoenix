@@ -239,25 +239,27 @@ if (
 			$tables_installed = false;
 		}
 
-		$table_size_query = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \'phoenix\' AND `table_name` = \'__TABLE_NAME__\' GROUP BY `table_schema`;';
-		foreach ( $tables as $table ) {
-			$size = str_replace('__TABLE_NAME__', $settings['db_prefix'].$table, $table_size_query);
-			$size = mysqli_query($connection, $size, MYSQLI_STORE_RESULT);
-			if ( $size ) {
-				$table_size[$table] = mysqli_fetch_assoc($size);
+		if ( $tables_installed ) {
+			$table_size_query = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \''.$settings['db_name'].'\' AND `table_name` = \'__TABLE_NAME__\' GROUP BY `table_schema`;';
+			foreach ( $tables as $table ) {
+				$size = str_replace('__TABLE_NAME__', $settings['db_prefix'].$table, $table_size_query);
+				$size = mysqli_query($connection, $size, MYSQLI_STORE_RESULT);
+				if ( $size ) {
+					$table_size[$table] = mysqli_fetch_assoc($size);
+				}
 			}
+			$database_size = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \''.$settings['db_name'].'\' GROUP BY `table_schema`;';
+			$database_size = mysqli_query($connection, $database_size, MYSQLI_STORE_RESULT);
+			if ( $database_size ) {
+				$database_size = mysqli_fetch_assoc($database_size);
+			}
+			echo '
+			<p class="box background-green-sea color-clouds">All your tables are installed.';
+			if ( $database_size ) {
+				echo 'Their current size is '.number_format($database_size['Total']).' bytes.';
+			}
+			echo '</td>';
 		}
-		$database_size = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \'phoenix\' GROUP BY `table_schema`;';
-		$database_size = mysqli_query($connection, $database_size, MYSQLI_STORE_RESULT);
-		if ( $database_size ) {
-			$database_size = mysqli_fetch_assoc($database_size);
-		}
-		echo '
-		<p class="box background-green-sea color-clouds">All your tables are installed.';
-		if ( $database_size ) {
-			echo 'Their current size is '.$database_size['Total'].' bytes.';
-		}
-		echo '</td>';
 
 		// Database Utilities
 		echo '
