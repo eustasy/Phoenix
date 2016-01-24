@@ -16,7 +16,7 @@ services:
   - mysql
 
 before_install:
-  - pip install --upgrade pip
+  - pip install --upgrade --user pip
   - pip install codecov
 
 before_script:
