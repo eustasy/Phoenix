@@ -256,7 +256,7 @@ if (
 			echo '
 			<p class="box background-green-sea color-clouds">All your tables are installed.';
 			if ( $database_size ) {
-				echo 'Their current size is '.number_format($database_size['Total']).' bytes.';
+				echo ' Their current size is '.number_format($database_size['Total']).' bytes.';
 			}
 			echo '</td>';
 		}
