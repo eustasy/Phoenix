@@ -4,9 +4,9 @@
 [![Code Climate](https://codeclimate.com/github/eustasy/phoenix/badges/gpa.svg)](https://codeclimate.com/github/eustasy/phoenix)
 [![Travis CI](https://travis-ci.org/eustasy/phoenix.svg)](https://travis-ci.org/eustasy/phoenix)
 
-A modern fork of [PeerTracker](https://github.com/JonnyJD/peertracker), a lightweight PHP/SQL BitTorrent Tracker.
+A lightweight BitTorrent Tracker written in PHP with an SQL backend.
 
-It is not backwards compatible.
+_A modern fork of [PeerTracker](https://github.com/JonnyJD/peertracker). It is not backwards compatible._
 
 ## Installation
 
