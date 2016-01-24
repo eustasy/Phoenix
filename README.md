@@ -6,7 +6,7 @@
 
 A lightweight BitTorrent Tracker written in PHP with an SQL backend.
 
-_A modern fork of [PeerTracker](https://github.com/JonnyJD/peertracker). It is not backwards compatible._
+A modern fork of [PeerTracker](https://github.com/JonnyJD/peertracker). It is not backwards compatible.
 
 ## Installation
 
