@@ -1,6 +1,8 @@
 # see http://about.travis-ci.org/docs/user/languages/php/ for more hints
 
 language: php
+sudo: required
+dist: trusty
 
 php:
   - 5.6
@@ -16,7 +18,7 @@ services:
   - mysql
 
 before_install:
-  - pip install --upgrade --user pip
+  - pip install --upgrade pip
   - pip install codecov
 
 before_script:
