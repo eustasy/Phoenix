@@ -27,6 +27,6 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 ### Install Guide
 1. Copy `_settings/phoenix.default.php` to `_settings/phoenix.custom.php`
 2. Edit the variables in `_settings/phoenix.custom.php`
-2. Upload all the `.php` files to your server.
+2. Upload all the `.php` and `.sh` files to your server.
 4. Load `admin.php` in your browser and run the `Setup` option.
 5. Add `$settings['db_reset'] = false;` to the end of `_settings/phoenix.custom.php`, OR delete `admin.php` from your server.
