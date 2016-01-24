@@ -1,8 +1,6 @@
 # see http://about.travis-ci.org/docs/user/languages/php/ for more hints
 
 language: php
-sudo: required
-dist: trusty
 
 php:
   - 5.6
