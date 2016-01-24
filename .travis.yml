@@ -17,10 +17,6 @@ matrix:
 services:
   - mysql
 
-before_install:
-  - sudo pip install --upgrade pip
-  - pip install codecov
-
 before_script:
   - sh -c "mysql -e 'CREATE DATABASE IF NOT EXISTS phoenix;'"
   - php _onces/phoenix/once.test.initialize.php
@@ -31,9 +27,6 @@ script:
   - php normal-checks/json.php
   - php normal-checks/xml.php
   - php _tests/phoenix.php
-
-after_success:
-  - codecov
 
 notifications:
   email:
