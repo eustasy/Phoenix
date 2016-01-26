@@ -33,3 +33,13 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 
 ## Configuration
 Configuration should take place in `_settings/phoenix.custom.php`, NOT `_settings/phoenix.default.php`. Phoenix _will_ attempt to use the default configuration if yours is missing.
+
+## Cron Jobs
+What's important to note, is that cron is an automated task that runs a shell script or command.
+Within your cronfile, all entires are in the format `minute hour day (of the month) month day (of the week)  command`
+Each value, besides the command, is in a numerical format.  You can also use wildcards in any point in the cronfile.
+For instance, `30 0 1 5 * rm /user/*` removes /user/* 30 minutes into the First of May every day of the week. 
+Commas between integers will allow the command to run multiple times in the respective value.
+`5,10 0 10 * 1  mkdir /opt/server` runs mkdir /opt/server every five and ten minutes into every Monday and tenth of every month.
+Within bash, run the `crontab -e` command to edit the file.
+
