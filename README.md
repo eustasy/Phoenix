@@ -34,7 +34,7 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 ## Configuration
 Configuration should take place in `_settings/phoenix.custom.php`, NOT `_settings/phoenix.default.php`. Phoenix _will_ attempt to use the default configuration if yours is missing.
 
-### Disabling Cleaning
+#### Disabling Cleaning
 In requests, to disable cleaning one would edit the file `_settings/phoenix.custom.php` and change the variable `settings['clean_with_cron'] = true` to `settings['clean_with_cron'] = false`
 
 ## Cron Jobs
