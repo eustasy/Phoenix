@@ -43,3 +43,8 @@ Commas between integers will allow the command to run multiple times in the resp
 `5,10 0 10 * 1  mkdir /opt/server` runs mkdir /opt/server every five and ten minutes into every Monday and tenth of every month.
 Within bash, run the `crontab -e` command to edit the file.
 
+Specificially, to run `_cron/hourly/backup-database.sh` every hour of every day, you'd run the following:
+`crontab -e`, and once the file's open you'd type in `0 * * * *  php _cron/hourly/backup-database.sh` in one of the lines.
+To run `_cron/hourly/clean-and-optimize.php` hourly, you'd do the same thing except with with a different filename
+`0 * * * *  php _cron/hourly/clean-and-optimize.sh`.  
+
