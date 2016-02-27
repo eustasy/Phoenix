@@ -3,6 +3,18 @@
 ////	DO NOT MODIFY `phoenix.default.php`
 // Copy to `phoenix.custom.php` and modify there.
 
+////	General Database Options
+// Can be better overridden with a settings.custom.php file.
+$settings['db_host']             = 'localhost';  /* ip or hostname to mysql server */
+$settings['db_user']             = 'phoenix';    /* username used to connect to mysql */
+$settings['db_pass']             = 'Password1';  /* password used to connect to mysql */
+$settings['db_name']             = 'phoenix';    /* name of the Phoenix database */
+$settings['db_reset']            = true;         /* allow database to be reset in admin */
+
+////	Advanced Database Options
+$settings['db_prefix']           = '';           /* name prefixes for the Phoenix tables */
+$settings['db_persist']          = true;         /* use persistent connections if available. */
+
 ////	General Tracker Options
 $settings['open_tracker']        = true;         /* track anything announced to it */
 $settings['announce_interval']   = 1800;         /* how often client will send requests */
@@ -24,15 +36,3 @@ $settings['honor_xff']           = false;        /* If this server is behind a f
                                                  /* will come in the form of a X-Forwarded-For. This option */
                                                  /* should only be set if your frontend proxy properly handles */
                                                  /* and filters XFF, else it allows for trivial IP spoofing */
-
-////	General Database Options
-// Can be better overridden with a settings.custom.php file.
-$settings['db_host']             = 'localhost';  /* ip or hostname to mysql server */
-$settings['db_user']             = 'phoenix';    /* username used to connect to mysql */
-$settings['db_pass']             = 'Password1';  /* password used to connect to mysql */
-$settings['db_name']             = 'phoenix';    /* name of the Phoenix database */
-$settings['db_reset']            = true;         /* allow database to be reset in admin */
-
-////	Advanced Database Options
-$settings['db_prefix']           = '';           /* name prefixes for the Phoenix tables */
-$settings['db_persist']          = true;         /* use persistent connections if available. */
