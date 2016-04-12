@@ -37,7 +37,7 @@ Configuration should take place in `_settings/phoenix.custom.php`, NOT `_setting
 ### Cron (Automating Maintenance)
 1. Configure `_cron/hourly/backup-database.sh` by changing the path in the second line, and the username, password, database, and file in the last three.
 2. Edit `_settings/phoenix.custom.php` and set `$settings['clean_with_cron']` to `true` instead of `false`. You can also set `$settings['clean_with_requests']` to `0` to save processing time.
-3. Edit your crontab with `crontab -e`, and add a crontab like the following. You can edit the times, and should make sure the paths are correct.
+3. Edit your crontab with `crontab -e`, and add a crontab like the following. You can edit the times, and should make sure the paths are correct by running the commands after the asteriks.
 ```
 15 * * * * php ~/phoenix/_cron/hourly/clean-and-optimize.php
 30 * * * * ~/phoenix/_cron/hourly/backup-database.sh
