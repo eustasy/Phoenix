@@ -9,10 +9,10 @@ $settings['db_host']             = 'localhost';  /* ip or hostname to mysql serv
 $settings['db_user']             = 'phoenix';    /* username used to connect to mysql */
 $settings['db_pass']             = 'Password1';  /* password used to connect to mysql */
 $settings['db_name']             = 'phoenix';    /* name of the Phoenix database */
-$settings['db_reset']            = true;         /* allow database to be reset in admin */
+$settings['db_reset']            = false;         /* allow database to be reset in admin */
 
 ////	Advanced Database Options
-$settings['db_prefix']           = '';           /* name prefixes for the Phoenix tables */
+$settings['db_prefix']           = 'phoenix_';           /* name prefixes for the Phoenix tables */
 $settings['db_persist']          = true;         /* use persistent connections if available. */
 
 ////	General Tracker Options

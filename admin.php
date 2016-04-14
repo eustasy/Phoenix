@@ -8,69 +8,58 @@ require_once $settings['onces'].'once.sanitize.admin.php';
 require_once $settings['functions'].'function.mysqli.drop.table.php';
 require_once $settings['functions'].'function.mysqli.create.database.php';
 
+// Tables Exist
+$tables = array('peers', 'tasks', 'torrents');
+$actual = 0;
+foreach ( $tables as $table ) {
+	$sql = 'SELECT TABLE_NAME '.
+	'FROM `information_schema`.`TABLES` '.
+	'WHERE TABLE_SCHEMA = \''.$settings['db_name'].'\' '.
+	'AND TABLE_NAME = \''.$settings['db_prefix'].$table.'\';';
+
+	$result = mysqli_query($connection, $sql);
+	$count = mysqli_num_rows($result);
+	if ( !$count ) {
+	} else {
+		$actual += $count;
+	}
+}
+if ( count($tables) == $actual ) {
+	$tables_installed = true;
+} else {
+	$tables_installed = false;
+}
+
 if (
 	$Process == 'setup' &&
-	$settings['db_reset']
+	(
+		$settings['db_reset'] ||
+		!$tables_installed
+	)
 ) {
 	// MySQL Setup
 	$success = true;
 
-	if (
-		!drop_table($connection, $settings, 'peers') ||
-		!drop_table($connection, $settings, 'tasks') ||
-		!drop_table($connection, $settings, 'torrents')
-	) {
-		$success = false;
+	if ( $tables_installed ) {
+		if (
+			!drop_table($connection, $settings, 'peers') ||
+			!drop_table($connection, $settings, 'tasks') ||
+			!drop_table($connection, $settings, 'torrents')
+		) {
+			$success = false;
+		}
 	}
 
-	$result = mysqli_query($connection,
-		'CREATE TABLE IF NOT EXISTS `'.$settings['db_prefix'].'peers` (' .
-			'`info_hash` varchar(40) NOT NULL,' .
-			'`peer_id` varchar(40) NOT NULL,' .
-			'`compactv4` varchar(12) NOT NULL,' .
-			'`compactv6` varchar(36) NOT NULL,' .
-			'`ipv4` char(15) NOT NULL DEFAULT \'0\',' .
-			'`ipv6` char(39) NOT NULL DEFAULT \'0\',' .
-			'`portv4` smallint(5) unsigned NOT NULL,' .
-			'`portv6` smallint(5) unsigned NOT NULL,' .
-			'`left` int(100) unsigned NOT NULL DEFAULT \'0\',' .
-			'`state` tinyint(1) unsigned NOT NULL DEFAULT \'0\',' .
-			'`updated` int(10) unsigned NOT NULL,' .
-			'PRIMARY KEY (`info_hash`,`peer_id`)' .
-		') ENGINE=MyISAM DEFAULT CHARSET=latin1;'
-	);
-	if ( !$result ) {
-		echo mysqli_error($connection);
-		$success = false;
-	}
-	$result = mysqli_query($connection,
-		'CREATE TABLE IF NOT EXISTS `'.$settings['db_prefix'].'tasks` (' .
-			'`name` varchar(16) NOT NULL,' .
-			'`value` int(10) NOT NULL,' .
-			'PRIMARY KEY (`name`)' .
-		') ENGINE=MyISAM DEFAULT CHARSET=latin1;'
-	);
-	if ( !$result ) {
-		echo mysqli_error($connection);
-		$success = false;
-	}
-	$result = mysqli_query($connection,
-		'CREATE TABLE IF NOT EXISTS `'.$settings['db_prefix'].'torrents` (' .
-			'`name` varchar(255) NULL,' .
-			'`info_hash` varchar(40) NOT NULL,' .
-			'`downloads` int(10) unsigned NOT NULL DEFAULT \'0\',' .
-			'PRIMARY KEY (`info_hash`)' .
-		') ENGINE=MyISAM DEFAULT CHARSET=latin1;'
-	);
-	if ( !$result ) {
-		echo mysqli_error($connection);
+	// Create the databases.
+	if ( !create_database($connection, $settings) ) {
 		$success = false;
 	}
 
 	if ( $success ) {
 		$Message = 'Your MySQL Tracker Database has been setup.';
 		require_once $settings['functions'].'function.task.log.php';
-		task($connection, $settings, 'install', $time);
+		$result = task_log($connection, $settings, 'install', $time);
+		$tables_installed = true;
 	} else {
 		$Message = 'Could not setup the MySQL Database.';
 	}
@@ -215,31 +204,6 @@ if (
 		<p class="color-asbestos">MySQL Version: '.$mysql_version.'</p>';
 		$mysql_compat = true;
 
-		// Tables Exist
-		$tables = array('peers', 'tasks', 'torrents');
-		$actual = 0;
-
-		foreach ( $tables as $table ) {
-			$sql = 'SELECT TABLE_NAME '.
-			'FROM `information_schema`.`TABLES` '.
-			'WHERE TABLE_SCHEMA = \''.$settings['db_name'].'\' '.
-			'AND TABLE_NAME = \''.$settings['db_prefix'].$table.'\';';
-
-			$result = mysqli_query($connection, $sql);
-			$count = mysqli_num_rows($result);
-			if ( !$count ) {
-				echo '
-		<p class="box background-pomegranate color-clouds">The table "'.$table.'" is not installed.</td>';
-			} else {
-				$actual += $count;
-			}
-		}
-		if ( count($tables) == $actual ) {
-			$tables_installed = true;
-		} else {
-			$tables_installed = false;
-		}
-
 		if ( $tables_installed ) {
 			$table_size_query = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \''.$settings['db_name'].'\' AND `table_name` = \'__TABLE_NAME__\' GROUP BY `table_schema`;';
 			foreach ( $tables as $table ) {
@@ -260,6 +224,9 @@ if (
 				echo ' Their current size is '.number_format($database_size['Total']).' bytes.';
 			}
 			echo '</td>';
+		} else {
+			echo '
+	<p class="box background-pomegranate color-clouds">Some or all of your tables are not installed.</p>';
 		}
 
 		// Database Utilities
@@ -275,7 +242,10 @@ if (
 			</div>';
 		}
 
-		if ( $settings['db_reset'] ) {
+		if (
+			$settings['db_reset'] ||
+			!$tables_installed
+		) {
 			echo '
 			<form class="mysql" action="" method="POST">
 				<p class="box background-pomegranate color-clouds">You should set

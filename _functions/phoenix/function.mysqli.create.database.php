@@ -1,9 +1,9 @@
 <?php
 
-function create_database($connection, $settings) {
+function create_database($connection, $settings, $debug = false) {
 
-	$queries[] = 'GRANT ALL ON `'.$settings['db_name'].'`.* TO \''.$settings['db_user'].'\'@\''.$settings['db_host'].'\' IDENTIFIED BY \''.$settings['db_pass'].'\';';
-	$queries[] = 'FLUSH PRIVILEGES;';
+	//$queries[] = 'GRANT ALL ON `'.$settings['db_name'].'`.* TO \''.$settings['db_user'].'\'@\''.$settings['db_host'].'\' IDENTIFIED BY \''.$settings['db_pass'].'\';';
+	//$queries[] = 'FLUSH PRIVILEGES;';
 	$queries[] = 'CREATE TABLE IF NOT EXISTS `'.$settings['db_name'].'`.`'.$settings['db_prefix'].'peers` (' .
 				'`info_hash` varchar(40) NOT NULL,' .
 				'`peer_id` varchar(40) NOT NULL,' .
@@ -33,14 +33,22 @@ function create_database($connection, $settings) {
 	foreach ( $queries as $query ) {
 		$result = mysqli_query($connection, $query);
 		if ( !$result ) {
-			echo 'Error #'.mysqli_errno($connection).': "'.mysqli_error($connection).'"';
+			if ( $debug ) {
+				echo 'Error #'.mysqli_errno($connection).': "'.mysqli_error($connection).'" while running "'.$query.'"'.PHP_EOL;
+			}
 			$failure = true;
 		}
 	}
 
 	if ( !empty($failure) ) {
+		if ( $debug ) {
+			echo 'Database Creation failed.'.PHP_EOL;
+		}
 		return false;
+	} else {
+		if ( $debug ) {
+			echo 'Database Creation succesful.'.PHP_EOL;
+		}
+		return true;
 	}
-	return true;
-
 }
