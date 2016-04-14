@@ -6,6 +6,7 @@
 require_once __DIR__.'/_phoenix.php';
 require_once $settings['onces'].'once.sanitize.admin.php';
 require_once $settings['functions'].'function.mysqli.drop.table.php';
+require_once $settings['functions'].'function.mysqli.create.database.php';
 
 if (
 	$Process == 'setup' &&
