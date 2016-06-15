@@ -11,18 +11,14 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 ### What Do You Need?
 
 #### Required
-* PHP >= 4
+* A PHP compatible web-server.
+* PHP >= 5.4.0 with Core, SimpleXML, date, filter, json, mysqli, pcre, & standard extensions. (Generated using [PHP CompatInfo](http://php5.laurent-laville.org/compatinfo/)
 * A MySQLI supported database, such as MySQL >= 4.1
 
 #### Recommended
-* Nginx >= 1.8.0, Apache, OR lighttpd.
-* [A supported version of PHP](http://php.net/supported-versions.php)
-* MySQL >= 5.5 OR MariaDB >= 5.5
-
-#### _Really_ Recommended
-* Nginx >= 1.10.0 with HTTP/2
+* The latest version of Nginx  ( >= 1.10.0 with HTTP/2 )
 * [The latest version of PHP](http://php.net/supported-versions.php)
-* MariaDB >= 10
+* The latest version of MariaDB ( >= 10 )
 
 ### Install Guide
 1. Copy `_settings/phoenix.default.php` to `_settings/phoenix.custom.php`
