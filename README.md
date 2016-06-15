@@ -1,4 +1,4 @@
-# Phoenix v.3.1
+# Phoenix v.3.12
 
 [![Codacy Badge](https://api.codacy.com/project/badge/10f5af9881b4412093e91d68086fd468)](https://www.codacy.com/app/lewisgoddard/phoenix)
 [![Code Climate](https://codeclimate.com/github/eustasy/phoenix/badges/gpa.svg)](https://codeclimate.com/github/eustasy/phoenix)
@@ -11,7 +11,7 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 ### What Do You Need?
 
 #### Required
-* PHP >= 5.3
+* PHP >= 4
 * A MySQLI supported database, such as MySQL >= 4.1
 
 #### Recommended
@@ -20,7 +20,7 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 * MySQL >= 5.5 OR MariaDB >= 5.5
 
 #### _Really_ Recommended
-* Nginx >= 1.8.0
+* Nginx >= 1.10.0 with HTTP/2
 * [The latest version of PHP](http://php.net/supported-versions.php)
 * MariaDB >= 10
 
