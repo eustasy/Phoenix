@@ -4,6 +4,13 @@ language: php
 dist: trusty
 sudo: required
 
+addons:
+  apt:
+    packages:
+    - mysql-server-5.6
+    - mysql-client-core-5.6
+    - mysql-client-5.6
+
 php:
   - 5.6
   - 7.0
@@ -18,7 +25,7 @@ services:
   - mysql
 
 before_script:
-  - sh -c "mysql -e 'CREATE DATABASE IF NOT EXISTS phoenix;'"
+  - sh -c "mysql -u root -e 'CREATE DATABASE IF NOT EXISTS phoenix;'"
   - php _onces/phoenix/once.test.initialize.php
   - git clone https://github.com/eustasy/normal-checks.git
   - sudo apt-get install -y npm
