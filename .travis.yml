@@ -7,9 +7,9 @@ sudo: required
 addons:
   apt:
     packages:
-    - mysql-server-5.6
-    - mysql-client-core-5.6
-    - mysql-client-5.6
+      - mysql-server-5.6
+      - mysql-client-core-5.6
+      - mysql-client-5.6
 
 php:
   - 5.6
@@ -18,7 +18,7 @@ php:
 
 matrix:
   allow_failures:
-  - php: hhvm
+    - php: hhvm
 
 # TODO https://docs.travis-ci.com/user/database-setup/#MariaDB
 services:
@@ -41,6 +41,6 @@ script:
 notifications:
   email:
     recipients:
-    - lewisgoddard@eustasy.org
+      - lewisgoddard@eustasy.org
     on_success: change
     on_failure: always
