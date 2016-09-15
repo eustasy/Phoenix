@@ -12,13 +12,13 @@ addons:
     - mysql-client-5.6
 
 php:
-  - 5.6
-  - 7.0
-  - hhvm
+	- 5.6
+	- 7.0
+	- hhvm
 
 matrix:
   allow_failures:
-    - php: hhvm
+  - php: hhvm
 
 # TODO https://docs.travis-ci.com/user/database-setup/#MariaDB
 services:
@@ -41,6 +41,6 @@ script:
 notifications:
   email:
     recipients:
-      - lewisgoddard@eustasy.org
+    - lewisgoddard@eustasy.org
     on_success: change
     on_failure: always
