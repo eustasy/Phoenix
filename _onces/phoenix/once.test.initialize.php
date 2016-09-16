@@ -7,7 +7,7 @@ if ( is_readable(__DIR__.'/../../_settings/phoenix.custom.php') ) {
 	require_once __DIR__.'/../../_settings/phoenix.custom.php';
 } else {
 	error_log('Configuration file "'.$settings['settings'].'phoenix.custom.php" not readable.'.PHP_EOL.
-		'Falling back to defaults.')
+		'Falling back to defaults.');
 	$settings['db_host'] = 'localhost';
 	$settings['db_user'] = 'root';
 	$settings['db_pass'] = 'Password1';
