@@ -50,7 +50,7 @@ if ( is_readable($settings['settings'].'phoenix.custom.php') ) {
 	include $settings['settings'].'phoenix.custom.php';
 } else {
 	error_log('Configuration file "'.$settings['settings'].'phoenix.custom.php" not readable.'.PHP_EOL.
-		'Falling back to defaults.')
+		'Falling back to defaults.');
 	$settings['db_host'] = 'localhost';
 	$settings['db_user'] = 'root';
 	$settings['db_pass'] = 'Password1';
