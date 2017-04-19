@@ -12,4 +12,4 @@ mysqldump \
 	--verbose \
 	-u'phoenix' \
 	-p'Password1' \
-	phoenix > "phoenix.$(date +\%Y\%m\%d_\%H\%M).sql"
+	phoenix > "phoenix.$(date +%Y%m%d_%H%M).sql"
