@@ -1,29 +1,60 @@
-# This is a sample .codeclimate.yml configured for Engine analysis on Code
-# Climate Platform. For an overview of the Code Climate Platform, see here:
-# http://docs.codeclimate.com/article/300-the-codeclimate-platform
-
 # Under the engines key, you can configure which engines will analyze your repo.
 # Each key is an engine name. For each value, you need to specify enabled: true
 # to enable the engine as well as any other engines-specific configuration.
 
 # For more details, see here:
-# http://docs.codeclimate.com/article/289-configuring-your-repository-via-codeclimate-yml#platform
+# https://docs.codeclimate.com/docs/example-codeclimateyml#platform
 
 # For a list of all available engines, see here:
-# http://docs.codeclimate.com/article/296-engines-available-engines
+# https://docs.codeclimate.com/docs/list-of-engines
 
 engines:
 # to turn on an engine, add it here and set enabled to `true`
 # to turn off an engine, set enabled to `false` or remove it
-  rubocop:
+  csslint:
+    enabled: false
+    # Stylelint at Codacy used isnstead.
+  duplication:
     enabled: true
-  golint:
-    enabled: true
-  gofmt:
-    enabled: true
+    config:
+      languages:
+      - javascript
+      - php
+      - python
   eslint:
     enabled: true
-  csslint:
+    channel: "eslint-3"
+    # config: .eslintrc.json
+    # ignore: .eslintignore
+  fixme:
+    enabled: true
+  markdownlint:
+    enabled: true
+    # initial: .mdlrc
+    # config: .mdlrc.style.rb
+  phpcodesniffer:
+    enabled: true
+    checks:
+      Generic WhiteSpace DisallowTabIndent TabsUsed:
+        enabled: false
+      PSR2 ControlStructures ControlStructureSpacing SpacingAfterOpenBrace:
+        enabled: false
+      PSR2 ControlStructures ControlStructureSpacing SpaceBeforeCloseBrace:
+        enabled: false
+      Squiz ControlStructures ForEachLoopDeclaration SpaceAfterOpen:
+        enabled: false
+      Squiz ControlStructures ForEachLoopDeclaration SpaceBeforeClose:
+        enabled: false
+      Squiz Functions MultiLineFunctionDeclaration BraceOnSameLine:
+        enabled: false
+  phpmd:
+    enabled: true
+    checks:
+      Controversial/CamelCaseParameterName:
+        enabled: false
+      Controversial/CamelCaseVariableName:
+        enabled: false
+  shellcheck:
     enabled: true
 
 # Engines can analyze files and report issues on them, but you can separately
@@ -53,4 +84,7 @@ ratings:
 exclude_paths:
   - "_libs/**"
   - "**.min.css"
+  - "**.custom.css"
   - "**.min.js"
+  - "**.pack.js"
+  - "**.custom.js"
