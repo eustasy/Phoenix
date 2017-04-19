@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ~/Server/phoenix/_backups
+cd ~/Server/phoenix/_backups || exit BACKUP_DIR_NOT_FOUND
 mysqldump \
 	--allow-keywords \
 	--replace \
@@ -12,4 +12,4 @@ mysqldump \
 	--verbose \
 	-u'phoenix' \
 	-p'Password1' \
-	phoenix > phoenix.`date +\%Y\%m\%d_\%H\%M`.sql
+	phoenix > "phoenix.$(date +\%Y\%m\%d_\%H\%M).sql"
