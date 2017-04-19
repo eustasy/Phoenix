@@ -1,9 +1,9 @@
 # Phoenix v.3.1.2
 
-[![Bountysource](https://www.bountysource.com/badge/tracker?tracker_id=10163092)](https://www.bountysource.com/teams/eustasy/issues?tracker_ids=10163092)
+[![Travis CI](https://travis-ci.org/eustasy/phoenix.svg)](https://travis-ci.org/eustasy/phoenix)
 [![Codacy Badge](https://api.codacy.com/project/badge/10f5af9881b4412093e91d68086fd468)](https://www.codacy.com/app/lewisgoddard/phoenix)
 [![Code Climate](https://codeclimate.com/github/eustasy/phoenix/badges/gpa.svg)](https://codeclimate.com/github/eustasy/phoenix)
-[![Travis CI](https://travis-ci.org/eustasy/phoenix.svg)](https://travis-ci.org/eustasy/phoenix)
+[![Bountysource](https://www.bountysource.com/badge/tracker?tracker_id=10163092)](https://www.bountysource.com/teams/eustasy/issues?tracker_ids=10163092)
 
 A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people that just want to host a tracker, not the torrent listing site.
 
