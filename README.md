@@ -4,6 +4,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/10f5af9881b4412093e91d68086fd468)](https://www.codacy.com/app/eustasy/phoenix)
 [![Code Climate](https://codeclimate.com/github/eustasy/phoenix/badges/gpa.svg)](https://codeclimate.com/github/eustasy/phoenix)
 [![Bountysource](https://www.bountysource.com/badge/tracker?tracker_id=10163092)](https://www.bountysource.com/teams/eustasy/issues?tracker_ids=10163092)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Feustasy%2Fphoenix.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Feustasy%2Fphoenix?ref=badge_shield)
 
 A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people that just want to host a tracker, not the torrent listing site.
 
@@ -38,3 +39,7 @@ Configuration should take place in `_settings/phoenix.custom.php`, NOT `_setting
 15 * * * * php ~/phoenix/_cron/hourly/clean-and-optimize.php
 30 * * * * ~/phoenix/_cron/hourly/backup-database.sh
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Feustasy%2Fphoenix.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Feustasy%2Fphoenix?ref=badge_large)
