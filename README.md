@@ -1,4 +1,4 @@
-# Phoenix v.3.1.2
+# Phoenix v.3.1.4
 
 [![Travis CI](https://travis-ci.org/eustasy/phoenix.svg?branch=master)](https://travis-ci.org/eustasy/phoenix)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/10f5af9881b4412093e91d68086fd468)](https://www.codacy.com/app/eustasy/phoenix)
