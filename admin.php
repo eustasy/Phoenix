@@ -86,7 +86,7 @@ if (
 <head>
 	<title>Phoenix Diagnostics and Utilities</title>
 	<meta charset="UTF-8">
-	<script src="https://cdn.jsdelivr.net/g/jquery"></script>
+	<script src="https://cdn.jsdelivr.net/gh/jquery/jquery@3/dist/jquery.min.js"></script>
 	<script>
 		$(document).ready(function(){
 			$('.mysql').submit(function() {
@@ -94,7 +94,7 @@ if (
 			});
 		});
 	</script>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/g/normalize,colors.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/combine/gh/eustasy/Colors.css@1/colors.min.css,gh/necolas/normalize.css@8/normalize.min.css">
 	<style>
 		body {
 			margin: 0 auto;
