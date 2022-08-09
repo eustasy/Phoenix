@@ -27,7 +27,7 @@ http://sourceforge.net/projects/phpmybittorrent/
 Developed 2015-09-10  
 https://github.com/epsylon3/torrentflux
 
-### RivetTracker [ABANDONED] (previously Linux Mint @ https://torrents.linuxmint.com/)
+### RivetTracker [UNSECURE / ABANDONED] (previously Linux Mint @ https://torrents.linuxmint.com/)
 2010-09-22 (1.03 with "Known Security Issues")  
 http://www.rivetcode.com/ (mysql deprecated)  
 http://sourceforge.net/projects/rivettracker/?source=directory  
