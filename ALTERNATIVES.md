@@ -4,6 +4,10 @@ A modern fork of PeerTracker, a lightweight PHP/SQL BitTorrent Tracker.
 
 ---
 
+### XBT
+Updated June 2022
+https://github.com/OlafvdSpek/xbt
+
 ### XBTIT [UNSECURE] (linuxtracker.org)
 2020-10-03 (v3.1)  
 https://github.com/btiteam/xbtit-3.1
