@@ -4,10 +4,10 @@ A modern fork of PeerTracker, a lightweight PHP/SQL BitTorrent Tracker.
 
 ---
 
-### XBTIT (linuxtracker.org)
-2017-01-11 (v2.5.4)  
+### XBTIT [UNSECURE] (linuxtracker.org)
+2020-10-03 (v3.1)  
 http://www.btiteam.org/  
-https://github.com/btiteam/xbtit
+https://github.com/btiteam/xbtit-3.1
 
 ### TorrentFlux B4RT [ABANDONED]
 2014-06-09  
