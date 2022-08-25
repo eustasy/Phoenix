@@ -1,7 +1,6 @@
 # Phoenix v.3.1.5
 
 [![Travis CI](https://travis-ci.org/eustasy/phoenix.svg?branch=master)](https://travis-ci.org/eustasy/phoenix)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/10f5af9881b4412093e91d68086fd468)](https://www.codacy.com/app/eustasy/phoenix)
 [![Code Climate](https://codeclimate.com/github/eustasy/phoenix/badges/gpa.svg)](https://codeclimate.com/github/eustasy/phoenix)
 [![Bountysource](https://www.bountysource.com/badge/tracker?tracker_id=10163092)](https://www.bountysource.com/teams/eustasy/issues?tracker_ids=10163092)
 
