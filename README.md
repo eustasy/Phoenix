@@ -1,6 +1,6 @@
 # Phoenix v.3.1.5
 
-[![Travis CI](https://travis-ci.org/eustasy/phoenix.svg?branch=master)](https://travis-ci.org/eustasy/phoenix)
+[![Normal](https://github.com/eustasy/phoenix/actions/workflows/normal.yml/badge.svg)](https://github.com/eustasy/phoenix/actions/workflows/normal.yml)
 [![Code Climate](https://codeclimate.com/github/eustasy/phoenix/badges/gpa.svg)](https://codeclimate.com/github/eustasy/phoenix)
 [![Bountysource](https://www.bountysource.com/badge/tracker?tracker_id=10163092)](https://www.bountysource.com/teams/eustasy/issues?tracker_ids=10163092)
 
