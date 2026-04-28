@@ -58,11 +58,11 @@ if ( !$query ) {
 			// IF IPv4
 			if ( $return['ipv4'] != null ) {
 				$response .= 'd2:ip'.strlen($return['ipv4']).':'.$return['ipv4'].
-					'4:porti'.$return['portv4'];
+					'4:porti'.$return['portv4'].'e';
 			// IF IPv6
 			} else if ( $return['ipv6'] != null ) {
 				$response .= 'd2:ip'.strlen($return['ipv6']).':'.$return['ipv6'].
-					'4:porti'.$return['portv6'];
+					'4:porti'.$return['portv6'].'e';
 			}
 
 			// IF Peer ID
@@ -70,7 +70,7 @@ if ( !$query ) {
 				$response .= '7:peer id20:'.hex2bin($return['peer_id']);
 			} // END IF Peer ID
 
-			$response .= 'ee';
+			$response .= 'e';
 
 		}
 	}

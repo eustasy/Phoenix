@@ -14,7 +14,7 @@ foreach ( $params as $param ) {
 	$param = explode('=', $param, 2);
 	if ( $param[0] == 'info_hash' ) {
 		$peer['info_hashes'][] = maybe_binary_to_hex($param[1]);
-	} else if ( $param[0] == 'peer_id' && !$peer['peer_id'] ) {
+	} else if ( $param[0] == 'peer_id' ) {
 		$peer['peer_id'] = maybe_binary_to_hex($param[1]);
 	}
 }
