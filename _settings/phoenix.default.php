@@ -4,7 +4,6 @@
 // Copy to `phoenix.custom.php` and modify there.
 
 ////	General Database Options
-// Can be better overridden with a settings.custom.php file.
 $settings['db_host']             = '%db_host%';      /* ip or hostname to mysql server */
 $settings['db_user']             = '%db_user%';      /* username used to connect to mysql */
 $settings['db_pass']             = '%db_pass%';      /* password used to connect to mysql */
