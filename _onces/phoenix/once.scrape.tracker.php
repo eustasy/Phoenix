@@ -9,14 +9,14 @@ $peers    = mysqli_query($connection,
 		SUM(`p`.`state`=\'1\') AS `seeders`,
 		SUM(`p`.`state`=\'0\') AS `leechers`
 	FROM `'.$settings['db_prefix'].'peers` AS `p`
-	GROUP BY `info_hash`;'
+	GROUP BY `p`.`info_hash`;'
 );
 $torrents = mysqli_query($connection,
 	'SELECT
 		`p`.`info_hash` AS `info_hash`,
 		`p`.`downloads` AS `downloads`
 	FROM `'.$settings['db_prefix'].'torrents` AS `p`
-	GROUP BY `info_hash`;'
+	GROUP BY `p`.`info_hash`;'
 );
 
 if (
