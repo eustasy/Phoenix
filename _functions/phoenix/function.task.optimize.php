@@ -13,6 +13,10 @@ function task_optimize($connection, $settings, $time, $table = false, $and_defau
 		$tables[] = 'torrents';
 	}
 
+	if ( empty($tables) ) {
+		return true;
+	}
+
 	$sql = '';
 	foreach ( $tables as $table ) {
 		$sql .= 'CHECK TABLE `'.$settings['db_prefix'].$table.'`;'.
@@ -26,7 +30,10 @@ function task_optimize($connection, $settings, $time, $table = false, $and_defau
 	if ( $result ) {
 		while ( mysqli_more_results($connection) ) {
 			mysqli_next_result($connection);
-			mysqli_store_result($connection);
+			$res = mysqli_store_result($connection);
+			if ( $res ) {
+				mysqli_free_result($res);
+			}
 		}
 	}
 
