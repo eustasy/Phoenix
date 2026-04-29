@@ -1,6 +1,7 @@
 <?php
 
 require_once $settings['functions'].'function.mysqli.fetch.once.php';
+require_once $settings['functions'].'function.peer.changed.php';
 
 $peer['old'] = mysqli_fetch_once(
 	$connection,
@@ -41,20 +42,8 @@ if ( isset($_GET['event']) ) {
 
 } // END IF Event
 
-$peer_changed =
-	// No Existing Peer
-	!$peer['old'] ||
-	// IP has changed.
-	$peer['ipv4']   != $peer['old']['ipv4'] ||
-	$peer['ipv6']   != $peer['old']['ipv6'] ||
-	// Port has changed.
-	$peer['portv4'] != $peer['old']['portv4'] ||
-	$peer['portv6'] != $peer['old']['portv6'] ||
-	// Seeding status has changed.
-	$peer['state']  != $peer['old']['state'];
-
 // IF Any Change
-if ( $peer_changed ) {
+if ( peer_changed($peer, $peer['old']) ) {
 	require_once $settings['functions'].'function.peer.new.php';
 	peer_new($connection, $settings, $time, $peer);
 	// HOOK PEER NEW/CHANGE
