@@ -29,11 +29,11 @@ class PeerNewTest extends PhoenixTestCase {
 			'left'       => 0,
 			'uploaded'   => 0,
 			'downloaded' => 0,
-			'ipv4'       => false,
-			'ipv6'       => false,
-			'port'       => false,
-			'portv4'     => false,
-			'portv6'     => false,
+			'ipv4'       => '',
+			'ipv6'       => '',
+			'port'       => '',
+			'portv4'     => '0',
+			'portv6'     => '0',
 		);
 	}
 
