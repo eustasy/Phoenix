@@ -89,7 +89,7 @@ if ( !unlink($errfile) ) {
 
 // Rotate: delete backups older than backup_rotate days.
 if ( intval($settings['backup_rotate']) > 0 ) {
-	$cutoff = time() - ( intval($settings['backup_rotate']) * 86400 );
+	$cutoff = $time - ( intval($settings['backup_rotate']) * 86400 );
 	$backups = glob($backup_dir . $settings['db_name'] . '.*.sql');
 	if ( $backups ) {
 		foreach ( $backups as $old ) {
