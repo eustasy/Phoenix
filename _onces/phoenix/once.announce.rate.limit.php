@@ -2,6 +2,9 @@
 
 require_once $settings['functions'].'function.mysqli.fetch.once.php';
 
+// Reject a different peer_id announcing from the same IP for the same torrent within min_interval/5.
+// The tighter window (e.g. 120 s when min_interval=600) catches rapid fake-peer injection
+// without blocking legitimate clients that reconnect within the normal min_interval.
 $ip_parts = array();
 if ( $peer['ipv4'] ) $ip_parts[] = '`ipv4`=\''.$peer['ipv4'].'\'';
 if ( $peer['ipv6'] ) $ip_parts[] = '`ipv6`=\''.$peer['ipv6'].'\'';

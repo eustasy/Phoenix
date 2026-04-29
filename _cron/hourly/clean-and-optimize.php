@@ -1,5 +1,8 @@
 <?php
 
+// Scheduled maintenance entry point.
+// Only runs when clean_with_cron is enabled; that setting disables the per-request fallback
+// in announce.php so the announce path doesn't pay the clean/optimize overhead on every request.
 require_once __DIR__.'/../../_phoenix.php';
 
 if ( $settings['clean_with_cron'] ) {

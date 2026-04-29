@@ -1,4 +1,5 @@
 <?php
+// Derives the local announce URL from the current request context to pre-fill the tracker field.
 $announce_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http')
 	. '://' . htmlspecialchars($_SERVER['HTTP_HOST'], ENT_QUOTES)
 	. rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\')

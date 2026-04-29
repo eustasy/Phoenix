@@ -1,5 +1,7 @@
 <?php
 
+////	peer_access
+// Updates the timestamp and transfer counters for a re-announcing peer whose address and state are unchanged.
 function peer_access($connection, $settings, $time, $peer) {
 	$peer_access = mysqli_query(
 		$connection,

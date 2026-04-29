@@ -1,5 +1,7 @@
 <?php
 
+////	mysqli_fetch_once
+// Executes $sql and returns the first row as an associative array, or false if no rows match.
 function mysqli_fetch_once($connection, $sql) {
 	$result = mysqli_query($connection, $sql);
 	if (

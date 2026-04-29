@@ -1,5 +1,7 @@
 <?php
 
+////	peer_delete
+// Removes a single peer row identified by info_hash and peer_id; exits via tracker_error on failure.
 function peer_delete($connection, $settings, $peer) {
 	$peer_delete = mysqli_query(
 		$connection,

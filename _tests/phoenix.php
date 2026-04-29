@@ -1,5 +1,6 @@
 <?php
 
+// Test runner: dynamically includes every test in _tests/phoenix/ and exits non-zero on failure.
 require_once __DIR__.'/../_phoenix.php';
 $settings['db_prefix'] = $settings['db_prefix'].'TESTING_';
 $failure = false;

@@ -1,5 +1,7 @@
 <?php
 
+////	peer_completed
+// Inserts or increments the download counter when a peer sends event=completed.
 function peer_completed($connection, $settings, $peer) {
 	mysqli_query(
 		$connection,

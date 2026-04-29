@@ -1,5 +1,6 @@
 <?php
 
+// Only includes torrents with listed=1; unlisted torrents are invisible to the public index.
 $sql = 'SELECT
 		`t`.`info_hash` AS `info_hash`,
 		`t`.`name` AS `name`,

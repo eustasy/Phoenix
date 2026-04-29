@@ -1,5 +1,8 @@
 <?php
 
+////	task_log
+// Records or replaces the last execution value for a named maintenance task.
+// REPLACE INTO updates the existing row if the task name (primary key) already exists.
 function task_log($connection, $settings, $task, $value) {
 	$task = mysqli_query(
 		$connection,
