@@ -39,7 +39,6 @@ exec($cmd, $output, $exit_code);
 if ( $exit_code !== 0 ) {
 	$error = is_readable($errfile) ? trim(file_get_contents($errfile)) : '';
 	echo 'Backup failed.' . ( $error ? ' ' . $error : '' ) . PHP_EOL;
-	@unlink($errfile);
 	exit(1);
 }
 @unlink($errfile);
