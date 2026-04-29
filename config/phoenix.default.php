@@ -43,5 +43,5 @@ $settings['admin_password']      = '';              /* bcrypt hash of the admin 
                                                     /* WARNING: set this or delete public/admin.php when you're up and running */
 
 ////	Backup Options
-$settings['backup_dir']          = '';              /* absolute path to backup directory; empty = _backups/ in the project root */
+$settings['backup_dir']          = '';              /* absolute path to backup directory; empty = backups/ in the project root */
 $settings['backup_rotate']       = 30;              /* delete backups older than this many days */

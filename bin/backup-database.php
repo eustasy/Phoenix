@@ -5,7 +5,7 @@ require_once __DIR__.'/../../_phoenix.php';
 
 $backup_dir = !empty($settings['backup_dir'])
 	? rtrim($settings['backup_dir'], '/') . '/'
-	: $settings['root'] . '_backups/';
+	: $settings['root'] . 'backups/';
 
 if ( !is_dir($backup_dir) ) {
 	echo 'BACKUP_DIR_NOT_FOUND' . PHP_EOL;
