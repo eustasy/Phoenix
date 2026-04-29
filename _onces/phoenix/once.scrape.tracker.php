@@ -13,10 +13,9 @@ $peers    = mysqli_query($connection,
 );
 $torrents = mysqli_query($connection,
 	'SELECT
-		`p`.`info_hash` AS `info_hash`,
-		`p`.`downloads` AS `downloads`
-	FROM `'.$settings['db_prefix'].'torrents` AS `p`
-	GROUP BY `p`.`info_hash`;'
+		`t`.`info_hash` AS `info_hash`,
+		`t`.`downloads` AS `downloads`
+	FROM `'.$settings['db_prefix'].'torrents` AS `t`;'
 );
 
 if (
