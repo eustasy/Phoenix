@@ -9,12 +9,12 @@ function parse_ipv4(string $address): array|false {
 	$port      = false;
 	if ( strpos($candidate, ':') !== false ) {
 		$parts     = explode(':', $candidate, 2);
-		$candidate = $parts[0];
-		// ctype_digit catches the bug in the original: explode() returns strings,
-		// so the previous is_int() check would never match.
-		if ( ctype_digit($parts[1]) ) {
-			$port = intval($parts[1]);
+		// A colon followed by non-numeric characters is malformed.
+		if ( !ctype_digit($parts[1]) ) {
+			return false;
 		}
+		$candidate = $parts[0];
+		$port      = intval($parts[1]);
 	}
 	if ( !filter_var($candidate, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ) {
 		return false;
