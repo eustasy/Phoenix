@@ -50,14 +50,23 @@ $cmd = 'mysqldump'
 	. ' 2>' . escapeshellarg($errfile);
 
 exec($cmd, $output, $exit_code);
-@unlink($cnf_file); // always removed — never leave credentials on disk
+
+if ( !unlink($cnf_file) ) {
+	echo 'Warning: could not remove credentials file ' . $cnf_file . PHP_EOL;
+}
+
+if ( !empty($output) ) {
+	echo 'mysqldump stdout: ' . implode(PHP_EOL, $output) . PHP_EOL;
+}
 
 if ( $exit_code !== 0 ) {
 	$error = is_readable($errfile) ? trim(file_get_contents($errfile)) : '';
 	echo 'Backup failed.' . ( $error ? ' ' . $error : '' ) . PHP_EOL;
 	exit(1);
 }
-@unlink($errfile);
+if ( !unlink($errfile) ) {
+	echo 'Warning: could not remove error file ' . $errfile . PHP_EOL;
+}
 
 // Rotate: delete backups older than backup_rotate days.
 if ( intval($settings['backup_rotate']) > 0 ) {
@@ -65,8 +74,8 @@ if ( intval($settings['backup_rotate']) > 0 ) {
 	$backups = glob($backup_dir . $settings['db_name'] . '.*.sql');
 	if ( $backups ) {
 		foreach ( $backups as $old ) {
-			if ( filemtime($old) < $cutoff ) {
-				unlink($old);
+			if ( filemtime($old) < $cutoff && !unlink($old) ) {
+				echo 'Warning: could not remove old backup ' . $old . PHP_EOL;
 			}
 		}
 	}
