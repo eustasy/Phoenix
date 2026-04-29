@@ -29,11 +29,12 @@ if ( !$config_exists ) {
 		isset($_POST['process']) &&
 		$_POST['process'] === 'install'
 	) {
-		$db_host      = !empty($_POST['db_host'])   ? strip_tags($_POST['db_host'])   : 'localhost';
-		$db_user      = !empty($_POST['db_user'])   ? strip_tags($_POST['db_user'])   : '';
-		$db_pass      =  isset($_POST['db_pass'])   ? $_POST['db_pass']               : '';
-		$db_name      = !empty($_POST['db_name'])   ? strip_tags($_POST['db_name'])   : 'phoenix';
-		$db_prefix    = !empty($_POST['db_prefix']) ? strip_tags($_POST['db_prefix']) : '';
+		$db_host      = !empty($_POST['db_host'])   ? strip_tags($_POST['db_host'])                              : 'localhost';
+		$db_user      = !empty($_POST['db_user'])   ? strip_tags($_POST['db_user'])                              : '';
+		$db_pass      =  isset($_POST['db_pass'])   ? $_POST['db_pass']                                         : '';
+		// db_name and db_prefix are used as SQL identifiers (backtick-quoted); restrict to safe chars.
+		$db_name      = !empty($_POST['db_name'])   ? preg_replace('/[^a-zA-Z0-9_]/', '', $_POST['db_name'])   : 'phoenix';
+		$db_prefix    = !empty($_POST['db_prefix']) ? preg_replace('/[^a-zA-Z0-9_]/', '', $_POST['db_prefix']) : '';
 		$db_persist      = !empty($_POST['db_persist']);
 		$open_tracker    = !empty($_POST['open_tracker']);
 		$public_index    = !empty($_POST['public_index']);
