@@ -25,7 +25,8 @@ $settings['max_peers']           = 100;              /* max # of peers to announ
 $settings['external_ip']         = false;            /* allow client to specify ip address */
 $settings['default_compact']     = true;             /* force compact announces only */
 $settings['full_scrape']         = true;             /* allow scrapes without info_hash */
-$settings['random_limit']        = 500;              /* if peers > #, use alternate SQL RAND() */
+$settings['random_peers']        = true;             /* randomise peer selection to spread load */
+$settings['random_limit']        = 500;              /* minimum swarm size before RAND() is used */
 $settings['clean_with_requests'] = 1;                /* tweaks % of time tracker attempts idle peer removal */
                                                      /* if you have a busy tracker, you may adjust this */
                                                      /* example: 1 = 1%, 10 = 10%, 50 = 50%, 100 = every time */

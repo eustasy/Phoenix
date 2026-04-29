@@ -40,9 +40,14 @@ if ( $peer['left'] == 0 ) {
 	$order  = ' ORDER BY `updated` DESC';
 } else if ( $peer['left'] > 0 ) {
 	// In progress (session downloaded >= remaining, so likely >=50% done):
-	// most complete first but randomised within quality tiers to spread load
+	// most complete first; randomise within quality tiers when the swarm is large
+	// enough that deterministic ordering would concentrate connections on the same peers.
 	// note: downloaded is session-only so the >=50% threshold is an approximation
-	$order = ' ORDER BY `left` ASC, RAND()';
+	if ( $settings['random_peers'] && ($complete + $incomplete) > intval($settings['random_limit']) ) {
+		$order = ' ORDER BY `left` ASC, RAND()';
+	} else {
+		$order = ' ORDER BY `left` ASC, `updated` DESC';
+	}
 } else {
 	// State unknown (left not reported): return most recently active peers
 	$order = ' ORDER BY `updated` DESC';
