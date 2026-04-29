@@ -3,7 +3,7 @@
 $settings['phoenix_version'] = 'Phoenix Procedural v.3.1 2016-04-14 15:42:00Z eustasy';
 
 // If the root isn't a directory up, modify that here.
-$settings['root'] = __DIR__.'/';
+$settings['root'] = __DIR__.'/../';
 // Don't modify these, they'll figure it out.
 $settings['functions'] = $settings['root'].'src/functions/';
 $settings['hooks']     = $settings['root'].'src/hooks/';

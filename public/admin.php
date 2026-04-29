@@ -5,10 +5,10 @@
 
 // Bootstrap paths before attempting a DB connection.
 $settings['root']      = __DIR__.'/';
-$settings['functions'] = $settings['root'].'src/functions/';
-$settings['hooks']     = $settings['root'].'src/hooks/';
-$settings['onces']     = $settings['root'].'src/onces/';
-$settings['settings']  = $settings['root'].'config/';
+$settings['functions'] = $settings['root'].'/src/functions/';
+$settings['hooks']     = $settings['root'].'/src/hooks/';
+$settings['onces']     = $settings['root'].'/src/onces/';
+$settings['settings']  = $settings['root'].'/config/';
 
 require_once $settings['functions'].'function.tracker.error.php';
 

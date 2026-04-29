@@ -1,7 +1,7 @@
 <?php
 
 // Public torrent index; exits with a tracker error if public_index is disabled in settings.
-require_once __DIR__.'/src/phoenix.php';
+require_once __DIR__.'/phoenix.php';
 
 if ( !$settings['public_index'] ) {
 	tracker_error('Index is not public.');
