@@ -22,8 +22,8 @@ class PeerAccessTest extends PhoenixTestCase {
 	public function testUpdatesLeftValue(): void {
 		mysqli_query(
 			self::$connection,
-			'INSERT INTO `'.self::$settings['db_prefix'].'peers` ( `info_hash`, `peer_id`, `left` ) '.
-			'VALUES (\'__TEST_1__\', \'__TEST_1__\', \'3\');'
+			'INSERT INTO `'.self::$settings['db_prefix'].'peers` ( `info_hash`, `peer_id`, `compactv4`, `compactv6`, `portv4`, `portv6`, `left`, `updated` ) '.
+			'VALUES (\'__TEST_1__\', \'__TEST_1__\', \'\', \'\', \'0\', \'0\', \'3\', \''.$time.'\');'
 		);
 
 		$peer = array(
