@@ -34,9 +34,12 @@ if ( !$config_exists ) {
 		$db_pass      =  isset($_POST['db_pass'])   ? $_POST['db_pass']               : '';
 		$db_name      = !empty($_POST['db_name'])   ? strip_tags($_POST['db_name'])   : 'phoenix';
 		$db_prefix    = !empty($_POST['db_prefix']) ? strip_tags($_POST['db_prefix']) : '';
-		$db_persist   = !empty($_POST['db_persist']);
-		$open_tracker = !empty($_POST['open_tracker']);
-		$public_index = !empty($_POST['public_index']);
+		$db_persist      = !empty($_POST['db_persist']);
+		$open_tracker    = !empty($_POST['open_tracker']);
+		$public_index    = !empty($_POST['public_index']);
+		$admin_password  = isset($_POST['admin_password']) && $_POST['admin_password'] !== ''
+			? password_hash($_POST['admin_password'], PASSWORD_DEFAULT)
+			: '';
 
 		// Test the connection before writing anything.
 		$test_host = $db_persist ? 'p:'.$db_host : $db_host;
@@ -61,8 +64,9 @@ if ( !$config_exists ) {
 				$config .= '$settings[\'db_prefix\']    = '.$s($db_prefix).';'.PHP_EOL;
 				$config .= '$settings[\'db_persist\']   = '.$b($db_persist).';'.PHP_EOL;
 				$config .= '$settings[\'db_reset\']     = false;'.PHP_EOL;
-				$config .= '$settings[\'open_tracker\'] = '.$b($open_tracker).';'.PHP_EOL;
-				$config .= '$settings[\'public_index\'] = '.$b($public_index).';'.PHP_EOL;
+				$config .= '$settings[\'open_tracker\']    = '.$b($open_tracker).';'.PHP_EOL;
+				$config .= '$settings[\'public_index\']    = '.$b($public_index).';'.PHP_EOL;
+				$config .= '$settings[\'admin_password\']  = '.$s($admin_password).';'.PHP_EOL;
 				if ( file_put_contents($config_path, $config) !== false ) {
 					header('Location: admin.php?installed=1');
 					exit;
@@ -147,6 +151,10 @@ if ( !$config_exists ) {
 				<label><input type="checkbox" name="public_index" value="1"<?php echo $f['public_index'] ? ' checked' : ''; ?>>
 				Public Index &mdash; list torrents on the index page</label>
 			</div>
+			<h2>Admin</h2>
+			<div class="field"><label>Admin Password (leave blank for no authentication)</label>
+				<input type="password" name="admin_password">
+			</div>
 			<br>
 			<input class="button background-belize-hole color-clouds" type="submit" value="Install">
 		</form>
@@ -159,6 +167,7 @@ if ( !$config_exists ) {
 
 ////	Normal Admin Flow
 require_once __DIR__.'/_phoenix.php';
+require_once $settings['onces'].'once.auth.php';
 require_once $settings['onces'].'once.sanitize.admin.php';
 require_once $settings['functions'].'function.mysqli.drop.table.php';
 require_once $settings['functions'].'function.mysqli.create.database.php';
@@ -316,6 +325,10 @@ if (
 	echo '
 	<h1>Compatibility Check</h1>
 	<p class="text-center color-9">'.$settings['phoenix_version'].'</p>';
+
+	if ( !empty($settings['admin_password']) ) {
+		echo '<p class="text-right"><a href="?logout=1">Log out</a></p>';
+	}
 
 	if ( isset($_GET['installed']) ) {
 		echo '
