@@ -40,7 +40,7 @@ $settings['public_index']        = false;            /* serve a public index of 
 
 ////	Admin Options
 $settings['admin_password']      = '';              /* bcrypt hash of the admin password; empty = no auth */
-                                                     /* WARNING: set this before exposing admin.php publicly */
+                                                    /* WARNING: set this or delete public/admin.php when you're up and running */
 
 ////	Backup Options
 $settings['backup_dir']          = '';              /* absolute path to backup directory; empty = _backups/ in the project root */

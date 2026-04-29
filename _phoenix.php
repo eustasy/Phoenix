@@ -5,10 +5,10 @@ $settings['phoenix_version'] = 'Phoenix Procedural v.3.1 2016-04-14 15:42:00Z eu
 // If the root isn't a directory up, modify that here.
 $settings['root'] = __DIR__.'/';
 // Don't modify these, they'll figure it out.
-$settings['functions'] = $settings['root'].'_functions/phoenix/';
-$settings['hooks']     = $settings['root'].'_hooks/phoenix/';
-$settings['onces']     = $settings['root'].'_onces/phoenix/';
-$settings['settings']  = $settings['root'].'_settings/';
+$settings['functions'] = $settings['root'].'src/functions/';
+$settings['hooks']     = $settings['root'].'src/hooks/';
+$settings['onces']     = $settings['root'].'src/onces/';
+$settings['settings']  = $settings['root'].'config/';
 
 ////	Error Level
 // error_reporting(E_ALL);

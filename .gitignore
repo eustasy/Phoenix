@@ -1,6 +1,6 @@
 *~
 *custom*
-_backups*
+backups/*
 normal-checks*
 .claude/settings.local.json
 /vendor/

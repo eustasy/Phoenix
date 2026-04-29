@@ -12,7 +12,7 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"Phoenix\\Tests\\": "_tests/phoenix/"
+			"Phoenix\\Tests\\": "tests/phoenix/"
 		}
 	},
 	"scripts": {

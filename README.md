@@ -20,19 +20,19 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 * The latest version of MariaDB ( >= 10 )
 
 ### Install Guide
-1. Copy `_settings/phoenix.default.php` to `_settings/phoenix.custom.php`
-2. Edit the variables in `_settings/phoenix.custom.php`
+1. Copy `config/phoenix.default.php` to `config/phoenix.custom.php`
+2. Edit the variables in `config/phoenix.custom.php`
 2. Upload all the `.php` and `.sh` files to your server.
 4. Load `admin.php` in your browser and run the `Setup` option.
 
 ## Configuration
-Configuration should take place in `_settings/phoenix.custom.php`, NOT `_settings/phoenix.default.php`. Phoenix _will_ attempt to use the default configuration if yours is missing.
+Configuration should take place in `config/phoenix.custom.php`, NOT `config/phoenix.default.php`. Phoenix _will_ attempt to use the default configuration if yours is missing.
 
 ### Cron (Automating Maintenance)
-1. Configure `_cron/hourly/backup-database.sh` by changing the path in the second line, and the username, password, database, and file in the last three.
-2. Edit `_settings/phoenix.custom.php` and set `$settings['clean_with_cron']` to `true` instead of `false`. You can also set `$settings['clean_with_requests']` to `0` to save processing time.
+1. Configure `bin/backup-database.sh` by changing the path in the second line, and the username, password, database, and file in the last three.
+2. Edit `config/phoenix.custom.php` and set `$settings['clean_with_cron']` to `true` instead of `false`. You can also set `$settings['clean_with_requests']` to `0` to save processing time.
 3. Edit your crontab with `crontab -e`, and add a crontab like the following. You can edit the times, and should make sure the paths are correct by running the commands after the asterisks.
 ```
-15 * * * * php ~/phoenix/_cron/hourly/clean-and-optimize.php
-30 * * * * ~/phoenix/_cron/hourly/backup-database.sh
+15 * * * * php ~/phoenix/bin/clean-and-optimize.php
+30 * * * * ~/phoenix/bin/backup-database.sh
 ```

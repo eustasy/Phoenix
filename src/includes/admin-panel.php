@@ -178,7 +178,7 @@
 				<p class="box background-pomegranate color-clouds">You should set
 				<code>$settings[\'db_reset\']</code>
 				to false to disable resets,<br>
-				or delete <code>admin.php</code> when you\'re up and running.</p>
+				or delete <code>public/admin.php</code> when you\'re up and running.</p>
 				<p class="float-left text-left">Install, Upgrade, and Reset</p>
 				<input type="hidden" name="process" value="setup">
 				<input class="button background-belize-hole color-clouds float-right" type="submit" name="submit" value="Setup">

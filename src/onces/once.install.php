@@ -48,7 +48,7 @@ if (
 				header('Location: admin.php?installed=1');
 				exit;
 			} else {
-				$install_error = 'Connected and created tables, but could not write the configuration file. Check that <code>_settings/</code> is writable.';
+				$install_error = 'Connected and created tables, but could not write the configuration file. Check that <code>config/</code> is writable.';
 			}
 		}
 		mysqli_close($test_conn);

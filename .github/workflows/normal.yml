@@ -89,7 +89,7 @@ jobs:
 
     - name: Configure Phoenix for tests
       run: |
-        cat > _settings/phoenix.custom.php <<'EOF'
+        cat > config/phoenix.custom.php <<'EOF'
         <?php
         $settings['db_host']      = '127.0.0.1';
         $settings['db_user']      = 'phoenix';

@@ -5,10 +5,10 @@
 
 // Bootstrap paths before attempting a DB connection.
 $settings['root']      = __DIR__.'/';
-$settings['functions'] = $settings['root'].'_functions/phoenix/';
-$settings['hooks']     = $settings['root'].'_hooks/phoenix/';
-$settings['onces']     = $settings['root'].'_onces/phoenix/';
-$settings['settings']  = $settings['root'].'_settings/';
+$settings['functions'] = $settings['root'].'src/functions/';
+$settings['hooks']     = $settings['root'].'src/hooks/';
+$settings['onces']     = $settings['root'].'src/onces/';
+$settings['settings']  = $settings['root'].'config/';
 
 require_once $settings['functions'].'function.tracker.error.php';
 
@@ -24,8 +24,8 @@ if ( !$config_exists ) {
 	$settings_writable = is_writable($settings['settings']);
 	$install_error     = null;
 
-	require __DIR__.'/_include/install-do.php';
-	require __DIR__.'/_include/install-form.php';
+	require __DIR__.'/src/onces/once.install.php';
+	require __DIR__.'/src/includes/install-form.php';
 	// install-form.php calls exit.
 
 }
@@ -109,4 +109,4 @@ if (
 	}
 }
 
-require __DIR__.'/_include/admin-panel.php';
+require __DIR__.'/src/includes/admin-panel.php';

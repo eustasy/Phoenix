@@ -36,7 +36,7 @@ $f = array(
 	<h1>Phoenix Setup</h1>
 	<?php if ( !$settings_writable ): ?>
 		<p class="box background-pomegranate color-clouds">
-			<code>_settings/</code> is not writable. Make it writable to proceed with installation.
+			<code>config/</code> is not writable. Make it writable to proceed with installation.
 		</p>
 	<?php else: ?>
 		<?php if ( $install_error ): ?>
