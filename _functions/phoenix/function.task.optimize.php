@@ -3,6 +3,7 @@
 function task_optimize($connection, $settings, $time, $table = false, $and_default = true) {
 	require_once $settings['functions'].'function.task.log.php';
 
+	$tables = array();
 	if ( $table ) {
 		$tables[] = $table;
 	}
