@@ -14,7 +14,7 @@ function peer_new($connection, $settings, $time, $peer) {
 	$peer_new = mysqli_query(
 		$connection,
 		'REPLACE INTO `'.$settings['db_prefix'].'peers` '.
-		'(`info_hash`, `peer_id`, `compactv4`, `compactv6`, `ipv4`, `ipv6`, `portv4`,`portv6`, `left`, `state`, `updated`) '.
+		'(`info_hash`, `peer_id`, `compactv4`, `compactv6`, `ipv4`, `ipv6`, `portv4`,`portv6`, `uploaded`, `downloaded`, `left`, `state`, `updated`) '.
 		'VALUES ('.
 			// 40-byte info_hash in HEX
 			'\''.$peer['info_hash'].'\', '.
@@ -29,6 +29,9 @@ function peer_new($connection, $settings, $time, $peer) {
 			// integer port
 			'\''.$peer['portv4'].'\', '.
 			'\''.$peer['portv6'].'\', '.
+			// transfer counters
+			'\''.$peer['uploaded'].'\', '.
+			'\''.$peer['downloaded'].'\', '.
 			// integer left
 			'\''.$peer['left'].'\', '.
 			// integer state

@@ -7,6 +7,7 @@ $peers = 'SELECT
 	FROM `'.$settings['db_prefix'].'peers` AS `p`';
 $torrents = 'SELECT
 		`p`.`info_hash` AS `info_hash`,
+		`p`.`size` AS `size`,
 		`p`.`downloads` AS `downloads`
 	FROM `'.$settings['db_prefix'].'torrents` AS `p`';
 	$where = 'WHERE ';
@@ -20,6 +21,8 @@ foreach ( $peer['info_hashes'] as $count => $info_hash ) {
 	$scrape[$info_hash]['leechers']  = 0;
 	$scrape[$info_hash]['downloads'] = 0;
 	$scrape[$info_hash]['peers']     = 0;
+	$scrape[$info_hash]['size']      = 0;
+	$scrape[$info_hash]['traffic']   = 0;
 }
 $peers = $peers.$where.' GROUP BY `info_hash`;';
 $torrents = $torrents.$where.' GROUP BY `info_hash`;';

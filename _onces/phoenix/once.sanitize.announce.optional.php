@@ -49,6 +49,24 @@ if (
 	$peer['no_peer_id'] = 0;
 }
 
+////	uploaded
+// Optional
+// Total bytes uploaded since the client started this session.
+if ( isset($_GET['uploaded']) && intval($_GET['uploaded']) >= 0 ) {
+	$peer['uploaded'] = intval($_GET['uploaded']);
+} else {
+	$peer['uploaded'] = 0;
+}
+
+////	downloaded
+// Optional
+// Total bytes downloaded since the client started this session.
+if ( isset($_GET['downloaded']) && intval($_GET['downloaded']) >= 0 ) {
+	$peer['downloaded'] = intval($_GET['downloaded']);
+} else {
+	$peer['downloaded'] = 0;
+}
+
 ////	numwant
 // Optional
 // An integer representing the number of peers that the client wants.

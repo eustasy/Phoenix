@@ -13,9 +13,10 @@ $sql = 'SELECT '.
 	'FROM `'.$settings['db_prefix'].'peers`;';
 $stats = mysqli_fetch_once($connection, $sql);
 
-// Downloads
+// Downloads and Traffic
 $sql = 'SELECT '.
-	'SUM(`downloads`) AS `downloads` '.
+	'SUM(`downloads`) AS `downloads`, '.
+	'SUM(`downloads` * IFNULL(`size`, 0)) AS `traffic` '.
 	'FROM `'.$settings['db_prefix'].'torrents`;';
 $downloads = mysqli_fetch_once($connection, $sql);
 
@@ -26,11 +27,12 @@ if (
 	tracker_error('Unable to get stats.');
 
 } else {
-	$stats['seeders'] = intval($stats['seeders']);
-	$stats['leechers'] = intval($stats['leechers']);
-	$stats['torrents'] = intval($stats['torrents']);
+	$stats['seeders']   = intval($stats['seeders']);
+	$stats['leechers']  = intval($stats['leechers']);
+	$stats['torrents']  = intval($stats['torrents']);
 	$stats['downloads'] = intval($downloads['downloads']);
-	$stats['peers'] = $stats['seeders']+$stats['leechers'];
+	$stats['traffic']   = intval($downloads['traffic']);
+	$stats['peers']     = $stats['seeders'] + $stats['leechers'];
 
 	// XML
 	if ( isset($_GET['xml']) ) {
@@ -41,7 +43,8 @@ if (
 			 '<seeders>'.$stats['seeders'].'</seeders>'.
 			 '<leechers>'.$stats['leechers'].'</leechers>'.
 			 '<torrents>'.$stats['torrents'].'</torrents>'.
-			 '<downloads>'.$stats['downloads'].'</downloads></tracker>';
+			 '<downloads>'.$stats['downloads'].'</downloads>'.
+			 '<traffic>'.$stats['traffic'].'</traffic></tracker>';
 
 	// JSON
 	} else if ( isset($_GET['json']) ) {
@@ -49,12 +52,13 @@ if (
 			echo json_encode(
 				array(
 					'tracker' => array(
-						'version' => '$Id: '.$settings['phoenix_version'].' $,',
-						'peers' => $stats['peers'],
-						'seeders' => $stats['seeders'],
-						'leechers' => $stats['leechers'],
-						'torrents' => $stats['torrents'],
+						'version'   => '$Id: '.$settings['phoenix_version'].' $,',
+						'peers'     => $stats['peers'],
+						'seeders'   => $stats['seeders'],
+						'leechers'  => $stats['leechers'],
+						'torrents'  => $stats['torrents'],
 						'downloads' => $stats['downloads'],
+						'traffic'   => $stats['traffic'],
 					),
 				)
 			);
@@ -66,7 +70,8 @@ if (
 				 '<body><pre>'.number_format($stats['peers']).
 				 ' peers ('.number_format($stats['seeders']).' seeders + '.number_format($stats['leechers']).
 				 ' leechers) in '.number_format($stats['torrents']).' torrents and'.
-				 ' '.number_format($stats['downloads']).' downloads completed.</pre></body></html>';
+				 ' '.number_format($stats['downloads']).' downloads completed,'.
+				 ' '.number_format($stats['traffic']).' bytes served.</pre></body></html>';
 	}
 
 }

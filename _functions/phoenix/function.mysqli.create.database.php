@@ -11,7 +11,9 @@ function create_database($connection, $settings, $debug = false) {
 				'`ipv6` char(39) NOT NULL DEFAULT \'0\',' .
 				'`portv4` smallint(5) unsigned NOT NULL,' .
 				'`portv6` smallint(5) unsigned NOT NULL,' .
-				'`left` int(100) unsigned NOT NULL DEFAULT \'0\',' .
+				'`uploaded` bigint(20) unsigned NOT NULL DEFAULT \'0\',' .
+				'`downloaded` bigint(20) unsigned NOT NULL DEFAULT \'0\',' .
+				'`left` bigint(20) unsigned NOT NULL DEFAULT \'0\',' .
 				'`state` tinyint(1) unsigned NOT NULL DEFAULT \'0\',' .
 				'`updated` int(10) unsigned NOT NULL,' .
 				'PRIMARY KEY (`info_hash`,`peer_id`)' .
@@ -24,6 +26,7 @@ function create_database($connection, $settings, $debug = false) {
 	$queries[] = 'CREATE TABLE IF NOT EXISTS `'.$settings['db_name'].'`.`'.$settings['db_prefix'].'torrents` (' .
 				'`name` varchar(255) NULL,' .
 				'`info_hash` varchar(40) NOT NULL,' .
+				'`size` bigint(20) unsigned NULL,' .
 				'`downloads` int(10) unsigned NOT NULL DEFAULT \'0\',' .
 				'PRIMARY KEY (`info_hash`)' .
 			') ENGINE=MyISAM DEFAULT CHARSET=latin1;';
