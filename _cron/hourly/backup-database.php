@@ -95,7 +95,7 @@ if ( intval($settings['backup_rotate']) > 0 ) {
 		foreach ( $backups as $old ) {
 			$mtime = filemtime($old);
 			if ( $mtime !== false && $mtime < $cutoff && !unlink($old) ) {
-				echo 'Warning: could not remove old backup ' . $old . PHP_EOL;
+				echo 'Warning: could not remove old backup ' . basename($old) . PHP_EOL;
 			}
 		}
 	}
