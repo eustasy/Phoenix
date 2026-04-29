@@ -48,8 +48,7 @@ foreach ( $tables as $table ) {
 
 	$result = mysqli_query($connection, $sql);
 	$count = mysqli_num_rows($result);
-	if ( !$count ) {
-	} else {
+	if ( $count ) {
 		$actual += $count;
 	}
 }
@@ -79,7 +78,7 @@ if (
 		}
 	}
 
-	// Create the databases.
+	// Create the database tables.
 	if ( !create_database($connection, $settings) ) {
 		$success = false;
 	}
