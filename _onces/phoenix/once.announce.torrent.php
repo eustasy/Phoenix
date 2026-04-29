@@ -1,11 +1,29 @@
 <?php
 
-// begin response
-$response = 'd8:intervali'.$settings['announce_interval'].
+require_once $settings['functions'].'function.mysqli.fetch.once.php';
+
+$stale_threshold = $time - ($settings['announce_interval'] + $settings['min_interval']);
+
+// Count active seeders and leechers for swarm stats
+$counts = mysqli_fetch_once($connection,
+	'SELECT '.
+		'IFNULL(SUM(`state`=\'1\'), 0) AS `complete`, '.
+		'IFNULL(SUM(`state`=\'0\'), 0) AS `incomplete` '.
+	'FROM `'.$settings['db_prefix'].'peers` '.
+	'WHERE `info_hash`=\''.$peer['info_hash'].'\' '.
+	'AND `updated`>'.$stale_threshold.';'
+);
+$complete   = $counts ? intval($counts['complete'])   : 0;
+$incomplete = $counts ? intval($counts['incomplete']) : 0;
+
+// begin response — keys in lexicographic order per bencode spec
+$response = 'd8:completei'.$complete.
+	'e10:incompletei'.$incomplete.
+	'e8:intervali'.$settings['announce_interval'].
 	'e12:min intervali'.$settings['min_interval'].
 	'e5:peers';
 
-$where = '`info_hash`=\''.$peer['info_hash'].'\' AND `peer_id`!=\''.$peer['peer_id'].'\'';
+$where = '`info_hash`=\''.$peer['info_hash'].'\' AND `peer_id`!=\''.$peer['peer_id'].'\' AND `updated`>'.$stale_threshold;
 $order = '';
 
 if ( $peer['left'] == 0 ) {
