@@ -1,5 +1,8 @@
 <?php
 
+require_once $settings['functions'].'function.parse.ipv4.php';
+require_once $settings['functions'].'function.parse.ipv6.php';
+
 // 101.45.75.219:12345
 // 101.45.75.219 &port= 12345
 // ::FFFF:101.45.75.219 &port= 12345
@@ -7,9 +10,9 @@
 // [dead:beef::1234] &port= 12345
 // [dead:beef::1234]:12345
 
-$peer['ipv4'] = false;
-$peer['ipv6'] = false;
-$peer['port'] = false;
+$peer['ipv4']   = false;
+$peer['ipv6']   = false;
+$peer['port']   = false;
 $peer['portv4'] = false;
 $peer['portv6'] = false;
 
@@ -22,6 +25,7 @@ if ( isset($_GET['port']) ) {
 
 ////	Find Possibles
 // List all possible addresses.
+$addresses = array();
 if ( $settings['external_ip'] ) {
 	if ( isset($_GET['ip']) ) {
 		$addresses[] = $_GET['ip'];
@@ -57,49 +61,20 @@ if ( !count($addresses) ) {
 $addresses = array_reverse($addresses);
 
 ////	Find Definites
-// Find the highest possible rank for
-// IPv4 and IPv6, plus their associated ports.
+// Find the highest possible rank for IPv4 and IPv6, plus their associated ports.
 foreach ( $addresses as $address ) {
-	// Check IPv4
-	if ( !$peer['ipv4'] ) {
-		// Trim IPv6 Padding
-		$address_ipv4 = trim($address, '::ffff:');
-		// Try and find a port
-		if ( strpos($address_ipv4, ':') !== false ) {
-			$address_ipv4 = explode(':', $address_ipv4);
-			$address_portv4 = $address_ipv4[1];
-			$address_ipv4 = $address_ipv4[0];
-		}
-		// Validate
-		if ( filter_var($address_ipv4, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ) {
-			$peer['ipv4'] = $address_ipv4;
-			if ( !$peer['portv4'] && !empty($address_portv4) && is_int($address_portv4) ) {
-				$peer['portv4'] = $address_portv4;
-			}
+	if ( !$peer['ipv4'] && ($ipv4 = parse_ipv4($address)) !== false ) {
+		$peer['ipv4'] = $ipv4['ip'];
+		if ( !$peer['portv4'] && $ipv4['port'] !== false ) {
+			$peer['portv4'] = $ipv4['port'];
 		}
 	}
-	// Check IPv6
-	if ( !$peer['ipv6'] ) {
-		$address_ipv6 = $address;
-		// Try and find a port
-		if ( strpos($address_ipv6, ']:') !== false ) {
-			$address_ipv6 = explode(']:', $address);
-			$address_portv6 = $address_ipv6[1];
-			$address_ipv6 = $address_ipv6[0];
-		}
-		// Trim any brackets
-		if ( strpos($address_ipv6, '[') !== false ) {
-			$address_ipv6 = trim($address_ipv6, '[]');
-		}
-		// Validate
-		if ( filter_var($address_ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ) {
-			$peer['ipv6'] = $address_ipv6;
-			if ( !$peer['portv6'] && !empty($address_portv6) && is_int($address_portv6) ) {
-				$peer['portv6'] = $address_portv6;
-			}
+	if ( !$peer['ipv6'] && ($ipv6 = parse_ipv6($address)) !== false ) {
+		$peer['ipv6'] = $ipv6['ip'];
+		if ( !$peer['portv6'] && $ipv6['port'] !== false ) {
+			$peer['portv6'] = $ipv6['port'];
 		}
 	}
-
 }
 
 if ( $peer['port'] && !$peer['portv4'] ) {
