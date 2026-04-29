@@ -6,7 +6,6 @@
 $error_msg = 'test error';
 $expected  = 'd14:failure reason'.strlen($error_msg).':'.$error_msg.'e';
 
-$failure = $failure ?? false;
 ob_start();
 register_shutdown_function(function() use ($expected, &$failure) {
 	$output = ob_get_clean();
