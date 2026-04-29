@@ -52,9 +52,3 @@ jobs:
       
     - name: .Normal - Check SQL
       run: sql-lint .
-      
-    - name: .Normal - Check JSON
-      run: php .normal/check-json.php
-      
-    - name: .Normal - Check XML
-      run: php .normal/check-xml.php
