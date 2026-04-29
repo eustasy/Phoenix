@@ -1,6 +1,8 @@
 <?php
 
 require_once $settings['functions'].'function.mysqli.fetch.once.php';
+require_once $settings['functions'].'function.peer.select.strategy.php';
+require_once $settings['functions'].'function.peer.format.bencode.php';
 
 $stale_threshold = $time - ($settings['announce_interval'] + $settings['min_interval']);
 
@@ -23,96 +25,41 @@ $response = 'd8:completei'.$complete.
 	'e12:min intervali'.$settings['min_interval'].
 	'e5:peers';
 
-$where = '`info_hash`=\''.$peer['info_hash'].'\' AND `peer_id`!=\''.$peer['peer_id'].'\' AND `updated`>'.$stale_threshold;
-$order = '';
+$strategy = peer_select_strategy($peer, $complete, $incomplete, $settings);
+$where    = '`info_hash`=\''.$peer['info_hash'].'\' AND `peer_id`!=\''.$peer['peer_id'].'\' AND `updated`>'.$stale_threshold.$strategy['where'];
+$sql      = 'SELECT * FROM `'.$settings['db_prefix'].'peers` WHERE '.$where.$strategy['order'].' LIMIT '.$peer['numwant'].';';
 
-if ( $peer['left'] == 0 ) {
-	// Completed: only show leechers (exclude fellow seeders); nearest-to-done first
-	// converts near-complete leechers to seeders fastest, growing available bandwidth
-	$where .= ' AND `state`=\'0\'';
-	$order  = ' ORDER BY `left` ASC, `updated` DESC';
-} else if ( $peer['left'] > 0 && $peer['left'] > $peer['downloaded'] ) {
-	// Just started (session downloaded < remaining, so likely <50% done):
-	// filter to peers likely >50% complete or seeders, spread across most recent
-	// to avoid concentrating connections on the same top peers
-	// note: downloaded is session-only so this is an approximation
-	$where .= ' AND (`state`=\'1\' OR `downloaded` > `left`)';
-	$order  = ' ORDER BY `updated` DESC';
-} else if ( $peer['left'] > 0 ) {
-	// In progress (session downloaded >= remaining, so likely >=50% done):
-	// most complete first; randomise within quality tiers when the swarm is large
-	// enough that deterministic ordering would concentrate connections on the same peers.
-	// note: downloaded is session-only so the >=50% threshold is an approximation
-	if ( $settings['random_peers'] && ($complete + $incomplete) > intval($settings['random_limit']) ) {
-		$order = ' ORDER BY `left` ASC, RAND()';
-	} else {
-		$order = ' ORDER BY `left` ASC, `updated` DESC';
-	}
-} else {
-	// State unknown (left not reported): return most recently active peers
-	$order = ' ORDER BY `updated` DESC';
-}
-
-$sql = 'SELECT * FROM `'.$settings['db_prefix'].'peers` WHERE '.$where.$order.' LIMIT '.$peer['numwant'].';';
-
-// IF Compact
 if ( $peer['compact'] ) {
 	$peers = '';
 	$peersv6 = '';
-// END IF Compact
-
-// IF Not Compact
 } else {
 	$response .= 'l';
-} // END IF Not Compact
+}
 
 $query = mysqli_query($connection, $sql);
 if ( !$query ) {
 	tracker_error('Failed to select peers.');
-} else {
-	while ( $return = mysqli_fetch_assoc($query) ) {
-		// IF Compact
-		if ( $peer['compact'] ) {
-			if ( $return['compactv4'] != null ) {
-				$peers .= hex2bin($return['compactv4']);
-			}
-			if ( $return['compactv6'] != null ) {
-				$peersv6 .= hex2bin($return['compactv6']);
-			}
-		// END IF Compact
+}
 
-		} else {
-			// IF IPv4
-			if ( $return['ipv4'] != null ) {
-				$response .= 'd2:ip'.strlen($return['ipv4']).':'.$return['ipv4'].
-					'4:porti'.$return['portv4'].'e';
-			// IF IPv6
-			} else if ( $return['ipv6'] != null ) {
-				$response .= 'd2:ip'.strlen($return['ipv6']).':'.$return['ipv6'].
-					'4:porti'.$return['portv6'].'e';
-			}
-
-			// IF Peer ID
-			if ( !$peer['no_peer_id'] ) {
-				$response .= '7:peer id20:'.hex2bin($return['peer_id']);
-			} // END IF Peer ID
-
-			$response .= 'e';
-
+while ( $return = mysqli_fetch_assoc($query) ) {
+	if ( $peer['compact'] ) {
+		if ( $return['compactv4'] != null ) {
+			$peers .= hex2bin($return['compactv4']);
 		}
+		if ( $return['compactv6'] != null ) {
+			$peersv6 .= hex2bin($return['compactv6']);
+		}
+	} else {
+		$response .= peer_format_bencode($return, !$peer['no_peer_id']);
 	}
 }
 
-// IF Compact
 if ( $peer['compact'] ) {
 	// 6-byte compacted peer info
 	$response .= strlen($peers).':'.$peers;
 	$response .= '6:peers6'.strlen($peersv6).':'.$peersv6;
-// END IF Compact
-
-// IF Not Compact
 } else {
 	$response .= 'e';
-} // END IF Not Compact
+}
 
 echo $response.'e';
