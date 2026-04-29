@@ -22,7 +22,7 @@ $settings['default_peers']       = 50;               /* default # of peers to an
 $settings['max_peers']           = 100;              /* max # of peers to announce */
 
 ////	Advanced Tracker Options
-$settings['external_ip']         = true;             /* allow client to specify ip address */
+$settings['external_ip']         = false;            /* allow client to specify ip address */
 $settings['default_compact']     = true;             /* force compact announces only */
 $settings['full_scrape']         = true;             /* allow scrapes without info_hash */
 $settings['random_limit']        = 500;              /* if peers > #, use alternate SQL RAND() */

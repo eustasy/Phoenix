@@ -22,14 +22,16 @@ if ( isset($_GET['port']) ) {
 
 ////	Find Possibles
 // List all possible addresses.
-if ( isset($_GET['ip']) ) {
-	$addresses[] = $_GET['ip'];
-}
-if ( isset($_GET['ipv4']) ) {
-	$addresses[] = $_GET['ipv4'];
-}
-if ( isset($_GET['ipv6']) ) {
-	$addresses[] = $_GET['ipv6'];
+if ( $settings['external_ip'] ) {
+	if ( isset($_GET['ip']) ) {
+		$addresses[] = $_GET['ip'];
+	}
+	if ( isset($_GET['ipv4']) ) {
+		$addresses[] = $_GET['ipv4'];
+	}
+	if ( isset($_GET['ipv6']) ) {
+		$addresses[] = $_GET['ipv6'];
+	}
 }
 if ( isset($_SERVER['REMOTE_ADDR']) ) {
 	$addresses[] = $_SERVER['REMOTE_ADDR'];
