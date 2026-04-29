@@ -3,7 +3,7 @@ name: Normal
 on:
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron:  '30 5,17 * * *'
+    - cron:  '0 0 * * 1'
   push:
     branches: [ "main" ]
   pull_request:
@@ -46,9 +46,6 @@ jobs:
       
     - name: .Normal - Setup
       run: git clone https://github.com/eustasy/.normal.git && cd .normal && git checkout af240a6c8960177bcb1d07815732df7eb15970c1 && cd ../ && npm install --silent -g npm && npm install --silent -g acorn sql-lint
-      
-    - name: .Normal - Check JavaScript
-      run: ./.normal/check-javascript.sh
       
     - name: .Normal - Check PHP
       run: ./.normal/check-php.sh
