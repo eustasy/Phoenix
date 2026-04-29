@@ -3,3 +3,7 @@
 _backups*
 normal-checks*
 .claude/settings.local.json
+/vendor/
+/composer.lock
+/.phpunit.cache/
+/phpunit.xml

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+		bootstrap="_tests/bootstrap.php"
+		colors="true"
+		cacheDirectory=".phpunit.cache"
+		failOnRisky="true"
+		failOnWarning="true">
+	<testsuites>
+		<testsuite name="Phoenix">
+			<directory>_tests/phoenix</directory>
+			<exclude>_tests/phoenix/PhoenixTestCase.php</exclude>
+		</testsuite>
+	</testsuites>
+</phpunit>

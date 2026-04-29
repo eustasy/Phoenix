@@ -9,22 +9,26 @@ Phoenix is a lightweight BitTorrent tracker written in procedural PHP with a MyS
 ## Common commands
 
 ```bash
-# Run the full PHP test suite (requires a reachable DB and phoenix.custom.php)
-php _tests/phoenix.php
+# Install dev dependencies (PHPUnit). Required before running tests.
+composer install
 
-# Run a single test by including only the bootstrap + that file
-php -r '$settings = []; require "_tests/phoenix.php";' # runs everything; there is no per-file runner
-# To run one test in isolation, comment out the glob loop in _tests/phoenix.php
-# and require_once just the test you want.
+# Run the full PHPUnit suite (requires a reachable DB and phoenix.custom.php).
+vendor/bin/phpunit
 
-# CI lint checks (what GitHub Actions actually runs — does NOT run the PHP test suite)
+# Run a single test class.
+vendor/bin/phpunit --filter ParseIpv4Test
+
+# Run a single test method.
+vendor/bin/phpunit --filter 'ParseIpv4Test::testIpv4WithPort'
+
+# CI lint checks (run by GitHub Actions in addition to PHPUnit).
 ./.normal/check-php.sh
 sql-lint .
 php .normal/check-json.php
 php .normal/check-xml.php
 ```
 
-CI runs the workflow in `.github/workflows/normal.yml` against PHP 8.3–8.6. **It only runs lint checks; the PHP unit-test suite under `_tests/` is not invoked by CI** — those tests are for local/manual use and require a configured database.
+CI runs the workflow in `.github/workflows/normal.yml` against PHP 8.3–8.6. It runs both the lint checks and the PHPUnit suite (the latter against a MariaDB service container).
 
 ## Architecture
 
@@ -38,7 +42,7 @@ The codebase follows what the changelog calls a "puff-style" layout — small, s
 - **`_include/`** — HTML template fragments included by `admin.php` (`install-form.php`, `install-do.php`, `admin-panel.php`). Distinct from `_onces/` — these are presentation, not logic.
 - **`_settings/`** — `phoenix.default.php` is the template (do not modify). User configuration goes into `phoenix.custom.php` (gitignored, created by the installer).
 - **`_cron/hourly/`** — standalone scripts intended for cron (`backup-database.php`, `clean-and-optimize.php`). They `require_once '../../_phoenix.php'` to bootstrap.
-- **`_tests/phoenix/`** — one test file per function/component (see test runner notes below).
+- **`_tests/phoenix/`** — one PHPUnit test class per function/component (see test runner notes below).
 
 ### Entry points
 
@@ -74,16 +78,20 @@ The installer (`admin.php` → `_include/install-do.php`) generates `phoenix.cus
 
 ## Test runner
 
-`_tests/phoenix.php` is the runner. It:
+PHPUnit is wired up via `composer.json` and `phpunit.xml.dist`. The test bootstrap (`_tests/bootstrap.php`):
 
-1. Loads `_phoenix.php` and overrides `$settings['db_prefix']` with a `TESTING_` suffix so tests can't touch production tables.
-2. Initialises `$failure = false`.
-3. Globs `_tests/phoenix/*.php` (alphabetical order) and `require_once`s each.
-4. Exits 1 if `$failure` is set by any test.
+1. Loads Composer's autoloader and `_phoenix.php` (giving access to `$connection`, `$settings`, `$time`).
+2. Suffixes `$settings['db_prefix']` with `TESTING_` so tests can't touch production tables.
+3. Calls `create_database()` to ensure the prefixed tables exist.
+4. Exposes `$connection`, `$settings`, `$time` via `$GLOBALS` so each test class can pick them up in `setUpBeforeClass()`.
 
-All test files share a single PHP scope. `$failure`, `$connection`, `$settings`, `$time`, etc. are visible in every test. There is no per-test isolation — tests that mutate the DB must clean up after themselves (or document why they don't, like `test.task.clean.php`).
+All test classes live in the `Phoenix\Tests` namespace and extend `PhoenixTestCase` (in `_tests/phoenix/PhoenixTestCase.php`), which copies the globals into `protected static` properties (`self::$connection`, `self::$settings`, `self::$time`).
 
-To test functions that call `exit()` (notably `tracker_error()`), use `ob_start()` + `register_shutdown_function()` to capture output and override the exit code — see `test.tracker.error.php`.
+Test classes are autoloaded via PSR-4 (`Phoenix\Tests\` → `_tests/phoenix/`), so files must be named in PascalCase matching the class (e.g. `ParseIpv4Test.php` → `class ParseIpv4Test`). PHPUnit discovers classes ending in `Test` automatically.
+
+Tests that mutate the DB should clean up in `tearDown()` using the `__TEST_%` LIKE pattern; `task_clean()` already removes such rows so its test relies on that rather than fixture cleanup.
+
+To test functions that call `exit()` (notably `tracker_error()`), spawn a subprocess via `proc_open(PHP_BINARY, ...)` and assert against captured stdout + exit code — see `TrackerErrorTest.php`. Running it in-process would terminate the PHPUnit worker.
 
 ## Conventions
 
