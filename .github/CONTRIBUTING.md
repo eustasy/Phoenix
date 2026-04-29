@@ -18,7 +18,7 @@ See the [Installation Guide](https://github.com/eustasy/phoenix#install-guide) f
 <?php
 
 ////	Large Header
-// Description of what this secion
+// Description of what this section
 // does and does not do.
 // Especially any caveats.
 
@@ -60,7 +60,7 @@ if ( $result ) {
 
 .second-class,
 .third-class {
-    backgound-color: white;
+    background-color: white;
 }
 ```
 
