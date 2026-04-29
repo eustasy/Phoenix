@@ -41,7 +41,7 @@ The codebase follows what the changelog calls a "puff-style" layout — small, s
 - **`src/hooks/`** — empty stubs (e.g. `phoenix.peer.new.php`) that operators can fill in. The tracker `include`s them at well-defined lifecycle points only when `is_readable()`. Keep them empty in this repo.
 - **`src/includes/`** — HTML template fragments included by `admin.php` (`install-form.php` + `admin-panel.php`). Distinct from `_onces/` — these are presentation, not logic.
 - **`config/`** — `phoenix.default.php` is the template (do not modify). User configuration goes into `phoenix.custom.php` (gitignored, created by the installer).
-- **`bin/`** — standalone scripts intended for cron (`backup-database.php`, `clean-and-optimize.php`). They `require_once '../../_phoenix.php'` to bootstrap.
+- **`bin/`** — standalone scripts intended for cron (`backup-database.php`, `clean-and-optimize.php`). They `require_once '../../src/phoenix.php'` to bootstrap.
 - **`tests/phoenix/`** — one PHPUnit test class per function/component (see test runner notes below).
 
 ### Entry points
@@ -54,7 +54,7 @@ Every entry point sits in `public` and bootstraps via `require_once '../src/phoe
 - `admin.php` — admin panel and first-run installer. Requires no `phoenix.custom.php` to enter installer mode.
 - `magnet.php` — pure client-side magnet generator. **Does not bootstrap** `../src/phoenix.php` and does not touch the tracker — it's a self-contained utility page.
 
-### Bootstrap (`_phoenix.php`)
+### Bootstrap (`src/phoenix.php`)
 
 Sets path constants on `$settings` (`functions`, `hooks`, `onces`, `settings`), then loads `phoenix.default.php` followed by `phoenix.custom.php` (or hard-coded fallbacks if missing). It then `require_once`s `function.tracker.error.php` and `once.db.connect.php`. After this point, scripts can rely on `$connection`, `$settings`, `$time`, and `$chance` being in scope.
 
@@ -80,7 +80,7 @@ The installer (`public/admin.php` → `src/onces/once.install.php`) generates `c
 
 PHPUnit is wired up via `composer.json` and `phpunit.xml.dist`. The test bootstrap (`tests/bootstrap.php`):
 
-1. Loads Composer's autoloader and `_phoenix.php` (giving access to `$connection`, `$settings`, `$time`).
+1. Loads Composer's autoloader and `src/phoenix.php` (giving access to `$connection`, `$settings`, `$time`).
 2. Suffixes `$settings['db_prefix']` with `TESTING_` so tests can't touch production tables.
 3. Calls `create_database()` to ensure the prefixed tables exist.
 4. Exposes `$connection`, `$settings`, `$time` via `$GLOBALS` so each test class can pick them up in `setUpBeforeClass()`.

@@ -7,7 +7,7 @@ declare(strict_types=1);
 // PhoenixTestCase can pick them up in setUpBeforeClass().
 
 require_once __DIR__.'/../vendor/autoload.php';
-require_once __DIR__.'/../_phoenix.php';
+require_once __DIR__.'/../src/phoenix.php';
 
 // Override db_prefix so tests can't touch production tables.
 $settings['db_prefix'] = $settings['db_prefix'].'TESTING_';

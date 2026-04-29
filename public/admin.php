@@ -31,7 +31,7 @@ if ( !$config_exists ) {
 }
 
 ////	Normal Admin Flow
-require_once __DIR__.'/_phoenix.php';
+require_once __DIR__.'/src/phoenix.php';
 require_once $settings['onces'].'once.auth.php';
 require_once $settings['onces'].'once.sanitize.admin.php';
 require_once $settings['functions'].'function.mysqli.drop.table.php';
