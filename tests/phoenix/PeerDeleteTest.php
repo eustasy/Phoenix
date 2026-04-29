@@ -22,8 +22,8 @@ class PeerDeleteTest extends PhoenixTestCase {
 	public function testDeletesMatchingRow(): void {
 		mysqli_query(
 			self::$connection,
-			'INSERT INTO `'.self::$settings['db_prefix'].'peers` ( `info_hash`, `peer_id` ) '.
-			'VALUES ( \'__TEST_1__\', \'__TEST_1__\' );'
+			'INSERT INTO `'.self::$settings['db_prefix'].'peers` ( `info_hash`, `peer_id`, `compactv4`, `compactv6`, `portv4`, `portv6`, `updated` ) '.
+			'VALUES ( \'__TEST_1__\', \'__TEST_1__\', \'\', \'\', \'0\', \'0\', \''.self::$time.'\');'
 		);
 
 		$peer = array(
