@@ -39,3 +39,7 @@ $settings['public_index']        = false;            /* serve a public index of 
 
 ////	Admin Options
 $settings['admin_password']      = '';              /* bcrypt hash of the admin password; empty = no auth */
+
+////	Backup Options
+$settings['backup_dir']          = '';              /* absolute path to backup directory; empty = _backups/ in the project root */
+$settings['backup_rotate']       = 0;               /* number of backups to keep; 0 = keep all */
