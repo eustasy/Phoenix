@@ -1,32 +1,36 @@
 <?php
 
-require_once $settings['functions'].'function.mysqli.fetch.once.php';
-
 // begin response
 $response = 'd8:intervali'.$settings['announce_interval'].
 	'e12:min intervali'.$settings['min_interval'].
 	'e5:peers';
 
-$sql = 'SELECT COUNT(*) AS `count` FROM `'.$settings['db_prefix'].'peers` '.
-	'WHERE `info_hash`=\''.$peer['info_hash'].'\';';
-$peer_count = mysqli_fetch_once($connection, $sql);
-if ( !$peer_count ) {
-	$peer_count = 0;
+$where = '`info_hash`=\''.$peer['info_hash'].'\' AND `peer_id`!=\''.$peer['peer_id'].'\'';
+$order = '';
+
+if ( $peer['left'] == 0 ) {
+	// Completed: only show leechers (exclude fellow seeders); nearest-to-done first
+	// converts near-complete leechers to seeders fastest, growing available bandwidth
+	$where .= ' AND `state`=\'0\'';
+	$order  = ' ORDER BY `left` ASC, `updated` DESC';
+} else if ( $peer['left'] > 0 && $peer['left'] > $peer['downloaded'] ) {
+	// Just started (session downloaded < remaining, so likely <50% done):
+	// filter to peers likely >50% complete or seeders, spread across most recent
+	// to avoid concentrating connections on the same top peers
+	// note: downloaded is session-only so this is an approximation
+	$where .= ' AND (`state`=\'1\' OR `downloaded` > `left`)';
+	$order  = ' ORDER BY `updated` DESC';
+} else if ( $peer['left'] > 0 ) {
+	// In progress (session downloaded >= remaining, so likely >=50% done):
+	// most complete first but randomised within quality tiers to spread load
+	// note: downloaded is session-only so the >=50% threshold is an approximation
+	$order = ' ORDER BY `left` ASC, RAND()';
 } else {
-	$peer_count = $peer_count['count'];
+	// State unknown (left not reported): return most recently active peers
+	$order = ' ORDER BY `updated` DESC';
 }
 
-$sql = 'SELECT * FROM `'.$settings['db_prefix'].'peers` WHERE `info_hash`=\''.$peer['info_hash'].'\'';
-
-// IF there are more peers than requested,
-// only return the ones we need.
-if ( $peer_count > $peer['numwant'] ) {
-	$sql .= ' LIMIT '.$peer['numwant'].' OFFSET '.mt_rand(0, ($peer_count - $peer['numwant'])).';';
-
-// IF there are more peers than the random limit.
-} else if ( $peer_count > $settings['random_limit'] ) {
-	$sql .= ' ORDER BY RAND();';
-}
+$sql = 'SELECT * FROM `'.$settings['db_prefix'].'peers` WHERE '.$where.$order.' LIMIT '.$peer['numwant'].';';
 
 // IF Compact
 if ( $peer['compact'] ) {
