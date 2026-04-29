@@ -32,6 +32,7 @@ $settings['clean_with_requests'] = 1;                /* tweaks % of time tracker
 $settings['clean_with_cron']     = false;            /* should your tracker clean with cron */
                                                      /* means clean_with_requests can be disabled for faster responses */
 $settings['honor_xff']           = false;            /* If this server is behind a frontend proxy, the client IP */
+$settings['public_index']        = false;            /* serve a public index of listed torrents */            
                                                      /* will come in the form of a X-Forwarded-For. This option */
                                                      /* should only be set if your frontend proxy properly handles */
                                                      /* and filters XFF, else it allows for trivial IP spoofing */

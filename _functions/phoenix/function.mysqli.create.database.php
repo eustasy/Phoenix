@@ -27,6 +27,7 @@ function create_database($connection, $settings, $debug = false) {
 				'`name` varchar(255) NULL,' .
 				'`info_hash` varchar(40) NOT NULL,' .
 				'`size` bigint(20) unsigned NULL,' .
+				'`listed` tinyint(1) unsigned NOT NULL DEFAULT \'0\',' .
 				'`downloads` int(10) unsigned NOT NULL DEFAULT \'0\',' .
 				'PRIMARY KEY (`info_hash`)' .
 			') ENGINE=MyISAM DEFAULT CHARSET=latin1;';
