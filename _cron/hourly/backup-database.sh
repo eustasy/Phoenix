@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ~/Server/phoenix/_backups || exit BACKUP_DIR_NOT_FOUND
+cd ~/Server/phoenix/_backups || { echo "BACKUP_DIR_NOT_FOUND" >&2; exit 1; }
 mysqldump \
 	--allow-keywords \
 	--replace \
