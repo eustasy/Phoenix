@@ -25,7 +25,11 @@ $db_host  = (strncmp($settings['db_host'], 'p:', 2) === 0)
 	? substr($settings['db_host'], 2)
 	: $settings['db_host'];
 $cnf_file = tempnam(sys_get_temp_dir(), 'phxbak_');
-chmod($cnf_file, 0600);
+if ( !chmod($cnf_file, 0600) ) {
+	unlink($cnf_file);
+	echo 'Backup failed: could not secure credentials file.' . PHP_EOL;
+	exit(1);
+}
 file_put_contents($cnf_file,
 	'[client]' . PHP_EOL .
 	'host='     . $db_host . PHP_EOL .
@@ -33,30 +37,45 @@ file_put_contents($cnf_file,
 	'password="' . str_replace('"', '""', $settings['db_pass']) . '"' . PHP_EOL
 );
 
+// proc_open with an argument array bypasses the shell entirely, so no
+// escaping is needed and settings values cannot be misinterpreted as flags.
 $errfile = $filepath . '.err';
-$cmd = 'mysqldump'
-	. ' --defaults-extra-file=' . escapeshellarg($cnf_file)
-	. ' --allow-keywords'
-	. ' --replace'
-	. ' --routines'
-	. ' --skip-add-drop-table'
-	. ' --skip-lock-tables'
-	. ' --single-transaction'
-	. ' --triggers'
-	. ' --tz-utc'
-	. ' --ignore-table=' . escapeshellarg($settings['db_name'] . '.' . $settings['db_prefix'] . 'peers')
-	. ' '   . escapeshellarg($settings['db_name'])
-	. ' > ' . escapeshellarg($filepath)
-	. ' 2>' . escapeshellarg($errfile);
+$proc = proc_open(
+	[
+		'mysqldump',
+		'--defaults-extra-file=' . $cnf_file,
+		'--allow-keywords',
+		'--replace',
+		'--routines',
+		'--skip-add-drop-table',
+		'--skip-lock-tables',
+		'--single-transaction',
+		'--triggers',
+		'--tz-utc',
+		'--ignore-table=' . $settings['db_name'] . '.' . $settings['db_prefix'] . 'peers',
+		$settings['db_name'],
+	],
+	[
+		0 => ['pipe', 'r'],
+		1 => ['file', $filepath, 'w'],
+		2 => ['file', $errfile,  'w'],
+	],
+	$pipes
+);
 
-exec($cmd, $output, $exit_code);
+if ( $proc === false ) {
+	if ( !unlink($cnf_file) ) {
+		echo 'Warning: could not remove credentials file ' . $cnf_file . PHP_EOL;
+	}
+	echo 'Backup failed: could not start mysqldump.' . PHP_EOL;
+	exit(1);
+}
+
+fclose($pipes[0]);
+$exit_code = proc_close($proc);
 
 if ( !unlink($cnf_file) ) {
 	echo 'Warning: could not remove credentials file ' . $cnf_file . PHP_EOL;
-}
-
-if ( !empty($output) ) {
-	echo 'mysqldump stdout: ' . implode(PHP_EOL, $output) . PHP_EOL;
 }
 
 if ( $exit_code !== 0 ) {
@@ -74,7 +93,8 @@ if ( intval($settings['backup_rotate']) > 0 ) {
 	$backups = glob($backup_dir . $settings['db_name'] . '.*.sql');
 	if ( $backups ) {
 		foreach ( $backups as $old ) {
-			if ( filemtime($old) < $cutoff && !unlink($old) ) {
+			$mtime = filemtime($old);
+			if ( $mtime !== false && $mtime < $cutoff && !unlink($old) ) {
 				echo 'Warning: could not remove old backup ' . $old . PHP_EOL;
 			}
 		}
