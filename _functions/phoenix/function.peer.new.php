@@ -1,6 +1,6 @@
 <?php
 
-function peer_new($connection, $settings, $time, $peer) {
+function peer_new(mysqli $connection, array $settings, int $time, array $peer): true {
 
 	$compactv4 = '';
 	$compactv6 = '';
@@ -44,10 +44,9 @@ function peer_new($connection, $settings, $time, $peer) {
 		');'
 	);
 
-	if ( $peer_new ) {
-		return true;
-	} else {
+	if ( !$peer_new ) {
 		tracker_error('Failed to add new peer.');
 	}
+	return true;
 
 }

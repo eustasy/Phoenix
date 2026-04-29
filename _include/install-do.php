@@ -31,8 +31,8 @@ if (
 		if ( !create_database($test_conn, $settings) ) {
 			$install_error = 'Connected, but could not create the tables.';
 		} else {
-			$s = function($v) { return '\''.addslashes($v).'\''; };
-			$b = function($v) { return $v ? 'true' : 'false'; };
+			$s = function(string $v): string { return '\''.addslashes($v).'\''; };
+			$b = function(bool $v): string { return $v ? 'true' : 'false'; };
 			$config  = '<?php'.PHP_EOL.PHP_EOL;
 			$config .= '$settings[\'db_host\']      = '.$s($db_host).';'.PHP_EOL;
 			$config .= '$settings[\'db_user\']      = '.$s($db_user).';'.PHP_EOL;

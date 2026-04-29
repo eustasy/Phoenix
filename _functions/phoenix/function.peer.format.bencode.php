@@ -5,7 +5,7 @@
 // per BEP 3 announce response (non-compact mode). $include_peer_id should be
 // the negation of $peer['no_peer_id'] — peers that explicitly request omission
 // should pass false.
-function peer_format_bencode($row, $include_peer_id) {
+function peer_format_bencode(array $row, bool $include_peer_id): string {
 	$out = '';
 	if ( $row['ipv4'] != null ) {
 		$out .= 'd2:ip'.strlen($row['ipv4']).':'.$row['ipv4'].

@@ -1,6 +1,6 @@
 <?php
 
-function task_optimize($connection, $settings, $time, $table = false, $and_default = true) {
+function task_optimize(mysqli $connection, array $settings, int $time, string|false $table = false, bool $and_default = true): bool {
 	require_once $settings['functions'].'function.task.log.php';
 
 	$tables = array();
@@ -18,11 +18,11 @@ function task_optimize($connection, $settings, $time, $table = false, $and_defau
 	}
 
 	$sql = '';
-	foreach ( $tables as $table ) {
-		$sql .= 'CHECK TABLE `'.$settings['db_prefix'].$table.'`;'.
-			'ANALYZE TABLE `'.$settings['db_prefix'].$table.'`;'.
-			'REPAIR TABLE `'.$settings['db_prefix'].$table.'`;'.
-			'OPTIMIZE TABLE `'.$settings['db_prefix'].$table.'`;';
+	foreach ( $tables as $t ) {
+		$sql .= 'CHECK TABLE `'.$settings['db_prefix'].$t.'`;'.
+			'ANALYZE TABLE `'.$settings['db_prefix'].$t.'`;'.
+			'REPAIR TABLE `'.$settings['db_prefix'].$t.'`;'.
+			'OPTIMIZE TABLE `'.$settings['db_prefix'].$t.'`;';
 	}
 	$result = mysqli_multi_query($connection, $sql);
 	// mysqli_multi_query buffers all result sets internally; each must be consumed

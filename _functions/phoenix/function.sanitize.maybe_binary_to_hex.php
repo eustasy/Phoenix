@@ -2,7 +2,7 @@
 
 // Accepts a raw query-string value (not a $_GET value, which is already decoded).
 // Calls urldecode() itself so binary bytes in %XX form are resolved exactly once.
-function maybe_binary_to_hex($binary) {
+function maybe_binary_to_hex(string $binary): string|false {
 	$binary = urldecode($binary);
 	if (
 		strlen($binary) == 20 ||

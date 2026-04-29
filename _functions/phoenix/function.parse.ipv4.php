@@ -4,7 +4,7 @@
 // Attempts to parse an address string as IPv4, optionally with a `:port` suffix.
 // Strips a leading `::ffff:` IPv4-mapped IPv6 prefix when present.
 // Returns array('ip' => string, 'port' => int|false) on success, or false if the address is not valid IPv4.
-function parse_ipv4($address) {
+function parse_ipv4(string $address): array|false {
 	$candidate = trim($address, '::ffff:');
 	$port      = false;
 	if ( strpos($candidate, ':') !== false ) {

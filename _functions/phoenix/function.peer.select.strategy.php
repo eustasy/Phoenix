@@ -10,7 +10,7 @@
 //  - left > downloaded : likely <50% done; only show seeders + likely-seeders, ordered by recency.
 //  - left > 0 (else)   : likely >=50% done; order by progress, randomise within tiers if swarm is large.
 //  - left < 0    : state unknown (left not reported); order by recency.
-function peer_select_strategy($peer, $complete, $incomplete, $settings) {
+function peer_select_strategy(array $peer, int $complete, int $incomplete, array $settings): array {
 	if ( $peer['left'] == 0 ) {
 		return array(
 			'where' => ' AND `state`=\'0\'',

@@ -3,8 +3,9 @@
 ////	create_database
 // Creates the peers, tasks, and torrents tables under db_name with the configured prefix.
 // MyISAM is chosen over InnoDB: the tracker is write-heavy and never needs transactions or foreign keys.
-function create_database($connection, $settings, $debug = false) {
+function create_database(mysqli $connection, array $settings, bool $debug = false): bool {
 
+	$queries = array();
 	$queries[] = 'CREATE TABLE IF NOT EXISTS `'.$settings['db_name'].'`.`'.$settings['db_prefix'].'peers` (' .
 				'`info_hash` varchar(40) NOT NULL,' .
 				'`peer_id` varchar(40) NOT NULL,' .
@@ -35,6 +36,7 @@ function create_database($connection, $settings, $debug = false) {
 				'PRIMARY KEY (`info_hash`)' .
 			') ENGINE=MyISAM DEFAULT CHARSET=latin1;';
 
+	$failure = false;
 	foreach ( $queries as $query ) {
 		$result = mysqli_query($connection, $query);
 		if ( !$result ) {
@@ -45,15 +47,14 @@ function create_database($connection, $settings, $debug = false) {
 		}
 	}
 
-	if ( !empty($failure) ) {
+	if ( $failure ) {
 		if ( $debug ) {
 			echo 'Database Creation failed.'.PHP_EOL;
 		}
 		return false;
-	} else {
-		if ( $debug ) {
-			echo 'Database Creation succesful.'.PHP_EOL;
-		}
-		return true;
 	}
+	if ( $debug ) {
+		echo 'Database Creation succesful.'.PHP_EOL;
+	}
+	return true;
 }
