@@ -5,9 +5,12 @@ function peer_new($connection, $settings, $time, $peer) {
 	$compactv4 = '';
 	$compactv6 = '';
 	if ( !empty($peer['ipv4'])) {
+		// BEP 23: compact IPv4 peer = 4-byte big-endian IP + 2-byte big-endian port (6 bytes).
+		// Stored as hex so it survives the latin1 DB column without corruption.
 		$compactv4 = bin2hex(pack('Nn', ip2long($peer['ipv4']), $peer['portv4']));
 	}
 	if ( !empty($peer['ipv6'])) {
+		// BEP 7: compact IPv6 peer = 16-byte address (inet_pton) + 2-byte big-endian port (18 bytes).
 		$compactv6 = bin2hex(inet_pton($peer['ipv6']).pack('n', $peer['portv6']));
 	}
 

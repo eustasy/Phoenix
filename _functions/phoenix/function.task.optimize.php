@@ -20,6 +20,8 @@ function task_optimize($connection, $settings, $time, $table = false, $and_defau
 			'OPTIMIZE TABLE `'.$settings['db_prefix'].$table.'`;';
 	}
 	$result = mysqli_multi_query($connection, $sql);
+	// mysqli_multi_query buffers all result sets internally; each must be consumed
+	// before the connection can be used again, even if we don't inspect the results.
 	if ( $result ) {
 		while ( mysqli_more_results($connection) ) {
 			mysqli_next_result($connection);

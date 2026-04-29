@@ -1,18 +1,23 @@
 <?php
 
-$peers = 'SELECT
+// Full scrape: no WHERE clause, returns all tracked torrents.
+// Only reached when $settings['full_scrape'] is true and no info_hash was given.
+// $scrape is not pre-initialised here; once.scrape.output.php builds it from the results.
+$peers    = mysqli_query($connection,
+	'SELECT
 		`p`.`info_hash` AS `info_hash`,
 		SUM(`p`.`state`=\'1\') AS `seeders`,
 		SUM(`p`.`state`=\'0\') AS `leechers`
 	FROM `'.$settings['db_prefix'].'peers` AS `p`
-	GROUP BY `info_hash`;';
-$torrents = 'SELECT
+	GROUP BY `info_hash`;'
+);
+$torrents = mysqli_query($connection,
+	'SELECT
 		`p`.`info_hash` AS `info_hash`,
 		`p`.`downloads` AS `downloads`
 	FROM `'.$settings['db_prefix'].'torrents` AS `p`
-	GROUP BY `info_hash`;';
-$peers = mysqli_query($connection, $peers);
-$torrents = mysqli_query($connection, $torrents);
+	GROUP BY `info_hash`;'
+);
 
 if (
 	!$peers ||

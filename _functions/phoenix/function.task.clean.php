@@ -4,7 +4,9 @@ function task_clean($connection, $settings, $time) {
 	require_once $settings['functions'].'function.task.log.php';
 	$cleaned = true;
 
-	// Delete Peers that have been idle twice the announce interval.
+	// Remove peers that have not announced within 3x the announce interval.
+	// 1x = the normal re-announce window; 2x = one missed announce (grace); 3x = clearly gone.
+	// Also purges rows with test-reserved prefixes/values left by the test suite.
 	$sql[] = 'DELETE FROM `'.$settings['db_prefix'].'peers`'.
 		' WHERE `updated` < \''. ( $time - ( $settings['announce_interval'] * 3 ) ) .'\''.
 		' OR `info_hash` LIKE \'__TEST_%\''.
