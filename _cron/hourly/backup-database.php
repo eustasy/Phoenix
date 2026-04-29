@@ -39,13 +39,15 @@ if ( $exit_code !== 0 ) {
 	exit(1);
 }
 
-// Rotate: delete the oldest backups beyond the configured limit.
-if ( !empty($settings['backup_rotate']) && intval($settings['backup_rotate']) > 0 ) {
+// Rotate: delete backups older than backup_rotate days.
+if ( intval($settings['backup_rotate']) > 0 ) {
+	$cutoff = $time - ( intval($settings['backup_rotate']) * 86400 );
 	$backups = glob($backup_dir . $settings['db_name'] . '.*.sql');
 	if ( $backups ) {
-		rsort($backups);
-		foreach ( array_slice($backups, intval($settings['backup_rotate'])) as $old ) {
-			unlink($old);
+		foreach ( $backups as $old ) {
+			if ( filemtime($old) < $cutoff ) {
+				unlink($old);
+			}
 		}
 	}
 }
