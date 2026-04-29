@@ -40,7 +40,7 @@ if ( $settings['external_ip'] ) {
 if ( isset($_SERVER['REMOTE_ADDR']) ) {
 	$addresses[] = $_SERVER['REMOTE_ADDR'];
 }
-// If we're honoring X_FORWARDED_FOR, we check and use that first if its present.
+// If we're honoring X_FORWARDED_FOR, we check and use that first if it's present.
 if (
 	isset($_SERVER['HTTP_CLIENT_IP']) &&
 	$settings['honor_xff']
@@ -57,7 +57,8 @@ if (
 if ( !count($addresses) ) {
 	tracker_error('Unable to obtain client IP');
 }
-// Reverse so we prioritise
+	
+// Reverse so later-added candidates are checked first (including X-Forwarded-For/Client-IP when honor_xff is enabled).
 $addresses = array_reverse($addresses);
 
 ////	Find Definites
