@@ -17,8 +17,25 @@ $filepath = $backup_dir . $filename;
 
 // Peers are ephemeral (expire after 3x announce_interval) and can be recreated
 // by running Setup in admin.php, so there is no value in backing up their rows.
+
+// Write credentials to a private temp file so the password never appears in
+// the process list. once.db.connect mutates db_host in place (prepends 'p:'
+// for persistent connections), so strip that prefix before writing.
+$db_host  = (strncmp($settings['db_host'], 'p:', 2) === 0)
+	? substr($settings['db_host'], 2)
+	: $settings['db_host'];
+$cnf_file = tempnam(sys_get_temp_dir(), 'phxbak_');
+chmod($cnf_file, 0600);
+file_put_contents($cnf_file,
+	'[client]' . PHP_EOL .
+	'host='     . $db_host . PHP_EOL .
+	'user='     . $settings['db_user'] . PHP_EOL .
+	'password="' . str_replace('"', '""', $settings['db_pass']) . '"' . PHP_EOL
+);
+
 $errfile = $filepath . '.err';
 $cmd = 'mysqldump'
+	. ' --defaults-extra-file=' . escapeshellarg($cnf_file)
 	. ' --allow-keywords'
 	. ' --replace'
 	. ' --routines'
@@ -28,13 +45,12 @@ $cmd = 'mysqldump'
 	. ' --triggers'
 	. ' --tz-utc'
 	. ' --ignore-table=' . escapeshellarg($settings['db_name'] . '.' . $settings['db_prefix'] . 'peers')
-	. ' -u' . escapeshellarg($settings['db_user'])
-	. ' -p' . escapeshellarg($settings['db_pass'])
 	. ' '   . escapeshellarg($settings['db_name'])
 	. ' > ' . escapeshellarg($filepath)
 	. ' 2>' . escapeshellarg($errfile);
 
 exec($cmd, $output, $exit_code);
+@unlink($cnf_file); // always removed — never leave credentials on disk
 
 if ( $exit_code !== 0 ) {
 	$error = is_readable($errfile) ? trim(file_get_contents($errfile)) : '';
