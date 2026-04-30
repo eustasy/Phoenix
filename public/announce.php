@@ -2,7 +2,9 @@
 
 // Load Phoenix Core
 require_once __DIR__.'/../src/phoenix.php';
-require_once $settings['onces'].'once.sanitize.tracker.php';
+
+require_once $settings['functions'].'function.sanitize.tracker.php';
+$peer = sanitize_tracker_params();
 
 ////	IF info_hash Valid
 // Required

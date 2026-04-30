@@ -11,7 +11,7 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 ### What Do You Need?
 
 #### Required
-* PHP >= 8.2 with the `mysqli` extension. The bundled `date`, `filter`, `json`, `pcre`, `session`, and `xml` extensions are also used (these ship enabled by default).
+* PHP >= 8.2 with the `mysqli` and `xml` extensions. The bundled `date`, `filter`, `json`, `pcre`, and `session` extensions are also used (these ship enabled by default).
 * A PHP-compatible web server (Apache or Nginx).
 * A MySQL-compatible database.
 
