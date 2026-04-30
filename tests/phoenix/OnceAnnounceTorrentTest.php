@@ -100,7 +100,7 @@ class OnceAnnounceTorrentTest extends PhoenixTestCase {
 	}
 
 	public function testNonCompactResponseIncludesBencodeList(): void {
-		$this->insertOtherPeer('__TEST_OAT_OTHER__', 0, '192.0.2.5', 9999);
+		$this->insertOtherPeer('__TEST_OAT_OTHER__', 1, '192.0.2.5', 9999);
 
 		$peer = $this->basePeer(array('compact' => 0));
 		$output = $this->runOnce($peer);
