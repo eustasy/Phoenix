@@ -33,9 +33,14 @@ if ( !$config_exists ) {
 ////	Normal Admin Flow
 require_once __DIR__.'/../src/phoenix.php';
 require_once $settings['onces'].'once.auth.php';
-require_once $settings['onces'].'once.sanitize.admin.php';
 require_once $settings['functions'].'function.mysqli.drop.table.php';
 require_once $settings['functions'].'function.mysqli.create.database.php';
+
+////	Process Form
+$process = false;
+if ( !empty($_POST['process']) ) {
+	$process = htmlentities($_POST['process'], ENT_QUOTES, 'UTF-8');
+}
 
 // Tables Exist
 $tables = array('peers', 'tasks', 'torrents');
@@ -59,7 +64,7 @@ if ( count($tables) == $actual ) {
 }
 
 if (
-	$Process == 'setup' &&
+	$process == 'setup' &&
 	(
 		$settings['db_reset'] ||
 		!$tables_installed
@@ -92,7 +97,7 @@ if (
 		$Message = 'Could not setup the MySQL Database.';
 	}
 
-} else if ( $Process == 'clean' ) {
+} else if ( $process == 'clean' ) {
 	require_once $settings['functions'].'function.task.clean.php';
 	if ( task_clean($connection, $settings, $time) ) {
 		$Message = 'The peers list has been cleaned.';
@@ -100,7 +105,7 @@ if (
 		$Message = 'Could not clean the peers list.';
 	}
 
-} else if ( $Process == 'optimize' ) {
+} else if ( $process == 'optimize' ) {
 	require_once $settings['functions'].'function.task.optimize.php';
 	if ( task_optimize($connection, $settings, $time) ) {
 		$Message = 'Your MySQL Tracker Database has been optimized.';
