@@ -35,36 +35,19 @@ while ( $row = mysqli_fetch_assoc($result) ) {
 
 // XML
 if ( isset($_GET['xml']) ) {
+	require_once $settings['functions'].'function.index.render.xml.php';
 	header('Content-Type: text/xml');
-	$xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><torrents>';
-	foreach ( $index as $torrent ) {
-		$xml .= '<torrent>'.
-			'<info_hash>'.$torrent['info_hash'].'</info_hash>'.
-			'<name>'.htmlspecialchars($torrent['name']).'</name>'.
-			'<size>'.$torrent['size'].'</size>'.
-			'<downloads>'.$torrent['downloads'].'</downloads>'.
-			'<seeders>'.$torrent['seeders'].'</seeders>'.
-			'<leechers>'.$torrent['leechers'].'</leechers>'.
-			'<peers>'.$torrent['peers'].'</peers>'.
-			'<traffic>'.$torrent['traffic'].'</traffic>'.
-		'</torrent>';
-	}
-	echo $xml.'</torrents>';
+	echo index_render_xml($index);
 
 // JSON
 } else if ( isset($_GET['json']) ) {
+	require_once $settings['functions'].'function.index.render.json.php';
 	header('Content-Type: application/json');
-	echo json_encode($index);
+	echo index_render_json($index);
 
 // HTML
 } else {
+	require_once $settings['functions'].'function.index.render.html.php';
 	header('Content-Type: text/html; charset=UTF-8');
-	echo '<!DocType html><html><head><meta charset="UTF-8"><title>Torrent Index</title></head><body><ul>';
-	foreach ( $index as $torrent ) {
-		echo '<li>'.htmlspecialchars($torrent['name']).
-			' &mdash; '.$torrent['seeders'].' seeders,'.
-			' '.$torrent['leechers'].' leechers,'.
-			' '.$torrent['downloads'].' downloads</li>';
-	}
-	echo '</ul></body></html>';
+	echo index_render_html($index);
 }
