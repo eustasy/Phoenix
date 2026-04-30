@@ -88,6 +88,30 @@ class OnceDbConnectTest extends PhoenixTestCase {
 		$this->assertSame($expected, $settings['db_host']);
 	}
 
+	public function testConnectionFailureCallsTrackerError(): void {
+		// PHP 8.1+ mysqli_connect throws mysqli_sql_exception on failure. The once
+		// must catch it and emit a bencode error rather than crashing. Drive a
+		// guaranteed-bad connection in a subprocess and assert on stdout/exit.
+		$script = '<?php '.PHP_EOL.
+			'$settings = array('.PHP_EOL.
+			'    \'functions\' => '.var_export(self::$settings['functions'], true).','.PHP_EOL.
+			'    \'onces\'     => '.var_export(self::$settings['onces'], true).','.PHP_EOL.
+			'    \'db_host\'   => \'127.0.0.1\','.PHP_EOL.
+			'    \'db_user\'   => \'__phx_no_such_user__\','.PHP_EOL.
+			'    \'db_pass\'   => \'wrong\','.PHP_EOL.
+			'    \'db_name\'   => \'__phx_no_such_db__\','.PHP_EOL.
+			'    \'db_persist\' => false,'.PHP_EOL.
+			');'.PHP_EOL.
+			'require $settings[\'functions\'].\'function.tracker.error.php\';'.PHP_EOL.
+			'require $settings[\'onces\'].\'once.db.connect.php\';'.PHP_EOL;
+
+		[$stdout, $exit] = $this->runScript($script);
+
+		$this->assertSame(2, $exit);
+		$this->assertStringContainsString('may be mis-configured', $stdout);
+		$this->assertStringStartsWith('d14:failure reason', $stdout);
+	}
+
 	public function testNotConfiguredCallsTrackerError(): void {
 		// tracker_error() calls exit(2). Running in-process would terminate the
 		// PHPUnit worker, so spawn a subprocess and assert against captured
