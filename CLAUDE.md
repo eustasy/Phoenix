@@ -39,7 +39,7 @@ The codebase follows what the changelog calls a "puff-style" layout — small, s
 - **`src/functions/`** — one function per file. File `function.peer.new.php` defines `peer_new()`. Functions are pure-ish PHP (no top-level execution beyond defining the function). When extracting logic from a once, prefer this layout: one function per file, `////\t<function_name>` header comment, then a brief description, then the function.
 - **`src/onces/`** — procedural code blocks pulled in via `require_once` exactly once per request. They share scope with their caller (read/write `$settings`, `$peer`, `$connection`, `$time`, etc. directly). Treat onces as procedural fragments, not as functions.
 - **`src/hooks/`** — empty stubs (e.g. `phoenix.peer.new.php`) that operators can fill in. The tracker `include`s them at well-defined lifecycle points only when `is_readable()`. Keep them empty in this repo.
-- **`src/includes/`** — HTML template fragments included by `admin.php` (`install-form.php` + `admin-panel.php`). Distinct from `_onces/` — these are presentation, not logic.
+- **`src/includes/`** — HTML template fragments included by `admin.php` (`install-form.php` + `admin-panel.php`). Distinct from `src/onces/` — these are presentation, not logic.
 - **`config/`** — `phoenix.default.php` is the template (do not modify). User configuration goes into `phoenix.custom.php` (gitignored, created by the installer).
 - **`bin/`** — standalone scripts intended for cron (`backup-database.php`, `clean-and-optimize.php`). They `require_once '../src/phoenix.php'` to bootstrap.
 - **`tests/phoenix/`** — one PHPUnit test class per function/component (see test runner notes below).
@@ -53,6 +53,10 @@ Every entry point sits in `public` and bootstraps via `require_once __DIR__.'/..
 - `index.php` — public torrent index, gated by `$settings['public_index']`.
 - `admin.php` — admin panel and first-run installer. Requires no `phoenix.custom.php` to enter installer mode.
 - `magnet.php` — pure client-side magnet generator. **Does not bootstrap** `../src/phoenix.php` and does not touch the tracker — it's a self-contained utility page.
+
+### Web exposure
+
+Only `public/` is meant to be web-served. The PDS layout puts `src/` (functions, onces, hooks, includes), `bin/` (cron scripts), `config/` (database credentials in `phoenix.custom.php`), and `tests/` one level above the document root, so when the server is configured correctly none of them are reachable over HTTP. This obviates the explicit deny rules earlier versions of Phoenix needed for the pre-PDS underscore-prefixed directories (`_functions/`, `_onces/`, etc.) — those rules are no longer relevant. Server-config docs live in `APACHE.md` and `NGINX.md`; both also cover stripping `.php` from URLs and rate-limiting the admin endpoint.
 
 ### Bootstrap (`src/phoenix.php`)
 

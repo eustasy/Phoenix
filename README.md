@@ -23,11 +23,19 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 ### Install Guide
 1. Copy `config/phoenix.default.php` to `config/phoenix.custom.php`
 2. Edit the variables in `config/phoenix.custom.php`
-2. Upload all the `.php` files to your server.
-4. Load `admin.php` in your browser and run the `Setup` option.
+3. Upload Phoenix to your server.
+4. Point your web server's document root at the `public/` directory. Only `public/` should be web-reachable; `src/`, `bin/`, `config/`, and `tests/` must remain outside the document root so configuration (including database credentials) is never served. See [APACHE.md](./APACHE.md) or [NGINX.md](./NGINX.md) for example configurations.
+5. Load `admin.php` in your browser and run the `Setup` option.
+6. After setup, move `public/admin.php` into `src/` (`mv public/admin.php src/admin.php`) so it stops being web-reachable. Move it back temporarily if you ever need to re-run setup.
 
 ## Configuration
 Configuration should take place in `config/phoenix.custom.php`, NOT `config/phoenix.default.php`. Phoenix _will_ attempt to use the default configuration if yours is missing.
+
+## Server Configuration
+Phoenix ships with example web server configurations covering document root, `.php` extension stripping, and admin endpoint rate limiting:
+
+* [APACHE.md](./APACHE.md)
+* [NGINX.md](./NGINX.md)
 
 ### Cron (Automating Maintenance)
 1. Configure `bin/backup-database.sh` by changing the path in the second line, and the username, password, database, and file in the last three.
