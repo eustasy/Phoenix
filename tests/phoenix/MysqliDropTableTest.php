@@ -24,4 +24,14 @@ class MysqliDropTableTest extends PhoenixTestCase {
 		$this->assertTrue(drop_table(self::$connection, self::$settings, '__TEST_NOT_THERE__'));
 	}
 
+	public function testReturnsFalseAndEchoesErrorOnSqlFailure(): void {
+		// A backtick in the table name breaks identifier quoting and forces a syntax error,
+		// exercising the failure branch that echoes mysqli_error and returns false.
+		ob_start();
+		$result = drop_table(self::$connection, self::$settings, 'bad`name');
+		$output = ob_get_clean();
+		$this->assertFalse($result);
+		$this->assertNotEmpty($output);
+	}
+
 }
