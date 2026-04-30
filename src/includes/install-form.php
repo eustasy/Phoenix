@@ -2,7 +2,7 @@
 
 // Repopulate form values after a failed attempt.
 $f = array(
-	'db_host'      => isset($db_host)      ? htmlspecialchars($db_host)   : 'localhost',
+	'db_host'      => isset($db_host)       ? htmlspecialchars($db_host)   : 'localhost',
 	'db_user'      => isset($db_user)       ? htmlspecialchars($db_user)   : '',
 	'db_name'      => isset($db_name)       ? htmlspecialchars($db_name)   : 'phoenix',
 	'db_prefix'    => isset($db_prefix)     ? htmlspecialchars($db_prefix) : 'phoenix_',
