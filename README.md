@@ -39,8 +39,8 @@ Phoenix ships with example web server configurations covering document root, `.p
 
 ### Cron (Automating Maintenance)
 1. Edit `config/phoenix.custom.php` and set:
-   a) `$settings['backup_dir']` to change the backup directory. Defaults to `backups`.
-   b) `$settings['clean_with_cron']` to `true` to enable the script and disable occaisional cleanup on announce.
+     - `$settings['backup_dir']` to change the backup directory. Defaults to `backups`.
+     - `$settings['clean_with_cron']` to `true` to enable the script and disable occaisional cleanup on announce.
 2. Edit your crontab with `crontab -e`, and add a crontab like the following. You can edit the times, and should make sure the paths are correct by running the commands after the asterisks.
 ```
 15 * * * * php ~/phoenix/bin/clean-and-optimize.php
