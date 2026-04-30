@@ -12,4 +12,9 @@
 			<exclude>tests/phoenix/PhoenixTestCase.php</exclude>
 		</testsuite>
 	</testsuites>
+	<source>
+		<include>
+			<directory>src</directory>
+		</include>
+	</source>
 </phpunit>
