@@ -40,6 +40,7 @@ jobs:
         php-version: ${{ matrix.php-version }}
         extensions: mysqli
         tools: composer:v2
+        coverage: pcov
 
     - name: Checkout Repo
       uses: actions/checkout@v6
@@ -62,9 +63,10 @@ jobs:
       run: composer install --no-interaction --no-progress --prefer-dist
 
     - name: Run PHPUnit
-      run: vendor/bin/phpunit
+      run: vendor/bin/phpunit --coverage-clover coverage/clover.xml
 
     - name: Upload Coverage
+      if: matrix.php-version == '8.6'
       uses: qltysh/qlty-action/coverage@v2
       with:
         token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
