@@ -1,78 +1,19 @@
 <?php
 
-// Merge peer counts from the peers query into the scrape array.
-while ( $peer = mysqli_fetch_assoc($peers) ) {
-	$scrape[$peer['info_hash']]['info_hash'] = $peer['info_hash'];
-	$scrape[$peer['info_hash']]['seeders']   = $peer['seeders'];
-	$scrape[$peer['info_hash']]['leechers']  = $peer['leechers'];
-}
+declare(strict_types=1);
 
-// Merge size and download counts from the torrents query.
-while ( $torrent = mysqli_fetch_assoc($torrents) ) {
-	$scrape[$torrent['info_hash']]['info_hash'] = $torrent['info_hash'];
-	$scrape[$torrent['info_hash']]['size']      = $torrent['size'];
-	$scrape[$torrent['info_hash']]['downloads'] = $torrent['downloads'];
-}
+require_once $settings['functions'].'function.scrape.merge.results.php';
+$scrape = scrape_merge_results($peers, $torrents, $scrape ?? array());
 
-// intval() guards against NULL from SQL SUM() on an empty set.
-foreach ( $scrape as $torrent ) {
-	$scrape[$torrent['info_hash']]['info_hash'] = $torrent['info_hash'];
-	$scrape[$torrent['info_hash']]['seeders']   = intval($torrent['seeders']);
-	$scrape[$torrent['info_hash']]['leechers']  = intval($torrent['leechers']);
-	$scrape[$torrent['info_hash']]['peers']     = intval($torrent['seeders']) + intval($torrent['leechers']);
-	$scrape[$torrent['info_hash']]['size']      = intval($torrent['size']);
-	$scrape[$torrent['info_hash']]['downloads'] = intval($torrent['downloads']);
-	$scrape[$torrent['info_hash']]['traffic']   = intval($torrent['size']) * intval($torrent['downloads']);
-}
-
-// XML
 if ( isset($_GET['xml']) ) {
+	require_once $settings['functions'].'function.scrape.render.xml.php';
 	header('Content-Type: text/xml');
-	$xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
-	foreach ( $scrape as $torrent ) {
-		$xml .= '<torrent>'.
-			'<info_hash>'.$torrent['info_hash'].'</info_hash>'.
-			'<seeders>'  .$torrent['seeders']  .'</seeders>'.
-			'<leechers>' .$torrent['leechers'] .'</leechers>'.
-			'<peers>'    .$torrent['peers']    .'</peers>'.
-			'<size>'     .$torrent['size']     .'</size>'.
-			'<downloads>'.$torrent['downloads'].'</downloads>'.
-			'<traffic>'  .$torrent['traffic']  .'</traffic>'.
-		'</torrent>';
-	}
-	echo $xml;
-
-// JSON
+	echo scrape_render_xml($scrape);
 } else if ( isset($_GET['json']) ) {
+	require_once $settings['functions'].'function.scrape.render.json.php';
 	header('Content-Type: application/json');
-	foreach ( $scrape as $torrent ) {
-		$json[$torrent['info_hash']] = array(
-			'info_hash' => $torrent['info_hash'],
-			'seeders'   => $torrent['seeders'],
-			'leechers'  => $torrent['leechers'],
-			'peers'     => $torrent['peers'],
-			'size'      => $torrent['size'],
-			'downloads' => $torrent['downloads'],
-			'traffic'   => $torrent['traffic'],
-		);
-	}
-	echo json_encode($json);
-
-// Bencode (BEP 15 scrape response)
+	echo scrape_render_json($scrape);
 } else {
-	$bencode = 'd'.
-		'5:files';
-	foreach ( $scrape as $torrent ) {
-		// BEP 15: the files dict key is the raw 20-byte info_hash, not hex.
-		// BEP 15 uses 'complete' (seeders), 'downloaded' (finished downloads), 'incomplete' (leechers).
-		$bencode .= 'd'.
-			'20:'.hex2bin($torrent['info_hash']).
-			'd'.
-				'8:complete'  .'i'.$torrent['seeders']  .'e'.
-				'10:downloaded'.'i'.$torrent['downloads'].'e'.
-				'10:incomplete'.'i'.$torrent['leechers'] .'e'.
-			'e'.
-		'e';
-	}
-	echo $bencode.'e';
+	require_once $settings['functions'].'function.scrape.render.bencode.php';
+	echo scrape_render_bencode($scrape);
 }
