@@ -38,10 +38,11 @@ Phoenix ships with example web server configurations covering document root, `.p
 * [NGINX.md](./NGINX.md)
 
 ### Cron (Automating Maintenance)
-1. Configure `bin/backup-database.sh` by changing the path in the second line, and the username, password, database, and file in the last three.
-2. Edit `config/phoenix.custom.php` and set `$settings['clean_with_cron']` to `true` instead of `false`. You can also set `$settings['clean_with_requests']` to `0` to save processing time.
-3. Edit your crontab with `crontab -e`, and add a crontab like the following. You can edit the times, and should make sure the paths are correct by running the commands after the asterisks.
+1. Edit `config/phoenix.custom.php` and set:
+   a) `$settings['backup_dir']` to change the backup directory. Defaults to `backups`.
+   b) `$settings['clean_with_cron']` to `true` to enable the script and disable occaisional cleanup on announce.
+2. Edit your crontab with `crontab -e`, and add a crontab like the following. You can edit the times, and should make sure the paths are correct by running the commands after the asterisks.
 ```
 15 * * * * php ~/phoenix/bin/clean-and-optimize.php
-30 * * * * ~/phoenix/bin/backup-database.sh
+30 * * * * php ~/phoenix/bin/backup-database.php
 ```
