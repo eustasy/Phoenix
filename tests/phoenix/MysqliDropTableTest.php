@@ -25,13 +25,19 @@ class MysqliDropTableTest extends PhoenixTestCase {
 	}
 
 	public function testReturnsFalseAndEchoesErrorOnSqlFailure(): void {
-		// A backtick in the table name breaks identifier quoting and forces a syntax error,
-		// exercising the failure branch that echoes mysqli_error and returns false.
-		ob_start();
-		$result = drop_table(self::$connection, self::$settings, 'bad`name');
-		$output = ob_get_clean();
-		$this->assertFalse($result);
-		$this->assertNotEmpty($output);
+		// PHP 8.1+ mysqli defaults to throwing on errors; switch reporting off so
+		// mysqli_query returns false and the !$result fallback branch is reached.
+		mysqli_report(MYSQLI_REPORT_OFF);
+		try {
+			// A backtick in the table name breaks identifier quoting and forces a syntax error.
+			ob_start();
+			$result = drop_table(self::$connection, self::$settings, 'bad`name');
+			$output = ob_get_clean();
+			$this->assertFalse($result);
+			$this->assertNotEmpty($output);
+		} finally {
+			mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+		}
 	}
 
 }
