@@ -1,7 +1,7 @@
 <?php
 
 // Scheduled database backup with optional rotation.
-require_once __DIR__.'/../../src/phoenix.php';
+require_once __DIR__.'/../src/phoenix.php';
 
 $backup_dir = !empty($settings['backup_dir'])
 	? rtrim($settings['backup_dir'], '/') . '/'

@@ -4,11 +4,11 @@
 // It should not be deployed in a production environment.
 
 // Bootstrap paths before attempting a DB connection.
-$settings['root']      = __DIR__.'/';
-$settings['functions'] = $settings['root'].'/src/functions/';
-$settings['hooks']     = $settings['root'].'/src/hooks/';
-$settings['onces']     = $settings['root'].'/src/onces/';
-$settings['settings']  = $settings['root'].'/config/';
+$settings['root']      = __DIR__.'/../';
+$settings['functions'] = $settings['root'].'src/functions/';
+$settings['hooks']     = $settings['root'].'src/hooks/';
+$settings['onces']     = $settings['root'].'src/onces/';
+$settings['settings']  = $settings['root'].'config/';
 
 require_once $settings['functions'].'function.tracker.error.php';
 
@@ -24,14 +24,14 @@ if ( !$config_exists ) {
 	$settings_writable = is_writable($settings['settings']);
 	$install_error     = null;
 
-	require __DIR__.'/src/onces/once.install.php';
-	require __DIR__.'/src/includes/install-form.php';
+	require $settings['onces'].'once.install.php';
+	require __DIR__.'/../src/includes/install-form.php';
 	// install-form.php calls exit.
 
 }
 
 ////	Normal Admin Flow
-require_once __DIR__.'/src/phoenix.php';
+require_once __DIR__.'/../src/phoenix.php';
 require_once $settings['onces'].'once.auth.php';
 require_once $settings['onces'].'once.sanitize.admin.php';
 require_once $settings['functions'].'function.mysqli.drop.table.php';
@@ -109,4 +109,4 @@ if (
 	}
 }
 
-require __DIR__.'/src/includes/admin-panel.php';
+require __DIR__.'/../src/includes/admin-panel.php';

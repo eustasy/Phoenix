@@ -1,7 +1,7 @@
 <?php
 
 // Load Phoenix Core
-require_once __DIR__.'/phoenix.php';
+require_once __DIR__.'/../src/phoenix.php';
 require_once $settings['onces'].'once.sanitize.tracker.php';
 
 ////	IF info_hash Valid

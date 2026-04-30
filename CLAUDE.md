@@ -41,12 +41,12 @@ The codebase follows what the changelog calls a "puff-style" layout — small, s
 - **`src/hooks/`** — empty stubs (e.g. `phoenix.peer.new.php`) that operators can fill in. The tracker `include`s them at well-defined lifecycle points only when `is_readable()`. Keep them empty in this repo.
 - **`src/includes/`** — HTML template fragments included by `admin.php` (`install-form.php` + `admin-panel.php`). Distinct from `_onces/` — these are presentation, not logic.
 - **`config/`** — `phoenix.default.php` is the template (do not modify). User configuration goes into `phoenix.custom.php` (gitignored, created by the installer).
-- **`bin/`** — standalone scripts intended for cron (`backup-database.php`, `clean-and-optimize.php`). They `require_once '../../src/phoenix.php'` to bootstrap.
+- **`bin/`** — standalone scripts intended for cron (`backup-database.php`, `clean-and-optimize.php`). They `require_once '../src/phoenix.php'` to bootstrap.
 - **`tests/phoenix/`** — one PHPUnit test class per function/component (see test runner notes below).
 
 ### Entry points
 
-Every entry point sits in `public` and bootstraps via `require_once '../src/phoenix.php'` (which loads settings, opens the DB, defines `tracker_error`):
+Every entry point sits in `public` and bootstraps via `require_once __DIR__.'/../src/phoenix.php'` (which loads settings, opens the DB, defines `tracker_error`):
 
 - `announce.php` — BEP 3 announce. Pulls in sanitization onces, then `once.announce.peer.event.php` (insert/update/delete/access depending on event), then `once.announce.torrent.php` (build response).
 - `scrape.php` — BEP 15 scrape. `?stats` returns tracker stats; with `info_hash`(es) returns specific torrents; otherwise full scrape (if enabled).

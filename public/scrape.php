@@ -2,7 +2,7 @@
 
 // This file defines all the functions we will need.
 // Since it defines things, we need to make sure it isn't loaded twice.
-require_once __DIR__.'/phoenix.php';
+require_once __DIR__.'/../src/phoenix.php';
 require_once $settings['onces'].'once.sanitize.tracker.php';
 
 // IF STATS
