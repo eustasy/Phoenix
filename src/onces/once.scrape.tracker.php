@@ -24,5 +24,6 @@ if (
 ) {
 	tracker_error('Unable to scrape for that torrent.');
 } else {
-	require_once $settings['onces'].'once.scrape.output.php';
+	require_once $settings['functions'].'function.scrape.output.php';
+	scrape_output(array(), $peers, $torrents);
 }
