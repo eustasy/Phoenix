@@ -45,7 +45,10 @@ if ( isset($_GET['stats']) ) {
 		$peer['info_hash'] &&
 		(
 			$settings['open_tracker'] ||
-			in_array($peer['info_hash'], $allowed_torrents)
+			(
+				require_once $settings['functions'].'function.tracker.validate.info.hashes.php',
+				tracker_validate_info_hashes($peer['info_hashes'], $allowed_torrents)
+			)
 		)
 	) {
 		// Perform a Scrape on the torrent.
