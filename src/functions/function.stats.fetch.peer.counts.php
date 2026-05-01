@@ -8,9 +8,9 @@ function stats_fetch_peer_counts($connection, $settings) {
 	require_once $settings['functions'].'function.mysqli.fetch.once.php';
 
 	$sql = 'SELECT '.
-		// select seeders and leechers
-		'SUM(`state`=\'1\') AS `seeders`, '.
-		'SUM(`state`=\'0\') AS `leechers`, '.
+		// select seeders and leechers (COALESCE handles NULL from SUM on empty set)
+		'COALESCE(SUM(`state`=\'1\'), 0) AS `seeders`, '.
+		'COALESCE(SUM(`state`=\'0\'), 0) AS `leechers`, '.
 		// unique torrents
 		'COUNT(DISTINCT info_hash) AS `torrents` '.
 		// from peers
