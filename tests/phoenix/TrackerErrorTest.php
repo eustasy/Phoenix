@@ -12,7 +12,8 @@ class TrackerErrorTest extends PhoenixTestCase {
 		// stdout and exit code.
 		$functionPath = self::$settings['functions'].'function.tracker.error.php';
 		$message      = 'test error';
-		$script       = '<?php require '.var_export($functionPath, true).
+		$script       = '<?php $settings = '.var_export(self::$settings, true).
+			'; require '.var_export($functionPath, true).
 			'; tracker_error('.var_export($message, true).');';
 
 		$tmp = tempnam(sys_get_temp_dir(), 'phx_test_');
