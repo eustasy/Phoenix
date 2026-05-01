@@ -28,6 +28,41 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 5. Load `admin.php` in your browser and run the `Setup` option.
 6. After setup, move `public/admin.php` into `src/` (`mv public/admin.php src/admin.php`) so it stops being web-reachable. Move it back temporarily if you ever need to re-run setup.
 
+## Project Structure
+
+Phoenix follows an MVC-inspired structure optimized for procedural PHP:
+
+```
+phoenix/
+├── public/              # Web-accessible entry points (controllers)
+│   ├── announce.php     # BitTorrent announce endpoint (BEP 3)
+│   ├── scrape.php       # BitTorrent scrape endpoint (BEP 15)
+│   ├── index.php        # Public torrent listing (optional)
+│   ├── admin.php        # Admin panel & installer
+│   └── magnet.php       # Client-side magnet link generator
+├── src/
+│   ├── phoenix.php      # Bootstrap: loads config, connects to DB
+│   ├── functions/       # Business logic helpers (one function per file)
+│   ├── model/           # Database operations (one query function per file)
+│   ├── views/           # Presentation layer (bencode, XML, HTML)
+│   └── hooks/           # User-defined lifecycle hooks (optional)
+├── config/
+│   ├── phoenix.default.php    # Default configuration (DO NOT EDIT)
+│   └── phoenix.custom.php     # Your configuration (gitignored)
+├── bin/                 # Cron maintenance scripts
+│   ├── backup-database.php
+│   └── clean-and-optimize.php
+└── tests/               # PHPUnit test suite
+```
+
+### Architecture Notes
+
+- **Controllers** (`public/*.php`) are thin orchestrators: sanitize input → call model → call view.
+- **Models** (`src/model/*.php`) handle all database operations. Each file exports one function that accepts `$connection`, `$settings`, and domain parameters.
+- **Views** (`src/views/*.php`) handle presentation. Bencode for BitTorrent protocol, HTML for humans, XML/JSON for debugging.
+- **Functions** (`src/functions/*.php`) contain business logic helpers that don't fit cleanly into model or view (sanitization, validation, address parsing, etc.).
+- **Hooks** (`src/hooks/*.php`) are optional operator-defined scripts called at lifecycle points (peer.new, peer.stopped, download.complete, etc.). Keep them empty in this repo.
+
 ## Configuration
 Configuration should take place in `config/phoenix.custom.php`, NOT `config/phoenix.default.php`. Phoenix _will_ attempt to use the default configuration if yours is missing.
 

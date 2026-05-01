@@ -36,11 +36,10 @@ CI runs the workflow in `.github/workflows/normal.yml` against PHP 8.3–8.6. It
 
 The codebase follows what the changelog calls a "puff-style" layout — small, single-purpose files glued together by `require_once`:
 
-- **`src/functions/`** — one function per file. File `function.peer.new.php` defines `peer_new()`. Functions are pure-ish PHP (no top-level execution beyond defining the function). When extracting logic from a once, prefer this layout: one function per file, `////    <function_name>` header comment, then a brief description, then the function.
-- **`src/model/`** — database operations. One function per file, each returns results or false.
-- **`src/views/`** — presentation layer. Bencode, XML, and HTML output functions.
+- **`src/functions/`** — one function per file. File `function.peer.new.php` defines `peer_new()`. Functions are pure-ish PHP (no top-level execution beyond defining the function). Business logic helpers: sanitization, validation, address parsing, peer selection strategies, etc. One function per file, `////    <function_name>` header comment, then a brief description, then the function.
+- **`src/model/`** — database operations. One function per file, each returns results or false. All queries live here.
+- **`src/views/`** — presentation layer. Bencode, XML, and HTML output functions. Receives normalized data arrays, never raw DB results or `$_GET`/`$_POST`.
 - **`src/hooks/`** — empty stubs (e.g. `phoenix.peer.new.php`) that operators can fill in. The tracker calls `phoenix_hook()` at well-defined lifecycle points; that helper checks `is_readable()` and `include`s the hook from inside its own scope. Hooks therefore see exactly `$connection`, `$settings`, `$time`, and `$peer` (the last passed by reference, so mutations propagate). Keep them empty in this repo.
-- **`src/includes/`** — HTML template fragments included by `admin.php` (`install-form.php` + `admin-panel.php`). Distinct from `src/onces/` — these are presentation, not logic.
 - **`config/`** — `phoenix.default.php` is the template (do not modify). User configuration goes into `phoenix.custom.php` (gitignored, created by the installer).
 - **`bin/`** — standalone scripts intended for cron (`backup-database.php`, `clean-and-optimize.php`). They `require_once '../src/phoenix.php'` to bootstrap.
 - **`tests/phoenix/`** — one PHPUnit test class per function/component (see test runner notes below).
@@ -57,7 +56,7 @@ Every entry point sits in `public` and bootstraps via `require_once __DIR__.'/..
 
 ### Web exposure
 
-Only `public/` is meant to be web-served. The PDS layout puts `src/` (functions, onces, hooks, includes), `bin/` (cron scripts), `config/` (database credentials in `phoenix.custom.php`), and `tests/` one level above the document root, so when the server is configured correctly none of them are reachable over HTTP. This obviates the explicit deny rules earlier versions of Phoenix needed for the pre-PDS underscore-prefixed directories (`_functions/`, `_onces/`, etc.) — those rules are no longer relevant. Server-config docs live in `APACHE.md` and `NGINX.md`; both also cover stripping `.php` from URLs and rate-limiting the admin endpoint.
+Only `public/` is meant to be web-served. The PDS layout puts `src/` (functions, model, views, hooks), `bin/` (cron scripts), `config/` (database credentials in `phoenix.custom.php`), and `tests/` one level above the document root, so when the server is configured correctly none of them are reachable over HTTP. Server-config docs live in `APACHE.md` and `NGINX.md`; both cover document root configuration, stripping `.php` from URLs, and rate-limiting the admin endpoint.
 
 ### Bootstrap (`src/phoenix.php`)
 
