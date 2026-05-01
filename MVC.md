@@ -12,18 +12,33 @@ All output/presentation logic. Organized by format type.
 ```
 src/
   views/
-    bencode.error.php       # Tracker error responses (d14:failure reason...e)
-                            # Currently: function.tracker.error.php
+    bencode.error.php       # ✓ CREATED: view_error_bencode($error)
+                            # Tracker error responses (d14:failure reason...e)
+                            # Replaces: function.tracker.error.php (inline echo)
                             # Used by: all endpoints on fatal errors
     
-    bencode.announce.php    # Announce responses (peer lists, interval, counts)
-                            # Currently: once.announce.torrent.php (inline bencode string building)
+    bencode.announce.php    # ✓ CREATED: view_announce_bencode($counts, $settings, $rows, $compact, $no_peer_id)
+                            # Announce responses (peer lists, interval, counts)
+                            # Replaces: once.announce.torrent.php (inline bencode building)
                             # Used by: announce.php
     
-    bencode.scrape.php      # Scrape responses (per BEP 15)
-                            # Currently: function.scrape.render.bencode.php
+    bencode.scrape.php      # ✓ CREATED: view_scrape_bencode($scrape)
+                            # Scrape responses (per BEP 15)
+                            # Replaces: function.scrape.render.bencode.php
                             # Used by: scrape.php (default format)
 ```
+
+#### Bencode Implementation Notes
+- **Error format**: `d14:failure reason<len>:<msg>e` — single key-value dict
+- **Announce format**: Dict with keys in lexicographic order:
+  - `complete` (int), `incomplete` (int), `interval` (int), `min interval` (int), `peers`
+  - Compact mode (BEP 23/7): `peers` is binary string (6 bytes/IPv4, 18 bytes/IPv6), `peers6` for IPv6
+  - Non-compact mode: `peers` is list of dicts, each with `ip`, `port`, optional `peer id` (20 bytes raw)
+- **Scrape format**: `d5:filesd20:<raw_hash>d8:complete<i>e10:downloaded<i>e10:incomplete<i>eeee`
+  - Info_hash is raw 20-byte binary (hex2bin), NOT 40-char hex
+  - Multiple torrents nest more hash→stats dicts inside the `files` dict
+- **Bencode rules**: Keys must be sorted lexicographically, strings are `<len>:<data>`, integers are `i<num>e`, lists are `l...e`, dicts are `d...e`
+- **Critical**: Never echo directly in view functions — return the bencode string. Caller handles output + exit.
 
 ### XML Views (simple format converters)
 ```

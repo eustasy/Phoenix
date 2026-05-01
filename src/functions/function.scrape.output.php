@@ -18,7 +18,7 @@ function scrape_output($scrape, $peers = null, $torrents = null) {
 		header('Content-Type: application/json');
 		echo scrape_render_json($scrape);
 	} else {
-		require_once $GLOBALS['settings']['functions'].'function.scrape.render.bencode.php';
-		echo scrape_render_bencode($scrape);
+		require_once $GLOBALS['settings']['views'].'bencode.scrape.php';
+		echo view_scrape_bencode($scrape);
 	}
 }

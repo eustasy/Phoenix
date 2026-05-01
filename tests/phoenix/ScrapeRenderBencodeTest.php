@@ -8,7 +8,7 @@ class ScrapeRenderBencodeTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.scrape.render.bencode.php';
+		require_once self::$settings['views'].'bencode.scrape.php';
 	}
 
 	/** @return array<string, array<string, int|string>> */
@@ -27,26 +27,26 @@ class ScrapeRenderBencodeTest extends PhoenixTestCase {
 	}
 
 	public function testStartsWithFilesDictKey(): void {
-		$out = scrape_render_bencode($this->fixture());
+		$out = view_scrape_bencode($this->fixture());
 		$this->assertStringStartsWith('d5:files', $out);
 	}
 
 	public function testInfoHashEncodedAsRawTwentyBytes(): void {
-		$out = scrape_render_bencode($this->fixture());
+		$out = view_scrape_bencode($this->fixture());
 		// BEP 15: key is the raw 20-byte info_hash, prefixed by '20:'.
 		$rawHash = hex2bin('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
 		$this->assertStringContainsString('20:'.$rawHash, $out);
 	}
 
 	public function testStatsDictUsesBepKeysAndCounts(): void {
-		$out = scrape_render_bencode($this->fixture());
+		$out = view_scrape_bencode($this->fixture());
 		$this->assertStringContainsString('8:completei2e',     $out);
 		$this->assertStringContainsString('10:downloadedi7e',  $out);
 		$this->assertStringContainsString('10:incompletei1e',  $out);
 	}
 
 	public function testSingleTorrentMatchesExactBencode(): void {
-		$out = scrape_render_bencode($this->fixture());
+		$out = view_scrape_bencode($this->fixture());
 		$rawHash  = hex2bin('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
 		$expected = 'd5:files'.
 			'd20:'.$rawHash.
@@ -59,7 +59,7 @@ class ScrapeRenderBencodeTest extends PhoenixTestCase {
 		// Boundary: with no torrents, the files dict stays empty but the outer
 		// dict still closes. Documents current behaviour rather than asserting
 		// canonical bencode validity for the zero-torrent edge case.
-		$out = scrape_render_bencode(array());
+		$out = view_scrape_bencode(array());
 		$this->assertSame('d5:filese', $out);
 	}
 
