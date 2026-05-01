@@ -8,7 +8,7 @@ class TaskOptimizeTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.task.optimize.php';
+		require_once self::$settings['model'].'db.optimize.php';
 	}
 
 	public function testOptimizesDefaultTables(): void {

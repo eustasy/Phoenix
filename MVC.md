@@ -266,9 +266,10 @@ src/
                             # Replaced: function.mysqli.drop.table.php
                             # Used by: admin reset, installer cleanup
     
-    db.optimize.php         # CHECK/ANALYZE/REPAIR/OPTIMIZE tables
-                            # Currently: function.task.optimize.php
-                            # Used by: admin panel, cron
+    db.optimize.php         # ✓ CREATED: task_optimize($connection, $settings, $time, $table = false, $and_default = true)
+                            # CHECK/ANALYZE/REPAIR/OPTIMIZE tables
+                            # Replaced: function.task.optimize.php
+                            # Used by: admin panel, cron, bin/clean-and-optimize.php
 ```
 
 ### Utility Helpers (not domain models, but DB utilities)

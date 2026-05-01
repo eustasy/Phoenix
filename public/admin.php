@@ -121,7 +121,7 @@ if (
 	}
 
 } else if ( $process == 'optimize' ) {
-	require_once $settings['functions'].'function.task.optimize.php';
+	require_once $settings['model'].'db.optimize.php';
 	if ( task_optimize($connection, $settings, $time) ) {
 		$Message = 'Your MySQL Tracker Database has been optimized.';
 	} else {
