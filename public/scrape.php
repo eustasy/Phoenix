@@ -27,8 +27,9 @@ if ( isset($_GET['stats']) ) {
 
 	// XML
 	if ( isset($_GET['xml']) ) {
-		require_once $settings['functions'].'function.stats.render.xml.php';
-		stats_render_xml($stats, $settings);
+		require_once $settings['views'].'xml.stats.php';
+		header('Content-Type: text/xml');
+		echo view_stats_xml($stats, $settings);
 
 	// JSON
 	} else if ( isset($_GET['json']) ) {

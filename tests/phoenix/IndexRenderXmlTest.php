@@ -8,7 +8,7 @@ class IndexRenderXmlTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.index.render.xml.php';
+		require_once self::$settings['views'].'xml.index.php';
 	}
 
 	/** @return list<array<string, mixed>> */
@@ -26,18 +26,18 @@ class IndexRenderXmlTest extends PhoenixTestCase {
 	}
 
 	public function testEmptyIndexYieldsEmptyTorrentsElement(): void {
-		$xml = index_render_xml(array());
+		$xml = view_index_xml(array());
 		$this->assertSame('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><torrents></torrents>', $xml);
 	}
 
 	public function testOutputWrappedInTorrentsElement(): void {
-		$xml = index_render_xml($this->fixture());
+		$xml = view_index_xml($this->fixture());
 		$this->assertStringStartsWith('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><torrents>', $xml);
 		$this->assertStringEndsWith('</torrents>', $xml);
 	}
 
 	public function testSingleTorrentRendersAllFields(): void {
-		$xml = index_render_xml($this->fixture());
+		$xml = view_index_xml($this->fixture());
 		$this->assertStringContainsString('<info_hash>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</info_hash>', $xml);
 		$this->assertStringContainsString('<name>Test Torrent</name>', $xml);
 		$this->assertStringContainsString('<size>1024</size>', $xml);
@@ -55,7 +55,7 @@ class IndexRenderXmlTest extends PhoenixTestCase {
 			'size'      => 0, 'downloads' => 0, 'seeders' => 0,
 			'leechers'  => 0, 'peers'     => 0, 'traffic' => 0,
 		));
-		$xml = index_render_xml($index);
+		$xml = view_index_xml($index);
 		$this->assertStringContainsString('<name>A &amp; B &lt;Test&gt;</name>', $xml);
 		$this->assertStringNotContainsString('<name>A & B', $xml);
 	}
@@ -68,7 +68,7 @@ class IndexRenderXmlTest extends PhoenixTestCase {
 			'size'      => 0, 'downloads' => 0, 'seeders' => 0,
 			'leechers'  => 0, 'peers'     => 0, 'traffic' => 0,
 		);
-		$xml = index_render_xml($index);
+		$xml = view_index_xml($index);
 		$this->assertSame(2, substr_count($xml, '<torrent>'));
 		$this->assertStringContainsString('<info_hash>bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb</info_hash>', $xml);
 	}

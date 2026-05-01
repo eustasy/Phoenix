@@ -8,7 +8,7 @@ class ScrapeRenderXmlTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.scrape.render.xml.php';
+		require_once self::$settings['views'].'xml.scrape.php';
 	}
 
 	/** @return array<string, array<string, int|string>> */
@@ -27,12 +27,12 @@ class ScrapeRenderXmlTest extends PhoenixTestCase {
 	}
 
 	public function testEmptyScrapeYieldsHeaderOnly(): void {
-		$xml = scrape_render_xml(array());
+		$xml = view_scrape_xml(array());
 		$this->assertSame('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', $xml);
 	}
 
 	public function testSingleTorrentRendersAllFields(): void {
-		$xml = scrape_render_xml($this->fixture());
+		$xml = view_scrape_xml($this->fixture());
 		$this->assertStringStartsWith('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', $xml);
 		$this->assertStringContainsString('<info_hash>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</info_hash>', $xml);
 		$this->assertStringContainsString('<seeders>2</seeders>', $xml);
@@ -44,7 +44,7 @@ class ScrapeRenderXmlTest extends PhoenixTestCase {
 	}
 
 	public function testWrappingTorrentTagsArePresent(): void {
-		$xml = scrape_render_xml($this->fixture());
+		$xml = view_scrape_xml($this->fixture());
 		$this->assertSame(1, substr_count($xml, '<torrent>'));
 		$this->assertSame(1, substr_count($xml, '</torrent>'));
 	}
@@ -56,7 +56,7 @@ class ScrapeRenderXmlTest extends PhoenixTestCase {
 			'seeders'   => 0, 'leechers' => 5, 'peers' => 5,
 			'size'      => 0, 'downloads' => 0, 'traffic' => 0,
 		);
-		$xml = scrape_render_xml($scrape);
+		$xml = view_scrape_xml($scrape);
 		$this->assertSame(2, substr_count($xml, '<torrent>'));
 		$this->assertStringContainsString('<info_hash>bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb</info_hash>', $xml);
 	}

@@ -4,9 +4,9 @@
 // Accepts $scrape array and outputs directly.
 
 require_once $settings['functions'].'function.scrape.merge.results.php';
-require_once $settings['functions'].'function.scrape.render.xml.php';
 require_once $settings['functions'].'function.scrape.render.json.php';
 require_once $settings['views'].'bencode.scrape.php';
+require_once $settings['views'].'xml.scrape.php';
 
 function scrape_output($scrape, $peers = null, $torrents = null) {
 	if ($peers && $torrents) {
@@ -14,7 +14,7 @@ function scrape_output($scrape, $peers = null, $torrents = null) {
 	}
 	if (isset($_GET['xml'])) {
 		header('Content-Type: text/xml');
-		echo scrape_render_xml($scrape);
+		echo view_scrape_xml($scrape);
 	} elseif (isset($_GET['json'])) {
 		header('Content-Type: application/json');
 		echo scrape_render_json($scrape);

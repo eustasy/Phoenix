@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 class StatsRenderXmlTest extends TestCase {
 
 	public function testRenderXml() {
-		require_once __DIR__.'/../../src/functions/function.stats.render.xml.php';
+		require_once __DIR__.'/../../src/views/xml.stats.php';
 
 		$stats = array(
 			'peers' => 15,
@@ -19,9 +19,7 @@ class StatsRenderXmlTest extends TestCase {
 		);
 		$settings = array('phoenix_version' => '1.0.0');
 
-		ob_start();
-		stats_render_xml($stats, $settings);
-		$output = ob_get_clean();
+		$output = view_stats_xml($stats, $settings);
 
 		$this->assertStringContainsString('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', $output);
 		$this->assertStringContainsString('<tracker version="$Id: 1.0.0 $">', $output);

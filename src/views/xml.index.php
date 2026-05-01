@@ -2,15 +2,28 @@
 
 declare(strict_types=1);
 
-////	index_render_xml
-// Renders a normalised $index array as the XML form of a torrent index response.
+////	view_index_xml
+// Renders a normalized $index array as XML torrent index response.
 // Caller is responsible for emitting the Content-Type header.
-function index_render_xml(array $index): string {
+//
+// Arguments:
+//   $index: array of torrents, each with:
+//           - info_hash: string (40-char hex)
+//           - name: string
+//           - size: int
+//           - downloads: int
+//           - seeders: int
+//           - leechers: int
+//           - peers: int
+//           - traffic: int
+//
+// Returns: XML string.
+function view_index_xml(array $index): string {
 	$xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><torrents>';
 	foreach ( $index as $torrent ) {
 		$xml .= '<torrent>'.
 			'<info_hash>'.$torrent['info_hash'].'</info_hash>'.
-			'<name>'.htmlspecialchars($torrent['name']).'</name>'.
+			'<name>'.htmlspecialchars($torrent['name'], ENT_XML1, 'UTF-8').'</name>'.
 			'<size>'.$torrent['size'].'</size>'.
 			'<downloads>'.$torrent['downloads'].'</downloads>'.
 			'<seeders>'.$torrent['seeders'].'</seeders>'.

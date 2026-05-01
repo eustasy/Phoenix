@@ -44,20 +44,24 @@ src/
 ```
 src/
   views/
-    xml.announce.php        # Announce response as XML (for debugging/monitoring)
-                            # Currently: does not exist
+    xml.announce.php        # ✓ CREATED: view_announce_xml($counts, $settings, $rows)
+                            # Announce response as XML (for debugging/monitoring)
+                            # NEW - did not previously exist
                             # Used by: announce.php?xml (if implemented)
     
-    xml.index.php           # Torrent index as XML
-                            # Currently: function.index.render.xml.php
+    xml.index.php           # ✓ CREATED: view_index_xml($index)
+                            # Torrent index as XML
+                            # Replaces: function.index.render.xml.php
                             # Used by: index.php?xml
     
-    xml.scrape.php          # Scrape data as XML
-                            # Currently: function.scrape.render.xml.php
+    xml.scrape.php          # ✓ CREATED: view_scrape_xml($scrape)
+                            # Scrape data as XML
+                            # Replaces: function.scrape.render.xml.php
                             # Used by: scrape.php?xml
     
-    xml.stats.php           # Tracker stats as XML
-                            # Currently: function.stats.render.xml.php
+    xml.stats.php           # ✓ CREATED: view_stats_xml($stats, $settings)
+                            # Tracker stats as XML
+                            # Replaces: function.stats.render.xml.php
                             # Used by: scrape.php?stats&xml
 ```
 

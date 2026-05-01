@@ -2,10 +2,22 @@
 
 declare(strict_types=1);
 
-////	scrape_render_xml
-// Renders a normalised $scrape array as the XML form of a scrape response.
+////	view_scrape_xml
+// Renders a normalized $scrape array as XML scrape response.
 // Caller is responsible for emitting the Content-Type header.
-function scrape_render_xml(array $scrape): string {
+//
+// Arguments:
+//   $scrape: array of torrents indexed by info_hash (40-char hex), each with:
+//            - info_hash: string (40-char hex)
+//            - seeders: int
+//            - leechers: int
+//            - peers: int
+//            - size: int
+//            - downloads: int
+//            - traffic: int
+//
+// Returns: XML string.
+function view_scrape_xml(array $scrape): string {
 	$xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
 	foreach ( $scrape as $torrent ) {
 		$xml .= '<torrent>'.

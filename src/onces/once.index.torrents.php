@@ -35,9 +35,9 @@ while ( $row = mysqli_fetch_assoc($result) ) {
 
 // XML
 if ( isset($_GET['xml']) ) {
-	require_once $settings['functions'].'function.index.render.xml.php';
+	require_once $settings['views'].'xml.index.php';
 	header('Content-Type: text/xml');
-	echo index_render_xml($index);
+	echo view_index_xml($index);
 
 // JSON
 } else if ( isset($_GET['json']) ) {
