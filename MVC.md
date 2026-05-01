@@ -219,3 +219,374 @@ src/
 - **Sanitization happens before model**: Models trust their inputs are already sanitized. The `info_hash` and `peer_id` are hex strings (sanitized by `maybe_binary_to_hex` at the boundary).
 - **Multi-table cleanup**: `task.clean.php` currently deletes from 3 tables in one call. Consider splitting into `peers.clean.php`, `torrents.clean.php`, `tasks.clean.php` or keep as orchestrator.
 - **Test sentinels**: Cleanup queries include `OR field='DELETEME'` / `OR field LIKE '__TEST_%'` patterns for test isolation. Preserve these in extracted model functions.
+
+## Controller
+
+HTTP request handlers in `public/`. Each file orchestrates: sanitize input → call model → call view. Logic from `src/onces/` gets absorbed directly into these files.
+
+### `public/announce.php` - BitTorrent Announce Endpoint (BEP 3)
+**Current flow:**
+1. Bootstrap (`require_once ../src/phoenix.php`)
+2. Sanitize tracker params (`sanitize_tracker_params()`)
+3. Validate info_hash (40 hex chars)
+4. Check torrent allowed (if closed tracker)
+5. Validate peer_id (40 hex chars)
+6. `once.sanitize.announce.address.php` → resolve IP addresses & ports
+7. Parse optional params (`peer_parse_announce_optional()`)
+8. Rate limiting (`announce_check_rate_limit()`)
+9. `once.announce.peer.event.php` → handle peer events
+10. Cleanup (if probabilistic)
+11. `once.announce.torrent.php` → build response
+
+**Refactored flow (absorb onces):**
+```php
+// Bootstrap
+require_once __DIR__.'/../src/phoenix.php';
+
+// Sanitization & validation
+$peer = sanitize_tracker_params();
+validate_info_hash($peer['info_hash'], $allowed_torrents, $settings);
+validate_peer_id($peer['peer_id']);
+
+// Address resolution (absorb once.sanitize.announce.address.php)
+$addresses = peer_address_candidates($settings, $_GET, $_SERVER);
+$resolved = peer_resolve_addresses($addresses);
+$peer = array_merge($peer, $resolved);
+validate_addresses($peer); // ensure ipv4/portv4 or ipv6/portv6
+
+// Optional params
+$peer = array_merge($peer, peer_parse_announce_optional($_GET, $settings));
+
+// Rate limiting
+announce_check_rate_limit($connection, $settings, $peer, $time);
+
+// Event handling (absorb once.announce.peer.event.php)
+$event = $_GET['event'] ?? null;
+$peer['old'] = peer_select($connection, $settings, $peer); // MODEL
+
+if ($event === 'stopped') {
+    peer_delete($connection, $settings, $peer); // MODEL
+    phoenix_hook('peer.stopped', $connection, $settings, $time, $peer);
+    exit;
+}
+
+if ($event === 'completed') {
+    $peer['state'] = 1;
+    torrent_upsert($connection, $settings, $peer); // MODEL (increment downloads)
+    phoenix_hook('download.complete', $connection, $settings, $time, $peer);
+}
+
+if (peer_changed($peer, $peer['old'])) {
+    peer_insert($connection, $settings, $time, $peer); // MODEL (REPLACE)
+    phoenix_hook($peer['old'] ? 'peer.change' : 'peer.new', $connection, $settings, $time, $peer);
+} else {
+    peer_update($connection, $settings, $time, $peer); // MODEL (UPDATE timestamp only)
+    phoenix_hook('peer.access', $connection, $settings, $time, $peer);
+}
+
+// Cleanup
+if (!$settings['clean_with_cron'] && $chance <= $settings['clean_with_requests']) {
+    task_clean($connection, $settings, $time); // MODEL
+}
+
+// Build response (absorb once.announce.torrent.php)
+$stale_threshold = $time - ($settings['announce_interval'] + $settings['min_interval']);
+$counts = peers_count_swarm($connection, $settings, $peer['info_hash'], $stale_threshold); // MODEL
+$strategy = peer_select_strategy($peer, $counts['complete'], $counts['incomplete'], $settings);
+$rows = peers_select_active($connection, $settings, $peer, $stale_threshold, $strategy); // MODEL
+
+// Render (VIEW - bencode.announce.php)
+echo view_announce_bencode($peer, $counts, $rows, $settings);
+```
+
+**Business logic helpers used (not model/view):**
+- `sanitize_tracker_params()` - parse/sanitize `$_GET` into `$peer` array
+- `validate_info_hash()`, `validate_peer_id()`, `validate_addresses()` - input validation
+- `peer_address_candidates()` - gather candidate IPs from `$_GET`, `$_SERVER`
+- `peer_resolve_addresses()` - parse IPv4/IPv6 addresses with ports
+- `peer_parse_announce_optional()` - parse `numwant`, `compact`, `no_peer_id`, etc.
+- `peer_changed()` - compare old/new peer state to decide insert vs update
+- `peer_select_strategy()` - decide ORDER BY + WHERE for peer selection
+- `phoenix_hook()` - call user hooks if enabled
+
+---
+
+### `public/scrape.php` - BitTorrent Scrape Endpoint (BEP 15) + Stats
+**Current flow:**
+1. Bootstrap
+2. Sanitize tracker params
+3. **IF `?stats`**: fetch stats, render (HTML/JSON/XML)
+4. **ELSE IF** specific torrents: build WHERE, query, render bencode scrape
+5. **ELSE IF** full scrape allowed: query all, render bencode scrape
+6. **ELSE**: error
+
+**Refactored flow (inline logic):**
+```php
+require_once __DIR__.'/../src/phoenix.php';
+
+$peer = sanitize_tracker_params();
+
+// STATS mode
+if (isset($_GET['stats'])) {
+    $peer_counts = stats_peers($connection, $settings); // MODEL
+    $download_totals = stats_downloads($connection, $settings); // MODEL
+    $stats = stats_merge($peer_counts, $download_totals);
+    
+    if (!$stats) tracker_error('Unable to get stats.');
+    
+    if (isset($_GET['xml'])) {
+        header('Content-Type: text/xml');
+        echo scrape_render_xml($stats); // inline function
+    } else if (isset($_GET['json'])) {
+        header('Content-Type: application/json');
+        echo json_encode($stats);
+    } else {
+        echo view_stats_html($stats, $settings); // VIEW
+    }
+    exit;
+}
+
+// SCRAPE mode (specific torrents)
+if ($peer['info_hash'] && (
+    $settings['open_tracker'] || 
+    in_array($peer['info_hash'], $allowed_torrents)
+)) {
+    $where = scrape_build_where_clause($peer['info_hashes']);
+    $scrape = scrape_initialize_results($peer['info_hashes']);
+    
+    $peers = peers_scrape($connection, $settings, $where); // MODEL
+    $torrents = torrents_scrape($connection, $settings, $where); // MODEL
+    
+    if (!$peers || !$torrents) tracker_error('Unable to scrape for that torrent.');
+    
+    $scrape = scrape_merge_results($peers, $torrents, $scrape);
+    echo view_scrape_bencode($scrape); // VIEW
+    exit;
+}
+
+// FULL SCRAPE mode
+if ($settings['full_scrape']) {
+    $peers = peers_scrape_all($connection, $settings); // MODEL
+    $torrents = torrents_scrape_all($connection, $settings); // MODEL
+    
+    if (!$peers || !$torrents) tracker_error('Unable to scrape for that torrent.');
+    
+    $scrape = scrape_merge_results($peers, $torrents);
+    echo view_scrape_bencode($scrape); // VIEW
+    exit;
+}
+
+// Not allowed
+tracker_error($peer['info_hash'] ? 'Torrent is not allowed.' : 'Tracker scraping is not allowed.');
+```
+
+**Business logic helpers:**
+- `scrape_build_where_clause()` - build WHERE clause for multiple info_hashes
+- `scrape_initialize_results()` - pre-fill zeroed scrape entries for requested hashes
+- `scrape_merge_results()` - merge peer counts + torrent metadata into scrape array
+- `stats_merge()` - merge peer counts + download totals
+- `scrape_render_xml()`, `json_encode()` - inline format conversions (not separate views)
+
+---
+
+### `public/index.php` - Public Torrent Index
+**Current flow:**
+1. Bootstrap
+2. Check `$settings['public_index']` or error
+3. `once.index.torrents.php` → query + render
+
+**Refactored flow:**
+```php
+require_once __DIR__.'/../src/phoenix.php';
+
+if (!$settings['public_index']) {
+    tracker_error('Index is not public.');
+}
+
+// Query (absorb once.index.torrents.php query)
+$index = torrents_select_listed($connection, $settings); // MODEL
+if (!$index) tracker_error('Unable to get index.');
+
+// Render
+if (isset($_GET['xml'])) {
+    header('Content-Type: text/xml');
+    echo index_render_xml($index); // inline function
+} else if (isset($_GET['json'])) {
+    header('Content-Type: application/json');
+    echo json_encode($index);
+} else {
+    echo view_index_html($index); // VIEW
+}
+```
+
+**Business logic helpers:**
+- None (just model + view)
+
+---
+
+### `public/admin.php` - Admin Panel & Installer
+**Current flow:**
+1. Bootstrap paths (before DB connection for installer)
+2. **IF no config exists**: `once.install.php` → render install form
+3. **ELSE**: full bootstrap, `once.auth.php` → authenticate
+4. Process POST actions (setup, clean, optimize)
+5. Render admin panel
+
+**Refactored flow:**
+```php
+// Pre-bootstrap (paths only, no DB)
+$settings['root'] = __DIR__.'/../';
+$settings['functions'] = $settings['root'].'src/functions/';
+// ...
+require_once $settings['functions'].'function.tracker.error.php';
+
+$config_path = $settings['settings'].'phoenix.custom.php';
+
+// INSTALLER MODE (absorb once.install.php logic)
+if (!is_readable($config_path)) {
+    error_reporting(0);
+    $settings_writable = is_writable($settings['settings']);
+    $install_error = null;
+    
+    if ($_POST['process'] === 'install' && $settings_writable) {
+        $config = install_sanitize_post($_POST);
+        $db_test = install_test_connection($config);
+        if ($db_test === true) {
+            install_build_config($config); // writes phoenix.custom.php
+            header('Location: admin.php?installed=1');
+            exit;
+        }
+        $install_error = $db_test; // error string
+    }
+    
+    echo view_install_html($settings_writable, $install_error, $_POST); // VIEW
+    exit;
+}
+
+// NORMAL MODE - full bootstrap
+require_once __DIR__.'/../src/phoenix.php';
+
+// AUTH (absorb once.auth.php logic)
+if (!empty($settings['admin_password'])) {
+    session_start();
+    
+    if (isset($_GET['logout'])) {
+        auth_handle_logout();
+    }
+    
+    if (!auth_is_authenticated()) {
+        $login_error = isset($_POST['process']) && $_POST['process'] === 'login';
+        if ($login_error && auth_verify_login($settings)) {
+            auth_set_authenticated();
+            header('Location: '.$_SERVER['REQUEST_URI']);
+            exit;
+        }
+        echo view_login_html($login_error); // VIEW
+        exit;
+    }
+}
+
+// PROCESS ACTIONS
+$process = htmlentities($_POST['process'] ?? '', ENT_QUOTES, 'UTF-8');
+
+if ($process === 'setup') {
+    if ($settings['db_reset']) db_drop_all($connection, $settings); // MODEL
+    db_create($connection, $settings); // MODEL
+    task_log($connection, $settings, 'install', $time); // MODEL
+    $Message = 'Your MySQL Tracker Database has been setup.';
+}
+
+if ($process === 'clean') {
+    task_clean($connection, $settings, $time); // MODEL
+    $Message = 'The peers list has been cleaned.';
+}
+
+if ($process === 'optimize') {
+    db_optimize($connection, $settings, $time); // MODEL
+    $Message = 'Your MySQL Tracker Database has been optimized.';
+}
+
+// RENDER PANEL
+echo view_admin_html($connection, $settings, $Message ?? null); // VIEW
+```
+
+**Business logic helpers:**
+- `install_sanitize_post()` - sanitize installer form input
+- `install_test_connection()` - test DB credentials before writing config
+- `install_build_config()` - write `phoenix.custom.php`
+- `auth_*()` functions - session-based authentication
+
+---
+
+### `public/magnet.php` - Magnet Link Generator (non-tracker utility)
+**No changes needed** - already self-contained, doesn't bootstrap Phoenix.
+
+---
+
+### Business Logic Functions (neither model nor view)
+
+These stay in `src/functions/` as helpers called by controllers:
+
+**Input Sanitization & Validation:**
+- `sanitize_tracker_params()` - parse `$_GET` into normalized `$peer` array
+- `sanitize_maybe_binary_to_hex()` - convert binary info_hash/peer_id to hex
+- `validate_*()` - validation checks (can be new or absorbed into sanitize functions)
+- `install_sanitize_post()` - sanitize installer form
+
+**Address/IP Handling:**
+- `peer_address_candidates()` - gather candidate IPs from request
+- `peer_resolve_addresses()` - parse IPv4/IPv6 with ports
+- `parse_ipv4()`, `parse_ipv6()` - low-level IP parsing
+
+**Peer Logic:**
+- `peer_parse_announce_optional()` - parse announce query string params
+- `peer_changed()` - diff old/new peer to decide insert vs update
+- `peer_select_strategy()` - decide peer selection strategy (ORDER BY)
+- `peer_format_bencode()` - format single peer as bencode dict
+- `peers_format_compact()` - format peer list as compact binary
+
+**Scrape Helpers:**
+- `scrape_build_where_clause()` - build WHERE for multiple info_hashes
+- `scrape_initialize_results()` - pre-fill zero results for missing torrents
+- `scrape_merge_results()` - merge peer/torrent query results
+
+**Stats Helpers:**
+- `stats_merge()` - merge peer counts + download totals
+
+**Auth:**
+- `auth_is_authenticated()`, `auth_verify_login()`, `auth_set_authenticated()`, `auth_handle_logout()`
+
+**Hooks:**
+- `phoenix_hook()` - call user-defined hook scripts
+
+**Install:**
+- `install_build_config()` - write config file
+
+**Rate Limiting:**
+- `announce_check_rate_limit()` - enforce per-IP announce limits
+
+---
+
+### What Happens to `src/onces/`?
+
+All onces get absorbed into `public/` controllers:
+- `once.announce.peer.event.php` → absorbed into `announce.php`
+- `once.announce.torrent.php` → absorbed into `announce.php`
+- `once.sanitize.announce.address.php` → absorbed into `announce.php`
+- `once.index.torrents.php` → absorbed into `index.php`
+- `once.auth.php` → absorbed into `admin.php`
+- `once.install.php` → absorbed into `admin.php`
+- `once.db.connect.php` → stays in `src/phoenix.php` (bootstrap)
+- `once.scrape.torrent.php` → doesn't exist / unused
+
+The `src/onces/` directory can be deleted after refactoring.
+
+---
+
+### Notes
+- **Controllers are thin orchestrators** - just sanitize → model → view flow.
+- **No routing layer** - each `public/*.php` is a single endpoint.
+- **Validation errors call `tracker_error()`** - bencode error response + exit.
+- **Business logic stays in `src/functions/`** - controllers call these helpers.
+- **Hooks remain procedural** - `phoenix_hook()` checks file existence and includes it.
+- **Keep top-to-bottom readability** - inline the onces logic directly so you can read the flow without jumping between files.
