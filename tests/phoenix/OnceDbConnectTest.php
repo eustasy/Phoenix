@@ -96,6 +96,7 @@ class OnceDbConnectTest extends PhoenixTestCase {
 			'$settings = array('.PHP_EOL.
 			'    \'functions\' => '.var_export(self::$settings['functions'], true).','.PHP_EOL.
 			'    \'onces\'     => '.var_export(self::$settings['onces'], true).','.PHP_EOL.
+			'    \'views\'     => '.var_export(self::$settings['views'], true).','.PHP_EOL.
 			'    \'db_host\'   => \'127.0.0.1\','.PHP_EOL.
 			'    \'db_user\'   => \'__phx_no_such_user__\','.PHP_EOL.
 			'    \'db_pass\'   => \'wrong\','.PHP_EOL.
@@ -120,6 +121,7 @@ class OnceDbConnectTest extends PhoenixTestCase {
 			'$settings = array('.PHP_EOL.
 			'    \'functions\' => '.var_export(self::$settings['functions'], true).','.PHP_EOL.
 			'    \'onces\'     => '.var_export(self::$settings['onces'], true).','.PHP_EOL.
+			'    \'views\'     => '.var_export(self::$settings['views'], true).','.PHP_EOL.
 			'    \'db_host\'   => \'\','.PHP_EOL.
 			'    \'db_user\'   => \'\','.PHP_EOL.
 			'    \'db_name\'   => \'\','.PHP_EOL.

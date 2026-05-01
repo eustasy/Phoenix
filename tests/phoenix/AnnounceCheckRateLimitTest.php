@@ -171,6 +171,7 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 	private function assertRateLimitErrorInSubprocess($peer) {
 		$functionPath = self::$settings['functions'].'function.announce.check.rate.limit.php';
 		$script = '<?php '.
+			'$settings = '.var_export(self::$settings, true).'; '.
 			'$connection = mysqli_connect('.
 			var_export(self::$settings['db_host'], true).', '.
 			var_export(self::$settings['db_user'], true).', '.
@@ -179,7 +180,7 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 			'); '.
 			'require '.var_export(self::$settings['functions'].'function.tracker.error.php', true).'; '.
 			'require '.var_export($functionPath, true).'; '.
-			'announce_check_rate_limit($connection, '.var_export(self::$settings, true).', '.
+			'announce_check_rate_limit($connection, $settings, '.
 			var_export($peer, true).', '.var_export(self::$time, true).');';
 
 		$tmp = tempnam(sys_get_temp_dir(), 'phx_test_');
