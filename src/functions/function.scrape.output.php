@@ -1,5 +1,5 @@
 <?php
-////\tscrape_output
+////	scrape_output
 // Render scrape results in XML, JSON, or bencoded format based on query params.
 // Accepts $scrape array and outputs directly.
 
@@ -10,15 +10,15 @@ function scrape_output($scrape, $peers = null, $torrents = null) {
 		$scrape = scrape_merge_results($peers, $torrents, $scrape ?? array());
 	}
 	if (isset($_GET['xml'])) {
-		require_once $GLOBALS['settings']['functions'].'function.scrape.render.xml.php';
+		require_once $settings['functions'].'function.scrape.render.xml.php';
 		header('Content-Type: text/xml');
 		echo scrape_render_xml($scrape);
 	} elseif (isset($_GET['json'])) {
-		require_once $GLOBALS['settings']['functions'].'function.scrape.render.json.php';
+		require_once $settings['functions'].'function.scrape.render.json.php';
 		header('Content-Type: application/json');
 		echo scrape_render_json($scrape);
 	} else {
-		require_once $GLOBALS['settings']['views'].'bencode.scrape.php';
+		require_once $settings['views'].'bencode.scrape.php';
 		echo view_scrape_bencode($scrape);
 	}
 }
