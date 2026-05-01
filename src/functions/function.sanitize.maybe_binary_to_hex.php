@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Accepts a raw query-string value (not a $_GET value, which is already decoded).
 // Calls urldecode() itself so binary bytes in %XX form are resolved exactly once.
 function maybe_binary_to_hex(string $binary): string|false {

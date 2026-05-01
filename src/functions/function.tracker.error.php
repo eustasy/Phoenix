@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	Fatal Error
 // Exits with a tracker-format error.
 require_once $settings['views'].'bencode.error.php';

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	parse_ipv4
 // Attempts to parse an address string as IPv4, optionally with a `:port` suffix.
 // Strips a leading `::ffff:` IPv4-mapped IPv6 prefix when present.

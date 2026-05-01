@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 ////	announce_check_rate_limit
 // Check if the same IP announced for the same torrent with a different peer_id recently.
 // This prevents rapid fake-peer injection by using a tighter time window (min_interval/5).
 // Calls tracker_error() and exits if rate limit is exceeded.
 
-function announce_check_rate_limit($connection, $settings, $peer, $time) {
+function announce_check_rate_limit(mysqli $connection, array $settings, array $peer, int $time): void {
 	require_once $settings['model'].'peers.count.rate.php';
 
 	$ip_threshold = $time - intval($settings['min_interval'] / 5);

@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 ////	stats_merge
 // Merge peer counts and download totals into a single stats array.
 // Returns array with all stats as integers, or false if either input is false.
 
-function stats_merge($peer_counts, $download_totals) {
+function stats_merge(array|false $peer_counts, array|false $download_totals): array|false {
 	if (!$peer_counts || !$download_totals) {
 		return false;
 	}

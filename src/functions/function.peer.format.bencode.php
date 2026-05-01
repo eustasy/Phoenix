@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	peer_format_bencode
 // Formats a single row from the peers table as a bencode dictionary entry,
 // per BEP 3 announce response (non-compact mode). $include_peer_id should be

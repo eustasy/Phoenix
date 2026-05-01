@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	peer_changed
 // Returns true if any of the announce-relevant fields differ between the
 // new peer state and the previous row, or if there is no previous row.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 function task_clean(mysqli $connection, array $settings, int $time): bool {
 	require_once $settings['model'].'task.log.php';
 	require_once $settings['model'].'peers.clean.php';

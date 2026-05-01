@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	peer_select_strategy
 // Determines the SQL WHERE extension and ORDER BY clause for peer selection
 // based on the announcing peer's progress and the current swarm size.

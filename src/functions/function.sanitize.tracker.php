@@ -1,11 +1,14 @@
 <?php
+
+declare(strict_types=1);
+
 ////    sanitize_tracker_params
 // Parse and sanitize info_hash and peer_id from a query string for tracker endpoints.
 // Returns an associative array: info_hash, info_hashes, peer_id.
 
 require_once $settings['functions'].'function.sanitize.maybe_binary_to_hex.php';
 
-function sanitize_tracker_params($query_string = null) {
+function sanitize_tracker_params(?string $query_string = null): array {
 	if ($query_string === null) {
 		$query_string = $_SERVER['QUERY_STRING'] ?? '';
 	}
