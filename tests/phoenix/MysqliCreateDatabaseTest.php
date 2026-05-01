@@ -8,7 +8,7 @@ class MysqliCreateDatabaseTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.mysqli.create.database.php';
+		require_once self::$settings['model'].'db.create.php';
 	}
 
 	public function testCreatesTablesOnFirstCall(): void {

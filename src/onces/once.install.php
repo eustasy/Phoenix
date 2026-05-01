@@ -31,7 +31,7 @@ if ( !$test_conn ) {
 
 $settings['db_prefix'] = $values['db_prefix'];
 $settings['db_name']   = $values['db_name'];
-require_once $settings['functions'].'function.mysqli.create.database.php';
+require_once $settings['model'].'db.create.php';
 if ( !create_database($test_conn, $settings) ) {
 	$install_error = 'Connected, but could not create the tables.';
 	mysqli_close($test_conn);
