@@ -132,8 +132,9 @@ src/
                             # Replaces: function.peer.new.php
                             # Used by: announce (new peers, state changes)
     
-    peer.update.php         # UPDATE timestamp + transfer stats only
-                            # Currently: function.peer.access.php
+    peer.update.php         # ✓ CREATED: peer_update($connection, $settings, $time, $peer)
+                            # UPDATE timestamp + transfer stats only
+                            # Replaces: function.peer.access.php
                             # Used by: announce (re-announce, no state change)
     
     peer.delete.php         # DELETE single peer by info_hash + peer_id

@@ -8,7 +8,7 @@ class PeerAccessTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.peer.access.php';
+		require_once self::$settings['model'].'peer.update.php';
 		require_once self::$settings['functions'].'function.mysqli.fetch.once.php';
 	}
 
@@ -33,7 +33,7 @@ class PeerAccessTest extends PhoenixTestCase {
 			'downloaded' => 0,
 			'left'       => 2,
 		);
-		$this->assertTrue(peer_access(self::$connection, self::$settings, self::$time, $peer));
+		$this->assertTrue(peer_update(self::$connection, self::$settings, self::$time, $peer));
 
 		$select = 'SELECT `left` FROM `'.self::$settings['db_prefix'].'peers` '.
 			'WHERE `info_hash` = \'__TEST_1__\' AND `peer_id` = \'__TEST_1__\';';

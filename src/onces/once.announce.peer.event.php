@@ -34,7 +34,7 @@ if ( peer_changed($peer, $peer['old']) ) {
 
 // UNCHANGED peer — bump the access timestamp only.
 } else {
-	require_once $settings['functions'].'function.peer.access.php';
-	peer_access($connection, $settings, $time, $peer);
+	require_once $settings['model'].'peer.update.php';
+	peer_update($connection, $settings, $time, $peer);
 	phoenix_hook('peer.access', $connection, $settings, $time, $peer);
 }
