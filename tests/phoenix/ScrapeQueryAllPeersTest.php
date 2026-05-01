@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 class ScrapeQueryAllPeersTest extends PhoenixTestCase {
 
 	public function testQueryAllPeersReturnsAllTorrents() {
-		require_once self::$settings['functions'].'function.scrape.query.all.peers.php';
+		require_once self::$settings['model'].'peers.scrape.all.php';
 
 		$info_hash_a = str_repeat('a', 40);
 		$info_hash_b = str_repeat('b', 40);
@@ -25,7 +25,7 @@ class ScrapeQueryAllPeersTest extends PhoenixTestCase {
 			   "('".$info_hash_b."', '".$peer_id_4."', '1', '', 'fc00::4', '', '', 0, 6881, ".self::$time.");";
 		mysqli_query(self::$connection, $sql);
 
-		$result = scrape_query_all_peers(self::$connection, self::$settings);
+		$result = peers_scrape_all(self::$connection, self::$settings);
 
 		$this->assertNotFalse($result);
 		
@@ -48,16 +48,16 @@ class ScrapeQueryAllPeersTest extends PhoenixTestCase {
 	}
 
 	public function testQueryAllPeersReturnsEmptyWhenNoPeers() {
-		require_once self::$settings['functions'].'function.scrape.query.all.peers.php';
+		require_once self::$settings['model'].'peers.scrape.all.php';
 
-		$result = scrape_query_all_peers(self::$connection, self::$settings);
+		$result = peers_scrape_all(self::$connection, self::$settings);
 
 		$this->assertNotFalse($result);
 		$this->assertSame(0, mysqli_num_rows($result));
 	}
 
 	public function testQueryAllPeersGroupsByInfoHash() {
-		require_once self::$settings['functions'].'function.scrape.query.all.peers.php';
+		require_once self::$settings['model'].'peers.scrape.all.php';
 
 		$info_hash = str_repeat('c', 40);
 		$peer_id_1 = str_repeat('5', 40);
@@ -72,7 +72,7 @@ class ScrapeQueryAllPeersTest extends PhoenixTestCase {
 			   "('".$info_hash."', '".$peer_id_3."', '0', '', 'fc00::7', '', '', 0, 6881, ".self::$time.");";
 		mysqli_query(self::$connection, $sql);
 
-		$result = scrape_query_all_peers(self::$connection, self::$settings);
+		$result = peers_scrape_all(self::$connection, self::$settings);
 
 		$this->assertNotFalse($result);
 		$this->assertSame(1, mysqli_num_rows($result)); // Only one row despite 3 peers

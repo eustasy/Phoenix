@@ -167,8 +167,9 @@ src/
                             # GROUP BY info_hash, returns seeders/leechers per torrent
                             # Used by: scrape.php (specific torrents)
     
-    peers.scrape.all.php    # SELECT aggregated peer counts for ALL torrents
-                            # Currently: function.scrape.query.all.peers.php
+    peers.scrape.all.php    # ✓ CREATED: peers_scrape_all($connection, $settings)
+                            # SELECT aggregated peer counts for ALL torrents
+                            # Replaces: function.scrape.query.all.peers.php
                             # Used by: scrape.php (full scrape)
     
     peers.clean.php         # DELETE stale peers (updated < threshold)
