@@ -224,8 +224,9 @@ src/
 ```
 src/
   model/
-    stats.peers.php         # SELECT total seeders/leechers/peers/torrents
-                            # Currently: function.stats.fetch.peer.counts.php
+    stats.peers.php         # ✓ CREATED: stats_fetch_peer_counts($connection, $settings)
+                            # SELECT total seeders/leechers/peers/torrents
+                            # Replaced: function.stats.fetch.peer.counts.php
                             # Aggregates from peers table
                             # Returns: array{seeders, leechers, peers, torrents}
     
