@@ -20,7 +20,6 @@ $config_path   = $settings['settings'].'phoenix.custom.php';
 $config_exists = is_readable($config_path);
 
 ////	Installer Mode (no config file exists)
-
 if (!$config_exists) {
 	require_once $settings['controller'].'admin.install.php';
 	echo admin_install_controller($settings, $config_path);
@@ -28,11 +27,9 @@ if (!$config_exists) {
 }
 
 ////	Normal Admin Mode (full bootstrap)
-
 require_once __DIR__.'/../src/phoenix.php';
 
 ////	Authentication
-
 require_once $settings['controller'].'admin.login.php';
 $login_output = admin_login_controller($settings);
 if ($login_output !== null) {
@@ -41,14 +38,12 @@ if ($login_output !== null) {
 }
 
 ////	Process Actions
-
 $process = false;
 if (!empty($_POST['process'])) {
 	$process = htmlentities($_POST['process'], ENT_QUOTES, 'UTF-8');
 }
 
 ////	Check if tables exist
-
 $tables = array('peers', 'tasks', 'torrents');
 $actual = 0;
 foreach ($tables as $table) {
@@ -66,7 +61,6 @@ foreach ($tables as $table) {
 $tables_installed = (count($tables) == $actual);
 
 ////	Dispatch actions to controllers
-
 $Message = false;
 
 if ($process == 'setup') {
@@ -85,7 +79,6 @@ if ($process == 'setup') {
 }
 
 ////	Calculate database size
-
 $database_size = false;
 if ($tables_installed) {
 	$database_size_query = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \''.$settings['db_name'].'\' GROUP BY `table_schema`;';
@@ -96,7 +89,6 @@ if ($tables_installed) {
 }
 
 ////	Render admin panel
-
 require_once $settings['views'].'html.admin.php';
 echo view_admin_html(
 	$settings,
