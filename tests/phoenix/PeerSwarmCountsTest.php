@@ -11,7 +11,7 @@ class PeerSwarmCountsTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.peer.swarm.counts.php';
+		require_once self::$settings['model'].'peers.count.swarm.php';
 		require_once self::$settings['model'].'peer.insert.php';
 	}
 
@@ -40,7 +40,7 @@ class PeerSwarmCountsTest extends PhoenixTestCase {
 	}
 
 	public function testEmptySwarmReturnsZeroCounts(): void {
-		$counts = peer_swarm_counts(self::$connection, self::$settings, self::HASH, self::$time - 100);
+		$counts = peers_count_swarm(self::$connection, self::$settings, self::HASH, self::$time - 100);
 		$this->assertSame(0, $counts['complete']);
 		$this->assertSame(0, $counts['incomplete']);
 	}
@@ -52,7 +52,7 @@ class PeerSwarmCountsTest extends PhoenixTestCase {
 		$this->insertPeer(self::HASH, '__TEST_PSC_L2__', 0, self::$time);
 		$this->insertPeer(self::HASH, '__TEST_PSC_L3__', 0, self::$time);
 
-		$counts = peer_swarm_counts(self::$connection, self::$settings, self::HASH, self::$time - 100);
+		$counts = peers_count_swarm(self::$connection, self::$settings, self::HASH, self::$time - 100);
 		$this->assertSame(2, $counts['complete']);
 		$this->assertSame(3, $counts['incomplete']);
 	}
@@ -61,7 +61,7 @@ class PeerSwarmCountsTest extends PhoenixTestCase {
 		$this->insertPeer(self::HASH, '__TEST_PSC_FRESH__', 1, self::$time);
 		$this->insertPeer(self::HASH, '__TEST_PSC_STALE__', 1, self::$time - 10000);
 
-		$counts = peer_swarm_counts(self::$connection, self::$settings, self::HASH, self::$time - 100);
+		$counts = peers_count_swarm(self::$connection, self::$settings, self::HASH, self::$time - 100);
 		$this->assertSame(1, $counts['complete']);
 	}
 
@@ -69,7 +69,7 @@ class PeerSwarmCountsTest extends PhoenixTestCase {
 		$this->insertPeer(self::HASH,       '__TEST_PSC_MINE__',  1, self::$time);
 		$this->insertPeer(self::OTHER_HASH, '__TEST_PSC_OTHER__', 1, self::$time);
 
-		$counts = peer_swarm_counts(self::$connection, self::$settings, self::HASH, self::$time - 100);
+		$counts = peers_count_swarm(self::$connection, self::$settings, self::HASH, self::$time - 100);
 		$this->assertSame(1, $counts['complete']);
 		$this->assertSame(0, $counts['incomplete']);
 	}

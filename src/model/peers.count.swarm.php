@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-////	peer_swarm_counts
-// Returns active seeder/leecher counts for a torrent swarm by counting peers
-// whose `updated` is newer than $stale_threshold. Returns
-// array{complete: int, incomplete: int}; both keys are 0 when the SELECT
-// returns no rows.
-function peer_swarm_counts(mysqli $connection, array $settings, string $info_hash, int $stale_threshold): array {
+////	peers_count_swarm
+// SELECT COUNT seeders/leechers for one torrent.
+// Returns active seeder/leecher counts by counting peers whose `updated` is newer than stale_threshold.
+// Returns array{complete: int, incomplete: int}; both keys are 0 when the SELECT returns no rows.
+// Used by: announce response (interval calculation).
+
+function peers_count_swarm(mysqli $connection, array $settings, string $info_hash, int $stale_threshold): array {
 	require_once $settings['functions'].'function.mysqli.fetch.once.php';
 	$counts = mysqli_fetch_once($connection,
 		'SELECT '.

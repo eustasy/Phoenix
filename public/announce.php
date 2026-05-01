@@ -67,13 +67,13 @@ if ( strlen($peer['info_hash']) != 40 ) {
 	}
 
 	// Announce Peers
-	require_once $settings['functions'].'function.peer.swarm.counts.php';
+	require_once $settings['model'].'peers.count.swarm.php';
 	require_once $settings['functions'].'function.peer.select.strategy.php';
 	require_once $settings['model'].'peers.select.active.php';
 	require_once $settings['views'].'bencode.announce.php';
 
 	$stale_threshold = $time - ($settings['announce_interval'] + $settings['min_interval']);
-	$counts = peer_swarm_counts($connection, $settings, $peer['info_hash'], $stale_threshold);
+	$counts = peers_count_swarm($connection, $settings, $peer['info_hash'], $stale_threshold);
 	$strategy = peer_select_strategy($peer, $counts['complete'], $counts['incomplete'], $settings);
 	$rows = peers_select_active($connection, $settings, $peer, $stale_threshold, $strategy);
 

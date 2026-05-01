@@ -149,8 +149,9 @@ src/
                             # ORDER/LIMIT: per strategy (seeders-first, random, etc.)
                             # Returns: array of peer rows
     
-    peers.count.swarm.php   # SELECT COUNT seeders/leechers for one torrent
-                            # Currently: function.peer.swarm.counts.php
+    peers.count.swarm.php   # ✓ CREATED: peers_count_swarm($connection, $settings, $info_hash, $stale_threshold)
+                            # SELECT COUNT seeders/leechers for one torrent
+                            # Replaces: function.peer.swarm.counts.php
                             # Returns: array{complete: int, incomplete: int}
                             # Used by: announce response (interval calculation)
     
