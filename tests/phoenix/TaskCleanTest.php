@@ -8,7 +8,7 @@ class TaskCleanTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.task.clean.php';
+		self::requireFunction(self::$settings['functions'].'function.task.clean.php');
 	}
 
 	public function testReturnsTrueOnSuccess(): void {

@@ -6,8 +6,12 @@ use PHPUnit\Framework\TestCase;
 
 class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+		self::requireFunction(self::$settings['functions'].'function.announce.check.rate.limit.php');
+	}
+
 	public function testNoRateLimitWhenNoPeersExist() {
-		require_once self::$settings['functions'].'function.announce.check.rate.limit.php';
 
 		$peer = array(
 			'info_hash' => str_repeat('a', 40),
@@ -22,8 +26,6 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 	}
 
 	public function testNoRateLimitWhenSamePeerIdExists() {
-		require_once self::$settings['functions'].'function.announce.check.rate.limit.php';
-
 		$info_hash = str_repeat('a', 40);
 		$peer_id   = str_repeat('1', 40);
 
@@ -46,8 +48,6 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 	}
 
 	public function testNoRateLimitWhenPeerOutsideTimeWindow() {
-		require_once self::$settings['functions'].'function.announce.check.rate.limit.php';
-
 		$info_hash = str_repeat('a', 40);
 		$peer_id_1 = str_repeat('1', 40);
 		$peer_id_2 = str_repeat('2', 40);
@@ -140,8 +140,6 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 	}
 
 	public function testNoRateLimitForDifferentTorrent() {
-		require_once self::$settings['functions'].'function.announce.check.rate.limit.php';
-
 		$info_hash_1 = str_repeat('a', 40);
 		$info_hash_2 = str_repeat('b', 40);
 		$peer_id_1   = str_repeat('1', 40);
