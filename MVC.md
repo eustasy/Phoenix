@@ -213,9 +213,11 @@ src/
                             # Returns: info_hash and downloads only (no size)
                             # Used by: scrape.php?full_scrape
     
-    torrents.clean.php      # DELETE test/sentinel torrents
-                            # Currently: function.task.clean.php (inline, multi-table)
-                            # WHERE: test sentinels
+    torrents.clean.php      # ✓ CREATED: torrents_clean($connection, $settings)
+                            # DELETE test/sentinel torrents
+                            # Extracted from: function.task.clean.php (inline, multi-table)
+                            # WHERE: info_hash/name LIKE '__TEST_%' OR = 'DELETEME'
+                            # Used by: function.task.clean.php
 ```
 
 ### Stats Model (cross-table aggregations)
@@ -240,8 +242,11 @@ src/
                             # Currently: function.task.log.php
                             # Used by: install, clean, optimize
     
-    task.clean.php          # DELETE test/sentinel rows from tasks table
-                            # Currently: function.task.clean.php (inline, multi-table)
+    task.clean.php          # ✓ CREATED: tasks_clean($connection, $settings)
+                            # DELETE test/sentinel rows from tasks table
+                            # Extracted from: function.task.clean.php (inline, multi-table)
+                            # WHERE: name LIKE '__TEST_%' OR = 'DELETEME'
+                            # Used by: function.task.clean.php
 ```
 
 ### Database Management

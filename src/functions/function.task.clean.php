@@ -3,6 +3,8 @@
 function task_clean(mysqli $connection, array $settings, int $time): bool {
 	require_once $settings['functions'].'function.task.log.php';
 	require_once $settings['model'].'peers.clean.php';
+	require_once $settings['model'].'tasks.clean.php';
+	require_once $settings['model'].'torrents.clean.php';
 	$cleaned = true;
 
 	// Remove peers that have not announced within 3x the announce interval.
@@ -11,22 +13,9 @@ function task_clean(mysqli $connection, array $settings, int $time): bool {
 	$threshold = $time - ( $settings['announce_interval'] * 3 );
 	$cleaned = peers_clean($connection, $settings, $threshold) && $cleaned;
 
-	// Clean tasks table
-	$sql = array();
-	$sql[] = 'DELETE FROM `'.$settings['db_prefix'].'tasks`'.
-		' WHERE `name` LIKE \'__TEST_%\''.
-		' OR `name` = \'DELETEME\';';
-	$sql[] = 'DELETE FROM `'.$settings['db_prefix'].'torrents`'.
-		' WHERE `info_hash` LIKE \'__TEST_%\''.
-		' OR `info_hash` = \'DELETEME\''.
-		' OR `name` LIKE \'__TEST_%\''.
-		' OR `name` = \'DELETEME\';';
-	foreach ( $sql as $query ) {
-		$result = mysqli_query($connection, $query);
-		if ( !$result ) {
-			$cleaned = false;
-		}
-	}
+	// Clean tasks and torrents tables (test/sentinel rows)
+	$cleaned = tasks_clean($connection, $settings) && $cleaned;
+	$cleaned = torrents_clean($connection, $settings) && $cleaned;
 
 	if ( $cleaned ) {
 		task_log($connection, $settings, 'clean', $time);
