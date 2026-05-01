@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 class ScrapeQueryTorrentsTest extends PhoenixTestCase {
 
 	public function testQueryTorrentsWithSingleHash() {
-		require_once self::$settings['functions'].'function.scrape.query.torrents.php';
+		require_once self::$settings['model'].'torrents.scrape.php';
 		require_once self::$settings['functions'].'function.scrape.build.where.clause.php';
 
 		$info_hash = str_repeat('a', 40);
@@ -19,7 +19,7 @@ class ScrapeQueryTorrentsTest extends PhoenixTestCase {
 		mysqli_query(self::$connection, $sql);
 
 		$where = scrape_build_where_clause(array($info_hash));
-		$result = scrape_query_torrents(self::$connection, self::$settings, $where);
+		$result = torrents_scrape(self::$connection, self::$settings, $where);
 
 		$this->assertNotFalse($result);
 		$row = mysqli_fetch_assoc($result);
@@ -29,7 +29,7 @@ class ScrapeQueryTorrentsTest extends PhoenixTestCase {
 	}
 
 	public function testQueryTorrentsWithMultipleHashes() {
-		require_once self::$settings['functions'].'function.scrape.query.torrents.php';
+		require_once self::$settings['model'].'torrents.scrape.php';
 		require_once self::$settings['functions'].'function.scrape.build.where.clause.php';
 
 		$info_hash_a = str_repeat('a', 40);
@@ -43,7 +43,7 @@ class ScrapeQueryTorrentsTest extends PhoenixTestCase {
 		mysqli_query(self::$connection, $sql);
 
 		$where = scrape_build_where_clause(array($info_hash_a, $info_hash_b));
-		$result = scrape_query_torrents(self::$connection, self::$settings, $where);
+		$result = torrents_scrape(self::$connection, self::$settings, $where);
 
 		$this->assertNotFalse($result);
 		
@@ -62,12 +62,12 @@ class ScrapeQueryTorrentsTest extends PhoenixTestCase {
 	}
 
 	public function testQueryTorrentsReturnsEmptyForUnknownHash() {
-		require_once self::$settings['functions'].'function.scrape.query.torrents.php';
+		require_once self::$settings['model'].'torrents.scrape.php';
 		require_once self::$settings['functions'].'function.scrape.build.where.clause.php';
 
 		$info_hash = str_repeat('z', 40);
 		$where = scrape_build_where_clause(array($info_hash));
-		$result = scrape_query_torrents(self::$connection, self::$settings, $where);
+		$result = torrents_scrape(self::$connection, self::$settings, $where);
 
 		$this->assertNotFalse($result);
 		$this->assertSame(0, mysqli_num_rows($result));

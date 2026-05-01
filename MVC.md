@@ -201,8 +201,9 @@ src/
                                  # LEFT JOIN peers, GROUP BY info_hash
                                  # Returns: array of torrent rows with seeders/leechers/peers/traffic
     
-    torrents.scrape.php     # SELECT torrent metadata (name, size, downloads) for scrape
-                            # Currently: function.scrape.query.torrents.php
+    torrents.scrape.php     # ✓ CREATED: torrents_scrape($connection, $settings, $where_clause)
+                            # SELECT torrent metadata (info_hash, size, downloads) for scrape
+                            # Replaced: function.scrape.query.torrents.php
                             # WHERE: info_hash IN (...)
                             # Used by: scrape.php (specific torrents)
     

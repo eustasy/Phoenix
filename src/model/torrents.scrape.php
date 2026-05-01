@@ -1,10 +1,9 @@
 <?php
 
-////	scrape_query_torrents
+////	torrents_scrape
 // Query torrent statistics for the given info_hashes.
 // Returns mysqli_result or false on failure.
-
-function scrape_query_torrents($connection, $settings, $where_clause) {
+function torrents_scrape(mysqli $connection, array $settings, string $where_clause): mysqli_result|false {
 	$sql = 'SELECT
 		`p`.`info_hash` AS `info_hash`,
 		`p`.`size` AS `size`,
