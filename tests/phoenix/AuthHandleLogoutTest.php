@@ -35,34 +35,12 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 			'require '.var_export($functionPath, true).'; '.
 			'auth_handle_logout();';
 
-		$tmp = tempnam(sys_get_temp_dir(), 'phx_test_');
-		$this->assertNotFalse($tmp);
-		file_put_contents($tmp, $script);
-
-		try {
-			$proc = proc_open(
-				array(PHP_BINARY, $tmp),
-				array(
-					0 => array('pipe', 'r'),
-					1 => array('pipe', 'w'),
-					2 => array('pipe', 'w'),
-				),
-				$pipes
-			);
-			$this->assertNotFalse($proc);
-			fclose($pipes[0]);
-			$stdout = stream_get_contents($pipes[1]);
-			fclose($pipes[1]);
-			fclose($pipes[2]);
-			$exit = proc_close($proc);
-		} finally {
-			unlink($tmp);
-		}
+		$result = $this->runPhpSubprocess($script);
 
 		// Should exit cleanly
-		$this->assertSame(0, $exit);
+		$this->assertSame(0, $result['exit']);
 		// Should output Location header
-		$this->assertStringContainsString('Location: /admin.php', $stdout);
+		$this->assertStringContainsString('Location: /admin.php', $result['stdout']);
 	}
 
 	public function testStripsQueryStringFromRedirect() {
@@ -76,34 +54,12 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 			'require '.var_export($functionPath, true).'; '.
 			'auth_handle_logout();';
 
-		$tmp = tempnam(sys_get_temp_dir(), 'phx_test_');
-		$this->assertNotFalse($tmp);
-		file_put_contents($tmp, $script);
-
-		try {
-			$proc = proc_open(
-				array(PHP_BINARY, $tmp),
-				array(
-					0 => array('pipe', 'r'),
-					1 => array('pipe', 'w'),
-					2 => array('pipe', 'w'),
-				),
-				$pipes
-			);
-			$this->assertNotFalse($proc);
-			fclose($pipes[0]);
-			$stdout = stream_get_contents($pipes[1]);
-			fclose($pipes[1]);
-			fclose($pipes[2]);
-			$exit = proc_close($proc);
-		} finally {
-			unlink($tmp);
-		}
+		$result = $this->runPhpSubprocess($script);
 
 		// Location should be just /admin.php without query string
-		$this->assertStringContainsString('Location: /admin.php', $stdout);
-		$this->assertStringNotContainsString('logout=', $stdout);
-		$this->assertStringNotContainsString('foo=', $stdout);
+		$this->assertStringContainsString('Location: /admin.php', $result['stdout']);
+		$this->assertStringNotContainsString('logout=', $result['stdout']);
+		$this->assertStringNotContainsString('foo=', $result['stdout']);
 	}
 
 	protected function tearDown(): void {
