@@ -78,7 +78,7 @@ Three MyISAM tables (chosen for write-heavy workload, no transactions/foreign ke
 
 Configuration is a single flat `$settings` array threaded through every function call. New tunables go in `phoenix.default.php` with a sensible default and a one-line `/* comment */`. The user-facing override file is `phoenix.custom.php` — code reads `$settings['foo']` directly with no fallback layer, so every key MUST exist in `phoenix.default.php`.
 
-The installer (`public/admin.php` → `src/onces/once.install.php`) generates `config/phoenix.custom.php` by writing `$settings['key'] = 'value';` lines for the keys it knows about.
+The installer (`public/admin.php` in installer mode) generates `config/phoenix.custom.php` by writing `$settings['key'] = 'value';` lines for the keys it knows about.
 
 ## Test runner
 
