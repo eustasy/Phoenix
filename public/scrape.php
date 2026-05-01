@@ -7,6 +7,10 @@ require_once __DIR__.'/../src/phoenix.php';
 require_once $settings['functions'].'function.sanitize.tracker.php';
 $peer = sanitize_tracker_params();
 
+if ( !$settings['open_tracker'] ) {
+	require_once $settings['functions'].'function.tracker.validate.info.hashes.php';
+}
+
 // IF STATS
 if ( isset($_GET['stats']) ) {
 	require_once $settings['functions'].'function.stats.fetch.peer.counts.php';
@@ -45,10 +49,7 @@ if ( isset($_GET['stats']) ) {
 		$peer['info_hash'] &&
 		(
 			$settings['open_tracker'] ||
-			(
-				require_once $settings['functions'].'function.tracker.validate.info.hashes.php',
-				tracker_validate_info_hashes($peer['info_hashes'], $allowed_torrents)
-			)
+			tracker_validate_info_hashes($peer['info_hashes'], $allowed_torrents)
 		)
 	) {
 		// Perform a Scrape on the torrent.
