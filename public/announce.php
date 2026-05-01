@@ -50,7 +50,8 @@ if ( strlen($peer['info_hash']) != 40 ) {
 	require_once $settings['onces'].'once.sanitize.announce.optional.php';
 
 	// Rate Limit
-	require_once $settings['onces'].'once.announce.rate.limit.php';
+	require_once $settings['functions'].'function.announce.check.rate.limit.php';
+	announce_check_rate_limit($connection, $settings, $peer, $time);
 
 	// Track Client
 	require_once $settings['onces'].'once.announce.peer.event.php';
