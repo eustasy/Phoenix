@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 class StatsFetchDownloadTotalsTest extends PhoenixTestCase {
 
 	public function testFetchDownloadTotals() {
-		require_once self::$settings['functions'].'function.stats.fetch.download.totals.php';
+		require_once self::$settings['model'].'stats.downloads.php';
 
 		// Insert test torrents
 		$info_hash_a = str_repeat('a', 40);
@@ -27,7 +27,7 @@ class StatsFetchDownloadTotalsTest extends PhoenixTestCase {
 	}
 
 	public function testFetchDownloadTotalsEmpty() {
-		require_once self::$settings['functions'].'function.stats.fetch.download.totals.php';
+		require_once self::$settings['model'].'stats.downloads.php';
 
 		$result = stats_fetch_download_totals(self::$connection, self::$settings);
 
@@ -37,7 +37,7 @@ class StatsFetchDownloadTotalsTest extends PhoenixTestCase {
 	}
 
 	public function testFetchDownloadTotalsWithNullSize() {
-		require_once self::$settings['functions'].'function.stats.fetch.download.totals.php';
+		require_once self::$settings['model'].'stats.downloads.php';
 
 		// Insert torrent with NULL size
 		$info_hash = str_repeat('c', 40);

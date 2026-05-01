@@ -14,7 +14,7 @@ if ( !$settings['open_tracker'] ) {
 // IF STATS
 if ( isset($_GET['stats']) ) {
 	require_once $settings['model'].'stats.peers.php';
-	require_once $settings['functions'].'function.stats.fetch.download.totals.php';
+	require_once $settings['model'].'stats.downloads.php';
 	require_once $settings['functions'].'function.stats.merge.php';
 
 	$peer_counts = stats_fetch_peer_counts($connection, $settings);
