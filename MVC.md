@@ -194,11 +194,12 @@ src/
                                  # Returns: array of info_hash strings
                                  # Used by: phoenix.php (whitelist check)
     
-    torrents.select.listed.php   # SELECT listed torrents with peer counts (for index)
-                                 # Currently: once.index.torrents.php (inline query)
+    torrents.select.listed.php   # ✓ CREATED: torrents_select_listed($connection, $settings)
+                                 # SELECT listed torrents with peer counts (for index)
+                                 # Extracted from: once.index.torrents.php (inline query)
                                  # WHERE: listed=1
                                  # LEFT JOIN peers, GROUP BY info_hash
-                                 # Returns: array of torrent rows with seeders/leechers
+                                 # Returns: array of torrent rows with seeders/leechers/peers/traffic
     
     torrents.scrape.php     # SELECT torrent metadata (name, size, downloads) for scrape
                             # Currently: function.scrape.query.torrents.php
