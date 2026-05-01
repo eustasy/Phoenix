@@ -8,7 +8,7 @@ class MysqliDropTableTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.mysqli.drop.table.php';
+		require_once self::$settings['model'].'db.drop.php';
 	}
 
 	public function testDropsExistingTable(): void {

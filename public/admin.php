@@ -48,7 +48,7 @@ if ( !$config_exists ) {
 ////	Normal Admin Flow
 require_once __DIR__.'/../src/phoenix.php';
 require_once $settings['onces'].'once.auth.php';
-require_once $settings['functions'].'function.mysqli.drop.table.php';
+require_once $settings['model'].'db.drop.php';
 require_once $settings['model'].'db.create.php';
 
 ////	Process Form

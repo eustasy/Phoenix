@@ -261,9 +261,10 @@ src/
                             # Replaced: function.mysqli.create.database.php
                             # Used by: installer, admin setup, tests bootstrap
     
-    db.drop.php             # DROP TABLE IF EXISTS
-                            # Currently: function.mysqli.drop.table.php
-                            # Used by: admin reset
+    db.drop.php             # ✓ CREATED: drop_table($connection, $settings, $table)
+                            # DROP TABLE IF EXISTS
+                            # Replaced: function.mysqli.drop.table.php
+                            # Used by: admin reset, installer cleanup
     
     db.optimize.php         # CHECK/ANALYZE/REPAIR/OPTIMIZE tables
                             # Currently: function.task.optimize.php
