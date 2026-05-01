@@ -188,10 +188,11 @@ src/
                                      # Replaced: function.peer.completed.php
                                      # Used by: announce?event=completed
     
-    torrents.select.allowed.php  # SELECT all info_hashes (for closed tracker)
-                                 # Currently: function.tracker.allowed.php
+    torrents.select.allowed.php  # ✓ CREATED: torrents_select_allowed($connection, $settings)
+                                 # SELECT all info_hashes (for closed tracker)
+                                 # Replaced: function.tracker.allowed.php
                                  # Returns: array of info_hash strings
-                                 # Used by: announce/scrape validation
+                                 # Used by: phoenix.php (whitelist check)
     
     torrents.select.listed.php   # SELECT listed torrents with peer counts (for index)
                                  # Currently: once.index.torrents.php (inline query)

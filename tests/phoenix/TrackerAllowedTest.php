@@ -8,7 +8,7 @@ class TrackerAllowedTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.tracker.allowed.php';
+		require_once self::$settings['model'].'torrents.select.allowed.php';
 	}
 
 	protected function tearDown(): void {
@@ -19,7 +19,7 @@ class TrackerAllowedTest extends PhoenixTestCase {
 	}
 
 	public function testReturnsEmptyArrayWhenNoTorrents(): void {
-		$this->assertSame(array(), tracker_allowed(self::$connection, self::$settings));
+		$this->assertSame(array(), torrents_select_allowed(self::$connection, self::$settings));
 	}
 
 	public function testReturnsListOfInfoHashes(): void {
@@ -28,7 +28,7 @@ class TrackerAllowedTest extends PhoenixTestCase {
 			'INSERT INTO `'.self::$settings['db_prefix'].'torrents` ( `info_hash` ) '.
 			'VALUES (\'__TEST_1__\'), (\'__TEST_2__\'), (\'__TEST_3__\');'
 		);
-		$result = tracker_allowed(self::$connection, self::$settings);
+		$result = torrents_select_allowed(self::$connection, self::$settings);
 		$this->assertCount(3, $result);
 		$this->assertContains('__TEST_1__', $result);
 		$this->assertContains('__TEST_2__', $result);

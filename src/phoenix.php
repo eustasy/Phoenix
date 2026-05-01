@@ -50,6 +50,6 @@ require_once $settings['functions'].'function.tracker.error.php';
 require_once $settings['onces'].'once.db.connect.php';
 
 if ( !$settings['open_tracker'] ) {
-	require_once $settings['functions'].'function.tracker.allowed.php';
-	$allowed_torrents = tracker_allowed($connection, $settings);
+	require_once $settings['model'].'torrents.select.allowed.php';
+	$allowed_torrents = torrents_select_allowed($connection, $settings);
 }
