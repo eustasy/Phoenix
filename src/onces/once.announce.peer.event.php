@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once $settings['functions'].'function.peer.select.php';
+require_once $settings['model'].'peer.select.php';
 require_once $settings['functions'].'function.peer.changed.php';
 require_once $settings['functions'].'function.phoenix.hook.php';
 

@@ -121,8 +121,9 @@ All database operations. Organized by domain/table. One function per file, each 
 ```
 src/
   model/
-    peer.select.php         # SELECT single peer by info_hash + peer_id
-                            # Currently: function.peer.select.php
+    peer.select.php         # ✓ CREATED: peer_select($connection, $settings, $peer)
+                            # SELECT single peer by info_hash + peer_id
+                            # Replaces: function.peer.select.php
                             # Returns: array|false|null (row or null if not found)
                             # Used by: announce event handling
     

@@ -8,7 +8,7 @@ class PeerSelectTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.peer.select.php';
+		require_once self::$settings['model'].'peer.select.php';
 		require_once self::$settings['functions'].'function.peer.new.php';
 	}
 
