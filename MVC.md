@@ -137,8 +137,9 @@ src/
                             # Replaces: function.peer.access.php
                             # Used by: announce (re-announce, no state change)
     
-    peer.delete.php         # DELETE single peer by info_hash + peer_id
-                            # Currently: function.peer.delete.php
+    peer.delete.php         # ✓ CREATED: peer_delete($connection, $settings, $peer)
+                            # DELETE single peer by info_hash + peer_id
+                            # Replaces: function.peer.delete.php
                             # Used by: announce?event=stopped
     
     peers.select.active.php # SELECT active peers for a torrent (for announce response)

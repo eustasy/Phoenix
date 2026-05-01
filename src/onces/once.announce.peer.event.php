@@ -12,7 +12,7 @@ $event = $_GET['event'] ?? null;
 
 // EVENT: stopped — remove the peer and exit; the client expects no body.
 if ( $event === 'stopped' ) {
-	require_once $settings['functions'].'function.peer.delete.php';
+	require_once $settings['model'].'peer.delete.php';
 	peer_delete($connection, $settings, $peer);
 	phoenix_hook('peer.stopped', $connection, $settings, $time, $peer);
 	exit;
