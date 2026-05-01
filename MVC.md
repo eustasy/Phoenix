@@ -183,9 +183,10 @@ src/
 ```
 src/
   model/
-    torrent.upsert.php      # INSERT ... ON DUPLICATE KEY UPDATE downloads counter
-                            # Currently: function.peer.completed.php
-                            # Used by: announce?event=completed
+    torrent.increment.downloads.php  # ✓ CREATED: torrent_increment_downloads($connection, $settings, $info_hash)
+                                     # INSERT ... ON DUPLICATE KEY UPDATE downloads counter
+                                     # Replaced: function.peer.completed.php
+                                     # Used by: announce?event=completed
     
     torrents.select.allowed.php  # SELECT all info_hashes (for closed tracker)
                                  # Currently: function.tracker.allowed.php

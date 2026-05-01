@@ -8,7 +8,7 @@ class PeerCompletedTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.peer.completed.php';
+		require_once self::$settings['model'].'torrent.increment.downloads.php';
 	}
 
 	protected function tearDown(): void {
@@ -19,8 +19,8 @@ class PeerCompletedTest extends PhoenixTestCase {
 	}
 
 	public function testInsertsRowWithDownloadCountOne(): void {
-		$peer = array('info_hash' => '__TEST_1__');
-		$this->assertTrue(peer_completed(self::$connection, self::$settings, $peer));
+		$info_hash = '__TEST_1__';
+		$this->assertTrue(torrent_increment_downloads(self::$connection, self::$settings, $info_hash));
 
 		$row = mysqli_fetch_assoc(mysqli_query(
 			self::$connection,
@@ -32,9 +32,9 @@ class PeerCompletedTest extends PhoenixTestCase {
 	}
 
 	public function testIncrementsExistingRow(): void {
-		$peer = array('info_hash' => '__TEST_1__');
-		peer_completed(self::$connection, self::$settings, $peer);
-		peer_completed(self::$connection, self::$settings, $peer);
+		$info_hash = '__TEST_1__';
+		torrent_increment_downloads(self::$connection, self::$settings, $info_hash);
+		torrent_increment_downloads(self::$connection, self::$settings, $info_hash);
 
 		$row = mysqli_fetch_assoc(mysqli_query(
 			self::$connection,

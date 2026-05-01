@@ -21,8 +21,8 @@ if ( $event === 'stopped' ) {
 // EVENT: completed — increment downloads and force seeding state.
 if ( $event === 'completed' ) {
 	$peer['state'] = 1;
-	require_once $settings['functions'].'function.peer.completed.php';
-	peer_completed($connection, $settings, $peer);
+	require_once $settings['model'].'torrent.increment.downloads.php';
+	torrent_increment_downloads($connection, $settings, $peer['info_hash']);
 	phoenix_hook('download.complete', $connection, $settings, $time, $peer);
 }
 
