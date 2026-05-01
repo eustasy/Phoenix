@@ -7,7 +7,7 @@ declare(strict_types=1);
 // Returns the peer row as an associative array, null if not found, or false on query error.
 
 function peer_select(mysqli $connection, array $settings, array $peer): array|false|null {
-	require_once $settings['functions'].'function.mysqli.fetch.once.php';
+	require_once $settings['model'].'db.fetch.once.php';
 	return mysqli_fetch_once(
 		$connection,
 		'SELECT * FROM `'.$settings['db_prefix'].'peers` '.

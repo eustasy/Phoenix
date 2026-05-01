@@ -8,7 +8,7 @@ class MysqliFetchOnceTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.mysqli.fetch.once.php';
+		require_once self::$settings['model'].'db.fetch.once.php';
 	}
 
 	protected function tearDown(): void {

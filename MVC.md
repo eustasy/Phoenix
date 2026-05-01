@@ -276,8 +276,10 @@ src/
 ```
 src/
   model/
-    db.fetch.once.php       # Execute query, return first row as assoc array
-                            # Currently: function.mysqli.fetch.once.php
+    db.fetch.once.php       # ✓ CREATED: mysqli_fetch_once($connection, $sql)
+                            # Execute query, return first row as assoc array
+                            # Replaced: function.mysqli.fetch.once.php
+                            # Used by: peer.select, peers.count.*, stats.*
                             # Helper for single-row queries
     
     db.fetch.array.php      # Execute query, return single column as flat array

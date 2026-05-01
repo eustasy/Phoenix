@@ -9,7 +9,7 @@ declare(strict_types=1);
 // Used by: announce response (interval calculation).
 
 function peers_count_swarm(mysqli $connection, array $settings, string $info_hash, int $stale_threshold): array {
-	require_once $settings['functions'].'function.mysqli.fetch.once.php';
+	require_once $settings['model'].'db.fetch.once.php';
 	$counts = mysqli_fetch_once($connection,
 		'SELECT '.
 			'IFNULL(SUM(`state`=\'1\'), 0) AS `complete`, '.
