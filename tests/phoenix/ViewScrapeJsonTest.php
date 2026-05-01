@@ -5,15 +5,9 @@ namespace Phoenix\Tests;
 use PHPUnit\Framework\TestCase;
 
 class ViewScrapeJsonTest extends PhoenixTestCase {
-	protected static $connection;
-	protected static $settings;
-	protected static $time;
 
 	public static function setUpBeforeClass(): void {
-		self::$connection = $GLOBALS['connection'];
-		self::$settings = $GLOBALS['settings'];
-		self::$time = $GLOBALS['time'];
-
+		parent::setUpBeforeClass();
 		require_once self::$settings['views'].'json.scrape.php';
 	}
 
