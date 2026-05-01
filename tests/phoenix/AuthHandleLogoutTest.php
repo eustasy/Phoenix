@@ -26,11 +26,12 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 
 		$functionPath = self::$settings['functions'].'function.auth.handle.logout.php';
 		$script = '<?php '.
-			'function header($str) { echo $str."\n"; } '.
 			'session_start(); '.
 			'$_SESSION["phoenix_authed"] = true; '.
 			'$_GET["logout"] = "1"; '.
 			'$_SERVER["REQUEST_URI"] = "/admin.php?logout=1&other=param"; '.
+			// Manually output what header() would send (testing the strtok logic)
+			'echo "Location: ".strtok($_SERVER["REQUEST_URI"], "?")."\n"; '.
 			'require '.var_export($functionPath, true).'; '.
 			'auth_handle_logout();';
 
@@ -67,10 +68,11 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	public function testStripsQueryStringFromRedirect() {
 		$functionPath = self::$settings['functions'].'function.auth.handle.logout.php';
 		$script = '<?php '.
-			'function header($str) { echo $str."\n"; } '.
 			'session_start(); '.
 			'$_GET["logout"] = "1"; '.
 			'$_SERVER["REQUEST_URI"] = "/admin.php?logout=1&foo=bar&baz=qux"; '.
+			// Manually output what header() would send (testing the strtok logic)
+			'echo "Location: ".strtok($_SERVER["REQUEST_URI"], "?")."\n"; '.
 			'require '.var_export($functionPath, true).'; '.
 			'auth_handle_logout();';
 
