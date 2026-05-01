@@ -29,18 +29,9 @@ if (isset($_GET['stats'])) {
 		header('Content-Type: text/xml');
 		echo view_stats_xml($stats, $settings);
 	} elseif (isset($_GET['json'])) {
+		require_once $settings['views'].'json.stats.php';
 		header('Content-Type: application/json');
-		echo json_encode(array(
-			'tracker' => array(
-				'version'   => '$Id: '.$settings['phoenix_version'].' $,',
-				'peers'     => $stats['peers'],
-				'seeders'   => $stats['seeders'],
-				'leechers'  => $stats['leechers'],
-				'torrents'  => $stats['torrents'],
-				'downloads' => $stats['downloads'],
-				'traffic'   => $stats['traffic'],
-			),
-		));
+		echo view_stats_json($stats, $settings);
 	} else {
 		require_once $settings['views'].'html.stats.php';
 		echo view_stats_html($stats, $settings);
@@ -81,20 +72,9 @@ if (
 		header('Content-Type: text/xml');
 		echo view_scrape_xml($scrape);
 	} elseif (isset($_GET['json'])) {
-		$json = array();
-		foreach ($scrape as $torrent) {
-			$json[$torrent['info_hash']] = array(
-				'info_hash' => $torrent['info_hash'],
-				'seeders'   => $torrent['seeders'],
-				'leechers'  => $torrent['leechers'],
-				'peers'     => $torrent['peers'],
-				'size'      => $torrent['size'],
-				'downloads' => $torrent['downloads'],
-				'traffic'   => $torrent['traffic'],
-			);
-		}
+		require_once $settings['views'].'json.scrape.php';
 		header('Content-Type: application/json');
-		echo json_encode($json);
+		echo view_scrape_json($scrape);
 	} else {
 		require_once $settings['views'].'bencode.scrape.php';
 		echo view_scrape_bencode($scrape);
@@ -123,20 +103,9 @@ if ($settings['full_scrape']) {
 		header('Content-Type: text/xml');
 		echo view_scrape_xml($scrape);
 	} elseif (isset($_GET['json'])) {
-		$json = array();
-		foreach ($scrape as $torrent) {
-			$json[$torrent['info_hash']] = array(
-				'info_hash' => $torrent['info_hash'],
-				'seeders'   => $torrent['seeders'],
-				'leechers'  => $torrent['leechers'],
-				'peers'     => $torrent['peers'],
-				'size'      => $torrent['size'],
-				'downloads' => $torrent['downloads'],
-				'traffic'   => $torrent['traffic'],
-			);
-		}
+		require_once $settings['views'].'json.scrape.php';
 		header('Content-Type: application/json');
-		echo json_encode($json);
+		echo view_scrape_json($scrape);
 	} else {
 		require_once $settings['views'].'bencode.scrape.php';
 		echo view_scrape_bencode($scrape);
