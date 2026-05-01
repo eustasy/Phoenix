@@ -282,8 +282,10 @@ src/
                             # Used by: peer.select, peers.count.*, stats.*
                             # Helper for single-row queries
     
-    db.fetch.array.php      # Execute query, return single column as flat array
-                            # Currently: function.mysqli.array.build.php
+    db.fetch.array.php      # ✓ CREATED: mysqli_array_build($connection, $sql)
+                            # Execute query, return single column as flat array
+                            # Replaced: function.mysqli.array.build.php
+                            # Used by: torrents.select.allowed
                             # Helper for SELECT column lists
 ```
 

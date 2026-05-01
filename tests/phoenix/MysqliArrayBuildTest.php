@@ -8,7 +8,7 @@ class MysqliArrayBuildTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.mysqli.array.build.php';
+		require_once self::$settings['model'].'db.fetch.array.php';
 	}
 
 	protected function tearDown(): void {
