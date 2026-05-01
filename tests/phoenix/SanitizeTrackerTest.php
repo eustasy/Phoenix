@@ -8,7 +8,8 @@ class SanitizeTrackerTest extends PhoenixTestCase
 	public static function setUpBeforeClass(): void
 	{
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.sanitize.tracker.php';
+		$settings = self::$settings;
+		require_once $settings['functions'].'function.sanitize.tracker.php';
 	}
 
 	public function testSingleInfoHashAndPeerId(): void

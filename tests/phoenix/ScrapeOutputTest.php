@@ -9,7 +9,8 @@ class ScrapeOutputTest extends PhoenixTestCase
 	public static function setUpBeforeClass(): void
 	{
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.scrape.output.php';
+		$settings = self::$settings;
+		require_once $settings['functions'].'function.scrape.output.php';
 	}
 
 	public function testOutputsBencodeByDefault(): void
