@@ -11,7 +11,7 @@ class OnceAnnouncePeerEventTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.peer.new.php';
+		require_once self::$settings['model'].'peer.insert.php';
 	}
 
 	protected function tearDown(): void {
@@ -92,7 +92,7 @@ class OnceAnnouncePeerEventTest extends PhoenixTestCase {
 
 	public function testReplacesPeerWhenStateChanged(): void {
 		$existing = $this->fixturePeer();
-		peer_new(self::$connection, self::$settings, self::$time, $existing);
+		peer_insert(self::$connection, self::$settings, self::$time, $existing);
 
 		$peer = $this->fixturePeer();
 		$peer['state'] = 1;
@@ -107,7 +107,7 @@ class OnceAnnouncePeerEventTest extends PhoenixTestCase {
 
 	public function testUpdatesAccessTimeWhenUnchanged(): void {
 		$peer = $this->fixturePeer();
-		peer_new(self::$connection, self::$settings, self::$time - 3600, $peer);
+		peer_insert(self::$connection, self::$settings, self::$time - 3600, $peer);
 
 		$_GET = array();
 		$this->runOnce($peer);
@@ -134,7 +134,7 @@ class OnceAnnouncePeerEventTest extends PhoenixTestCase {
 
 	public function testStoppedEventDeletesPeerAndExits(): void {
 		$peer = $this->fixturePeer();
-		peer_new(self::$connection, self::$settings, self::$time, $peer);
+		peer_insert(self::$connection, self::$settings, self::$time, $peer);
 
 		// The 'stopped' branch of the once calls exit(), which would terminate
 		// the PHPUnit worker if invoked in-process. Run it in a subprocess and

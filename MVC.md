@@ -127,8 +127,9 @@ src/
                             # Returns: array|false|null (row or null if not found)
                             # Used by: announce event handling
     
-    peer.insert.php         # REPLACE INTO peer (insert or update all fields)
-                            # Currently: function.peer.new.php
+    peer.insert.php         # ✓ CREATED: peer_insert($connection, $settings, $time, $peer)
+                            # REPLACE INTO peer (insert or update all fields)
+                            # Replaces: function.peer.new.php
                             # Used by: announce (new peers, state changes)
     
     peer.update.php         # UPDATE timestamp + transfer stats only

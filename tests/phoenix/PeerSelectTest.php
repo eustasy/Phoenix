@@ -9,7 +9,7 @@ class PeerSelectTest extends PhoenixTestCase {
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 		require_once self::$settings['model'].'peer.select.php';
-		require_once self::$settings['functions'].'function.peer.new.php';
+		require_once self::$settings['model'].'peer.insert.php';
 	}
 
 	protected function tearDown(): void {
@@ -43,7 +43,7 @@ class PeerSelectTest extends PhoenixTestCase {
 
 	public function testReturnsRowWhenPeerExists(): void {
 		$peer = $this->fixturePeer('__TEST_PS_EXISTS__', '__TEST_PS_EXISTS__');
-		peer_new(self::$connection, self::$settings, self::$time, $peer);
+		peer_insert(self::$connection, self::$settings, self::$time, $peer);
 
 		$result = peer_select(self::$connection, self::$settings, $peer);
 
@@ -55,7 +55,7 @@ class PeerSelectTest extends PhoenixTestCase {
 	public function testRequiresBothInfoHashAndPeerIdToMatch(): void {
 		// Insert under one peer_id, look up under another with the same info_hash.
 		$inserted = $this->fixturePeer('__TEST_PS_HASH__', '__TEST_PS_PEER_A__');
-		peer_new(self::$connection, self::$settings, self::$time, $inserted);
+		peer_insert(self::$connection, self::$settings, self::$time, $inserted);
 
 		$lookup = $this->fixturePeer('__TEST_PS_HASH__', '__TEST_PS_PEER_B__');
 		$this->assertFalse(peer_select(self::$connection, self::$settings, $lookup));

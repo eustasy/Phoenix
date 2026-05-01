@@ -8,7 +8,7 @@ class PeerNewTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.peer.new.php';
+		require_once self::$settings['model'].'peer.insert.php';
 	}
 
 	protected function tearDown(): void {
@@ -38,13 +38,13 @@ class PeerNewTest extends PhoenixTestCase {
 	}
 
 	public function testInsertsNewPeer(): void {
-		$this->assertTrue(peer_new(self::$connection, self::$settings, self::$time, $this->fixturePeer()));
+		$this->assertTrue(peer_insert(self::$connection, self::$settings, self::$time, $this->fixturePeer()));
 	}
 
 	public function testReplacesExistingPeer(): void {
 		$peer = $this->fixturePeer();
-		peer_new(self::$connection, self::$settings, self::$time, $peer);
-		$this->assertTrue(peer_new(self::$connection, self::$settings, self::$time, $peer));
+		peer_insert(self::$connection, self::$settings, self::$time, $peer);
+		$this->assertTrue(peer_insert(self::$connection, self::$settings, self::$time, $peer));
 	}
 
 }

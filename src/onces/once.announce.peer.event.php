@@ -28,8 +28,8 @@ if ( $event === 'completed' ) {
 
 // CHANGED or NEW peer — REPLACE the row, then run new/change hook.
 if ( peer_changed($peer, $peer['old']) ) {
-	require_once $settings['functions'].'function.peer.new.php';
-	peer_new($connection, $settings, $time, $peer);
+	require_once $settings['model'].'peer.insert.php';
+	peer_insert($connection, $settings, $time, $peer);
 	phoenix_hook($peer['old'] ? 'peer.change' : 'peer.new', $connection, $settings, $time, $peer);
 
 // UNCHANGED peer — bump the access timestamp only.

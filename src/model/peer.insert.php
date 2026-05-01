@@ -1,6 +1,11 @@
 <?php
 
-function peer_new(mysqli $connection, array $settings, int $time, array $peer): true {
+////	peer_insert
+// REPLACE INTO peer (insert or update all fields when peer state has changed).
+// Uses REPLACE to handle both new peers and state changes (IP change, seeding transition, etc.).
+// Returns true on success, calls tracker_error() on failure.
+
+function peer_insert(mysqli $connection, array $settings, int $time, array $peer): true {
 
 	$compactv4 = '';
 	$compactv6 = '';
@@ -48,5 +53,4 @@ function peer_new(mysqli $connection, array $settings, int $time, array $peer): 
 		tracker_error('Failed to add new peer.');
 	}
 	return true;
-
 }

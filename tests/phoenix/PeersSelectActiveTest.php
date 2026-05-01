@@ -12,7 +12,7 @@ class PeersSelectActiveTest extends PhoenixTestCase {
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 		require_once self::$settings['functions'].'function.peers.select.active.php';
-		require_once self::$settings['functions'].'function.peer.new.php';
+		require_once self::$settings['model'].'peer.insert.php';
 	}
 
 	protected function tearDown(): void {
@@ -36,7 +36,7 @@ class PeersSelectActiveTest extends PhoenixTestCase {
 			'portv4'     => '0',
 			'portv6'     => '0',
 		);
-		peer_new(self::$connection, self::$settings, $time, $row);
+			peer_insert(self::$connection, self::$settings, $time, $row);
 	}
 
 	/** @return array<string, mixed> */
