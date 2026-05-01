@@ -161,8 +161,9 @@ src/
                             # Returns: int count
                             # Used by: rate limiting
     
-    peers.scrape.php        # SELECT aggregated peer counts per torrent (for scrape)
-                            # Currently: function.scrape.query.peers.php
+    peers.scrape.php        # ✓ CREATED: peers_scrape($connection, $settings, $where_clause)
+                            # SELECT aggregated peer counts per torrent (for scrape)
+                            # Replaces: function.scrape.query.peers.php
                             # GROUP BY info_hash, returns seeders/leechers per torrent
                             # Used by: scrape.php (specific torrents)
     

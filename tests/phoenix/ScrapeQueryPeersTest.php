@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 class ScrapeQueryPeersTest extends PhoenixTestCase {
 
 	public function testQueryPeersWithSingleHash() {
-		require_once self::$settings['functions'].'function.scrape.query.peers.php';
+		require_once self::$settings['model'].'peers.scrape.php';
 		require_once self::$settings['functions'].'function.scrape.build.where.clause.php';
 
 		$info_hash = str_repeat('a', 40);
@@ -22,7 +22,7 @@ class ScrapeQueryPeersTest extends PhoenixTestCase {
 		mysqli_query(self::$connection, $sql);
 
 		$where = scrape_build_where_clause(array($info_hash));
-		$result = scrape_query_peers(self::$connection, self::$settings, $where);
+		$result = peers_scrape(self::$connection, self::$settings, $where);
 
 		$this->assertNotFalse($result);
 		$row = mysqli_fetch_assoc($result);
@@ -32,7 +32,7 @@ class ScrapeQueryPeersTest extends PhoenixTestCase {
 	}
 
 	public function testQueryPeersWithMultipleHashes() {
-		require_once self::$settings['functions'].'function.scrape.query.peers.php';
+		require_once self::$settings['model'].'peers.scrape.php';
 		require_once self::$settings['functions'].'function.scrape.build.where.clause.php';
 
 		$info_hash_a = str_repeat('a', 40);
@@ -50,7 +50,7 @@ class ScrapeQueryPeersTest extends PhoenixTestCase {
 		mysqli_query(self::$connection, $sql);
 
 		$where = scrape_build_where_clause(array($info_hash_a, $info_hash_b));
-		$result = scrape_query_peers(self::$connection, self::$settings, $where);
+		$result = peers_scrape(self::$connection, self::$settings, $where);
 
 		$this->assertNotFalse($result);
 		
@@ -69,12 +69,12 @@ class ScrapeQueryPeersTest extends PhoenixTestCase {
 	}
 
 	public function testQueryPeersReturnsEmptyForUnknownHash() {
-		require_once self::$settings['functions'].'function.scrape.query.peers.php';
+		require_once self::$settings['model'].'peers.scrape.php';
 		require_once self::$settings['functions'].'function.scrape.build.where.clause.php';
 
 		$info_hash = str_repeat('z', 40);
 		$where = scrape_build_where_clause(array($info_hash));
-		$result = scrape_query_peers(self::$connection, self::$settings, $where);
+		$result = peers_scrape(self::$connection, self::$settings, $where);
 
 		$this->assertNotFalse($result);
 		$this->assertSame(0, mysqli_num_rows($result));
