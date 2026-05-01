@@ -10,7 +10,6 @@ $settings['root']      = __DIR__.'/../';
 $settings['functions'] = $settings['root'].'src/functions/';
 $settings['hooks']     = $settings['root'].'src/hooks/';
 $settings['model']     = $settings['root'].'src/model/';
-$settings['onces']     = $settings['root'].'src/onces/';
 $settings['settings']  = $settings['root'].'config/';
 $settings['views']     = $settings['root'].'src/views/';
 

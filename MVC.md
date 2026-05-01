@@ -655,17 +655,17 @@ These stay in `src/functions/` as helpers called by controllers:
 
 ### What Happens to `src/onces/`?
 
-All onces get absorbed into `public/` controllers:
+All onces have been absorbed into `public/` controllers or `src/phoenix.php` bootstrap:
 - `once.announce.peer.event.php` → absorbed into `announce.php`
 - `once.announce.torrent.php` → absorbed into `announce.php`
 - `once.sanitize.announce.address.php` → absorbed into `announce.php`
 - `once.index.torrents.php` → absorbed into `index.php`
 - `once.auth.php` → absorbed into `admin.php`
 - `once.install.php` → absorbed into `admin.php`
-- `once.db.connect.php` → stays in `src/phoenix.php` (bootstrap)
-- `once.scrape.torrent.php` → doesn't exist / unused
+- `once.db.connect.php` → absorbed into `src/phoenix.php` (bootstrap)
+- `once.scrape.torrent.php` → was unused
 
-The `src/onces/` directory can be deleted after refactoring.
+The `src/onces/` directory has been deleted.
 
 ---
 

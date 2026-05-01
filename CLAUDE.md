@@ -37,7 +37,8 @@ CI runs the workflow in `.github/workflows/normal.yml` against PHP 8.3–8.6. It
 The codebase follows what the changelog calls a "puff-style" layout — small, single-purpose files glued together by `require_once`:
 
 - **`src/functions/`** — one function per file. File `function.peer.new.php` defines `peer_new()`. Functions are pure-ish PHP (no top-level execution beyond defining the function). When extracting logic from a once, prefer this layout: one function per file, `////    <function_name>` header comment, then a brief description, then the function.
-- **`src/onces/`** — procedural code blocks pulled in via `require_once` exactly once per request. They share scope with their caller (read/write `$settings`, `$peer`, `$connection`, `$time`, etc. directly). Treat onces as procedural fragments, not as functions.
+- **`src/model/`** — database operations. One function per file, each returns results or false.
+- **`src/views/`** — presentation layer. Bencode, XML, and HTML output functions.
 - **`src/hooks/`** — empty stubs (e.g. `phoenix.peer.new.php`) that operators can fill in. The tracker calls `phoenix_hook()` at well-defined lifecycle points; that helper checks `is_readable()` and `include`s the hook from inside its own scope. Hooks therefore see exactly `$connection`, `$settings`, `$time`, and `$peer` (the last passed by reference, so mutations propagate). Keep them empty in this repo.
 - **`src/includes/`** — HTML template fragments included by `admin.php` (`install-form.php` + `admin-panel.php`). Distinct from `src/onces/` — these are presentation, not logic.
 - **`config/`** — `phoenix.default.php` is the template (do not modify). User configuration goes into `phoenix.custom.php` (gitignored, created by the installer).
@@ -60,9 +61,9 @@ Only `public/` is meant to be web-served. The PDS layout puts `src/` (functions,
 
 ### Bootstrap (`src/phoenix.php`)
 
-Sets path constants on `$settings` (`functions`, `hooks`, `onces`, `settings`), then loads `phoenix.default.php` followed by `phoenix.custom.php` (or hard-coded fallbacks if missing). It then `require_once`s `function.tracker.error.php` and `once.db.connect.php`. After this point, scripts can rely on `$connection`, `$settings`, `$time`, and `$chance` being in scope.
+Sets path constants on `$settings` (`functions`, `hooks`, `model`, `views`, `settings`), then loads `phoenix.default.php` followed by `phoenix.custom.php` (or hard-coded fallbacks if missing). It then `require_once`s `function.tracker.error.php` and establishes the database connection. After this point, scripts can rely on `$connection`, `$settings`, `$time`, and `$chance` being in scope.
 
-**Gotcha:** `once.db.connect.php` mutates `$settings['db_host']` in place — when `db_persist` is true it prepends `p:`. Anywhere outside `mysqli_connect` that reads `db_host` (e.g. `bin/backup-database.php` writing a credentials file) must strip the `p:` prefix.
+**Gotcha:** The DB connection logic mutates `$settings['db_host']` in place — when `db_persist` is true it prepends `p:`. Anywhere outside `mysqli_connect` that reads `db_host` (e.g. `bin/backup-database.php` writing a credentials file) must strip the `p:` prefix.
 
 ### Database
 

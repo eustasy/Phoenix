@@ -8,7 +8,6 @@ $settings['root'] = __DIR__.'/../';
 $settings['src']       = $settings['root'].'src/';
 $settings['functions'] = $settings['root'].'src/functions/';
 $settings['hooks']     = $settings['root'].'src/hooks/';
-$settings['onces']     = $settings['root'].'src/onces/';
 $settings['views']     = $settings['root'].'src/views/';
 $settings['model']     = $settings['root'].'src/model/';
 $settings['public']    = $settings['root'].'public/';
@@ -32,7 +31,7 @@ header('Access-Control-Allow-Origin: *');
 
 // Override the default database variables with this.
 include $settings['settings'].'phoenix.default.php';
-if ( is_readable($settings['settings'].'phoenix.custom.php') ) {
+if (is_readable($settings['settings'].'phoenix.custom.php')) {
 	include $settings['settings'].'phoenix.custom.php';
 } else {
 	error_log('Configuration file "'.$settings['settings'].'phoenix.custom.php" not readable.'.PHP_EOL.
@@ -46,10 +45,36 @@ if ( is_readable($settings['settings'].'phoenix.custom.php') ) {
 }
 
 require_once $settings['functions'].'function.tracker.error.php';
-// DB_Connect must be loaded after tracker_error and settings.
-require_once $settings['onces'].'once.db.connect.php';
 
-if ( !$settings['open_tracker'] ) {
+////	Database Connection (inlined from once.db.connect.php)
+
+require_once $settings['functions'].'function.db.is.configured.php';
+if (!db_is_configured($settings)) {
+	tracker_error('Connection Failed. Tracker is not configured.');
+}
+
+require_once $settings['functions'].'function.db.persist.host.php';
+$settings['db_host'] = db_persist_host($settings['db_host'], (bool)$settings['db_persist']);
+
+// PHP 8.1+ mysqli_report defaults to throwing on failure, so mysqli_connect()
+// no longer just returns false on bad credentials. Wrap in try/catch so the
+// failure path emits a friendly bencode error rather than crashing with an
+// uncaught exception.
+try {
+	$connection = @mysqli_connect($settings['db_host'], $settings['db_user'], $settings['db_pass'], $settings['db_name']);
+} catch (mysqli_sql_exception $e) {
+	$connection = false;
+}
+
+if (!$connection) {
+	tracker_error('Connection Failed. Tracker may be mis-configured. '.mysqli_connect_error());
+}
+
+////	Load allowed torrents for closed tracker
+
+////	Load allowed torrents for closed tracker
+
+if (!$settings['open_tracker']) {
 	require_once $settings['model'].'torrents.select.allowed.php';
 	$allowed_torrents = torrents_select_allowed($connection, $settings);
 }
