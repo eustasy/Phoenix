@@ -25,6 +25,27 @@ src/
                             # Used by: scrape.php (default format)
 ```
 
+### XML Views (simple format converters)
+```
+src/
+  views/
+    xml.announce.php        # Announce response as XML (for debugging/monitoring)
+                            # Currently: does not exist
+                            # Used by: announce.php?xml (if implemented)
+    
+    xml.index.php           # Torrent index as XML
+                            # Currently: function.index.render.xml.php
+                            # Used by: index.php?xml
+    
+    xml.scrape.php          # Scrape data as XML
+                            # Currently: function.scrape.render.xml.php
+                            # Used by: scrape.php?xml
+    
+    xml.stats.php           # Tracker stats as XML
+                            # Currently: function.stats.render.xml.php
+                            # Used by: scrape.php?stats&xml
+```
+
 ### HTML Views (full pages and forms)
 ```
 src/
@@ -61,7 +82,8 @@ public/
 
 ### Notes
 - **Bencode views** are the core tracker protocol. They currently mix logic and presentation (especially announce, which builds bencode inline). Extract to dedicated view files.
-- **JSON/XML views** are simple `json_encode()` or string-building wrappers. Do not add view files, just do inline.
+- **XML views** are simple string-building wrappers that convert arrays to XML. Extract to dedicated view files for consistency.
+- **JSON output** uses built-in `json_encode()` directly in controllers - no separate view files needed.
 - **HTML views** range from simple (index, stats) to complex (admin panel). The admin panel and install form are currently in `src/includes/`; move to `src/views/html.*.php`.
 - **Standalone views** like `magnet.php` don't use the tracker at all — pure UI utilities. Leave in `public/` but document here for completeness.
 - All views receive normalized data arrays (never raw DB results or `$_GET`/`$_POST`).
@@ -296,7 +318,16 @@ $strategy = peer_select_strategy($peer, $counts['complete'], $counts['incomplete
 $rows = peers_select_active($connection, $settings, $peer, $stale_threshold, $strategy); // MODEL
 
 // Render (VIEW - bencode.announce.php)
-echo view_announce_bencode($peer, $counts, $rows, $settings);
+// Note: BitTorrent protocol requires bencode, but XML/JSON can be useful for debugging
+if (isset($_GET['xml'])) {
+    header('Content-Type: text/xml');
+    echo view_announce_xml($peer, $counts, $rows, $settings); // VIEW
+} else if (isset($_GET['json'])) {
+    header('Content-Type: application/json');
+    echo json_encode(['peer' => $peer, 'counts' => $counts, 'rows' => $rows]);
+} else {
+    echo view_announce_bencode($peer, $counts, $rows, $settings); // VIEW
+}
 ```
 
 **Business logic helpers used (not model/view):**
@@ -336,7 +367,7 @@ if (isset($_GET['stats'])) {
     
     if (isset($_GET['xml'])) {
         header('Content-Type: text/xml');
-        echo scrape_render_xml($stats); // inline function
+        echo view_stats_xml($stats); // VIEW
     } else if (isset($_GET['json'])) {
         header('Content-Type: application/json');
         echo json_encode($stats);
@@ -385,7 +416,6 @@ tracker_error($peer['info_hash'] ? 'Torrent is not allowed.' : 'Tracker scraping
 - `scrape_initialize_results()` - pre-fill zeroed scrape entries for requested hashes
 - `scrape_merge_results()` - merge peer counts + torrent metadata into scrape array
 - `stats_merge()` - merge peer counts + download totals
-- `scrape_render_xml()`, `json_encode()` - inline format conversions (not separate views)
 
 ---
 
@@ -411,7 +441,7 @@ if (!$index) tracker_error('Unable to get index.');
 if (isset($_GET['xml'])) {
     header('Content-Type: text/xml');
     echo index_render_xml($index); // inline function
-} else if (isset($_GET['json'])) {
+} else ifview_index_xml($index); // VIEW
     header('Content-Type: application/json');
     echo json_encode($index);
 } else {
