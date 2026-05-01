@@ -56,11 +56,10 @@ class ScrapeRenderBencodeTest extends PhoenixTestCase {
 	}
 
 	public function testEmptyScrapeStillBalancesContainer(): void {
-		// Boundary: with no torrents, the files dict stays empty but the outer
-		// dict still closes. Documents current behaviour rather than asserting
-		// canonical bencode validity for the zero-torrent edge case.
+		// Boundary: with no torrents, the files dict is empty.
+		// Correct bencode: outer dict with "files" key pointing to empty dict.
 		$out = view_scrape_bencode(array());
-		$this->assertSame('d5:filese', $out);
+		$this->assertSame('d5:filesdee', $out);
 	}
 
 }

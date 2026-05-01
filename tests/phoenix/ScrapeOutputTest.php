@@ -27,8 +27,13 @@ class ScrapeOutputTest extends PhoenixTestCase
 			],
 		];
 		ob_start();
-		scrape_output($scrape);
-		$out = ob_get_clean();
+		try {
+			scrape_output($scrape);
+			$out = ob_get_clean();
+		} catch (\Throwable $e) {
+			ob_end_clean();
+			throw $e;
+		}
 		$this->assertNotEmpty($out);
 		// Should be bencoded (d...e)
 		$this->assertStringStartsWith('d', $out);
@@ -39,10 +44,16 @@ class ScrapeOutputTest extends PhoenixTestCase
 		$_GET['json'] = 1;
 		$scrape = [ 'abc' => ['info_hash' => 'abc', 'seeders' => 1, 'leechers' => 2, 'peers' => 3, 'size' => 123, 'downloads' => 4, 'traffic' => 492] ];
 		ob_start();
-		scrape_output($scrape);
-		$out = ob_get_clean();
+		try {
+			scrape_output($scrape);
+			$out = ob_get_clean();
+		} catch (\Throwable $e) {
+			ob_end_clean();
+			throw $e;
+		} finally {
+			unset($_GET['json']);
+		}
 		$this->assertJson($out);
-		unset($_GET['json']);
 	}
 
 	public function testOutputsXmlIfRequested(): void
@@ -50,9 +61,15 @@ class ScrapeOutputTest extends PhoenixTestCase
 		$_GET['xml'] = 1;
 		$scrape = [ 'abc' => ['info_hash' => 'abc', 'seeders' => 1, 'leechers' => 2, 'peers' => 3, 'size' => 123, 'downloads' => 4, 'traffic' => 492] ];
 		ob_start();
-		scrape_output($scrape);
-		$out = ob_get_clean();
+		try {
+			scrape_output($scrape);
+			$out = ob_get_clean();
+		} catch (\Throwable $e) {
+			ob_end_clean();
+			throw $e;
+		} finally {
+			unset($_GET['xml']);
+		}
 		$this->assertStringContainsString('<?xml', $out);
-		unset($_GET['xml']);
 	}
 }
