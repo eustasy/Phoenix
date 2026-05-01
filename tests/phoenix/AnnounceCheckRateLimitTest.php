@@ -29,8 +29,8 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 
 		// Insert existing peer with same peer_id
 		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
-			   '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `state`, `ip`, `port`, `updated`) VALUES '.
-			   "('".$info_hash."', '".$peer_id."', '192.0.2.1', NULL, '1', 'fc00::1', 6881, ".self::$time.");";
+			   '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+			   "('".$info_hash."', '".$peer_id."', '192.0.2.1', '', '', '', 6881, 0, '1', ".self::$time.");";
 		mysqli_query(self::$connection, $sql);
 
 		$peer = array(
@@ -57,8 +57,8 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 		$old_time = $threshold - 100; // Well outside the window
 
 		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
-			   '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `state`, `ip`, `port`, `updated`) VALUES '.
-			   "('".$info_hash."', '".$peer_id_1."', '192.0.2.1', NULL, '1', 'fc00::1', 6881, ".$old_time.");";
+			   '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+			   "('".$info_hash."', '".$peer_id_1."', '192.0.2.1', '', '', '', 6881, 0, '1', ".$old_time.");";
 		mysqli_query(self::$connection, $sql);
 
 		$peer = array(
@@ -80,8 +80,8 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 
 		// Insert recent peer with different peer_id but same IPv4
 		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
-			   '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `state`, `ip`, `port`, `updated`) VALUES '.
-			   "('".$info_hash."', '".$peer_id_1."', '192.0.2.1', NULL, '1', 'fc00::1', 6881, ".self::$time.");";
+			   '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+			   "('".$info_hash."', '".$peer_id_1."', '192.0.2.1', '', '', '', 6881, 0, '1', ".self::$time.");";
 		mysqli_query(self::$connection, $sql);
 
 		$peer = array(
@@ -102,8 +102,8 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 
 		// Insert recent peer with different peer_id but same IPv6
 		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
-			   '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `state`, `ip`, `port`, `updated`) VALUES '.
-			   "('".$info_hash."', '".$peer_id_1."', NULL, 'fc00::1', '1', 'fc00::1', 6881, ".self::$time.");";
+			   '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+			   "('".$info_hash."', '".$peer_id_1."', '', 'fc00::1', '', '', 0, 6881, '1', ".self::$time.");";
 		mysqli_query(self::$connection, $sql);
 
 		$peer = array(
@@ -124,8 +124,8 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 
 		// Insert peer with both IPv4 and IPv6
 		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
-			   '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `state`, `ip`, `port`, `updated`) VALUES '.
-			   "('".$info_hash."', '".$peer_id_1."', '192.0.2.100', 'fc00::100', '1', 'fc00::100', 6881, ".self::$time.");";
+			   '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+			   "('".$info_hash."', '".$peer_id_1."', '192.0.2.100', 'fc00::100', '', '', 6881, 6881, '1', ".self::$time.");";
 		mysqli_query(self::$connection, $sql);
 
 		$peer = array(
@@ -149,8 +149,8 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 
 		// Insert peer for torrent 1
 		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
-			   '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `state`, `ip`, `port`, `updated`) VALUES '.
-			   "('".$info_hash_1."', '".$peer_id_1."', '192.0.2.1', NULL, '1', 'fc00::1', 6881, ".self::$time.");";
+			   '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+			   "('".$info_hash_1."', '".$peer_id_1."', '192.0.2.1', '', '', '', 6881, 0, '1', ".self::$time.");";
 		mysqli_query(self::$connection, $sql);
 
 		$peer = array(

@@ -18,11 +18,11 @@ class ScrapeQueryAllPeersTest extends PhoenixTestCase {
 
 		// Insert test peers for multiple torrents
 		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
-			   '(`info_hash`, `peer_id`, `state`, `ip`, `port`, `updated`) VALUES '.
-			   "('".$info_hash_a."', '".$peer_id_1."', '1', 'fc00::1', 6881, ".self::$time."), ".
-			   "('".$info_hash_a."', '".$peer_id_2."', '0', 'fc00::2', 6881, ".self::$time."), ".
-			   "('".$info_hash_b."', '".$peer_id_3."', '1', 'fc00::3', 6881, ".self::$time."), ".
-			   "('".$info_hash_b."', '".$peer_id_4."', '1', 'fc00::4', 6881, ".self::$time.");";
+			   '(`info_hash`, `peer_id`, `state`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `updated`) VALUES '.
+			   "('".$info_hash_a."', '".$peer_id_1."', '1', '', 'fc00::1', '', '', 0, 6881, ".self::$time."), ".
+			   "('".$info_hash_a."', '".$peer_id_2."', '0', '', 'fc00::2', '', '', 0, 6881, ".self::$time."), ".
+			   "('".$info_hash_b."', '".$peer_id_3."', '1', '', 'fc00::3', '', '', 0, 6881, ".self::$time."), ".
+			   "('".$info_hash_b."', '".$peer_id_4."', '1', '', 'fc00::4', '', '', 0, 6881, ".self::$time.");";
 		mysqli_query(self::$connection, $sql);
 
 		$result = scrape_query_all_peers(self::$connection, self::$settings);
@@ -66,10 +66,10 @@ class ScrapeQueryAllPeersTest extends PhoenixTestCase {
 
 		// Insert multiple peers for same torrent
 		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
-			   '(`info_hash`, `peer_id`, `state`, `ip`, `port`, `updated`) VALUES '.
-			   "('".$info_hash."', '".$peer_id_1."', '1', 'fc00::5', 6881, ".self::$time."), ".
-			   "('".$info_hash."', '".$peer_id_2."', '1', 'fc00::6', 6881, ".self::$time."), ".
-			   "('".$info_hash."', '".$peer_id_3."', '0', 'fc00::7', 6881, ".self::$time.");";
+			   '(`info_hash`, `peer_id`, `state`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `updated`) VALUES '.
+			   "('".$info_hash."', '".$peer_id_1."', '1', '', 'fc00::5', '', '', 0, 6881, ".self::$time."), ".
+			   "('".$info_hash."', '".$peer_id_2."', '1', '', 'fc00::6', '', '', 0, 6881, ".self::$time."), ".
+			   "('".$info_hash."', '".$peer_id_3."', '0', '', 'fc00::7', '', '', 0, 6881, ".self::$time.");";
 		mysqli_query(self::$connection, $sql);
 
 		$result = scrape_query_all_peers(self::$connection, self::$settings);

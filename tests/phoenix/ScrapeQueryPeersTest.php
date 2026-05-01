@@ -16,9 +16,9 @@ class ScrapeQueryPeersTest extends PhoenixTestCase {
 
 		// Insert test peers
 		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
-			   '(`info_hash`, `peer_id`, `state`, `ip`, `port`, `updated`) VALUES '.
-			   "('".$info_hash."', '".$peer_id_1."', '1', 'fc00::1', 6881, ".self::$time."), ".
-			   "('".$info_hash."', '".$peer_id_2."', '0', 'fc00::2', 6881, ".self::$time.");";
+			   '(`info_hash`, `peer_id`, `state`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `updated`) VALUES '.
+			   "('".$info_hash."', '".$peer_id_1."', '1', '', 'fc00::1', '', '', 0, 6881, ".self::$time."), ".
+			   "('".$info_hash."', '".$peer_id_2."', '0', '', 'fc00::2', '', '', 0, 6881, ".self::$time.");";
 		mysqli_query(self::$connection, $sql);
 
 		$where = scrape_build_where_clause(array($info_hash));
@@ -43,10 +43,10 @@ class ScrapeQueryPeersTest extends PhoenixTestCase {
 
 		// Insert test peers for two torrents
 		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
-			   '(`info_hash`, `peer_id`, `state`, `ip`, `port`, `updated`) VALUES '.
-			   "('".$info_hash_a."', '".$peer_id_1."', '1', 'fc00::1', 6881, ".self::$time."), ".
-			   "('".$info_hash_a."', '".$peer_id_2."', '0', 'fc00::2', 6881, ".self::$time."), ".
-			   "('".$info_hash_b."', '".$peer_id_3."', '1', 'fc00::3', 6881, ".self::$time.");";
+			   '(`info_hash`, `peer_id`, `state`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `updated`) VALUES '.
+			   "('".$info_hash_a."', '".$peer_id_1."', '1', '', 'fc00::1', '', '', 0, 6881, ".self::$time."), ".
+			   "('".$info_hash_a."', '".$peer_id_2."', '0', '', 'fc00::2', '', '', 0, 6881, ".self::$time."), ".
+			   "('".$info_hash_b."', '".$peer_id_3."', '1', '', 'fc00::3', '', '', 0, 6881, ".self::$time.");";
 		mysqli_query(self::$connection, $sql);
 
 		$where = scrape_build_where_clause(array($info_hash_a, $info_hash_b));
