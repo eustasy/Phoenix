@@ -26,5 +26,6 @@ if ( $login_error ) {
 	}
 }
 
-require_once $settings['functions'].'function.auth.render.login.form.php';
-auth_render_login_form($login_error);
+require_once $settings['views'].'html.login.php';
+echo view_login_html($login_error);
+exit;

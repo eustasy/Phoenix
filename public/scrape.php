@@ -38,8 +38,8 @@ if ( isset($_GET['stats']) ) {
 
 	// HTML
 	} else {
-		require_once $settings['functions'].'function.stats.render.html.php';
-		stats_render_html($stats, $settings);
+		require_once $settings['views'].'html.stats.php';
+		echo view_stats_html($stats, $settings);
 	}
 // END IF STATS
 

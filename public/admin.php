@@ -25,8 +25,23 @@ if ( !$config_exists ) {
 	$install_error     = null;
 
 	require $settings['onces'].'once.install.php';
-	require __DIR__.'/../src/includes/install-form.php';
-	// install-form.php calls exit.
+	
+	// Prepare form values (repopulate after failed attempt)
+	$form = array(
+		'db_host'      => isset($_POST['db_host'])      ? $_POST['db_host']   : 'localhost',
+		'db_user'      => isset($_POST['db_user'])      ? $_POST['db_user']   : '',
+		'db_name'      => isset($_POST['db_name'])      ? $_POST['db_name']   : 'phoenix',
+		'db_prefix'    => isset($_POST['db_prefix'])    ? $_POST['db_prefix'] : 'phoenix_',
+		'db_persist'   => !isset($_POST['db_persist'])  || $_POST['db_persist'],
+		'open_tracker' => isset($_POST['open_tracker']) && $_POST['open_tracker'],
+		'public_index' => isset($_POST['public_index']) && $_POST['public_index'],
+	);
+	
+	require_once $settings['functions'].'function.tracker.error.php';
+	$settings['views'] = $settings['root'].'src/views/';
+	require_once $settings['views'].'html.install.php';
+	echo view_install_html($settings_writable, $install_error, $form);
+	exit;
 
 }
 
@@ -114,4 +129,21 @@ if (
 	}
 }
 
-require __DIR__.'/../src/includes/admin-panel.php';
+// Calculate database size if tables are installed
+$database_size = false;
+if ( $tables_installed ) {
+	$database_size_query = 'SELECT `data_length` AS `Data`, `index_length` AS `Indexes`, SUM( `data_length` + `index_length` ) AS `Total`, SUM( `data_free` ) AS `Free` FROM `information_schema`.`TABLES` WHERE `table_schema` = \''.$settings['db_name'].'\' GROUP BY `table_schema`;';
+	$result = mysqli_query($connection, $database_size_query, MYSQLI_STORE_RESULT);
+	if ( $result ) {
+		$database_size = mysqli_fetch_assoc($result);
+	}
+}
+
+require_once $settings['views'].'html.admin.php';
+echo view_admin_html(
+	$settings,
+	$tables_installed,
+	$database_size,
+	$Message ?? false,
+	isset($_GET['installed'])
+);

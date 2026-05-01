@@ -8,7 +8,7 @@ class IndexRenderHtmlTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.index.render.html.php';
+		require_once self::$settings['views'].'html.index.php';
 	}
 
 	/** @return list<array<string, mixed>> */
@@ -26,22 +26,22 @@ class IndexRenderHtmlTest extends PhoenixTestCase {
 	}
 
 	public function testEmptyIndexProducesEmptyList(): void {
-		$html = index_render_html(array());
+		$html = view_index_html(array());
 		$this->assertStringContainsString('<ul></ul>', $html);
 	}
 
 	public function testOutputStartsWithDoctype(): void {
-		$html = index_render_html($this->fixture());
+		$html = view_index_html($this->fixture());
 		$this->assertStringStartsWith('<!DocType html>', $html);
 	}
 
 	public function testTorrentNameAppearsInListItem(): void {
-		$html = index_render_html($this->fixture());
+		$html = view_index_html($this->fixture());
 		$this->assertStringContainsString('<li>Test Torrent', $html);
 	}
 
 	public function testStatisticsAreIncluded(): void {
-		$html = index_render_html($this->fixture());
+		$html = view_index_html($this->fixture());
 		$this->assertStringContainsString('2 seeders', $html);
 		$this->assertStringContainsString('1 leechers', $html);
 		$this->assertStringContainsString('7 downloads', $html);
@@ -54,7 +54,7 @@ class IndexRenderHtmlTest extends PhoenixTestCase {
 			'size'      => 0, 'downloads' => 0, 'seeders' => 0,
 			'leechers'  => 0, 'peers'     => 0, 'traffic' => 0,
 		));
-		$html = index_render_html($index);
+		$html = view_index_html($index);
 		$this->assertStringNotContainsString('<script>', $html);
 		$this->assertStringContainsString('&lt;script&gt;', $html);
 	}
@@ -67,7 +67,7 @@ class IndexRenderHtmlTest extends PhoenixTestCase {
 			'size'      => 0, 'downloads' => 3, 'seeders' => 1,
 			'leechers'  => 0, 'peers'     => 1, 'traffic' => 0,
 		);
-		$html = index_render_html($index);
+		$html = view_index_html($index);
 		$this->assertSame(2, substr_count($html, '<li>'));
 		$this->assertStringContainsString('Second Torrent', $html);
 	}

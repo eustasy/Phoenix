@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 class StatsRenderHtmlTest extends TestCase {
 
 	public function testRenderHtml() {
-		require_once __DIR__.'/../../src/functions/function.stats.render.html.php';
+		require_once __DIR__.'/../../src/views/html.stats.php';
 
 		$stats = array(
 			'peers' => 15,
@@ -19,9 +19,7 @@ class StatsRenderHtmlTest extends TestCase {
 		);
 		$settings = array('phoenix_version' => '1.0.0');
 
-		ob_start();
-		stats_render_html($stats, $settings);
-		$output = ob_get_clean();
+		$output = view_stats_html($stats, $settings);
 
 		$this->assertStringContainsString('<!DocType html>', $output);
 		$this->assertStringContainsString('<title>Phoenix: $Id: 1.0.0 $</title>', $output);
@@ -34,7 +32,7 @@ class StatsRenderHtmlTest extends TestCase {
 	}
 
 	public function testRenderHtmlWithZeroStats() {
-		require_once __DIR__.'/../../src/functions/function.stats.render.html.php';
+		require_once __DIR__.'/../../src/views/html.stats.php';
 
 		$stats = array(
 			'peers' => 0,
@@ -46,9 +44,7 @@ class StatsRenderHtmlTest extends TestCase {
 		);
 		$settings = array('phoenix_version' => '1.0.0');
 
-		ob_start();
-		stats_render_html($stats, $settings);
-		$output = ob_get_clean();
+		$output = view_stats_html($stats, $settings);
 
 		$this->assertStringContainsString('0 peers', $output);
 		$this->assertStringContainsString('0 seeders', $output);
@@ -59,7 +55,7 @@ class StatsRenderHtmlTest extends TestCase {
 	}
 
 	public function testRenderHtmlFormatsLargeNumbers() {
-		require_once __DIR__.'/../../src/functions/function.stats.render.html.php';
+		require_once __DIR__.'/../../src/views/html.stats.php';
 
 		$stats = array(
 			'peers' => 1234567,
@@ -71,9 +67,7 @@ class StatsRenderHtmlTest extends TestCase {
 		);
 		$settings = array('phoenix_version' => '1.0.0');
 
-		ob_start();
-		stats_render_html($stats, $settings);
-		$output = ob_get_clean();
+		$output = view_stats_html($stats, $settings);
 
 		// Check that number_format() is working (US English thousands separator)
 		$this->assertStringContainsString('1,234,567 peers', $output);

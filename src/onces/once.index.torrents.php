@@ -47,7 +47,7 @@ if ( isset($_GET['xml']) ) {
 
 // HTML
 } else {
-	require_once $settings['functions'].'function.index.render.html.php';
+	require_once $settings['views'].'html.index.php';
 	header('Content-Type: text/html; charset=UTF-8');
-	echo index_render_html($index);
+	echo view_index_html($index);
 }

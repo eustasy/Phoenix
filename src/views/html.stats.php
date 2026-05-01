@@ -1,11 +1,11 @@
 <?php
 
-////	stats_render_html
+////	view_stats_html
 // Render tracker statistics as HTML.
-// Outputs HTML and terminates.
+// Returns HTML string. Caller is responsible for setting Content-Type header.
 
-function stats_render_html($stats, $settings) {
-	echo '<!DocType html><html><head><meta charset="UTF-8">'.
+function view_stats_html($stats, $settings): string {
+	return '<!DocType html><html><head><meta charset="UTF-8">'.
 		 '<title>Phoenix: $Id: '.$settings['phoenix_version'].' $</title>'.
 		 '<body><pre>'.number_format($stats['peers']).
 		 ' peers ('.number_format($stats['seeders']).' seeders + '.number_format($stats['leechers']).

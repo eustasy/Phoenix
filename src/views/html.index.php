@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-////	index_render_html
-// Renders a normalised $index array as the HTML form of a torrent index response.
-// Caller is responsible for emitting the Content-Type header.
-function index_render_html(array $index): string {
+////	view_index_html
+// Renders a normalized $index array as HTML torrent index.
+// Returns HTML string. Caller is responsible for setting Content-Type header.
+
+function view_index_html(array $index): string {
 	$html = '<!DocType html><html><head><meta charset="UTF-8"><title>Torrent Index</title></head><body><ul>';
 	foreach ( $index as $torrent ) {
 		$html .= '<li>'.htmlspecialchars($torrent['name']).

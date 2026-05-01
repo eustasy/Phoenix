@@ -69,24 +69,29 @@ src/
 ```
 src/
   views/
-    html.index.php          # Public torrent listing
-                            # Currently: function.index.render.html.php
+    html.index.php          # ✓ CREATED: view_index_html($index)
+                            # Public torrent listing
+                            # Replaces: function.index.render.html.php
                             # Used by: index.php (default format)
     
-    html.stats.php          # Tracker statistics page
-                            # Currently: function.stats.render.html.php
+    html.stats.php          # ✓ CREATED: view_stats_html($stats, $settings)
+                            # Tracker statistics page
+                            # Replaces: function.stats.render.html.php
                             # Used by: scrape.php?stats (default format)
     
-    html.login.php          # Admin login form
-                            # Currently: function.auth.render.login.form.php
+    html.login.php          # ✓ CREATED: view_login_html($show_error)
+                            # Admin login form
+                            # Replaces: function.auth.render.login.form.php
                             # Used by: admin.php (when auth required)
     
-    html.install.php        # First-run installation form
-                            # Currently: src/includes/install-form.php
+    html.install.php        # ✓ CREATED: view_install_html($settings_writable, $install_error, $form)
+                            # First-run installation form
+                            # Replaces: src/includes/install-form.php
                             # Used by: admin.php (when no phoenix.custom.php exists)
     
-    html.admin.php          # Admin panel with diagnostics, setup, optimize, clean
-                            # Currently: src/includes/admin-panel.php
+    html.admin.php          # ✓ CREATED: view_admin_html($settings, $tables_installed, $database_size, $message, $show_installed)
+                            # Admin panel with diagnostics, setup, optimize, clean
+                            # Replaces: src/includes/admin-panel.php
                             # Used by: admin.php (main admin UI)
 ```
 

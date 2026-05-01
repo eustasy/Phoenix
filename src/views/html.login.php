@@ -1,12 +1,17 @@
 <?php
 
-////	auth_render_login_form
+////	view_login_html
 // Render the login form HTML.
 // Displays error message if $show_error is true.
-// Calls exit() after rendering.
+// Returns HTML string. Caller is responsible for echo and exit.
 
-function auth_render_login_form($show_error = false) {
-	?><!DOCTYPE html>
+function view_login_html($show_error = false): string {
+	$error_html = '';
+	if ( $show_error ) {
+		$error_html = '<p class="box background-pomegranate color-clouds">Incorrect password.</p>';
+	}
+	
+	return '<!DOCTYPE html>
 <html lang="en">
 <head>
 	<title>Phoenix &mdash; Login</title>
@@ -25,9 +30,7 @@ function auth_render_login_form($show_error = false) {
 </head>
 <body>
 	<h1>Phoenix</h1>
-	<?php if ( $show_error ): ?>
-		<p class="box background-pomegranate color-clouds">Incorrect password.</p>
-	<?php endif; ?>
+	'.$error_html.'
 	<form method="POST" action="">
 		<input type="hidden" name="process" value="login">
 		<div class="field"><label>Password</label>
@@ -36,7 +39,5 @@ function auth_render_login_form($show_error = false) {
 		<input class="button background-belize-hole color-clouds" type="submit" value="Log In">
 	</form>
 </body>
-</html>
-<?php
-	exit;
+</html>';
 }
