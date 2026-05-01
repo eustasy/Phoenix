@@ -105,7 +105,7 @@ if (
 
 	if ( $success ) {
 		$Message = 'Your MySQL Tracker Database has been setup.';
-		require_once $settings['functions'].'function.task.log.php';
+		require_once $settings['model'].'task.log.php';
 		$result = task_log($connection, $settings, 'install', $time);
 		$tables_installed = true;
 	} else {

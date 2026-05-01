@@ -230,8 +230,9 @@ src/
                             # Aggregates from peers table
                             # Returns: array{seeders, leechers, peers, torrents}
     
-    stats.downloads.php     # SELECT total downloads + traffic from torrents table
-                            # Currently: function.stats.fetch.download.totals.php
+    stats.downloads.php     # ✓ CREATED: stats_fetch_download_totals($connection, $settings)
+                            # SELECT total downloads + traffic from torrents table
+                            # Replaced: function.stats.fetch.download.totals.php
                             # Returns: array{downloads, traffic}
 ```
 
@@ -239,8 +240,9 @@ src/
 ```
 src/
   model/
-    task.log.php            # REPLACE INTO task log entry (name PK, timestamp value)
-                            # Currently: function.task.log.php
+    task.log.php            # ✓ CREATED: task_log($connection, $settings, $task, $value)
+                            # REPLACE INTO task log entry (name PK, timestamp value)
+                            # Replaced: function.task.log.php
                             # Used by: install, clean, optimize
     
     task.clean.php          # ✓ CREATED: tasks_clean($connection, $settings)

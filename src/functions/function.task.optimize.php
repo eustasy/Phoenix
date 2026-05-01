@@ -1,7 +1,7 @@
 <?php
 
 function task_optimize(mysqli $connection, array $settings, int $time, string|false $table = false, bool $and_default = true): bool {
-	require_once $settings['functions'].'function.task.log.php';
+	require_once $settings['model'].'task.log.php';
 
 	$tables = array();
 	if ( $table ) {

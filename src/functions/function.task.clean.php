@@ -1,7 +1,7 @@
 <?php
 
 function task_clean(mysqli $connection, array $settings, int $time): bool {
-	require_once $settings['functions'].'function.task.log.php';
+	require_once $settings['model'].'task.log.php';
 	require_once $settings['model'].'peers.clean.php';
 	require_once $settings['model'].'tasks.clean.php';
 	require_once $settings['model'].'torrents.clean.php';

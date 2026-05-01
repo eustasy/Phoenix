@@ -8,7 +8,7 @@ class TaskLogTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.task.log.php';
+		require_once self::$settings['model'].'task.log.php';
 	}
 
 	protected function tearDown(): void {
