@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 class ScrapeQueryAllTorrentsTest extends PhoenixTestCase {
 
 	public function testQueryAllTorrentsReturnsAllTorrents() {
-		require_once self::$settings['functions'].'function.scrape.query.all.torrents.php';
+		require_once self::$settings['model'].'torrents.scrape.all.php';
 
 		$info_hash_a = str_repeat('a', 40);
 		$info_hash_b = str_repeat('b', 40);
@@ -21,7 +21,7 @@ class ScrapeQueryAllTorrentsTest extends PhoenixTestCase {
 			   "('".$info_hash_c."', '__TEST_c', 3000, 10);";
 		mysqli_query(self::$connection, $sql);
 
-		$result = scrape_query_all_torrents(self::$connection, self::$settings);
+		$result = torrents_scrape_all(self::$connection, self::$settings);
 
 		$this->assertNotFalse($result);
 		
@@ -41,16 +41,16 @@ class ScrapeQueryAllTorrentsTest extends PhoenixTestCase {
 	}
 
 	public function testQueryAllTorrentsReturnsEmptyWhenNoTorrents() {
-		require_once self::$settings['functions'].'function.scrape.query.all.torrents.php';
+		require_once self::$settings['model'].'torrents.scrape.all.php';
 
-		$result = scrape_query_all_torrents(self::$connection, self::$settings);
+		$result = torrents_scrape_all(self::$connection, self::$settings);
 
 		$this->assertNotFalse($result);
 		$this->assertSame(0, mysqli_num_rows($result));
 	}
 
 	public function testQueryAllTorrentsIncludesInfoHashAndDownloads() {
-		require_once self::$settings['functions'].'function.scrape.query.all.torrents.php';
+		require_once self::$settings['model'].'torrents.scrape.all.php';
 
 		$info_hash = str_repeat('d', 40);
 
@@ -59,7 +59,7 @@ class ScrapeQueryAllTorrentsTest extends PhoenixTestCase {
 			   "('".$info_hash."', '__TEST_d', 5000, 42);";
 		mysqli_query(self::$connection, $sql);
 
-		$result = scrape_query_all_torrents(self::$connection, self::$settings);
+		$result = torrents_scrape_all(self::$connection, self::$settings);
 
 		$this->assertNotFalse($result);
 		$row = mysqli_fetch_assoc($result);
@@ -71,7 +71,7 @@ class ScrapeQueryAllTorrentsTest extends PhoenixTestCase {
 	}
 
 	public function testQueryAllTorrentsDoesNotIncludeSize() {
-		require_once self::$settings['functions'].'function.scrape.query.all.torrents.php';
+		require_once self::$settings['model'].'torrents.scrape.all.php';
 
 		$info_hash = str_repeat('e', 40);
 
@@ -80,12 +80,12 @@ class ScrapeQueryAllTorrentsTest extends PhoenixTestCase {
 			   "('".$info_hash."', '__TEST_e', 99999, 1);";
 		mysqli_query(self::$connection, $sql);
 
-		$result = scrape_query_all_torrents(self::$connection, self::$settings);
+		$result = torrents_scrape_all(self::$connection, self::$settings);
 
 		$this->assertNotFalse($result);
 		$row = mysqli_fetch_assoc($result);
 		
-		// Size is not selected in the query (unlike scrape_query_torrents)
+		// Size is not selected in the query (unlike torrents_scrape)
 		$this->assertArrayNotHasKey('size', $row);
 	}
 

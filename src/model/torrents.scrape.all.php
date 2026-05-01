@@ -1,10 +1,9 @@
 <?php
 
-////	scrape_query_all_torrents
+////	torrents_scrape_all
 // Query torrent statistics for all torrents (full scrape).
 // Returns mysqli_result or false on failure.
-
-function scrape_query_all_torrents($connection, $settings) {
+function torrents_scrape_all(mysqli $connection, array $settings): mysqli_result|false {
 	return mysqli_query($connection,
 		'SELECT
 			`t`.`info_hash` AS `info_hash`,

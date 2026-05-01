@@ -207,8 +207,10 @@ src/
                             # WHERE: info_hash IN (...)
                             # Used by: scrape.php (specific torrents)
     
-    torrents.scrape.all.php # SELECT ALL torrent metadata for full scrape
-                            # Currently: function.scrape.query.all.torrents.php
+    torrents.scrape.all.php # ✓ CREATED: torrents_scrape_all($connection, $settings)
+                            # SELECT ALL torrent metadata for full scrape
+                            # Replaced: function.scrape.query.all.torrents.php
+                            # Returns: info_hash and downloads only (no size)
                             # Used by: scrape.php?full_scrape
     
     torrents.clean.php      # DELETE test/sentinel torrents
