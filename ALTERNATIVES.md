@@ -8,7 +8,7 @@
 | TorrentFlux NG | Abandoned | v1.0 (2011) | 11 years ago | — |
 | TorrentFlux B4RT| Abandoned | 1.0beta2 (2008) | 12 years ago | — |
 | PeerTracker | Abandoned | r164 (2013) | 13 years ago | - |
-| RivetTracker | ⚠️ Unsecure / Abandoned | v1.03 (2010) | 16 years ago | Known security issues (blog post 2012-12-03, link down). Previously used by Linux Mint. Modified PHPBTTracker with MySQL backend, RSS, HTTP seeding. |
+| RivetTracker | ⚠️ Unsecure | v1.03 (2010) | 16 years ago | Known security issues (blog post 2012-12-03, link down). Previously used by Linux Mint. Modified PHPBTTracker with MySQL backend, RSS, HTTP seeding. |
 | phpMyBitTorrent | Abandoned | 2.0.4repack (2009) | 16 years ago | - |
 | TorrentFlux | Abandoned | v2.4 (2008) | 18 years ago | - |
 | BitTornado | Abandoned | v0.3.18 (2006) | 20 years ago | Previously used by Ubuntu (torrent.ubuntu.com:6969) |
