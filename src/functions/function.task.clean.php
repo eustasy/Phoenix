@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
+require_once $settings['model'].'task.log.php';
+require_once $settings['model'].'peers.clean.php';
+require_once $settings['model'].'tasks.clean.php';
+require_once $settings['model'].'torrents.clean.php';
+
 function task_clean(mysqli $connection, array $settings, int $time): bool {
-	require_once $settings['model'].'task.log.php';
-	require_once $settings['model'].'peers.clean.php';
-	require_once $settings['model'].'tasks.clean.php';
-	require_once $settings['model'].'torrents.clean.php';
 	$cleaned = true;
 
 	// Remove peers that have not announced within 3x the announce interval.

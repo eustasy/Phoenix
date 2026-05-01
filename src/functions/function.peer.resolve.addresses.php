@@ -5,8 +5,11 @@ declare(strict_types=1);
 ////	peer_resolve_addresses
 // Iterates the given address candidates, returning the first valid IPv4 and
 // the first valid IPv6 found, plus their associated ports (or false when no
-// port could be parsed). Requires parse_ipv4 and parse_ipv6 to be loaded by
-// the caller.
+// port could be parsed).
+
+require_once $settings['functions'].'function.parse.ipv4.php';
+require_once $settings['functions'].'function.parse.ipv6.php';
+
 function peer_resolve_addresses(array $addresses): array {
 	$result = array(
 		'ipv4'   => false,
