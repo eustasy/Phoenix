@@ -25,12 +25,12 @@ abstract class PhoenixTestCase extends TestCase {
 
 	/**
 	 * Load a function file that has top-level require_once statements.
-	 * Makes $settings available in global scope before loading.
+	 * Makes $settings available in local scope before loading.
 	 *
 	 * @param string $path Absolute path to the function file
 	 */
 	protected static function requireFunction(string $path): void {
-		$GLOBALS['settings'] = self::$settings;
+		$settings = self::$settings;
 		require_once $path;
 	}
 
