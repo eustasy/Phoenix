@@ -73,7 +73,20 @@ if ( isset($_GET['stats']) ) {
 	// IF FULL SCRAPE
 	} else if ( $settings['full_scrape'] ) {
 		// Scrape the full tracker.
-		require_once $settings['onces'].'once.scrape.tracker.php';
+		require_once $settings['functions'].'function.scrape.query.all.peers.php';
+		require_once $settings['functions'].'function.scrape.query.all.torrents.php';
+
+		// Full scrape: no WHERE clause, returns all tracked torrents.
+		// $scrape is not pre-initialised here; scrape_output builds it from the results.
+		$peers    = scrape_query_all_peers($connection, $settings);
+		$torrents = scrape_query_all_torrents($connection, $settings);
+
+		if ( !$peers || !$torrents ) {
+			tracker_error('Unable to scrape for that torrent.');
+		}
+
+		require_once $settings['functions'].'function.scrape.output.php';
+		scrape_output(array(), $peers, $torrents);
 	// END IF FULL SCRAPE
 
 	// IF NOT ALLOWED TO SCRAPE
