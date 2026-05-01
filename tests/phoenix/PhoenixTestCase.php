@@ -62,4 +62,29 @@ abstract class PhoenixTestCase extends TestCase {
 		];
 	}
 
+	/**
+	 * Insert a peer row for testing.
+	 *
+	 * @param string $info_hash
+	 * @param string $peer_id
+	 * @param int $state
+	 * @param int $time
+	 */
+	protected function insertPeer(string $info_hash, string $peer_id, int $state, int $time): void {
+		$row = [
+			'info_hash'  => $info_hash,
+			'peer_id'    => $peer_id,
+			'state'      => $state,
+			'left'       => 0,
+			'uploaded'   => 0,
+			'downloaded' => 0,
+			'ipv4'       => '',
+			'ipv6'       => '',
+			'port'       => '',
+			'portv4'     => '0',
+			'portv6'     => '0',
+		];
+		peer_insert(self::$connection, self::$settings, $time, $row);
+	}
+
 }

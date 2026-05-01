@@ -22,23 +22,6 @@ class PeersSelectActiveTest extends PhoenixTestCase {
 		);
 	}
 
-	private function insertPeer(string $info_hash, string $peer_id, int $state, int $time): void {
-		$row = array(
-			'info_hash'  => $info_hash,
-			'peer_id'    => $peer_id,
-			'state'      => $state,
-			'left'       => 0,
-			'uploaded'   => 0,
-			'downloaded' => 0,
-			'ipv4'       => '',
-			'ipv6'       => '',
-			'port'       => '',
-			'portv4'     => '0',
-			'portv6'     => '0',
-		);
-			peer_insert(self::$connection, self::$settings, $time, $row);
-	}
-
 	/** @return array<string, mixed> */
 	private function announcer(int $numwant = 50): array {
 		return array(
