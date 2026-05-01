@@ -69,7 +69,7 @@ if ( strlen($peer['info_hash']) != 40 ) {
 	// Announce Peers
 	require_once $settings['functions'].'function.peer.swarm.counts.php';
 	require_once $settings['functions'].'function.peer.select.strategy.php';
-	require_once $settings['functions'].'function.peers.select.active.php';
+	require_once $settings['model'].'peers.select.active.php';
 	require_once $settings['views'].'bencode.announce.php';
 
 	$stale_threshold = $time - ($settings['announce_interval'] + $settings['min_interval']);

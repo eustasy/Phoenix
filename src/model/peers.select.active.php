@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 ////	peers_select_active
-// Selects up to $peer['numwant'] fresh peer rows for a torrent's info_hash,
-// excluding the announcer (matched by peer_id) and stale rows (older than
-// $stale_threshold). The WHERE/ORDER clauses returned by peer_select_strategy
-// are appended verbatim. Calls tracker_error and exits when the query fails.
+// SELECT active peers for a torrent (for announce response).
+// Returns up to numwant rows excluding the announcer and stale peers.
+// WHERE: info_hash, updated > stale_threshold, peer_id != announcer
+// ORDER/LIMIT: per strategy (seeders-first, random, etc.)
+// Returns array of peer rows, calls tracker_error() on failure.
+
 function peers_select_active(mysqli $connection, array $settings, array $peer, int $stale_threshold, array $strategy): array {
 	$where = '`info_hash`=\''.$peer['info_hash'].'\' '.
 		'AND `peer_id`!=\''.$peer['peer_id'].'\' '.

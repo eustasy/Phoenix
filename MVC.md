@@ -142,8 +142,9 @@ src/
                             # Replaces: function.peer.delete.php
                             # Used by: announce?event=stopped
     
-    peers.select.active.php # SELECT active peers for a torrent (for announce response)
-                            # Currently: function.peers.select.active.php
+    peers.select.active.php # ✓ CREATED: peers_select_active($connection, $settings, $peer, $stale_threshold, $strategy)
+                            # SELECT active peers for a torrent (for announce response)
+                            # Replaces: function.peers.select.active.php
                             # WHERE: info_hash, updated > stale_threshold
                             # ORDER/LIMIT: per strategy (seeders-first, random, etc.)
                             # Returns: array of peer rows

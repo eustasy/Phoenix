@@ -11,7 +11,7 @@ class PeersSelectActiveTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.peers.select.active.php';
+		require_once self::$settings['model'].'peers.select.active.php';
 		require_once self::$settings['model'].'peer.insert.php';
 	}
 
