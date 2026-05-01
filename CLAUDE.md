@@ -36,7 +36,7 @@ CI runs the workflow in `.github/workflows/normal.yml` against PHP 8.3–8.6. It
 
 The codebase follows what the changelog calls a "puff-style" layout — small, single-purpose files glued together by `require_once`:
 
-- **`src/functions/`** — one function per file. File `function.peer.new.php` defines `peer_new()`. Functions are pure-ish PHP (no top-level execution beyond defining the function). When extracting logic from a once, prefer this layout: one function per file, `////\t<function_name>` header comment, then a brief description, then the function.
+- **`src/functions/`** — one function per file. File `function.peer.new.php` defines `peer_new()`. Functions are pure-ish PHP (no top-level execution beyond defining the function). When extracting logic from a once, prefer this layout: one function per file, `////    <function_name>` header comment, then a brief description, then the function.
 - **`src/onces/`** — procedural code blocks pulled in via `require_once` exactly once per request. They share scope with their caller (read/write `$settings`, `$peer`, `$connection`, `$time`, etc. directly). Treat onces as procedural fragments, not as functions.
 - **`src/hooks/`** — empty stubs (e.g. `phoenix.peer.new.php`) that operators can fill in. The tracker calls `phoenix_hook()` at well-defined lifecycle points; that helper checks `is_readable()` and `include`s the hook from inside its own scope. Hooks therefore see exactly `$connection`, `$settings`, `$time`, and `$peer` (the last passed by reference, so mutations propagate). Keep them empty in this repo.
 - **`src/includes/`** — HTML template fragments included by `admin.php` (`install-form.php` + `admin-panel.php`). Distinct from `src/onces/` — these are presentation, not logic.
@@ -102,7 +102,7 @@ To test functions that call `exit()` (notably `tracker_error()`), spawn a subpro
 These come from `.github/CONTRIBUTING.md` and consistent practice in the codebase:
 
 - **Tabs for indentation**, spaces for alignment.
-- **"Four stroke" section headers**: `////\tName`, followed by a short `//` description. Used both at file top-level and inside functions to mark logical sections.
+- **"Four stroke" section headers**: `////  Name`, followed by a short `//` description. Used both at file top-level and inside functions to mark logical sections.
 - **No closing `?>`** on PHP-only files.
 - **One function per file** in `src/functions/`, named `function.<category>.<verb>.php`.
 - **PHP-native solutions** over shell scripts when adding maintenance/utility code, so configuration stays in `$settings` rather than being spread across language boundaries (e.g. `bin/backup-database.php`, not `.sh`).
