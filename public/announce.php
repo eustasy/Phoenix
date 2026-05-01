@@ -47,7 +47,8 @@ if ( strlen($peer['info_hash']) != 40 ) {
 	}
 
 	// Optional Items
-	require_once $settings['onces'].'once.sanitize.announce.optional.php';
+	require_once $settings['functions'].'function.peer.parse.announce.optional.php';
+	$peer = array_merge($peer, peer_parse_announce_optional($_GET, $settings));
 
 	// Rate Limit
 	require_once $settings['functions'].'function.announce.check.rate.limit.php';
