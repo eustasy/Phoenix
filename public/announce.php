@@ -141,11 +141,22 @@ if (
 require_once $settings['model'].'peers.count.swarm.php';
 require_once $settings['functions'].'function.peer.select.strategy.php';
 require_once $settings['model'].'peers.select.active.php';
-require_once $settings['views'].'bencode.announce.php';
 
 $stale_threshold = $time - ($settings['announce_interval'] + $settings['min_interval']);
 $counts = peers_count_swarm($connection, $settings, $peer['info_hash'], $stale_threshold);
 $strategy = peer_select_strategy($peer, $counts['complete'], $counts['incomplete'], $settings);
 $rows = peers_select_active($connection, $settings, $peer, $stale_threshold, $strategy);
 
-echo view_announce_bencode($counts, $settings, $rows, (bool)$peer['compact'], (bool)$peer['no_peer_id']);
+// Render response in requested format
+if ( isset($_GET['xml']) ) {
+	require_once $settings['views'].'xml.announce.php';
+	header('Content-Type: text/xml');
+	echo view_announce_xml($counts, $settings, $rows);
+} elseif ( isset($_GET['json']) ) {
+	require_once $settings['views'].'json.announce.php';
+	header('Content-Type: application/json');
+	echo view_announce_json($counts, $settings, $rows);
+} else {
+	require_once $settings['views'].'bencode.announce.php';
+	echo view_announce_bencode($counts, $settings, $rows, (bool)$peer['compact'], (bool)$peer['no_peer_id']);
+}
