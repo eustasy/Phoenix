@@ -43,7 +43,7 @@ class StatsFetchPeerCountsTest extends PhoenixTestCase {
 	}
 
 	protected function tearDown(): void {
-		mysqli_query(self::$connection, 'DELETE FROM `'.self::$settings['db_prefix'].'peers` WHERE `peer_id` LIKE \'__TEST_%\'');
+		mysqli_query(self::$connection, 'DELETE FROM `'.self::$settings['db_prefix'].'peers` WHERE `peer_id` LIKE \'__TEST_%\' OR `peer_id` REGEXP \'^[0-9]+$\'');
 	}
 
 }

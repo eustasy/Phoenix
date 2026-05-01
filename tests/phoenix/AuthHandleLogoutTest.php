@@ -26,6 +26,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 
 		$functionPath = self::$settings['functions'].'function.auth.handle.logout.php';
 		$script = '<?php '.
+			'register_shutdown_function(function() { foreach (headers_list() as $h) { echo $h."\n"; } }); '.
 			'session_start(); '.
 			'$_SESSION["phoenix_authed"] = true; '.
 			'$_GET["logout"] = "1"; '.
@@ -66,6 +67,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	public function testStripsQueryStringFromRedirect() {
 		$functionPath = self::$settings['functions'].'function.auth.handle.logout.php';
 		$script = '<?php '.
+			'register_shutdown_function(function() { foreach (headers_list() as $h) { echo $h."\n"; } }); '.
 			'session_start(); '.
 			'$_GET["logout"] = "1"; '.
 			'$_SERVER["REQUEST_URI"] = "/admin.php?logout=1&foo=bar&baz=qux"; '.
