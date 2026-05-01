@@ -9,7 +9,33 @@ $peer = sanitize_tracker_params();
 
 // IF STATS
 if ( isset($_GET['stats']) ) {
-		require_once $settings['onces'].'once.stats.tracker.php';
+	require_once $settings['functions'].'function.stats.fetch.peer.counts.php';
+	require_once $settings['functions'].'function.stats.fetch.download.totals.php';
+	require_once $settings['functions'].'function.stats.merge.php';
+
+	$peer_counts = stats_fetch_peer_counts($connection, $settings);
+	$download_totals = stats_fetch_download_totals($connection, $settings);
+	$stats = stats_merge($peer_counts, $download_totals);
+
+	if (!$stats) {
+		tracker_error('Unable to get stats.');
+	}
+
+	// XML
+	if ( isset($_GET['xml']) ) {
+		require_once $settings['functions'].'function.stats.render.xml.php';
+		stats_render_xml($stats, $settings);
+
+	// JSON
+	} else if ( isset($_GET['json']) ) {
+		require_once $settings['functions'].'function.stats.render.json.php';
+		stats_render_json($stats, $settings);
+
+	// HTML
+	} else {
+		require_once $settings['functions'].'function.stats.render.html.php';
+		stats_render_html($stats, $settings);
+	}
 // END IF STATS
 
 // IF NOT STATS
