@@ -48,7 +48,7 @@ The codebase follows what the changelog calls a "puff-style" layout — small, s
 
 Every entry point sits in `public` and bootstraps via `require_once __DIR__.'/../src/phoenix.php'` (which loads settings, opens the DB, defines `tracker_error`):
 
-- `announce.php` — BEP 3 announce. Pulls in sanitization onces, then `once.announce.peer.event.php` (insert/update/delete/access depending on event), then `once.announce.torrent.php` (build response).
+- `announce.php` — BEP 3 announce. Follows MVC pattern: sanitizes input, resolves peer addresses, handles peer events (new/change/access/stopped/completed), then builds and outputs bencode response.
 - `scrape.php` — BEP 15 scrape. `?stats` returns tracker stats; with `info_hash`(es) returns specific torrents; otherwise full scrape (if enabled).
 - `index.php` — public torrent index, gated by `$settings['public_index']`.
 - `admin.php` — admin panel and first-run installer. Requires no `phoenix.custom.php` to enter installer mode.
