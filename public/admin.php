@@ -6,12 +6,13 @@
 
 ////	Bootstrap paths before attempting DB connection
 
-$settings['root']      = __DIR__.'/../';
-$settings['functions'] = $settings['root'].'src/functions/';
-$settings['hooks']     = $settings['root'].'src/hooks/';
-$settings['model']     = $settings['root'].'src/model/';
-$settings['settings']  = $settings['root'].'config/';
-$settings['views']     = $settings['root'].'src/views/';
+$settings['root']       = __DIR__.'/../';
+$settings['controller'] = $settings['root'].'src/controller/';
+$settings['functions']  = $settings['root'].'src/functions/';
+$settings['hooks']      = $settings['root'].'src/hooks/';
+$settings['model']      = $settings['root'].'src/model/';
+$settings['settings']   = $settings['root'].'config/';
+$settings['views']      = $settings['root'].'src/views/';
 
 require_once $settings['functions'].'function.tracker.error.php';
 
@@ -21,65 +22,8 @@ $config_exists = is_readable($config_path);
 ////	Installer Mode (no config file exists)
 
 if (!$config_exists) {
-	error_reporting(0);
-
-	$settings_writable = is_writable($settings['settings']);
-	$install_error     = null;
-
-	// Inlined from once.install.php
-	if (
-		$settings_writable &&
-		isset($_POST['process']) &&
-		$_POST['process'] === 'install'
-	) {
-		require_once $settings['functions'].'function.install.sanitize.post.php';
-		$values = install_sanitize_post($_POST);
-
-		// Test DB connection before writing config
-		$test_host = $values['db_persist'] ? 'p:'.$values['db_host'] : $values['db_host'];
-		try {
-			$test_conn = @mysqli_connect($test_host, $values['db_user'], $values['db_pass'], $values['db_name']);
-		} catch (mysqli_sql_exception $e) {
-			$test_conn = false;
-		}
-
-		if (!$test_conn) {
-			$install_error = 'Could not connect to the database: '.mysqli_connect_error();
-		} else {
-			// Create tables
-			$settings['db_prefix'] = $values['db_prefix'];
-			$settings['db_name']   = $values['db_name'];
-			require_once $settings['model'].'db.create.php';
-			if (!create_database($test_conn, $settings)) {
-				$install_error = 'Connected, but could not create the tables.';
-			} else {
-				// Write config file
-				require_once $settings['functions'].'function.install.build.config.php';
-				if (file_put_contents($config_path, install_build_config($values)) === false) {
-					$install_error = 'Connected and created tables, but could not write the configuration file. Check that <code>config/</code> is writable.';
-				} else {
-					mysqli_close($test_conn);
-					header('Location: admin.php?installed=1');
-					exit;
-				}
-			}
-			mysqli_close($test_conn);
-		}
-	}
-
-	// Prepare form values (repopulate after failed attempt)
-	$form = array(
-		'db_host'      => $_POST['db_host']   ?? 'localhost',
-		'db_user'      => $_POST['db_user']   ?? '',
-		'db_name'      => $_POST['db_name']   ?? 'phoenix',
-		'db_prefix'    => $_POST['db_prefix'] ?? 'phoenix_',
-		'db_persist'   => !isset($_POST['db_persist'])  || $_POST['db_persist'],
-		'open_tracker' => isset($_POST['open_tracker']) && $_POST['open_tracker'],
-		'public_index' => isset($_POST['public_index']) && $_POST['public_index'],
-	);
-
-	require_once $settings['views'].'html.install.php';
-	echo view_install_html($settings_writable, $install_error, $form);
+	require_once $settings['controller'].'admin.install.php';
+	echo admin_install_controller($settings, $config_path);
 	exit;
 }
 
@@ -87,38 +31,16 @@ if (!$config_exists) {
 
 require_once __DIR__.'/../src/phoenix.php';
 
-////	Authentication (inlined from once.auth.php)
+////	Authentication
 
-if (!empty($settings['admin_password'])) {
-	session_start();
-
-	require_once $settings['functions'].'function.auth.handle.logout.php';
-	auth_handle_logout();
-
-	require_once $settings['functions'].'function.auth.is.authenticated.php';
-	if (!auth_is_authenticated()) {
-		$login_error = isset($_POST['process']) && $_POST['process'] === 'login';
-
-		if ($login_error) {
-			require_once $settings['functions'].'function.auth.verify.login.php';
-			if (auth_verify_login($settings)) {
-				require_once $settings['functions'].'function.auth.set.authenticated.php';
-				auth_set_authenticated();
-				header('Location: '.$_SERVER['REQUEST_URI']);
-				exit;
-			}
-		}
-
-		require_once $settings['views'].'html.login.php';
-		echo view_login_html($login_error);
-		exit;
-	}
+require_once $settings['controller'].'admin.login.php';
+$login_output = admin_login_controller($settings);
+if ($login_output !== null) {
+	echo $login_output;
+	exit;
 }
 
 ////	Process Actions
-
-require_once $settings['model'].'db.drop.php';
-require_once $settings['model'].'db.create.php';
 
 $process = false;
 if (!empty($_POST['process'])) {
@@ -143,59 +65,23 @@ foreach ($tables as $table) {
 }
 $tables_installed = (count($tables) == $actual);
 
-////	Setup Action
+////	Dispatch actions to controllers
 
-if (
-	$process == 'setup' &&
-	(
-		$settings['db_reset'] ||
-		!$tables_installed
-	)
-) {
-	$success = true;
+$Message = false;
 
-	if ($tables_installed) {
-		if (
-			!drop_table($connection, $settings, 'peers') ||
-			!drop_table($connection, $settings, 'tasks') ||
-			!drop_table($connection, $settings, 'torrents')
-		) {
-			$success = false;
-		}
-	}
-
-	if (!create_database($connection, $settings)) {
-		$success = false;
-	}
-
-	if ($success) {
-		$Message = 'Your MySQL Tracker Database has been setup.';
-		require_once $settings['model'].'task.log.php';
-		task_log($connection, $settings, 'install', $time);
+if ($process == 'setup') {
+	require_once $settings['controller'].'admin.setup.php';
+	$result = admin_setup_action($connection, $settings, $time, $tables_installed);
+	if ($result !== false) {
+		$Message = $result;
 		$tables_installed = true;
-	} else {
-		$Message = 'Could not setup the MySQL Database.';
 	}
-
-////	Clean Action
-
 } elseif ($process == 'clean') {
-	require_once $settings['functions'].'function.task.clean.php';
-	if (task_clean($connection, $settings, $time)) {
-		$Message = 'The peers list has been cleaned.';
-	} else {
-		$Message = 'Could not clean the peers list.';
-	}
-
-////	Optimize Action
-
+	require_once $settings['controller'].'admin.clean.php';
+	$Message = admin_clean_action($connection, $settings, $time);
 } elseif ($process == 'optimize') {
-	require_once $settings['model'].'db.optimize.php';
-	if (task_optimize($connection, $settings, $time)) {
-		$Message = 'Your MySQL Tracker Database has been optimized.';
-	} else {
-		$Message = 'Could not optimize the MySQL Database.';
-	}
+	require_once $settings['controller'].'admin.optimize.php';
+	$Message = admin_optimize_action($connection, $settings, $time);
 }
 
 ////	Calculate database size
