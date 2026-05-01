@@ -172,10 +172,11 @@ src/
                             # Replaces: function.scrape.query.all.peers.php
                             # Used by: scrape.php (full scrape)
     
-    peers.clean.php         # DELETE stale peers (updated < threshold)
-                            # Currently: function.task.clean.php (inline, multi-table)
+    peers.clean.php         # ✓ CREATED: peers_clean($connection, $settings, $threshold)
+                            # DELETE stale peers (updated < threshold)
+                            # Extracted from function.task.clean.php (inline, multi-table)
                             # WHERE: updated < time - (3 * interval), OR test sentinels
-                            # Used by: cron cleanup
+                            # Used by: cron cleanup (via task_clean)
 ```
 
 ### Torrent Model (torrents table)
