@@ -155,8 +155,10 @@ src/
                             # Returns: array{complete: int, incomplete: int}
                             # Used by: announce response (interval calculation)
     
-    peers.count.rate.php    # SELECT COUNT announces from one IP in time window
-                            # Currently: function.announce.check.rate.limit.php (inline query)
+    peers.count.rate.php    # ✓ CREATED: peers_count_rate($connection, $settings, $peer, $threshold)
+                            # SELECT COUNT announces from one IP in time window
+                            # Replaces: inline query in function.announce.check.rate.limit.php
+                            # Returns: int count
                             # Used by: rate limiting
     
     peers.scrape.php        # SELECT aggregated peer counts per torrent (for scrape)
