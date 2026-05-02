@@ -67,7 +67,7 @@ jobs:
 
     - name: Upload Coverage
       if: matrix.php-version == '8.6'
-      uses: qltysh/qlty-action/coverage@v2
+      uses: qltysh/qlty-action/coverage@a19242102d17e497f437d7466aa01b528537e899 # v2.2.0
       with:
         token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
         files: coverage/clover.xml
