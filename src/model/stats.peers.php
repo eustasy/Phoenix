@@ -16,5 +16,5 @@ function stats_fetch_peer_counts(mysqli $connection, array $settings): array|fal
 		'COUNT(DISTINCT info_hash) AS `torrents` '.
 		// from peers
 		'FROM `'.$settings['db_prefix'].'peers`;';
-	return mysqli_fetch_once($connection, $sql);
+	return db_fetch_once($connection, $sql);
 }

@@ -21,9 +21,9 @@ function admin_setup_action($connection, $settings, $time, $tables_installed) {
 
 	if ($tables_installed) {
 		if (
-			!drop_table($connection, $settings, 'peers') ||
-			!drop_table($connection, $settings, 'tasks') ||
-			!drop_table($connection, $settings, 'torrents')
+			!db_drop_table($connection, $settings, 'peers') ||
+			!db_drop_table($connection, $settings, 'tasks') ||
+			!db_drop_table($connection, $settings, 'torrents')
 		) {
 			$success = false;
 		}
@@ -31,7 +31,7 @@ function admin_setup_action($connection, $settings, $time, $tables_installed) {
 
 	////	Create database tables
 
-	if (!create_database($connection, $settings)) {
+	if (!db_create($connection, $settings)) {
 		$success = false;
 	}
 

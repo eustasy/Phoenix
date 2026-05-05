@@ -34,7 +34,7 @@ class PeerDeleteTest extends PhoenixTestCase {
 
 		$select = 'SELECT * FROM `'.self::$settings['db_prefix'].'peers` '.
 			'WHERE `info_hash` = \'__TEST_1__\' AND `peer_id` = \'__TEST_1__\';';
-		$this->assertFalse(mysqli_fetch_once(self::$connection, $select));
+		$this->assertFalse(db_fetch_once(self::$connection, $select));
 	}
 
 }

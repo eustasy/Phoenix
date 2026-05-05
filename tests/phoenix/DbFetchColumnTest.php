@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-class MysqliArrayBuildTest extends PhoenixTestCase {
+class DbFetchColumnTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['model'].'db.fetch.array.php';
+		require_once self::$settings['model'].'db.fetch.column.php';
 	}
 
 	protected function tearDown(): void {
@@ -20,7 +20,7 @@ class MysqliArrayBuildTest extends PhoenixTestCase {
 
 	public function testEmptyResultIsEmptyArray(): void {
 		$select = 'SELECT `info_hash` FROM `'.self::$settings['db_prefix'].'torrents`;';
-		$result = mysqli_array_build(self::$connection, $select);
+		$result = db_fetch_column(self::$connection, $select);
 		$this->assertSame(array(), $result);
 	}
 
@@ -31,7 +31,7 @@ class MysqliArrayBuildTest extends PhoenixTestCase {
 			'VALUES (\'__TEST_1__\'), (\'__TEST_2__\'), (\'__TEST_3__\');'
 		);
 		$select = 'SELECT `info_hash` FROM `'.self::$settings['db_prefix'].'torrents`;';
-		$result = mysqli_array_build(self::$connection, $select);
+		$result = db_fetch_column(self::$connection, $select);
 		$this->assertCount(3, $result);
 		$this->assertContains('__TEST_1__', $result);
 		$this->assertContains('__TEST_2__', $result);

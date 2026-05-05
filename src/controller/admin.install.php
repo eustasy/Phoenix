@@ -60,7 +60,7 @@ function admin_install_controller($settings, $config_path) {
 	$settings['db_prefix'] = $values['db_prefix'];
 	$settings['db_name']   = $values['db_name'];
 	require_once $settings['model'].'db.create.php';
-	if (!create_database($test_conn, $settings)) {
+	if (!db_create($test_conn, $settings)) {
 		$install_error = 'Connected, but could not create the tables.';
 		return view_install_html($settings_writable, $install_error, $form);
 	}

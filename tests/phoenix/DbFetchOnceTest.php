@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-class MysqliFetchOnceTest extends PhoenixTestCase {
+class DbFetchOnceTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
@@ -20,7 +20,7 @@ class MysqliFetchOnceTest extends PhoenixTestCase {
 
 	public function testReturnsFalseForEmptyResult(): void {
 		$sql = 'SELECT `info_hash` FROM `'.self::$settings['db_prefix'].'torrents`;';
-		$this->assertFalse(mysqli_fetch_once(self::$connection, $sql));
+		$this->assertFalse(db_fetch_once(self::$connection, $sql));
 	}
 
 	public function testReturnsFirstRowAsAssoc(): void {
@@ -30,7 +30,7 @@ class MysqliFetchOnceTest extends PhoenixTestCase {
 			'VALUES (\'__TEST_1__\'), (\'__TEST_2__\'), (\'__TEST_3__\');'
 		);
 		$sql = 'SELECT `info_hash` FROM `'.self::$settings['db_prefix'].'torrents`;';
-		$result = mysqli_fetch_once(self::$connection, $sql);
+		$result = db_fetch_once(self::$connection, $sql);
 		$this->assertIsArray($result);
 		$this->assertArrayHasKey('info_hash', $result);
 	}

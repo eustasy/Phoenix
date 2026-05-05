@@ -19,7 +19,7 @@ function peers_count_rate(mysqli $connection, array $settings, array $peer, int 
 		return 0;
 	}
 
-	$rate = mysqli_fetch_once($connection,
+	$rate = db_fetch_once($connection,
 		'SELECT COUNT(*) AS `count` FROM `'.$settings['db_prefix'].'peers` '.
 		'WHERE `info_hash`=\''.$peer['info_hash'].'\' '.
 		'AND ('.implode(' OR ', $ip_parts).') '.

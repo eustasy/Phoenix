@@ -13,7 +13,7 @@ require_once __DIR__.'/../src/phoenix.php';
 $settings['db_prefix'] = $settings['db_prefix'].'TESTING_';
 
 require_once $settings['model'].'db.create.php';
-if ( !create_database($connection, $settings) ) {
+if ( !db_create($connection, $settings) ) {
 	fwrite(STDERR, 'Failed to set up test database.'.PHP_EOL);
 	exit(1);
 }

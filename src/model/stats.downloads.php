@@ -12,5 +12,5 @@ function stats_fetch_download_totals(mysqli $connection, array $settings): array
 		'SUM(`downloads`) AS `downloads`, '.
 		'SUM(`downloads` * IFNULL(`size`, 0)) AS `traffic` '.
 		'FROM `'.$settings['db_prefix'].'torrents`;';
-	return mysqli_fetch_once($connection, $sql);
+	return db_fetch_once($connection, $sql);
 }

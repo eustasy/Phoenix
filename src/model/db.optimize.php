@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-function task_optimize(mysqli $connection, array $settings, int $time, string|false $table = false, bool $and_default = true): bool {
+function db_optimize(mysqli $connection, array $settings, int $time, string|false $table = false, bool $and_default = true): bool {
 	require_once $settings['model'].'task.log.php';
 
 	$tables = array();

@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 function peer_select(mysqli $connection, array $settings, array $peer): array|false {
 	require_once $settings['model'].'db.fetch.once.php';
-	return mysqli_fetch_once(
+	return db_fetch_once(
 		$connection,
 		'SELECT * FROM `'.$settings['db_prefix'].'peers` '.
 		'WHERE `info_hash`=\''.$peer['info_hash'].'\' AND `peer_id`=\''.$peer['peer_id'].'\';'

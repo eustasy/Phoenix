@@ -9,7 +9,7 @@ declare(strict_types=1);
 function admin_optimize_action($connection, $settings, $time) {
 	require_once $settings['model'].'db.optimize.php';
 
-	if (task_optimize($connection, $settings, $time)) {
+	if (db_optimize($connection, $settings, $time)) {
 		return 'Your MySQL Tracker Database has been optimized.';
 	} else {
 		return 'Could not optimize the MySQL Database.';

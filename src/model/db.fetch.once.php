@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-////	mysqli_fetch_once
+////	db_fetch_once
 // Executes $sql and returns the first row as an associative array, or false
 // when the query failed or returned no rows.
-function mysqli_fetch_once(mysqli $connection, string $sql): array|false {
+function db_fetch_once(mysqli $connection, string $sql): array|false {
 	$result = mysqli_query($connection, $sql);
 	if (
 		$result &&

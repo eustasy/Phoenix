@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-class MysqliCreateDatabaseTest extends PhoenixTestCase {
+class DbCreateTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
@@ -12,7 +12,7 @@ class MysqliCreateDatabaseTest extends PhoenixTestCase {
 	}
 
 	public function testCreatesTablesOnFirstCall(): void {
-		$this->assertTrue(create_database(self::$connection, self::$settings));
+		$this->assertTrue(db_create(self::$connection, self::$settings));
 		foreach ( array('peers', 'tasks', 'torrents') as $table ) {
 			$check = mysqli_query(self::$connection,
 				'SELECT TABLE_NAME FROM `information_schema`.`TABLES` '.
@@ -26,8 +26,8 @@ class MysqliCreateDatabaseTest extends PhoenixTestCase {
 
 	public function testIsIdempotent(): void {
 		// IF NOT EXISTS means a second call must be a no-op, not an error.
-		$this->assertTrue(create_database(self::$connection, self::$settings));
-		$this->assertTrue(create_database(self::$connection, self::$settings));
+		$this->assertTrue(db_create(self::$connection, self::$settings));
+		$this->assertTrue(db_create(self::$connection, self::$settings));
 	}
 
 }

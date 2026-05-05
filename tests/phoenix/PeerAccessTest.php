@@ -37,7 +37,7 @@ class PeerAccessTest extends PhoenixTestCase {
 
 		$select = 'SELECT `left` FROM `'.self::$settings['db_prefix'].'peers` '.
 			'WHERE `info_hash` = \'__TEST_1__\' AND `peer_id` = \'__TEST_1__\';';
-		$result = mysqli_fetch_once(self::$connection, $select);
+		$result = db_fetch_once(self::$connection, $select);
 		$this->assertIsArray($result);
 		$this->assertEquals(2, $result['left']);
 	}

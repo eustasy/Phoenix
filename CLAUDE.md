@@ -86,7 +86,7 @@ PHPUnit is wired up via `composer.json` and `phpunit.xml.dist`. The test bootstr
 
 1. Loads Composer's autoloader and `src/phoenix.php` (giving access to `$connection`, `$settings`, `$time`).
 2. Suffixes `$settings['db_prefix']` with `TESTING_` so tests can't touch production tables.
-3. Calls `create_database()` to ensure the prefixed tables exist.
+3. Calls `db_create()` to ensure the prefixed tables exist.
 4. Exposes `$connection`, `$settings`, `$time` via `$GLOBALS` so each test class can pick them up in `setUpBeforeClass()`.
 
 All test classes live in the `Phoenix\Tests` namespace and extend `PhoenixTestCase` (in `tests/phoenix/PhoenixTestCase.php`), which copies the globals into `protected static` properties (`self::$connection`, `self::$settings`, `self::$time`).
