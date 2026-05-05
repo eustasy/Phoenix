@@ -8,28 +8,41 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 
 	protected function setUp(): void {
 		$_GET = array();
-		$_SERVER['REQUEST_URI'] = '/admin.php?logout=1';
+		$_POST = array();
+		$_SERVER['REQUEST_URI'] = '/admin.php';
+		$_SERVER['REQUEST_METHOD'] = 'GET';
 	}
 
 	public function testDoesNothingWhenLogoutNotSet() {
 		require_once self::$settings['functions'].'function.auth.handle.logout.php';
 
-		// No $_GET['logout'] set
 		auth_handle_logout();
 
-		// If we get here, no exit was called
+		// If we get here, no exit was called.
 		$this->assertTrue(true);
 	}
 
-	public function testExitsAndRedirectsWhenLogoutSet() {
-		// auth_handle_logout() calls session_destroy() and exit(), so we test in subprocess
+	public function testIgnoresGetRequestEvenWithLogoutParam() {
+		// CSRF-resistant: a third-party <img src="…?logout=1"> would arrive as
+		// a GET, and must not be able to end the admin session.
+		require_once self::$settings['functions'].'function.auth.handle.logout.php';
+		$_SERVER['REQUEST_METHOD'] = 'GET';
+		$_GET['logout'] = '1';
 
+		auth_handle_logout();
+
+		// No exit, no redirect.
+		$this->assertTrue(true);
+	}
+
+	public function testExitsAndRedirectsOnPostLogout() {
 		$functionPath = self::$settings['functions'].'function.auth.handle.logout.php';
 		$script = '<?php '.
 			'session_start(); '.
 			'$_SESSION["phoenix_authed"] = true; '.
-			'$_GET["logout"] = "1"; '.
-			'$_SERVER["REQUEST_URI"] = "/admin.php?logout=1&other=param"; '.
+			'$_SERVER["REQUEST_METHOD"] = "POST"; '.
+			'$_POST["logout"] = "1"; '.
+			'$_SERVER["REQUEST_URI"] = "/admin.php?other=param"; '.
 			// Manually output what header() would send (testing the strtok logic)
 			'echo "Location: ".strtok($_SERVER["REQUEST_URI"], "?")."\n"; '.
 			'require '.var_export($functionPath, true).'; '.
@@ -37,9 +50,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 
 		$result = $this->runPhpSubprocess($script);
 
-		// Should exit cleanly
 		$this->assertSame(0, $result['exit']);
-		// Should output Location header
 		$this->assertStringContainsString('Location: /admin.php', $result['stdout']);
 	}
 
@@ -47,23 +58,23 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 		$functionPath = self::$settings['functions'].'function.auth.handle.logout.php';
 		$script = '<?php '.
 			'session_start(); '.
-			'$_GET["logout"] = "1"; '.
-			'$_SERVER["REQUEST_URI"] = "/admin.php?logout=1&foo=bar&baz=qux"; '.
-			// Manually output what header() would send (testing the strtok logic)
+			'$_SERVER["REQUEST_METHOD"] = "POST"; '.
+			'$_POST["logout"] = "1"; '.
+			'$_SERVER["REQUEST_URI"] = "/admin.php?foo=bar&baz=qux"; '.
 			'echo "Location: ".strtok($_SERVER["REQUEST_URI"], "?")."\n"; '.
 			'require '.var_export($functionPath, true).'; '.
 			'auth_handle_logout();';
 
 		$result = $this->runPhpSubprocess($script);
 
-		// Location should be just /admin.php without query string
 		$this->assertStringContainsString('Location: /admin.php', $result['stdout']);
-		$this->assertStringNotContainsString('logout=', $result['stdout']);
 		$this->assertStringNotContainsString('foo=', $result['stdout']);
+		$this->assertStringNotContainsString('baz=', $result['stdout']);
 	}
 
 	protected function tearDown(): void {
 		$_GET = array();
+		$_POST = array();
 	}
 
 }

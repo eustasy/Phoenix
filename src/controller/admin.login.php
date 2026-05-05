@@ -10,6 +10,14 @@ function admin_login_controller($settings) {
 		return null;
 	}
 
+	// Harden the session cookie before session_start() — params apply to the
+	// cookie that is about to be sent. Secure is conditional on the request
+	// arriving over HTTPS so local-dev plain-HTTP setups still work.
+	session_set_cookie_params([
+		'httponly' => true,
+		'samesite' => 'Lax',
+		'secure'   => !empty($_SERVER['HTTPS']),
+	]);
 	session_start();
 
 	////	Handle logout
@@ -21,11 +29,15 @@ function admin_login_controller($settings) {
 
 	require_once $settings['functions'].'function.auth.is.authenticated.php';
 	if (!auth_is_authenticated()) {
-		$login_error = isset($_POST['process']) && $_POST['process'] === 'login';
+		$login_attempted = isset($_POST['process']) && $_POST['process'] === 'login';
 
-		if ($login_error) {
+		if ($login_attempted) {
 			require_once $settings['functions'].'function.auth.verify.login.php';
 			if (auth_verify_login($settings)) {
+				// Defeat session-fixation: any pre-login session id is now
+				// retired so an attacker who planted one cannot resume the
+				// authenticated session.
+				session_regenerate_id(true);
 				require_once $settings['functions'].'function.auth.set.authenticated.php';
 				auth_set_authenticated();
 				header('Location: '.$_SERVER['REQUEST_URI']);
@@ -34,7 +46,7 @@ function admin_login_controller($settings) {
 		}
 
 		require_once $settings['views'].'html.login.php';
-		return view_login_html($login_error);
+		return view_login_html($login_attempted);
 	}
 
 	// Authenticated, allow proceeding

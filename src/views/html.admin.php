@@ -14,10 +14,14 @@
 function view_admin_html($settings, $tables_installed, $database_size, $message = false, $show_installed = false): string {
 	$php_version = PHP_VERSION;
 	
-	// Build logout link
+	// Build logout form. POST-only so a cross-site GET (e.g. an <img> tag)
+	// cannot end an admin session.
 	$logout_html = '';
 	if ( !empty($settings['admin_password']) ) {
-		$logout_html = '<p class="text-right"><a href="?logout=1">Log out</a></p>';
+		$logout_html = '<form method="POST" class="text-right" style="display:inline">'.
+			'<input type="hidden" name="logout" value="1">'.
+			'<button type="submit" class="link-button" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline">Log out</button>'.
+			'</form>';
 	}
 	
 	// Build installation complete message
