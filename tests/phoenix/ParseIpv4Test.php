@@ -42,4 +42,24 @@ class ParseIpv4Test extends PhoenixTestCase {
 		$this->assertFalse(parse_ipv4(''));
 	}
 
+	public function testStripsIpv4MappedIpv6Prefix(): void {
+		$r = parse_ipv4('::ffff:101.45.75.219');
+		$this->assertIsArray($r);
+		$this->assertSame('101.45.75.219', $r['ip']);
+		$this->assertFalse($r['port']);
+	}
+
+	public function testStripsIpv4MappedIpv6PrefixWithPort(): void {
+		$r = parse_ipv4('::ffff:101.45.75.219:12345');
+		$this->assertIsArray($r);
+		$this->assertSame('101.45.75.219', $r['ip']);
+		$this->assertSame(12345, $r['port']);
+	}
+
+	public function testDoesNotStripPrefixCharactersFromAddressProper(): void {
+		// trim($address, '::ffff:') would have eaten leading/trailing 'f' and ':',
+		// breaking parses of plain IPv6 addresses that happen to share those bytes.
+		$this->assertFalse(parse_ipv4('ff:ff:ff:ff'));
+	}
+
 }
