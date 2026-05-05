@@ -73,8 +73,6 @@ if (!$connection) {
 
 ////	Load allowed torrents for closed tracker
 
-////	Load allowed torrents for closed tracker
-
 if (!$settings['open_tracker']) {
 	require_once $settings['model'].'torrents.select.allowed.php';
 	$allowed_torrents = torrents_select_allowed($connection, $settings);
