@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once $settings['functions'].'function.peer.format.bencode.php';
+
 ////	view_announce_bencode
 // Renders a BitTorrent announce response as bencode (BEP 3).
 // Keys must be in lexicographic order per the bencode spec.
@@ -48,20 +50,11 @@ function view_announce_bencode(
 		$response .= '6:peers6'.strlen($v6).':'.$v6;
 	} else {
 		// Non-compact mode: list of peer dictionaries.
+		// Each peer dict has 'ip', optionally 'peer id', then 'port' — the only
+		// lexicographic order BEP 3 permits.
 		$response .= 'l';
 		foreach ( $rows as $row ) {
-			// Each peer is a bencode dict with 'ip', 'port', and optionally 'peer id'.
-			if ( $row['ipv4'] != null ) {
-				$response .= 'd2:ip'.strlen($row['ipv4']).':'.$row['ipv4'].
-					'4:porti'.$row['portv4'].'e';
-			} else if ( $row['ipv6'] != null ) {
-				$response .= 'd2:ip'.strlen($row['ipv6']).':'.$row['ipv6'].
-					'4:porti'.$row['portv6'].'e';
-			}
-			if ( !$no_peer_id ) {
-				$response .= '7:peer id20:'.hex2bin($row['peer_id']);
-			}
-			$response .= 'e';
+			$response .= peer_format_bencode($row, !$no_peer_id);
 		}
 		$response .= 'e';
 	}

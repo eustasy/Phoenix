@@ -19,7 +19,8 @@ class PeerFormatBencodeTest extends PhoenixTestCase {
 			'portv6'  => 0,
 			'peer_id' => str_repeat('00', 20),
 		);
-		$expected = 'd2:ip7:1.2.3.44:porti12345e7:peer id20:'.hex2bin(str_repeat('00', 20)).'e';
+		// BEP 3 dict keys must be sorted as raw bytes: 'ip' < 'peer id' < 'port'.
+		$expected = 'd2:ip7:1.2.3.47:peer id20:'.hex2bin(str_repeat('00', 20)).'4:porti12345ee';
 		$this->assertSame($expected, peer_format_bencode($row, true));
 	}
 
@@ -54,6 +55,39 @@ class PeerFormatBencodeTest extends PhoenixTestCase {
 			'peer_id' => str_repeat('00', 20),
 		);
 		$this->assertSame('d2:ip7:1.2.3.44:porti12345ee', peer_format_bencode($row, false));
+	}
+
+	public function testReturnsEmptyStringWhenNoAddress(): void {
+		// Avoid emitting a stray closing 'e' for rows that have neither family;
+		// the row should simply be skipped from the response.
+		$row = array(
+			'ipv4'    => null,
+			'ipv6'    => null,
+			'portv4'  => 0,
+			'portv6'  => 0,
+			'peer_id' => str_repeat('00', 20),
+		);
+		$this->assertSame('', peer_format_bencode($row, true));
+		$this->assertSame('', peer_format_bencode($row, false));
+	}
+
+	public function testKeyOrderIsLexicographic(): void {
+		$row = array(
+			'ipv4'    => '1.2.3.4',
+			'ipv6'    => null,
+			'portv4'  => 6881,
+			'portv6'  => 0,
+			'peer_id' => str_repeat('aa', 20),
+		);
+		$out = peer_format_bencode($row, true);
+		$ip      = strpos($out, '2:ip');
+		$peer_id = strpos($out, '7:peer id');
+		$port    = strpos($out, '4:port');
+		$this->assertNotFalse($ip);
+		$this->assertNotFalse($peer_id);
+		$this->assertNotFalse($port);
+		$this->assertLessThan($peer_id, $ip);
+		$this->assertLessThan($port,    $peer_id);
 	}
 
 }
