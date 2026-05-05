@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-require_once $settings['functions'].'function.peer.format.bencode.php';
+// Resolved relative to __DIR__ rather than $settings so callers (and tests)
+// don't have to ensure $settings is in the inclusion scope.
+require_once __DIR__.'/../functions/function.peer.format.bencode.php';
 
 ////	view_announce_bencode
 // Renders a BitTorrent announce response as bencode (BEP 3).
