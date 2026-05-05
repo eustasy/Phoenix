@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Scheduled maintenance entry point.
 // Only runs when clean_with_cron is enabled; that setting disables the per-request fallback
 // in public/announce.php so the announce path doesn't pay the clean/optimize overhead on any requests.

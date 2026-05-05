@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 $settings['phoenix_version'] = 'Phoenix Procedural v.3.1 2016-04-14 15:42:00Z eustasy';
 
 // If the root isn't a directory up, modify that here.

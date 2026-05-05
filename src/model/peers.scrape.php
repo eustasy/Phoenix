@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	peers_scrape
 // SELECT aggregated peer counts per torrent (for scrape).
 // Returns mysqli_result with columns: info_hash, seeders, leechers.

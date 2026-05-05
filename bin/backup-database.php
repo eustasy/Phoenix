@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Scheduled database backup with optional rotation.
 require_once __DIR__.'/../src/phoenix.php';
 

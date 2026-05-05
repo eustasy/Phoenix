@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	torrents_clean
 // Delete test/sentinel torrents from the torrents table.
 // Removes rows matching test prefixes or the DELETEME sentinel.

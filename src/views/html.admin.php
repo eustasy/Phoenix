@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	view_admin_html
 // Render the admin panel with diagnostics and utilities.
 // Returns HTML string. Caller is responsible for echo and exit.

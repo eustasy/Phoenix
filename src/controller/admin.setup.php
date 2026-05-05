@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	admin_setup_action
 //  Handles database setup/reset action.
 //  Returns message string on completion.

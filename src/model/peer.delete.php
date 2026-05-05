@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	peer_delete
 // DELETE single peer row by info_hash + peer_id.
 // Used when a peer announces with event=stopped.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	Public Torrent Index
 require_once __DIR__.'/../src/phoenix.php';
 

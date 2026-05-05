@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	tasks_clean
 // Delete test/sentinel rows from the tasks table.
 // Removes rows matching test prefixes or the DELETEME sentinel.

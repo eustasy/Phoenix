@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	torrents_scrape_all
 // Query torrent statistics for all torrents (full scrape).
 // Returns mysqli_result or false on failure.

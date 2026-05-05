@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	stats_fetch_peer_counts
 // Fetch peer statistics from the database.
 // Returns array with seeders, leechers, and torrent count, or false on failure.

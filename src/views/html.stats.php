@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	view_stats_html
 // Render tracker statistics as HTML.
 // Returns HTML string. Caller is responsible for setting Content-Type header.

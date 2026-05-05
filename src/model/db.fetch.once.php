@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	mysqli_fetch_once
 // Executes $sql and returns the first row as an associative array, or false
 // when the query failed or returned no rows.

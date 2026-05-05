@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	view_login_html
 // Render the login form HTML.
 // Displays error message if $show_error is true.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	stats_fetch_download_totals
 // Fetch download and traffic totals from the database.
 // Returns array with downloads and traffic, or false on failure.

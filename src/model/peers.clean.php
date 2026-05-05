@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	peers_clean
 // DELETE stale peers (updated < threshold) and test sentinels.
 // Removes peers that have not announced within 3x the announce interval.

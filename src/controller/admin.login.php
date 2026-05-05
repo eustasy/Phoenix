@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	admin_login_controller
 //  Handles authentication for admin panel.
 //  Returns HTML output if login required, or null if authenticated.

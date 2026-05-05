@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	torrents_select_allowed
 // Returns the list of permitted info_hashes for closed-tracker mode.
 // Returns an empty array (not an error) when no torrents are registered.

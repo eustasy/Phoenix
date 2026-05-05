@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	peer_insert
 // REPLACE INTO peer (insert or update all fields when peer state has changed).
 // Uses REPLACE to handle both new peers and state changes (IP change, seeding transition, etc.).

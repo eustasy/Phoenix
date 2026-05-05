@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	view_install_html
 // Render the installation form.
 // Returns HTML string. Caller is responsible for echo and exit.

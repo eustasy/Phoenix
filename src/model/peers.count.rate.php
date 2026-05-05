@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	peers_count_rate
 // SELECT COUNT announces from one IP in time window.
 // Counts peers matching the same info_hash and IP (v4 or v6), but different peer_id,

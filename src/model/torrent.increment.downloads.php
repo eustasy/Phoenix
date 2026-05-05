@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	torrent_increment_downloads
 // INSERT ... ON DUPLICATE KEY UPDATE downloads counter.
 // Inserts torrent row with downloads=1 if new, or increments existing counter.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	admin_optimize_action
 //  Handles database optimization action.
 //  Returns message string on completion.

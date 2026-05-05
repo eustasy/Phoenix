@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	torrents_scrape
 // Query torrent statistics for the given info_hashes.
 // Returns mysqli_result or false on failure.

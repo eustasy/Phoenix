@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	Admin Panel & Installer
 // This page is not secure.
 // It should not be deployed in a production environment.

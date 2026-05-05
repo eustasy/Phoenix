@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	view_stats_json
 
 //	Returns tracker stats as a JSON-encoded string.

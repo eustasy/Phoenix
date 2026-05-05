@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	create_database
 // Creates the peers, tasks, and torrents tables under db_name with the configured prefix.
 // MyISAM is chosen over InnoDB: the tracker is write-heavy and never needs transactions or foreign keys.

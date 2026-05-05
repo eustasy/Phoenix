@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	view_scrape_json
 
 //	Returns scrape results as a JSON-encoded string.

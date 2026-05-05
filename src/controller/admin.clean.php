@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	admin_clean_action
 //  Handles peers list cleanup action.
 //  Returns message string on completion.

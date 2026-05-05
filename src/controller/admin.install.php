@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	admin_install_controller
 //  Handles first-run installer mode when no config file exists.
 //  Returns HTML output.

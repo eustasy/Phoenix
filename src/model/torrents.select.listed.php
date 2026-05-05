@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	torrents_select_listed
 // Returns all listed torrents with peer counts (seeders/leechers) for the public index.
 // Returns an empty array if no listed torrents exist.

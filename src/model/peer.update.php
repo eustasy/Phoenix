@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 ////	peer_update
 // UPDATE timestamp and transfer counters for a re-announcing peer.
 // Used when peer address and state are unchanged (no migration or completion).
