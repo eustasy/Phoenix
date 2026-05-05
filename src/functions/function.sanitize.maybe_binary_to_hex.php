@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 // Accepts a raw query-string value (not a $_GET value, which is already decoded).
 // Calls urldecode() itself so binary bytes in %XX form are resolved exactly once.
+//
+// This is the project's primary SQL injection defense for info_hash and peer_id
+// values, which are interpolated directly into single-quoted SQL strings. The
+// ctype_xdigit() check is what makes that interpolation safe — it guarantees
+// the returned value contains only [0-9a-f], which carries no SQL metacharacters.
 function maybe_binary_to_hex(string $binary): string|false {
 	$binary = urldecode($binary);
-	if (
-		strlen($binary) == 20 ||
-		strlen($binary) == 40
-	) {
-		// BEP 3: info_hash and peer_id are 20-byte SHA-1 values, URL-encoded as raw binary.
-		// Some clients send them pre-encoded as 40-char hex strings; both forms are valid.
-		if ( strlen($binary) == 20 ) {
-			$binary = bin2hex($binary);
-		}
-		// htmlentities as a final sanitization pass; safe hex chars (0-9a-f) pass through unchanged.
-		$binary = htmlentities($binary, ENT_QUOTES, 'UTF-8');
-		if ( strlen($binary) == 40 ) {
-			return $binary;
-		}
+	// BEP 3: info_hash and peer_id are 20-byte SHA-1 values, URL-encoded as raw binary.
+	// Some clients send them pre-encoded as 40-char hex strings; both forms are valid.
+	if ( strlen($binary) === 20 ) {
+		$binary = bin2hex($binary);
 	}
-	// Reject anything that isn't a valid 20-byte or 40-char hash.
+	if ( strlen($binary) === 40 && ctype_xdigit($binary) ) {
+		return $binary;
+	}
 	return false;
 }
