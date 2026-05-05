@@ -26,9 +26,31 @@ class ScrapeRenderXmlTest extends PhoenixTestCase {
 		);
 	}
 
-	public function testEmptyScrapeYieldsHeaderOnly(): void {
+	public function testEmptyScrapeYieldsEmptyScrapeElement(): void {
 		$xml = view_scrape_xml(array());
-		$this->assertSame('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', $xml);
+		$this->assertSame(
+			'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><scrape></scrape>',
+			$xml
+		);
+	}
+
+	public function testOutputIsWellFormedXml(): void {
+		$xml = view_scrape_xml($this->fixture());
+
+		// A bare list of <torrent> siblings would parse as multiple-root and
+		// fail here; the <scrape> wrapper makes the document well-formed.
+		$prev = libxml_use_internal_errors(true);
+		libxml_clear_errors();
+		$doc = simplexml_load_string($xml);
+		$errors = libxml_get_errors();
+		libxml_clear_errors();
+		libxml_use_internal_errors($prev);
+
+		$this->assertNotFalse($doc, 'XML failed to parse: '.implode('; ', array_map(
+			static fn ($e) => trim($e->message),
+			$errors
+		)));
+		$this->assertSame('scrape', $doc->getName());
 	}
 
 	public function testSingleTorrentRendersAllFields(): void {

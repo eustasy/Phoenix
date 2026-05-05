@@ -18,7 +18,10 @@ declare(strict_types=1);
 //
 // Returns: XML string.
 function view_scrape_xml(array $scrape): string {
-	$xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+	// Wrapped in a <scrape> root so the document is well-formed even when
+	// $scrape contains zero or many torrents — a bare list of <torrent>
+	// siblings has no root element and isn't valid XML.
+	$xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><scrape>';
 	foreach ( $scrape as $torrent ) {
 		$xml .= '<torrent>'.
 			'<info_hash>'.$torrent['info_hash'].'</info_hash>'.
@@ -30,5 +33,5 @@ function view_scrape_xml(array $scrape): string {
 			'<traffic>'  .$torrent['traffic']  .'</traffic>'.
 		'</torrent>';
 	}
-	return $xml;
+	return $xml.'</scrape>';
 }
