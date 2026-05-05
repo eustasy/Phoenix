@@ -82,6 +82,7 @@ if (
 		echo view_scrape_json($scrape);
 	} else {
 		require_once $settings['views'].'bencode.scrape.php';
+		header('Content-Type: text/plain; charset=ISO-8859-1');
 		echo view_scrape_bencode($scrape);
 	}
 	exit;
@@ -113,6 +114,7 @@ if ($settings['full_scrape']) {
 		echo view_scrape_json($scrape);
 	} else {
 		require_once $settings['views'].'bencode.scrape.php';
+		header('Content-Type: text/plain; charset=ISO-8859-1');
 		echo view_scrape_bencode($scrape);
 	}
 	exit;

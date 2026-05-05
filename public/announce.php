@@ -160,5 +160,9 @@ if ( isset($_GET['xml']) ) {
 	echo view_announce_json($counts, $settings, $rows);
 } else {
 	require_once $settings['views'].'bencode.announce.php';
+	// text/plain matches the de-facto convention for tracker bencode and stops
+	// PHP from defaulting to text/html. ISO-8859-1 lines up with the global
+	// default_charset set in phoenix.php so the raw bytes pass through.
+	header('Content-Type: text/plain; charset=ISO-8859-1');
 	echo view_announce_bencode($counts, $settings, $rows, (bool)$peer['compact'], (bool)$peer['no_peer_id']);
 }
