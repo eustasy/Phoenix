@@ -12,26 +12,29 @@ function admin_install_controller($settings, $config_path) {
 	require_once $settings['functions'].'function.install.sanitize.post.php';
 	$values = install_sanitize_post($_POST);
 
+	$settings_writable = is_writable($settings['settings']);
+	$install_error     = null;
+
 	////	Prepare form values (repopulate after failed attempt)
 	$form = array(
-		'db_host'      => $values['db_host']   ?? 'localhost',
-		'db_user'      => $values['db_user']   ?? '',
-		'db_name'      => $values['db_name']   ?? 'phoenix',
-		'db_prefix'    => $values['db_prefix'] ?? 'phoenix_',
-		'db_persist'   => !isset($values['db_persist'])  || $values['db_persist'],
-		'open_tracker' => isset($values['open_tracker']) && $values['open_tracker'],
-		'public_index' => isset($values['public_index']) && $values['public_index'],
+		'db_host'      => $values['db_host'],
+		'db_user'      => $values['db_user'],
+		'db_name'      => $values['db_name'],
+		'db_prefix'    => $values['db_prefix'] !== '' ? $values['db_prefix'] : 'phoenix_',
+		'db_persist'   => !empty($_POST) ? $values['db_persist'] : true,
+		'open_tracker' => $values['open_tracker'],
+		'public_index' => $values['public_index'],
 	);
 
 
 	////	Process installation
-	if (!isset($values['process']) || $values['process'] !== 'install') {
-		// Not attempting installation, just show the form
+	// 'process' is part of the request, not the sanitised config payload, so it
+	// is read from $_POST directly. Without this, install_sanitize_post() never
+	// sets it and the controller could never reach the install branch.
+	if (($_POST['process'] ?? '') !== 'install') {
 		return view_install_html($settings_writable, $install_error, $form);
 	}
 
-	$install_error     = null;
-	$settings_writable = is_writable($settings['settings']);
 	if ( !$settings_writable ) {
 		$install_error = 'The <code>config/</code> directory is not writable. Please make it writable and try again.';
 		return view_install_html($settings_writable, $install_error, $form);
