@@ -19,8 +19,29 @@ function peer_address_candidates(array $settings, array $get, array $server): ar
 		$addresses[] = $server['REMOTE_ADDR'];
 	}
 	if ( $settings['honor_xff'] ) {
-		if ( isset($server['HTTP_CLIENT_IP']) )       { $addresses[] = $server['HTTP_CLIENT_IP']; }
-		if ( isset($server['HTTP_X_FORWARDED_FOR']) ) { $addresses[] = $server['HTTP_X_FORWARDED_FOR']; }
+		// Both headers can carry a comma-separated chain (`client, proxy1, ...`).
+		// Take the first entry — the originating client per RFC 7239 — and skip
+		// the header entirely if every entry is blank. Honor_xff requires that
+		// the operator's frontend proxy strips/sanitises these, so trusting the
+		// leftmost is the contract.
+		if ( isset($server['HTTP_CLIENT_IP']) ) {
+			$first = peer_xff_first($server['HTTP_CLIENT_IP']);
+			if ( $first !== null ) { $addresses[] = $first; }
+		}
+		if ( isset($server['HTTP_X_FORWARDED_FOR']) ) {
+			$first = peer_xff_first($server['HTTP_X_FORWARDED_FOR']);
+			if ( $first !== null ) { $addresses[] = $first; }
+		}
 	}
 	return array_reverse($addresses);
+}
+
+function peer_xff_first(string $header): ?string {
+	foreach ( explode(',', $header) as $entry ) {
+		$entry = trim($entry);
+		if ( $entry !== '' ) {
+			return $entry;
+		}
+	}
+	return null;
 }

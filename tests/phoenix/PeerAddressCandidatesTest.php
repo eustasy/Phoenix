@@ -64,4 +64,55 @@ class PeerAddressCandidatesTest extends PhoenixTestCase {
 		);
 	}
 
+	public function testXffMultiHopChainPicksLeftmost(): void {
+		// Standard XFF chain: 'client, proxy1, proxy2'. The leftmost is the
+		// originating client. The IP parsers cannot accept the raw header
+		// (it isn't an IP), so we must split here.
+		$settings = array('external_ip' => false, 'honor_xff' => true);
+		$server = array(
+			'REMOTE_ADDR'          => '10.0.0.1',
+			'HTTP_X_FORWARDED_FOR' => '203.0.113.5, 198.51.100.7, 10.0.0.1',
+		);
+		$this->assertSame(
+			array('203.0.113.5', '10.0.0.1'),
+			peer_address_candidates($settings, array(), $server)
+		);
+	}
+
+	public function testXffWithExtraWhitespaceIsTrimmed(): void {
+		$settings = array('external_ip' => false, 'honor_xff' => true);
+		$server = array(
+			'REMOTE_ADDR'          => '10.0.0.1',
+			'HTTP_X_FORWARDED_FOR' => '   203.0.113.5  ,198.51.100.7',
+		);
+		$this->assertSame(
+			array('203.0.113.5', '10.0.0.1'),
+			peer_address_candidates($settings, array(), $server)
+		);
+	}
+
+	public function testXffSkippedWhenAllEntriesBlank(): void {
+		$settings = array('external_ip' => false, 'honor_xff' => true);
+		$server = array(
+			'REMOTE_ADDR'          => '10.0.0.1',
+			'HTTP_X_FORWARDED_FOR' => ' , ,  ',
+		);
+		$this->assertSame(
+			array('10.0.0.1'),
+			peer_address_candidates($settings, array(), $server)
+		);
+	}
+
+	public function testClientIpHeaderIsAlsoSplit(): void {
+		$settings = array('external_ip' => false, 'honor_xff' => true);
+		$server = array(
+			'REMOTE_ADDR'    => '10.0.0.1',
+			'HTTP_CLIENT_IP' => '203.0.113.5, 198.51.100.7',
+		);
+		$this->assertSame(
+			array('203.0.113.5', '10.0.0.1'),
+			peer_address_candidates($settings, array(), $server)
+		);
+	}
+
 }
