@@ -5,6 +5,7 @@ declare(strict_types=1);
 // Resolved relative to __DIR__ rather than $settings so callers (and tests)
 // don't have to ensure $settings is in the inclusion scope.
 require_once __DIR__.'/../functions/function.peer.format.bencode.php';
+require_once __DIR__.'/../functions/function.peers.format.compact.php';
 
 ////	view_announce_bencode
 // Renders a BitTorrent announce response as bencode (BEP 3).
@@ -35,21 +36,12 @@ function view_announce_bencode(
 		'e5:peers';
 
 	if ( $compact ) {
-		// BEP 23 (IPv4) and BEP 7 (IPv6) compact peer format.
-		// Build compact binary strings (6 bytes per IPv4 peer, 18 bytes per IPv6).
-		$v4 = '';
-		$v6 = '';
-		foreach ( $rows as $row ) {
-			if ( $row['compactv4'] != null ) {
-				$v4 .= hex2bin($row['compactv4']);
-			}
-			if ( $row['compactv6'] != null ) {
-				$v6 .= hex2bin($row['compactv6']);
-			}
-		}
-		// Bencode the binary strings with length prefix.
-		$response .= strlen($v4).':'.$v4;
-		$response .= '6:peers6'.strlen($v6).':'.$v6;
+		// BEP 23 (IPv4, 6 bytes per peer) and BEP 7 (IPv6, 18 bytes per peer).
+		// peers_format_compact does the hex2bin assembly; we just bencode the
+		// length-prefixed binary strings here.
+		$compact_peers = peers_format_compact($rows);
+		$response .= strlen($compact_peers['v4']).':'.$compact_peers['v4'];
+		$response .= '6:peers6'.strlen($compact_peers['v6']).':'.$compact_peers['v6'];
 	} else {
 		// Non-compact mode: list of peer dictionaries.
 		// Each peer dict has 'ip', optionally 'peer id', then 'port' — the only
