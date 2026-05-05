@@ -30,17 +30,14 @@ function view_admin_html($settings, $tables_installed, $database_size, $message 
 		$installed_html = '<p class="box background-green-sea color-clouds">Installation complete.</p>';
 	}
 	
-	// PHP version check
-	$php_compat_html = '';
-	if ( version_compare(PHP_VERSION, '5.5.0', '>=') ) {
-		$php_compat_html = '<p class="box background-green-sea color-clouds">Your PHP version is >= 5.5</p>
-		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
-	} else if ( version_compare(PHP_VERSION, '5.0.0', '>=') ) {
-		$php_compat_html = '<p class="box background-sun-flower color-midnight-blue">Your PHP version is >= 5.0, but < 5.5.
-		We recommend updating to PHP >= 5.5</p>
+	// PHP version check. Composer already enforces ^8.2 at install time, so
+	// reaching this view at all guarantees we're on a supported version; the
+	// panel just surfaces the running version for diagnostics.
+	if ( version_compare(PHP_VERSION, '8.2.0', '>=') ) {
+		$php_compat_html = '<p class="box background-green-sea color-clouds">Your PHP version is supported.</p>
 		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
 	} else {
-		$php_compat_html = '<p class="box background-pomegranate color-clouds">Phoenix is unable to run. Your PHP version is < 5.0</p>
+		$php_compat_html = '<p class="box background-pomegranate color-clouds">Phoenix requires PHP &gt;= 8.2.</p>
 		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
 	}
 	
