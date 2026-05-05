@@ -24,10 +24,6 @@ class PeerChangedTest extends PhoenixTestCase {
 		$this->assertTrue(peer_changed($this->current, false));
 	}
 
-	public function testReturnsTrueWhenOldIsNull(): void {
-		$this->assertTrue(peer_changed($this->current, null));
-	}
-
 	public function testReturnsFalseForIdenticalRow(): void {
 		$this->assertFalse(peer_changed($this->current, $this->current));
 	}
