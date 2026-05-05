@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 ////	scrape_build_where_clause
 // Build WHERE clause for scraping multiple info_hashes.
-// Returns SQL WHERE clause string.
+// Returns SQL WHERE clause string, or '' when there are no hashes (so callers
+// don't accidentally append a bare 'WHERE ' to their query).
 
 function scrape_build_where_clause(array $info_hashes): string {
+	if ( empty($info_hashes) ) {
+		return '';
+	}
 	$where = 'WHERE ';
 	foreach ( $info_hashes as $count => $info_hash ) {
 		if ( $count > 0 ) {

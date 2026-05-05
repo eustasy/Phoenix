@@ -39,12 +39,17 @@ if (isset($_GET['stats'])) {
 	exit;
 }
 
+// Drop any info_hashes that failed sanitization (maybe_binary_to_hex returns
+// false for those) so they cannot reach the SQL layer or seed result rows
+// keyed by the literal value false.
+$valid_info_hashes = array_values(array_filter($peer['info_hashes']));
+
 ////	Scrape Mode (specific torrents)
 if (
-	$peer['info_hash'] &&
+	!empty($valid_info_hashes) &&
 	(
 		$settings['open_tracker'] ||
-		tracker_validate_info_hashes($peer['info_hashes'], $allowed_torrents)
+		tracker_validate_info_hashes($valid_info_hashes, $allowed_torrents)
 	)
 ) {
 	require_once $settings['functions'].'function.scrape.build.where.clause.php';
@@ -55,8 +60,8 @@ if (
 
 	// BEP 15 allows multiple info_hashes per request.
 	// Pre-initialize results so missing torrents get zero counts instead of being omitted.
-	$where = scrape_build_where_clause($peer['info_hashes']);
-	$scrape = scrape_initialize_results($peer['info_hashes']);
+	$where = scrape_build_where_clause($valid_info_hashes);
+	$scrape = scrape_initialize_results($valid_info_hashes);
 	$peers = peers_scrape($connection, $settings, $where);
 	$torrents = torrents_scrape($connection, $settings, $where);
 
@@ -114,8 +119,11 @@ if ($settings['full_scrape']) {
 }
 
 ////	Not Allowed
-if (isset($peer['info_hash'])) {
+// $peer['info_hash'] is always set (keyed by sanitize_tracker_params) but is
+// false when the request supplied no usable hash. The request-tried-a-hash
+// path produces 'Torrent is not allowed.', everything else falls through to
+// 'Tracker scraping is not allowed.'.
+if ($peer['info_hash']) {
 	tracker_error('Torrent is not allowed.');
-} else {
-	tracker_error('Tracker scraping is not allowed.');
 }
+tracker_error('Tracker scraping is not allowed.');

@@ -37,11 +37,9 @@ class ScrapeBuildWhereClauseTest extends TestCase {
 	public function testBuildWhereClauseWithEmptyArray() {
 		require_once __DIR__.'/../../src/functions/function.scrape.build.where.clause.php';
 
-		$info_hashes = array();
-
-		$result = scrape_build_where_clause($info_hashes);
-
-		$this->assertSame('WHERE ', $result);
+		// An empty hash list must not produce a bare 'WHERE ' — that would be
+		// concatenated onto the model's SELECT and cause a syntax error.
+		$this->assertSame('', scrape_build_where_clause(array()));
 	}
 
 }
