@@ -50,4 +50,25 @@ class SanitizeTrackerTest extends PhoenixTestCase
 		$this->assertFalse($result['peer_id']);
 		$this->assertSame([], $result['info_hashes']);
 	}
+
+	public function testBareKeysAreIgnored(): void
+	{
+		// Query strings with a bare 'info_hash' or 'peer_id' (no '=value')
+		// must not cause an undefined-index warning when the loop reads
+		// the value half of the explode.
+		$result = sanitize_tracker_params('info_hash&peer_id&foo=bar');
+		$this->assertFalse($result['info_hash']);
+		$this->assertFalse($result['peer_id']);
+		$this->assertSame([], $result['info_hashes']);
+	}
+
+	public function testBareKeysMixedWithValidValue(): void
+	{
+		$ih = str_repeat('a', 20);
+		$query = 'info_hash&info_hash=' . rawurlencode($ih) . '&peer_id';
+		$result = sanitize_tracker_params($query);
+		$this->assertCount(1, $result['info_hashes']);
+		$this->assertSame(bin2hex($ih), $result['info_hash']);
+		$this->assertFalse($result['peer_id']);
+	}
 }

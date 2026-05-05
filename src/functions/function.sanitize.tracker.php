@@ -20,6 +20,11 @@ function sanitize_tracker_params(?string $query_string = null): array {
 	$params = explode('&', $query_string);
 	foreach ($params as $param) {
 		$param = explode('=', $param, 2);
+		// Skip bare keys (e.g. '&info_hash' with no '=value') so $param[1]
+		// is never read undefined.
+		if (!isset($param[1])) {
+			continue;
+		}
 		if ($param[0] === 'info_hash') {
 			$peer['info_hashes'][] = maybe_binary_to_hex($param[1]);
 		} elseif ($param[0] === 'peer_id') {
