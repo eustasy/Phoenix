@@ -12,10 +12,20 @@ declare(strict_types=1);
 //   $database_size - array|false, database size info (Data, Indexes, Total, Free)
 //   $message - string|false, optional message to display
 //   $show_installed - bool, whether to show "Installation complete" message
+//   $php_version - string|null, PHP version to report (defaults to PHP_VERSION).
+//                  Override only used by tests so the unsupported-version
+//                  branch can be exercised without spawning a different PHP.
+//   $has_mysqli - bool|null, whether mysqli is available (defaults to
+//                 class_exists('mysqli')). Override only used by tests so
+//                 the missing-extension branch can be exercised.
 
-function view_admin_html($settings, $tables_installed, $database_size, $message = false, $show_installed = false): string {
-	$php_version = PHP_VERSION;
-	
+function view_admin_html($settings, $tables_installed, $database_size, $message = false, $show_installed = false, $php_version = null, $has_mysqli = null): string {
+	// Composer enforces ^8.2 and ext-mysqli, but the project supports manual
+	// installs that bypass composer, so the runtime checks below stay in
+	// place; tests pass overrides to reach the failure branches.
+	$php_version = $php_version ?? PHP_VERSION;
+	$has_mysqli = $has_mysqli ?? class_exists('mysqli');
+
 	// Build logout form. POST-only so a cross-site GET (e.g. an <img> tag)
 	// cannot end an admin session.
 	$logout_html = '';
@@ -25,27 +35,25 @@ function view_admin_html($settings, $tables_installed, $database_size, $message 
 			'<button type="submit" class="link-button" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline">Log out</button>'.
 			'</form>';
 	}
-	
+
 	// Build installation complete message
 	$installed_html = '';
 	if ( $show_installed ) {
 		$installed_html = '<p class="box background-green-sea color-clouds">Installation complete.</p>';
 	}
-	
-	// PHP version check. Composer already enforces ^8.2 at install time, so
-	// reaching this view at all guarantees we're on a supported version; the
-	// panel just surfaces the running version for diagnostics.
-	if ( version_compare(PHP_VERSION, '8.2.0', '>=') ) {
+
+	// PHP version check
+	if ( version_compare($php_version, '8.2.0', '>=') ) {
 		$php_compat_html = '<p class="box background-green-sea color-clouds">Your PHP version is supported.</p>
 		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
 	} else {
 		$php_compat_html = '<p class="box background-pomegranate color-clouds">Phoenix requires PHP &gt;= 8.2.</p>
 		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
 	}
-	
+
 	// MySQL support check
 	$mysql_html = '';
-	if ( !class_exists('mysqli') ) {
+	if ( !$has_mysqli ) {
 		$mysql_html = '<p class="box background-pomegranate color-clouds">Your server does not support MySQL.</p>';
 	} else {
 		// mysqli_get_client_info typically returns "mysqlnd 8.x.y-…", but a
@@ -59,7 +67,7 @@ function view_admin_html($settings, $tables_installed, $database_size, $message 
 		);
 		$mysql_html = '<p class="box background-green-sea color-clouds">Your server supports MySQL.</p>
 		<p class="color-asbestos">MySQL Version: '.$mysql_version.'</p>';
-		
+
 		// Tables status
 		if ( $tables_installed ) {
 			$mysql_html .= '<p class="box background-green-sea color-clouds">All your tables are installed.';
@@ -70,15 +78,15 @@ function view_admin_html($settings, $tables_installed, $database_size, $message 
 		} else {
 			$mysql_html .= '<p class="box background-pomegranate color-clouds">Some or all of your tables are not installed.</p>';
 		}
-		
+
 		// Utilities section
 		$mysql_html .= '<br><h1>Utilities</h1>';
-		
+
 		// Message
 		if ( $message ) {
 			$mysql_html .= '<div class="box background-wisteria color-clouds"><h3>'.htmlspecialchars($message).'</h3></div>';
 		}
-		
+
 		// Setup/Reset form
 		if ( $settings['db_reset'] || !$tables_installed ) {
 			$mysql_html .= '<form class="mysql" action="" method="POST">
@@ -96,7 +104,7 @@ function view_admin_html($settings, $tables_installed, $database_size, $message 
 				<span class="button background-clouds float-right">Disabled</span></p>
 				<div class="clear"></div>';
 		}
-		
+
 		// Clean and Optimize forms (only if tables are installed)
 		if ( $tables_installed ) {
 			$mysql_html .= '<form class="mysql" action="" method="POST">

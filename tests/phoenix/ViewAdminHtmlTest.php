@@ -109,4 +109,26 @@ class ViewAdminHtmlTest extends TestCase {
 		$this->assertStringContainsString('Your PHP version is supported.', $html);
 	}
 
+	public function testFlagsUnsupportedPhpVersion(): void {
+		// Manual installs may bypass composer's php: ^8.2 constraint, so the
+		// view must still warn when the runtime is too old. The override
+		// parameter exists purely so this branch can be reached from tests.
+		$html = view_admin_html($this->settings(), true, false, false, false, '8.1.99');
+		$this->assertStringContainsString('Phoenix requires PHP &gt;= 8.2.', $html);
+		$this->assertStringContainsString('PHP Version: 8.1.99', $html);
+		$this->assertStringNotContainsString('Your PHP version is supported.', $html);
+	}
+
+	public function testFlagsMissingMysqliExtension(): void {
+		// Manual installs may bypass composer's ext-mysqli requirement, so the
+		// view must still warn when mysqli is not loaded. When mysqli is
+		// missing the panel short-circuits — no version line, no utilities.
+		$html = view_admin_html($this->settings(), true, false, false, false, null, false);
+		$this->assertStringContainsString('Your server does not support MySQL.', $html);
+		$this->assertStringNotContainsString('Your server supports MySQL.', $html);
+		$this->assertStringNotContainsString('name="process" value="setup"', $html);
+		$this->assertStringNotContainsString('name="process" value="clean"', $html);
+		$this->assertStringNotContainsString('name="process" value="optimize"', $html);
+	}
+
 }
