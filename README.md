@@ -3,6 +3,7 @@
 [![Normal](https://github.com/eustasy/phoenix/actions/workflows/normal.yml/badge.svg)](https://github.com/eustasy/phoenix/actions/workflows/normal.yml)
 [![PHPUnit](https://github.com/eustasy/Phoenix/actions/workflows/phpunit.yml/badge.svg?branch=main)](https://github.com/eustasy/Phoenix/actions/workflows/phpunit.yml)
 [![Maintainability](https://qlty.sh/gh/eustasy/projects/Phoenix/maintainability.svg)](https://qlty.sh/gh/eustasy/projects/Phoenix)
+[![Code Coverage](https://qlty.sh/gh/eustasy/projects/Phoenix/coverage.svg)](https://qlty.sh/gh/eustasy/projects/Phoenix)
 
 A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people that just want to host a tracker, not the torrent listing site.
 
