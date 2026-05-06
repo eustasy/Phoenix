@@ -112,11 +112,17 @@ function view_admin_html($settings, $tables_installed, $database_size, $message 
 <head>
 	<title>Phoenix Diagnostics and Utilities</title>
 	<meta charset="UTF-8">
-	<script src="https://cdn.jsdelivr.net/gh/jquery/jquery@3/dist/jquery.min.js"></script>
 	<script>
-		$(document).ready(function(){
-			$(\'.mysql\').submit(function() {
-				$(\'input[type="submit"]\').attr(\'disabled\',\'disabled\');
+		// Disable every submit button on the page when any .mysql form is
+		// submitted, to prevent double-submission across the mutually
+		// exclusive setup/clean/optimize forms.
+		document.addEventListener(\'DOMContentLoaded\', function () {
+			document.querySelectorAll(\'form.mysql\').forEach(function (form) {
+				form.addEventListener(\'submit\', function () {
+					document.querySelectorAll(\'input[type="submit"]\').forEach(function (btn) {
+						btn.disabled = true;
+					});
+				});
 			});
 		});
 	</script>
