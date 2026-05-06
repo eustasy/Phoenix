@@ -2,11 +2,6 @@
 
 declare(strict_types=1);
 
-// Resolved relative to __DIR__ rather than $settings so callers (and tests)
-// don't have to ensure $settings is in the inclusion scope.
-require_once __DIR__.'/../functions/function.peer.format.bencode.php';
-require_once __DIR__.'/../functions/function.peers.format.compact.php';
-
 ////	view_announce_bencode
 // Renders a BitTorrent announce response as bencode (BEP 3).
 // Keys must be in lexicographic order per the bencode spec.
@@ -28,6 +23,11 @@ function view_announce_bencode(
 	bool $compact,
 	bool $no_peer_id
 ): string {
+	// Helpers loaded inside the function so coverage tracks them per-call
+	// (top-of-file require_once executes once per process and may show as
+	// uncovered if another test loaded the file first).
+	require_once __DIR__.'/../functions/function.peer.format.bencode.php';
+	require_once __DIR__.'/../functions/function.peers.format.compact.php';
 	// Begin response — keys in lexicographic order per bencode spec.
 	$response = 'd8:completei'.$counts['complete'].
 		'e10:incompletei'.$counts['incomplete'].
