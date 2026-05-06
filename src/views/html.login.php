@@ -18,7 +18,7 @@ function view_login_html($show_error = false): string {
 <head>
 	<title>Phoenix &mdash; Login</title>
 	<meta charset="UTF-8">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/combine/gh/eustasy/Colors.css@1/colors.min.css,gh/necolas/normalize.css@8/normalize.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/eustasy/colors.css@2.0.9/flatui.min.css" integrity="sha256-88LCIpF5risV+CCY/1CbWvHUJ7Rxg5KIj1tTg4ZUZLQ=" crossorigin="anonymous">
 	<style>
 		body { margin: 0 auto; max-width: 400px; padding: 5% 10%; text-align: center; width: 80%; }
 		h1 { font-weight: normal; }

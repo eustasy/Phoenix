@@ -70,7 +70,7 @@ function view_install_html($settings_writable, $install_error, $form): string {
 <head>
 	<title>Phoenix Setup</title>
 	<meta charset="UTF-8">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/combine/gh/eustasy/Colors.css@1/colors.min.css,gh/necolas/normalize.css@8/normalize.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/eustasy/colors.css@2.0.9/flatui.min.css" integrity="sha256-88LCIpF5risV+CCY/1CbWvHUJ7Rxg5KIj1tTg4ZUZLQ=" crossorigin="anonymous">
 	<style>
 		body { margin: 0 auto; max-width: 600px; padding: 1% 10%; text-align: center; width: 80%; }
 		h1, h2, h3, h4, h5, h6 { font-weight: normal; }
