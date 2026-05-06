@@ -3,51 +3,41 @@
 declare(strict_types=1);
 
 ////	db_create
-// Creates the peers, tasks, and torrents tables under db_name with the configured prefix.
-// MyISAM is chosen over InnoDB: the tracker is write-heavy and never needs transactions or foreign keys.
+// Creates the peers, tasks, and torrents tables in the connection's currently
+// selected database, using $settings['db_prefix'] as the table prefix.
+//
+// Schema lives in sql/<table>.sql so it is lintable, importable manually, and
+// kept in one place. Each file uses the literal default prefix `phoenix_`,
+// which is rewritten here to whatever the install's actual prefix is.
+//
+// MyISAM is chosen over InnoDB: the tracker is write-heavy and never needs
+// transactions or foreign keys.
 function db_create(mysqli $connection, array $settings, bool $debug = false): bool {
 
-	$queries = array();
-	$queries[] = 'CREATE TABLE IF NOT EXISTS `'.$settings['db_name'].'`.`'.$settings['db_prefix'].'peers` (' .
-				'`info_hash` varchar(40) NOT NULL,' .
-				'`peer_id` varchar(40) NOT NULL,' .
-				'`compactv4` varchar(12) NOT NULL,' .
-				'`compactv6` varchar(36) NOT NULL,' .
-				// Empty string is the "no address" sentinel and matches what
-				// peer_insert writes when only the other family is present.
-				// '' is a normal, non-NULL value in MySQL/MariaDB (the
-				// '' == NULL conflation is Oracle-specific and does not apply).
-				'`ipv4` char(15) NOT NULL DEFAULT \'\',' .
-				'`ipv6` char(39) NOT NULL DEFAULT \'\',' .
-				'`portv4` smallint(5) unsigned NOT NULL,' .
-				'`portv6` smallint(5) unsigned NOT NULL,' .
-				'`uploaded` bigint(20) unsigned NOT NULL DEFAULT \'0\',' .
-				'`downloaded` bigint(20) unsigned NOT NULL DEFAULT \'0\',' .
-				'`left` bigint(20) unsigned NOT NULL DEFAULT \'0\',' .
-				'`state` tinyint(1) unsigned NOT NULL DEFAULT \'0\',' .
-				'`updated` int(10) unsigned NOT NULL,' .
-				'PRIMARY KEY (`info_hash`,`peer_id`)' .
-			') ENGINE=MyISAM DEFAULT CHARSET=latin1;';
-	$queries[] = 'CREATE TABLE IF NOT EXISTS `'.$settings['db_name'].'`.`'.$settings['db_prefix'].'tasks` (' .
-				'`name` varchar(16) NOT NULL,' .
-				'`value` int(10) NOT NULL,' .
-				'PRIMARY KEY (`name`)' .
-			') ENGINE=MyISAM DEFAULT CHARSET=latin1;';
-	$queries[] = 'CREATE TABLE IF NOT EXISTS `'.$settings['db_name'].'`.`'.$settings['db_prefix'].'torrents` (' .
-				'`name` varchar(255) NULL,' .
-				'`info_hash` varchar(40) NOT NULL,' .
-				'`size` bigint(20) unsigned NULL,' .
-				'`listed` tinyint(1) unsigned NOT NULL DEFAULT \'0\',' .
-				'`downloads` int(10) unsigned NOT NULL DEFAULT \'0\',' .
-				'PRIMARY KEY (`info_hash`)' .
-			') ENGINE=MyISAM DEFAULT CHARSET=latin1;';
+	$tables = array('peers', 'tasks', 'torrents');
 
 	$failure = false;
-	foreach ( $queries as $query ) {
-		$result = mysqli_query($connection, $query);
+	foreach ( $tables as $table ) {
+		$path = __DIR__.'/../../sql/'.$table.'.sql';
+		$sql  = @file_get_contents($path);
+		if ( $sql === false ) {
+			if ( $debug ) {
+				echo 'Could not read schema file "'.$path.'".'.PHP_EOL;
+			}
+			$failure = true;
+			continue;
+		}
+
+		// Schema files use the literal default prefix `phoenix_`; rewrite to
+		// the install's actual prefix before executing.
+		if ( $settings['db_prefix'] !== 'phoenix_' ) {
+			$sql = str_replace('phoenix_', $settings['db_prefix'], $sql);
+		}
+
+		$result = mysqli_query($connection, $sql);
 		if ( !$result ) {
 			if ( $debug ) {
-				echo 'Error #'.mysqli_errno($connection).': "'.mysqli_error($connection).'" while running "'.$query.'"'.PHP_EOL;
+				echo 'Error #'.mysqli_errno($connection).': "'.mysqli_error($connection).'" while running "'.$sql.'"'.PHP_EOL;
 			}
 			$failure = true;
 		}

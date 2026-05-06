@@ -72,6 +72,8 @@ Three MyISAM tables (chosen for write-heavy workload, no transactions/foreign ke
 - `<prefix>torrents` — tracked torrents. PK `info_hash`. Holds `name`, `size`, `listed`, `downloads`.
 - `<prefix>tasks` — task log (`name` PK).
 
+Schema lives in `sql/<table>.sql`, one CREATE TABLE per file using the literal default prefix `phoenix_`. `db_create()` reads each file, rewrites the prefix to `$settings['db_prefix']` if different, and executes against the connection's selected database. Files are also importable manually with `mysql <database> < sql/peers.sql` for installs that bypass the wizard.
+
 `info_hash` and `peer_id` are stored as 40-char hex strings, not raw 20-byte binary. Conversion happens at the boundary via `maybe_binary_to_hex()` (in `function.sanitize.maybe_binary_to_hex.php`). This is the project's primary SQL injection defense: the hex sanitizer ensures these values can't carry SQL metacharacters into the many string-concatenated queries in the codebase.
 
 ### Settings model
