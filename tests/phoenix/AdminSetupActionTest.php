@@ -56,6 +56,46 @@ class AdminSetupActionTest extends PhoenixTestCase {
 		$this->assertSame(1, mysqli_num_rows($check));
 	}
 
+	public function testReturnsFailureMessageWhenDropFails(): void {
+		// tables_installed=true sends the controller through db_drop_table.
+		// DROP TABLE IF EXISTS succeeds against a missing table, so just
+		// re-running drop on an empty DB wouldn't exercise the failure path.
+		// Force a real SQL error by injecting a backtick into the prefix so
+		// identifier quoting breaks; db_drop_table echoes mysqli_error on
+		// failure, so capture output too.
+		$brokenSettings              = self::$settings;
+		$brokenSettings['db_prefix'] = 'bad`prefix_';
+		$brokenSettings['db_reset']  = true;
+
+		mysqli_report(MYSQLI_REPORT_OFF);
+		ob_start();
+		try {
+			$result = admin_setup_action(self::$connection, $brokenSettings, self::$time, true);
+			$this->assertSame('Could not setup the MySQL Database.', $result);
+		} finally {
+			ob_end_clean();
+			mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+		}
+	}
+
+	public function testReturnsFailureMessageWhenCreateFails(): void {
+		// tables_installed=false skips drop and goes straight to db_create;
+		// a broken prefix forces the create to fail and routes to the else
+		// branch with the failure message.
+		$brokenSettings              = self::$settings;
+		$brokenSettings['db_prefix'] = 'bad`prefix_';
+
+		mysqli_report(MYSQLI_REPORT_OFF);
+		ob_start();
+		try {
+			$result = admin_setup_action(self::$connection, $brokenSettings, self::$time, false);
+			$this->assertSame('Could not setup the MySQL Database.', $result);
+		} finally {
+			ob_end_clean();
+			mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+		}
+	}
+
 	public function testDropsAndRecreatesWhenResetAllowed(): void {
 		// Pre-create the tables, then run setup with db_reset=true; both the
 		// drop-existing branch and the re-create branch must run cleanly.
