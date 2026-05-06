@@ -56,6 +56,43 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 		$this->assertStringContainsString('Location: /admin.php', $result['stdout']);
 	}
 
+	public function testIgnoresPostWithoutLogoutField() {
+		// admin.php POSTs setup/clean/optimize requests; those must not be
+		// mis-interpreted as logout because they share the POST verb.
+		require_once __DIR__.'/../../src/functions/function.auth.handle.logout.php';
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_POST['process'] = 'clean';
+
+		auth_handle_logout();
+
+		// No exit means the action dispatch can still run after this returns.
+		$this->assertTrue(true);
+	}
+
+	public function testIgnoresEmptyRequestMethod() {
+		// Defensive null-coalescence: an unset REQUEST_METHOD must not be
+		// treated as POST.
+		require_once __DIR__.'/../../src/functions/function.auth.handle.logout.php';
+		unset($_SERVER['REQUEST_METHOD']);
+		$_POST['logout'] = '1';
+
+		auth_handle_logout();
+
+		$this->assertTrue(true);
+	}
+
+	public function testIgnoresOtherHttpVerbs() {
+		// Anything that isn't literally POST must be ignored, even with the
+		// logout field set.
+		require_once __DIR__.'/../../src/functions/function.auth.handle.logout.php';
+		foreach ( ['PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'post'] as $verb ) {
+			$_SERVER['REQUEST_METHOD'] = $verb;
+			$_POST = ['logout' => '1'];
+			auth_handle_logout();
+		}
+		$this->assertTrue(true);
+	}
+
 	public function testStripsQueryStringFromRedirect() {
 		$functionPath = __DIR__.'/../../src/functions/function.auth.handle.logout.php';
 		$script = '<?php '.
