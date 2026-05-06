@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 class StatsFetchPeerCountsTest extends PhoenixTestCase {
 
 	public function testFetchPeerCounts() {
-		require_once self::$settings['model'].'stats.peers.php';
+		require_once __DIR__.'/../../src/model/stats.peers.php';
 
 		// Insert test peers
 		$info_hash_a = str_repeat('a', 40);
@@ -34,7 +34,7 @@ class StatsFetchPeerCountsTest extends PhoenixTestCase {
 	}
 
 	public function testFetchPeerCountsEmpty() {
-		require_once self::$settings['model'].'stats.peers.php';
+		require_once __DIR__.'/../../src/model/stats.peers.php';
 
 		$result = stats_fetch_peer_counts(self::$connection, self::$settings);
 

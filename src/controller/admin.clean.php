@@ -7,7 +7,7 @@ declare(strict_types=1);
 //  Returns message string on completion.
 
 function admin_clean_action($connection, $settings, $time) {
-	require_once $settings['functions'].'function.task.clean.php';
+	require_once __DIR__.'/../functions/function.task.clean.php';
 
 	if (task_clean($connection, $settings, $time)) {
 		return 'The peers list has been cleaned.';

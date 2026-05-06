@@ -9,8 +9,8 @@ use PHPUnit\Framework\TestCase;
 class ScrapeQueryPeersTest extends PhoenixTestCase {
 
 	public function testQueryPeersWithSingleHash() {
-		require_once self::$settings['model'].'peers.scrape.php';
-		require_once self::$settings['functions'].'function.scrape.build.where.clause.php';
+		require_once __DIR__.'/../../src/model/peers.scrape.php';
+		require_once __DIR__.'/../../src/functions/function.scrape.build.where.clause.php';
 
 		$info_hash = str_repeat('a', 40);
 		$peer_id_1 = str_repeat('1', 40);
@@ -34,8 +34,8 @@ class ScrapeQueryPeersTest extends PhoenixTestCase {
 	}
 
 	public function testQueryPeersWithMultipleHashes() {
-		require_once self::$settings['model'].'peers.scrape.php';
-		require_once self::$settings['functions'].'function.scrape.build.where.clause.php';
+		require_once __DIR__.'/../../src/model/peers.scrape.php';
+		require_once __DIR__.'/../../src/functions/function.scrape.build.where.clause.php';
 
 		$info_hash_a = str_repeat('a', 40);
 		$info_hash_b = str_repeat('b', 40);
@@ -71,8 +71,8 @@ class ScrapeQueryPeersTest extends PhoenixTestCase {
 	}
 
 	public function testQueryPeersReturnsEmptyForUnknownHash() {
-		require_once self::$settings['model'].'peers.scrape.php';
-		require_once self::$settings['functions'].'function.scrape.build.where.clause.php';
+		require_once __DIR__.'/../../src/model/peers.scrape.php';
+		require_once __DIR__.'/../../src/functions/function.scrape.build.where.clause.php';
 
 		$info_hash = str_repeat('z', 40);
 		$where = scrape_build_where_clause(array($info_hash));

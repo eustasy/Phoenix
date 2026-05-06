@@ -8,7 +8,7 @@ class InstallBuildConfigTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.install.build.config.php';
+		require_once __DIR__.'/../../src/functions/function.install.build.config.php';
 	}
 
 	/** @return array<string, mixed> */

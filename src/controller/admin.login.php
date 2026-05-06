@@ -24,30 +24,30 @@ function admin_login_controller($settings) {
 
 	////	Handle logout
 
-	require_once $settings['functions'].'function.auth.handle.logout.php';
+	require_once __DIR__.'/../functions/function.auth.handle.logout.php';
 	auth_handle_logout();
 
 	////	Check authentication
 
-	require_once $settings['functions'].'function.auth.is.authenticated.php';
+	require_once __DIR__.'/../functions/function.auth.is.authenticated.php';
 	if (!auth_is_authenticated()) {
 		$login_attempted = isset($_POST['process']) && $_POST['process'] === 'login';
 
 		if ($login_attempted) {
-			require_once $settings['functions'].'function.auth.verify.login.php';
+			require_once __DIR__.'/../functions/function.auth.verify.login.php';
 			if (auth_verify_login($settings)) {
 				// Defeat session-fixation: any pre-login session id is now
 				// retired so an attacker who planted one cannot resume the
 				// authenticated session.
 				session_regenerate_id(true);
-				require_once $settings['functions'].'function.auth.set.authenticated.php';
+				require_once __DIR__.'/../functions/function.auth.set.authenticated.php';
 				auth_set_authenticated();
 				header('Location: '.$_SERVER['REQUEST_URI']);
 				exit;
 			}
 		}
 
-		require_once $settings['views'].'html.login.php';
+		require_once __DIR__.'/../views/html.login.php';
 		return view_login_html($login_attempted);
 	}
 

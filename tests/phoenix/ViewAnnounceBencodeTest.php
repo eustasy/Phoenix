@@ -8,7 +8,7 @@ class ViewAnnounceBencodeTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['views'].'bencode.announce.php';
+		require_once __DIR__.'/../../src/views/bencode.announce.php';
 	}
 
 	private function defaultCounts(): array {

@@ -17,7 +17,7 @@ class PeerChangedTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.peer.changed.php';
+		require_once __DIR__.'/../../src/functions/function.peer.changed.php';
 	}
 
 	public function testReturnsTrueWhenOldIsFalse(): void {

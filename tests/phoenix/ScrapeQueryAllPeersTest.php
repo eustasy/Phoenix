@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 class ScrapeQueryAllPeersTest extends PhoenixTestCase {
 
 	public function testQueryAllPeersReturnsAllTorrents() {
-		require_once self::$settings['model'].'peers.scrape.all.php';
+		require_once __DIR__.'/../../src/model/peers.scrape.all.php';
 
 		$info_hash_a = str_repeat('a', 40);
 		$info_hash_b = str_repeat('b', 40);
@@ -50,7 +50,7 @@ class ScrapeQueryAllPeersTest extends PhoenixTestCase {
 	}
 
 	public function testQueryAllPeersReturnsEmptyWhenNoPeers() {
-		require_once self::$settings['model'].'peers.scrape.all.php';
+		require_once __DIR__.'/../../src/model/peers.scrape.all.php';
 
 		$result = peers_scrape_all(self::$connection, self::$settings);
 
@@ -59,7 +59,7 @@ class ScrapeQueryAllPeersTest extends PhoenixTestCase {
 	}
 
 	public function testQueryAllPeersGroupsByInfoHash() {
-		require_once self::$settings['model'].'peers.scrape.all.php';
+		require_once __DIR__.'/../../src/model/peers.scrape.all.php';
 
 		$info_hash = str_repeat('c', 40);
 		$peer_id_1 = str_repeat('5', 40);

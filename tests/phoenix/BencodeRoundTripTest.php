@@ -23,10 +23,10 @@ class BencodeRoundTripTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['views'].'bencode.error.php';
-		require_once self::$settings['views'].'bencode.scrape.php';
-		require_once self::$settings['views'].'bencode.announce.php';
-		require_once self::$settings['functions'].'function.peer.format.bencode.php';
+		require_once __DIR__.'/../../src/views/bencode.error.php';
+		require_once __DIR__.'/../../src/views/bencode.scrape.php';
+		require_once __DIR__.'/../../src/views/bencode.announce.php';
+		require_once __DIR__.'/../../src/functions/function.peer.format.bencode.php';
 	}
 
 	////	Decoder

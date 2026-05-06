@@ -8,7 +8,7 @@ class IndexRenderHtmlTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['views'].'html.index.php';
+		require_once __DIR__.'/../../src/views/html.index.php';
 	}
 
 	/** @return list<array<string, mixed>> */

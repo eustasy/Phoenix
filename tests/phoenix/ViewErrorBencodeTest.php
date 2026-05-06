@@ -8,7 +8,7 @@ class ViewErrorBencodeTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['views'].'bencode.error.php';
+		require_once __DIR__.'/../../src/views/bencode.error.php';
 	}
 
 	public function testEmitsBencodeFailureReason(): void {

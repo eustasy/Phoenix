@@ -10,7 +10,7 @@ class TrackerValidateInfoHashesTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.tracker.validate.info.hashes.php';
+		require_once __DIR__.'/../../src/functions/function.tracker.validate.info.hashes.php';
 	}
 
 	public function testAllHashesAllowed() {

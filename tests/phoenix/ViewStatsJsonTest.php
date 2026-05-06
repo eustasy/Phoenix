@@ -10,7 +10,7 @@ class ViewStatsJsonTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['views'].'json.stats.php';
+		require_once __DIR__.'/../../src/views/json.stats.php';
 	}
 
 	public function testReturnsValidJson() {

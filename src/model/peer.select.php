@@ -8,7 +8,7 @@ declare(strict_types=1);
 // (also false on query error — same channel, callers truthy-test).
 
 function peer_select(mysqli $connection, array $settings, array $peer): array|false {
-	require_once $settings['model'].'db.fetch.once.php';
+	require_once __DIR__.'/db.fetch.once.php';
 	return db_fetch_once(
 		$connection,
 		'SELECT * FROM `'.$settings['db_prefix'].'peers` '.

@@ -12,7 +12,7 @@ require_once __DIR__.'/../src/phoenix.php';
 // Override db_prefix so tests can't touch production tables.
 $settings['db_prefix'] = $settings['db_prefix'].'TESTING_';
 
-require_once $settings['model'].'db.create.php';
+require_once __DIR__.'/../src/model/db.create.php';
 if ( !db_create($connection, $settings) ) {
 	fwrite(STDERR, 'Failed to set up test database.'.PHP_EOL);
 	exit(1);

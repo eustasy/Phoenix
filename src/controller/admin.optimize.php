@@ -7,7 +7,7 @@ declare(strict_types=1);
 //  Returns message string on completion.
 
 function admin_optimize_action($connection, $settings, $time) {
-	require_once $settings['model'].'db.optimize.php';
+	require_once __DIR__.'/../model/db.optimize.php';
 
 	if (db_optimize($connection, $settings, $time)) {
 		return 'Your MySQL Tracker Database has been optimized.';

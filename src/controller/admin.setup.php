@@ -7,8 +7,8 @@ declare(strict_types=1);
 //  Returns message string on completion.
 
 function admin_setup_action($connection, $settings, $time, $tables_installed) {
-	require_once $settings['model'].'db.drop.php';
-	require_once $settings['model'].'db.create.php';
+	require_once __DIR__.'/../model/db.drop.php';
+	require_once __DIR__.'/../model/db.create.php';
 
 	if (!$settings['db_reset'] && $tables_installed) {
 		// Reset not allowed and tables already exist
@@ -38,7 +38,7 @@ function admin_setup_action($connection, $settings, $time, $tables_installed) {
 	////	Return result message
 
 	if ($success) {
-		require_once $settings['model'].'task.log.php';
+		require_once __DIR__.'/../model/task.log.php';
 		task_log($connection, $settings, 'install', $time);
 		return 'Your MySQL Tracker Database has been setup.';
 	} else {

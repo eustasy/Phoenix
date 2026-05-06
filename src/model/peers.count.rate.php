@@ -9,7 +9,7 @@ declare(strict_types=1);
 // Returns int count.
 
 function peers_count_rate(mysqli $connection, array $settings, array $peer, int $threshold): int {
-	require_once $settings['model'].'db.fetch.once.php';
+	require_once __DIR__.'/db.fetch.once.php';
 
 	$ip_parts = array();
 	if ( $peer['ipv4'] ) $ip_parts[] = '`ipv4`=\''.$peer['ipv4'].'\'';

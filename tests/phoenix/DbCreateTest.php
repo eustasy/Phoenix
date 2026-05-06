@@ -8,7 +8,7 @@ class DbCreateTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['model'].'db.create.php';
+		require_once __DIR__.'/../../src/model/db.create.php';
 	}
 
 	public function testCreatesTablesOnFirstCall(): void {

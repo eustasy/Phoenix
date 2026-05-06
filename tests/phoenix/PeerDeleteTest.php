@@ -8,8 +8,8 @@ class PeerDeleteTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['model'].'peer.delete.php';
-		require_once self::$settings['model'].'db.fetch.once.php';
+		require_once __DIR__.'/../../src/model/peer.delete.php';
+		require_once __DIR__.'/../../src/model/db.fetch.once.php';
 	}
 
 	protected function tearDown(): void {

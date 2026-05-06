@@ -16,7 +16,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	}
 
 	public function testDoesNothingWhenLogoutNotSet() {
-		require_once self::$settings['functions'].'function.auth.handle.logout.php';
+		require_once __DIR__.'/../../src/functions/function.auth.handle.logout.php';
 
 		auth_handle_logout();
 
@@ -27,7 +27,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	public function testIgnoresGetRequestEvenWithLogoutParam() {
 		// CSRF-resistant: a third-party <img src="…?logout=1"> would arrive as
 		// a GET, and must not be able to end the admin session.
-		require_once self::$settings['functions'].'function.auth.handle.logout.php';
+		require_once __DIR__.'/../../src/functions/function.auth.handle.logout.php';
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$_GET['logout'] = '1';
 
@@ -38,7 +38,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	}
 
 	public function testExitsAndRedirectsOnPostLogout() {
-		$functionPath = self::$settings['functions'].'function.auth.handle.logout.php';
+		$functionPath = __DIR__.'/../../src/functions/function.auth.handle.logout.php';
 		$script = '<?php '.
 			'session_start(); '.
 			'$_SESSION["phoenix_authed"] = true; '.
@@ -57,7 +57,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	}
 
 	public function testStripsQueryStringFromRedirect() {
-		$functionPath = self::$settings['functions'].'function.auth.handle.logout.php';
+		$functionPath = __DIR__.'/../../src/functions/function.auth.handle.logout.php';
 		$script = '<?php '.
 			'session_start(); '.
 			'$_SERVER["REQUEST_METHOD"] = "POST"; '.

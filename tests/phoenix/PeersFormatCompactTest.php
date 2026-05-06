@@ -8,7 +8,7 @@ class PeersFormatCompactTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.peers.format.compact.php';
+		require_once __DIR__.'/../../src/functions/function.peers.format.compact.php';
 	}
 
 	private function compactv4(string $ip, int $port): string {

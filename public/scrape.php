@@ -5,18 +5,18 @@ declare(strict_types=1);
 ////	BitTorrent Scrape Endpoint (BEP 15) + Tracker Stats
 require_once __DIR__.'/../src/phoenix.php';
 
-require_once $settings['functions'].'function.sanitize.tracker.php';
+require_once __DIR__.'/../src/functions/function.sanitize.tracker.php';
 $peer = sanitize_tracker_params();
 
 if (!$settings['open_tracker']) {
-	require_once $settings['functions'].'function.tracker.validate.info.hashes.php';
+	require_once __DIR__.'/../src/functions/function.tracker.validate.info.hashes.php';
 }
 
 ////	Stats Mode
 if (isset($_GET['stats'])) {
-	require_once $settings['model'].'stats.peers.php';
-	require_once $settings['model'].'stats.downloads.php';
-	require_once $settings['functions'].'function.stats.merge.php';
+	require_once __DIR__.'/../src/model/stats.peers.php';
+	require_once __DIR__.'/../src/model/stats.downloads.php';
+	require_once __DIR__.'/../src/functions/function.stats.merge.php';
 
 	$peer_counts = stats_fetch_peer_counts($connection, $settings);
 	$download_totals = stats_fetch_download_totals($connection, $settings);
@@ -27,15 +27,15 @@ if (isset($_GET['stats'])) {
 	}
 
 	if (isset($_GET['xml'])) {
-		require_once $settings['views'].'xml.stats.php';
+		require_once __DIR__.'/../src/views/xml.stats.php';
 		header('Content-Type: text/xml');
 		echo view_stats_xml($stats, $settings);
 	} elseif (isset($_GET['json'])) {
-		require_once $settings['views'].'json.stats.php';
+		require_once __DIR__.'/../src/views/json.stats.php';
 		header('Content-Type: application/json');
 		echo view_stats_json($stats, $settings);
 	} else {
-		require_once $settings['views'].'html.stats.php';
+		require_once __DIR__.'/../src/views/html.stats.php';
 		echo view_stats_html($stats, $settings);
 	}
 	exit;
@@ -54,11 +54,11 @@ if (
 		tracker_validate_info_hashes($valid_info_hashes, $allowed_torrents)
 	)
 ) {
-	require_once $settings['functions'].'function.scrape.build.where.clause.php';
-	require_once $settings['functions'].'function.scrape.initialize.results.php';
-	require_once $settings['functions'].'function.scrape.merge.results.php';
-	require_once $settings['model'].'peers.scrape.php';
-	require_once $settings['model'].'torrents.scrape.php';
+	require_once __DIR__.'/../src/functions/function.scrape.build.where.clause.php';
+	require_once __DIR__.'/../src/functions/function.scrape.initialize.results.php';
+	require_once __DIR__.'/../src/functions/function.scrape.merge.results.php';
+	require_once __DIR__.'/../src/model/peers.scrape.php';
+	require_once __DIR__.'/../src/model/torrents.scrape.php';
 
 	// BEP 15 allows multiple info_hashes per request.
 	// Pre-initialize results so missing torrents get zero counts instead of being omitted.
@@ -75,15 +75,15 @@ if (
 
 	// Render
 	if (isset($_GET['xml'])) {
-		require_once $settings['views'].'xml.scrape.php';
+		require_once __DIR__.'/../src/views/xml.scrape.php';
 		header('Content-Type: text/xml');
 		echo view_scrape_xml($scrape);
 	} elseif (isset($_GET['json'])) {
-		require_once $settings['views'].'json.scrape.php';
+		require_once __DIR__.'/../src/views/json.scrape.php';
 		header('Content-Type: application/json');
 		echo view_scrape_json($scrape);
 	} else {
-		require_once $settings['views'].'bencode.scrape.php';
+		require_once __DIR__.'/../src/views/bencode.scrape.php';
 		header('Content-Type: text/plain; charset=ISO-8859-1');
 		echo view_scrape_bencode($scrape);
 	}
@@ -92,9 +92,9 @@ if (
 
 ////	Full Scrape Mode
 if ($settings['full_scrape']) {
-	require_once $settings['functions'].'function.scrape.merge.results.php';
-	require_once $settings['model'].'peers.scrape.all.php';
-	require_once $settings['model'].'torrents.scrape.all.php';
+	require_once __DIR__.'/../src/functions/function.scrape.merge.results.php';
+	require_once __DIR__.'/../src/model/peers.scrape.all.php';
+	require_once __DIR__.'/../src/model/torrents.scrape.all.php';
 
 	$peers = peers_scrape_all($connection, $settings);
 	$torrents = torrents_scrape_all($connection, $settings);
@@ -107,15 +107,15 @@ if ($settings['full_scrape']) {
 
 	// Render
 	if (isset($_GET['xml'])) {
-		require_once $settings['views'].'xml.scrape.php';
+		require_once __DIR__.'/../src/views/xml.scrape.php';
 		header('Content-Type: text/xml');
 		echo view_scrape_xml($scrape);
 	} elseif (isset($_GET['json'])) {
-		require_once $settings['views'].'json.scrape.php';
+		require_once __DIR__.'/../src/views/json.scrape.php';
 		header('Content-Type: application/json');
 		echo view_scrape_json($scrape);
 	} else {
-		require_once $settings['views'].'bencode.scrape.php';
+		require_once __DIR__.'/../src/views/bencode.scrape.php';
 		header('Content-Type: text/plain; charset=ISO-8859-1');
 		echo view_scrape_bencode($scrape);
 	}

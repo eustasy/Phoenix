@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 class ScrapeQueryAllTorrentsTest extends PhoenixTestCase {
 
 	public function testQueryAllTorrentsReturnsAllTorrents() {
-		require_once self::$settings['model'].'torrents.scrape.all.php';
+		require_once __DIR__.'/../../src/model/torrents.scrape.all.php';
 
 		$info_hash_a = str_repeat('a', 40);
 		$info_hash_b = str_repeat('b', 40);
@@ -43,7 +43,7 @@ class ScrapeQueryAllTorrentsTest extends PhoenixTestCase {
 	}
 
 	public function testQueryAllTorrentsReturnsEmptyWhenNoTorrents() {
-		require_once self::$settings['model'].'torrents.scrape.all.php';
+		require_once __DIR__.'/../../src/model/torrents.scrape.all.php';
 
 		$result = torrents_scrape_all(self::$connection, self::$settings);
 
@@ -52,7 +52,7 @@ class ScrapeQueryAllTorrentsTest extends PhoenixTestCase {
 	}
 
 	public function testQueryAllTorrentsIncludesInfoHashAndDownloads() {
-		require_once self::$settings['model'].'torrents.scrape.all.php';
+		require_once __DIR__.'/../../src/model/torrents.scrape.all.php';
 
 		$info_hash = str_repeat('d', 40);
 
@@ -73,7 +73,7 @@ class ScrapeQueryAllTorrentsTest extends PhoenixTestCase {
 	}
 
 	public function testQueryAllTorrentsDoesNotIncludeSize() {
-		require_once self::$settings['model'].'torrents.scrape.all.php';
+		require_once __DIR__.'/../../src/model/torrents.scrape.all.php';
 
 		$info_hash = str_repeat('e', 40);
 

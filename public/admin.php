@@ -6,24 +6,17 @@ declare(strict_types=1);
 // This page is not secure.
 // It should not be deployed in a production environment.
 
-////	Bootstrap paths before attempting DB connection
+////	Bootstrap tracker_error before any DB work so the installer-mode path
+//      below can use it without going through phoenix.php's full DB connect.
 
-$settings['root']       = __DIR__.'/../';
-$settings['controller'] = $settings['root'].'src/controller/';
-$settings['functions']  = $settings['root'].'src/functions/';
-$settings['hooks']      = $settings['root'].'src/hooks/';
-$settings['model']      = $settings['root'].'src/model/';
-$settings['settings']   = $settings['root'].'config/';
-$settings['views']      = $settings['root'].'src/views/';
+require_once __DIR__.'/../src/functions/function.tracker.error.php';
 
-require_once $settings['functions'].'function.tracker.error.php';
-
-$config_path   = $settings['settings'].'phoenix.custom.php';
+$config_path   = __DIR__.'/../config/phoenix.custom.php';
 $config_exists = is_readable($config_path);
 
 ////	Installer Mode (no config file exists)
 if (!$config_exists) {
-	require_once $settings['controller'].'admin.install.php';
+	require_once __DIR__.'/../src/controller/admin.install.php';
 	echo admin_install_controller($settings, $config_path);
 	exit;
 }
@@ -32,7 +25,7 @@ if (!$config_exists) {
 require_once __DIR__.'/../src/phoenix.php';
 
 ////	Authentication
-require_once $settings['controller'].'admin.login.php';
+require_once __DIR__.'/../src/controller/admin.login.php';
 $login_output = admin_login_controller($settings);
 if ($login_output !== null) {
 	echo $login_output;
@@ -66,17 +59,17 @@ $tables_installed = (count($tables) == $actual);
 $Message = false;
 
 if ($process == 'setup') {
-	require_once $settings['controller'].'admin.setup.php';
+	require_once __DIR__.'/../src/controller/admin.setup.php';
 	$result = admin_setup_action($connection, $settings, $time, $tables_installed);
 	if ($result !== false) {
 		$Message = $result;
 		$tables_installed = true;
 	}
 } elseif ($process == 'clean') {
-	require_once $settings['controller'].'admin.clean.php';
+	require_once __DIR__.'/../src/controller/admin.clean.php';
 	$Message = admin_clean_action($connection, $settings, $time);
 } elseif ($process == 'optimize') {
-	require_once $settings['controller'].'admin.optimize.php';
+	require_once __DIR__.'/../src/controller/admin.optimize.php';
 	$Message = admin_optimize_action($connection, $settings, $time);
 }
 
@@ -91,7 +84,7 @@ if ($tables_installed) {
 }
 
 ////	Render admin panel
-require_once $settings['views'].'html.admin.php';
+require_once __DIR__.'/../src/views/html.admin.php';
 echo view_admin_html(
 	$settings,
 	$tables_installed,

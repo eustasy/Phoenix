@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-require_once $settings['model'].'task.log.php';
-require_once $settings['model'].'peers.clean.php';
-require_once $settings['model'].'tasks.clean.php';
-require_once $settings['model'].'torrents.clean.php';
+require_once __DIR__.'/../model/task.log.php';
+require_once __DIR__.'/../model/peers.clean.php';
+require_once __DIR__.'/../model/tasks.clean.php';
+require_once __DIR__.'/../model/torrents.clean.php';
 
 function task_clean(mysqli $connection, array $settings, int $time): bool {
 	$cleaned = true;

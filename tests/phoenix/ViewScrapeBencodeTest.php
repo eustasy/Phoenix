@@ -8,7 +8,7 @@ class ViewScrapeBencodeTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['views'].'bencode.scrape.php';
+		require_once __DIR__.'/../../src/views/bencode.scrape.php';
 	}
 
 	/** @return array<string, array<string, int|string>> */

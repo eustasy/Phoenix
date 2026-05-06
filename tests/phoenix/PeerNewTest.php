@@ -8,7 +8,7 @@ class PeerNewTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['model'].'peer.insert.php';
+		require_once __DIR__.'/../../src/model/peer.insert.php';
 	}
 
 	protected function tearDown(): void {

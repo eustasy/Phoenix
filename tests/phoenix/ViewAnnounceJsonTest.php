@@ -8,7 +8,7 @@ class ViewAnnounceJsonTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['views'].'json.announce.php';
+		require_once __DIR__.'/../../src/views/json.announce.php';
 	}
 
 	private function defaultCounts(): array {

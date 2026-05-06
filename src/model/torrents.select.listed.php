@@ -21,7 +21,7 @@ function torrents_select_listed(mysqli $connection, array $settings): array {
 
 	$result = mysqli_query($connection, $sql);
 	if ( !$result ) {
-		require_once $settings['functions'].'function.tracker.error.php';
+		require_once __DIR__.'/../functions/function.tracker.error.php';
 		tracker_error('Unable to get index.');
 	}
 

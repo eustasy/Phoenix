@@ -8,7 +8,7 @@ class PeerCompletedTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['model'].'torrent.increment.downloads.php';
+		require_once __DIR__.'/../../src/model/torrent.increment.downloads.php';
 	}
 
 	protected function tearDown(): void {

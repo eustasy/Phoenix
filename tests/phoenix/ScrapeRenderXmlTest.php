@@ -8,7 +8,7 @@ class ScrapeRenderXmlTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['views'].'xml.scrape.php';
+		require_once __DIR__.'/../../src/views/xml.scrape.php';
 	}
 
 	/** @return array<string, array<string, int|string>> */

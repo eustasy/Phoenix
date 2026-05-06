@@ -6,15 +6,15 @@ declare(strict_types=1);
 //  Handles first-run installer mode when no config file exists.
 //  Returns HTML output.
 
-require_once $settings['views'].'html.install.php';
+require_once __DIR__.'/../views/html.install.php';
 
 function admin_install_controller($settings, $config_path) {
 	error_reporting(0);
 
-	require_once $settings['functions'].'function.install.sanitize.post.php';
+	require_once __DIR__.'/../functions/function.install.sanitize.post.php';
 	$values = install_sanitize_post($_POST);
 
-	$settings_writable = is_writable($settings['settings']);
+	$settings_writable = is_writable(__DIR__.'/../../config/');
 	$install_error     = null;
 
 	////	Prepare form values (repopulate after failed attempt)
@@ -59,14 +59,14 @@ function admin_install_controller($settings, $config_path) {
 	////	Create tables
 	$settings['db_prefix'] = $values['db_prefix'];
 	$settings['db_name']   = $values['db_name'];
-	require_once $settings['model'].'db.create.php';
+	require_once __DIR__.'/../model/db.create.php';
 	if (!db_create($test_conn, $settings)) {
 		$install_error = 'Connected, but could not create the tables.';
 		return view_install_html($settings_writable, $install_error, $form);
 	}
 
 	////	Write config file
-	require_once $settings['functions'].'function.install.build.config.php';
+	require_once __DIR__.'/../functions/function.install.build.config.php';
 	if (file_put_contents($config_path, install_build_config($values)) === false) {
 		$install_error = 'Connected and created tables, but could not write the configuration file. Check that <code>config/</code> is writable.';
 		return view_install_html($settings_writable, $install_error, $form);

@@ -8,7 +8,7 @@ class IndexRenderXmlTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['views'].'xml.index.php';
+		require_once __DIR__.'/../../src/views/xml.index.php';
 	}
 
 	/** @return list<array<string, mixed>> */

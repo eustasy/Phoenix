@@ -8,7 +8,7 @@ class DbIsConfiguredTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.db.is.configured.php';
+		require_once __DIR__.'/../../src/functions/function.db.is.configured.php';
 	}
 
 	/** @return array<string, mixed> */

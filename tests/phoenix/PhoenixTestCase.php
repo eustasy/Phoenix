@@ -24,17 +24,6 @@ abstract class PhoenixTestCase extends TestCase {
 	}
 
 	/**
-	 * Load a function file that has top-level require_once statements.
-	 * Makes $settings available in local scope before loading.
-	 *
-	 * @param string $path Absolute path to the function file
-	 */
-	protected static function requireFunction(string $path): void {
-		$settings = self::$settings;
-		require_once $path;
-	}
-
-	/**
 	 * Run PHP script in subprocess and capture output/exit code.
 	 *
 	 * @param string $script PHP code to execute
@@ -91,7 +80,6 @@ abstract class PhoenixTestCase extends TestCase {
 			'downloaded' => 0,
 			'ipv4'       => '',
 			'ipv6'       => '',
-			'port'       => '',
 			'portv4'     => '0',
 			'portv6'     => '0',
 		];

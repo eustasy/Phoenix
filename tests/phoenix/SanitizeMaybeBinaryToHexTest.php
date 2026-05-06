@@ -8,7 +8,7 @@ class SanitizeMaybeBinaryToHexTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.sanitize.maybe_binary_to_hex.php';
+		require_once __DIR__.'/../../src/functions/function.sanitize.maybe_binary_to_hex.php';
 	}
 
 	public function testTwentyByteBinaryConvertsToFortyHex(): void {

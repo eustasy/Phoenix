@@ -8,7 +8,7 @@ class PhoenixHookTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['functions'].'function.phoenix.hook.php';
+		require_once __DIR__.'/../../src/functions/function.phoenix.hook.php';
 	}
 
 	public function testIsNoOpWhenHookFileIsNotReadable(): void {
@@ -20,7 +20,7 @@ class PhoenixHookTest extends PhoenixTestCase {
 	}
 
 	public function testIncludesHookFileWhenReadable(): void {
-		$path = self::$settings['hooks'].'phoenix.test.synthetic.php';
+		$path = __DIR__.'/../../src/hooks/phoenix.test.synthetic.php';
 		file_put_contents($path, "<?php\necho 'HOOK_RAN_'.\$peer['info_hash'];\n");
 
 		try {
@@ -35,7 +35,7 @@ class PhoenixHookTest extends PhoenixTestCase {
 	}
 
 	public function testHookCanMutatePeerByReference(): void {
-		$path = self::$settings['hooks'].'phoenix.test.mutate.php';
+		$path = __DIR__.'/../../src/hooks/phoenix.test.mutate.php';
 		file_put_contents($path, "<?php\n\$peer['mutated'] = true;\n");
 
 		try {

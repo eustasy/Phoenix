@@ -8,7 +8,7 @@ class ViewAnnounceXmlTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once self::$settings['views'].'xml.announce.php';
+		require_once __DIR__.'/../../src/views/xml.announce.php';
 	}
 
 	private function defaultCounts(): array {
