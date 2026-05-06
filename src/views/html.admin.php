@@ -48,8 +48,15 @@ function view_admin_html($settings, $tables_installed, $database_size, $message 
 	if ( !class_exists('mysqli') ) {
 		$mysql_html = '<p class="box background-pomegranate color-clouds">Your server does not support MySQL.</p>';
 	} else {
+		// mysqli_get_client_info typically returns "mysqlnd 8.x.y-…", but a
+		// build without a '-' suffix is valid; strpos() returns false there
+		// and substr() under strict_types refuses a false length.
 		$mysql_version = mysqli_get_client_info();
-		$mysql_version = trim(substr($mysql_version, 0, strpos($mysql_version, '-')), 'mysqlnd ');
+		$dash = strpos($mysql_version, '-');
+		$mysql_version = trim(
+			$dash !== false ? substr($mysql_version, 0, $dash) : $mysql_version,
+			'mysqlnd '
+		);
 		$mysql_html = '<p class="box background-green-sea color-clouds">Your server supports MySQL.</p>
 		<p class="color-asbestos">MySQL Version: '.$mysql_version.'</p>';
 		
