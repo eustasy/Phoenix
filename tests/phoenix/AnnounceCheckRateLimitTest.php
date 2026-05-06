@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-use PHPUnit\Framework\TestCase;
-
 class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
@@ -163,6 +161,127 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 		// Should not throw error (different info_hash)
 		announce_check_rate_limit(self::$connection, self::$settings, $peer, self::$time);
 		$this->assertTrue(true);
+	}
+
+	public function testNoRateLimitWhenAnnouncerHasNoIps() {
+		// Insert a recent peer that would otherwise match.
+		$info_hash = str_repeat('a', 40);
+		$peer_id_1 = str_repeat('1', 40);
+		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
+			'(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+			"('".$info_hash."', '".$peer_id_1."', '192.0.2.1', '', '', '', 6881, 0, '1', ".self::$time.");";
+		mysqli_query(self::$connection, $sql);
+
+		// Announcer has neither family — peers_count_rate must short-circuit
+		// to 0 instead of building a WHERE clause with no IP predicate.
+		$peer = array(
+			'info_hash' => $info_hash,
+			'peer_id'   => str_repeat('2', 40),
+			'ipv4'      => null,
+			'ipv6'      => null,
+		);
+
+		announce_check_rate_limit(self::$connection, self::$settings, $peer, self::$time);
+		$this->assertTrue(true);
+	}
+
+	public function testEmptyStringIpsTreatedLikeNoIps() {
+		// Same shape as the no-IPs case, but using '' (the schema default for
+		// the missing family) instead of null. Both must be falsy so the
+		// short-circuit fires.
+		$info_hash = str_repeat('a', 40);
+		$peer_id_1 = str_repeat('1', 40);
+		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
+			'(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+			"('".$info_hash."', '".$peer_id_1."', '192.0.2.1', '', '', '', 6881, 0, '1', ".self::$time.");";
+		mysqli_query(self::$connection, $sql);
+
+		$peer = array(
+			'info_hash' => $info_hash,
+			'peer_id'   => str_repeat('2', 40),
+			'ipv4'      => '',
+			'ipv6'      => '',
+		);
+
+		announce_check_rate_limit(self::$connection, self::$settings, $peer, self::$time);
+		$this->assertTrue(true);
+	}
+
+	public function testNoRateLimitWhenOnlyOtherFamilyMatches() {
+		// Existing peer has IPv6 'fc00::1' and no IPv4. Announcer has IPv4
+		// '192.0.2.1' and no IPv6 — the WHERE OR clause only includes
+		// `ipv4`='192.0.2.1' (announcer has no ipv6 to add), so the existing
+		// IPv6-only peer must not match.
+		$info_hash = str_repeat('a', 40);
+		$peer_id_1 = str_repeat('1', 40);
+		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
+			'(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+			"('".$info_hash."', '".$peer_id_1."', '', 'fc00::1', '', '', 0, 6881, '1', ".self::$time.");";
+		mysqli_query(self::$connection, $sql);
+
+		$peer = array(
+			'info_hash' => $info_hash,
+			'peer_id'   => str_repeat('2', 40),
+			'ipv4'      => '192.0.2.1',
+			'ipv6'      => null,
+		);
+
+		announce_check_rate_limit(self::$connection, self::$settings, $peer, self::$time);
+		$this->assertTrue(true);
+	}
+
+	public function testThresholdBoundaryIsExclusive() {
+		// `updated > threshold` is strict, so a peer updated exactly at the
+		// threshold timestamp must NOT count, while threshold+1 must count.
+		$info_hash = str_repeat('a', 40);
+		$peer_id_1 = str_repeat('1', 40);
+		$threshold = self::$time - intval(self::$settings['min_interval'] / 5);
+
+		// Boundary: updated == threshold → excluded by '>' comparison.
+		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
+			'(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+			"('".$info_hash."', '".$peer_id_1."', '192.0.2.1', '', '', '', 6881, 0, '1', ".$threshold.");";
+		mysqli_query(self::$connection, $sql);
+
+		$peer = array(
+			'info_hash' => $info_hash,
+			'peer_id'   => str_repeat('2', 40),
+			'ipv4'      => '192.0.2.1',
+			'ipv6'      => null,
+		);
+
+		announce_check_rate_limit(self::$connection, self::$settings, $peer, self::$time);
+		$this->assertTrue(true);
+
+		// One second past threshold → must trigger.
+		mysqli_query(
+			self::$connection,
+			'UPDATE `'.self::$settings['db_prefix'].'peers` SET `updated`='.($threshold + 1).
+			' WHERE `peer_id`=\''.$peer_id_1.'\';'
+		);
+		$this->assertRateLimitErrorInSubprocess($peer);
+	}
+
+	public function testMultipleOffendersStillTrigger() {
+		// Three recent peers from the same IP, all with different peer_ids.
+		// count > 0 already covers any positive count, but pin the behaviour.
+		$info_hash = str_repeat('a', 40);
+		for ( $i = 1; $i <= 3; $i++ ) {
+			$pid = str_repeat((string) $i, 40);
+			$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
+				'(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+				"('".$info_hash."', '".$pid."', '192.0.2.1', '', '', '', 6881, 0, '1', ".self::$time.");";
+			mysqli_query(self::$connection, $sql);
+		}
+
+		$peer = array(
+			'info_hash' => $info_hash,
+			'peer_id'   => str_repeat('9', 40),
+			'ipv4'      => '192.0.2.1',
+			'ipv6'      => null,
+		);
+
+		$this->assertRateLimitErrorInSubprocess($peer);
 	}
 
 	/**
