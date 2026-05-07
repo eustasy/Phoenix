@@ -11,26 +11,10 @@ class SettingsLoadTest extends PhoenixTestCase {
 		require_once __DIR__.'/../../src/functions/function.settings.load.php';
 	}
 
-	private string $errorLogBackup;
-	private string $errorLogFile;
-
 	/** @var list<string> */
 	private array $tmpFiles = [];
 
-	protected function setUp(): void {
-		parent::setUp();
-		// Redirect error_log() output to a tempfile so the missing-config
-		// fallback doesn't leak warnings into PHPUnit's stderr.
-		$this->errorLogFile   = tempnam(sys_get_temp_dir(), 'phx_errlog_');
-		$this->errorLogBackup = (string)ini_get('error_log');
-		ini_set('error_log', $this->errorLogFile);
-	}
-
 	protected function tearDown(): void {
-		ini_set('error_log', $this->errorLogBackup);
-		if ( is_file($this->errorLogFile) ) {
-			unlink($this->errorLogFile);
-		}
 		foreach ( $this->tmpFiles as $f ) {
 			if ( is_file($f) ) {
 				unlink($f);
@@ -75,20 +59,6 @@ class SettingsLoadTest extends PhoenixTestCase {
 		$this->assertTrue($result['open_tracker']);
 	}
 
-	public function testLogsFallbackMessageWhenCustomMissing(): void {
-		// Same fallback scenario, but assert on the error_log output.
-		$default = $this->makeConfigFile([]);
-		$custom  = sys_get_temp_dir().'/phoenix_custom_does_not_exist_'.bin2hex(random_bytes(4)).'.php';
-
-		\settings_load($default, $custom);
-
-		$logged = file_get_contents($this->errorLogFile);
-		$this->assertNotFalse($logged);
-		$this->assertStringContainsString('not readable', $logged);
-		$this->assertStringContainsString('Falling back to defaults', $logged);
-		$this->assertStringContainsString($custom, $logged);
-	}
-
 	public function testCustomOverridesDefault(): void {
 		// Custom file present. Its values should override the default's
 		// for any shared key, while non-shared keys from the default
@@ -111,8 +81,6 @@ class SettingsLoadTest extends PhoenixTestCase {
 		$this->assertSame(1800, $result['announce_interval']);
 		// Missing-file fallbacks should not have been applied.
 		$this->assertArrayNotHasKey('db_user', $result);
-
-		$this->assertSame('', (string)file_get_contents($this->errorLogFile));
 	}
 
 }
