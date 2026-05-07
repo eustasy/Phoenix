@@ -6,9 +6,8 @@ declare(strict_types=1);
 // This page is not secure.
 // It should not be deployed in a production environment.
 
-////	Bootstrap tracker_error before any DB work so the installer-mode path
-//      below can use it without going through phoenix.php's full DB connect.
-
+// Bootstrap tracker_error before any DB work so the installer-mode path
+// below can use it without going through phoenix.php's full DB connect.
 require_once __DIR__.'/../src/functions/function.tracker.error.php';
 
 $config_path   = __DIR__.'/../config/phoenix.custom.php';
