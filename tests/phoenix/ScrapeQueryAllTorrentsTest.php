@@ -51,7 +51,7 @@ class ScrapeQueryAllTorrentsTest extends PhoenixTestCase {
 		$this->assertSame(0, mysqli_num_rows($result));
 	}
 
-	public function testQueryAllTorrentsIncludesInfoHashAndDownloads() {
+	public function testQueryAllTorrentsIncludesInfoHashSizeAndDownloads() {
 		require_once __DIR__.'/../../src/model/torrents.scrape.all.php';
 
 		$info_hash = str_repeat('d', 40);
@@ -65,30 +65,13 @@ class ScrapeQueryAllTorrentsTest extends PhoenixTestCase {
 
 		$this->assertNotFalse($result);
 		$row = mysqli_fetch_assoc($result);
-		
+
 		$this->assertArrayHasKey('info_hash', $row);
+		$this->assertArrayHasKey('size',      $row);
 		$this->assertArrayHasKey('downloads', $row);
 		$this->assertSame($info_hash, $row['info_hash']);
-		$this->assertSame('42', $row['downloads']);
-	}
-
-	public function testQueryAllTorrentsDoesNotIncludeSize() {
-		require_once __DIR__.'/../../src/model/torrents.scrape.all.php';
-
-		$info_hash = str_repeat('e', 40);
-
-		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'torrents` '.
-			   '(`info_hash`, `name`, `size`, `downloads`) VALUES '.
-			   "('".$info_hash."', '__TEST_e', 99999, 1);";
-		mysqli_query(self::$connection, $sql);
-
-		$result = torrents_scrape_all(self::$connection, self::$settings);
-
-		$this->assertNotFalse($result);
-		$row = mysqli_fetch_assoc($result);
-		
-		// Size is not selected in the query (unlike torrents_scrape)
-		$this->assertArrayNotHasKey('size', $row);
+		$this->assertSame('5000',      $row['size']);
+		$this->assertSame('42',        $row['downloads']);
 	}
 
 	protected function tearDown(): void {

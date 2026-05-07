@@ -53,45 +53,73 @@ class ScrapeFullControllerTest extends PhoenixTestCase {
 		parent::tearDown();
 	}
 
-	public function testRendersBencodeByDefault(): void {
+	// Expected per-torrent rendering for HASH: 1 seeder, 1 leecher, size
+	// 4096, 3 downloads → peers = 2, traffic = size * downloads = 12288.
+	// Full-scrape now mirrors specific-scrape's field set; the previous
+	// asymmetry (size always 0 in full-scrape output) was an oversight in
+	// torrents_scrape_all that has been corrected.
+
+	private const HASH_BENCODE = 'd8:completei1e10:downloadedi3e10:incompletei1ee';
+	private const HASH_XML     =
+		'<torrent>'.
+		'<info_hash>cccccccccccccccccccccccccccccccccccccccc</info_hash>'.
+		'<seeders>1</seeders>'.
+		'<leechers>1</leechers>'.
+		'<peers>2</peers>'.
+		'<size>4096</size>'.
+		'<downloads>3</downloads>'.
+		'<traffic>12288</traffic>'.
+		'</torrent>';
+	private const HASH_JSON = [
+		'info_hash' => self::HASH,
+		'seeders'   => 1,
+		'leechers'  => 1,
+		'peers'     => 2,
+		'size'      => 4096,
+		'downloads' => 3,
+		'traffic'   => 12288,
+	];
+
+	public function testRendersBencodeForFullScrape(): void {
 		$_GET    = [];
 		$bencode = \scrape_full_controller(self::$connection, self::$settings);
 
 		$this->assertStringStartsWith('d5:files', $bencode);
 		$this->assertStringEndsWith('ee',        $bencode);
-		// Each torrent dict carries its own counts; assert the inserted
-		// numbers appear somewhere in the response. Other torrents in
-		// the wider suite may add other dicts but won't have these
-		// exact-shape combinations against our hash.
-		$this->assertStringContainsString(hex2bin(self::HASH).'d8:completei1e10:downloadedi3e10:incompletei1ee', $bencode);
+		// Other torrents from the wider suite may also appear in the
+		// response, but our hash should carry exactly these counts.
+		$this->assertStringContainsString(
+			'20:'.hex2bin(self::HASH).self::HASH_BENCODE,
+			$bencode
+		);
+		// BEP 15 specifies exactly three keys per torrent dict (complete,
+		// downloaded, incomplete). Phoenix's XML/JSON renders extend that
+		// with peers/size/traffic for caller convenience, but the bencode
+		// output must stay strictly conformant — strict BitTorrent clients
+		// are within their rights to reject responses with unknown keys.
+		$this->assertStringNotContainsString('9:info_hash', $bencode);
+		$this->assertStringNotContainsString('5:peers',     $bencode);
+		$this->assertStringNotContainsString('4:size',      $bencode);
+		$this->assertStringNotContainsString('7:traffic',   $bencode);
 	}
 
-	public function testRendersXmlWhenXmlFlagSet(): void {
+	public function testRendersXmlForFullScrape(): void {
 		$_GET = ['xml' => '1'];
 		$xml  = \scrape_full_controller(self::$connection, self::$settings);
 
 		$this->assertStringStartsWith('<?xml', $xml);
 		$this->assertStringContainsString('<scrape>', $xml);
-		$this->assertStringContainsString('<info_hash>'.self::HASH.'</info_hash>', $xml);
-		$this->assertStringContainsString('<seeders>1</seeders>',   $xml);
-		$this->assertStringContainsString('<leechers>1</leechers>', $xml);
-		$this->assertStringContainsString('<downloads>3</downloads>', $xml);
+		$this->assertStringContainsString(self::HASH_XML, $xml);
 	}
 
-	public function testRendersJsonWhenJsonFlagSet(): void {
+	public function testRendersJsonForFullScrape(): void {
 		$_GET = ['json' => '1'];
 		$json = \scrape_full_controller(self::$connection, self::$settings);
 
 		$decoded = json_decode($json, true);
 		$this->assertIsArray($decoded);
 		$this->assertArrayHasKey(self::HASH, $decoded);
-		$this->assertSame(1, $decoded[self::HASH]['seeders']);
-		$this->assertSame(1, $decoded[self::HASH]['leechers']);
-		$this->assertSame(3, $decoded[self::HASH]['downloads']);
-		// torrents_scrape_all intentionally doesn't select `size` (it's not
-		// part of BEP 15 and full scrape is meant to stay cheap), so the
-		// merge defaults size to 0 regardless of the table value.
-		$this->assertSame(0, $decoded[self::HASH]['size']);
+		$this->assertSame(self::HASH_JSON, $decoded[self::HASH]);
 	}
 
 }

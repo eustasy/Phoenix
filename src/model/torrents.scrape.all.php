@@ -9,6 +9,7 @@ function torrents_scrape_all(mysqli $connection, array $settings): mysqli_result
 	return mysqli_query($connection,
 		'SELECT
 			`t`.`info_hash` AS `info_hash`,
+			`t`.`size`      AS `size`,
 			`t`.`downloads` AS `downloads`
 		FROM `'.$settings['db_prefix'].'torrents` AS `t`;'
 	);
