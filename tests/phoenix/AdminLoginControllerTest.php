@@ -59,23 +59,6 @@ class AdminLoginControllerTest extends PhoenixTestCase {
 		parent::tearDown();
 	}
 
-	/**
-	 * Open a CLI session and assign the given values into $_SESSION, leaving
-	 * the session active. The controller's later session_start() no-ops
-	 * (notice suppressed by @ on the call site) so $_SESSION retains the
-	 * values we just set, without depending on the save handler doing a
-	 * write/read round-trip across different CI configurations.
-	 *
-	 * @param array<string, mixed> $values
-	 */
-	private function primeSession(array $values): void {
-		@session_id('phoenix_login_test_'.bin2hex(random_bytes(8)));
-		@session_start();
-		foreach ( $values as $k => $v ) {
-			$_SESSION[$k] = $v;
-		}
-	}
-
 	public function testReturnsNullWhenNoAdminPasswordSet(): void {
 		// Empty admin_password disables auth entirely; the controller short-
 		// circuits before session_start, so this branch is safe to run
@@ -85,14 +68,31 @@ class AdminLoginControllerTest extends PhoenixTestCase {
 	}
 
 	public function testReturnsNullWhenAlreadyAuthenticated(): void {
-		// Pre-seeded $_SESSION['phoenix_authed'] should skip the login form
-		// entirely. The @ on the controller call suppresses the
-		// "session already started" notice from the second session_start().
-		$this->primeSession(['phoenix_authed' => '1']);
-		$result = @\admin_login_controller([
-			'admin_password' => password_hash('secret', PASSWORD_DEFAULT),
-		]);
-		$this->assertNull($result);
+		// Subprocess-only: in-process priming of $_SESSION['phoenix_authed']
+		// is unreliable across PHP/CI configs — session_set_cookie_params
+		// on an active session and a second session_start() can interact
+		// with use_strict_mode in ways that drop the pre-seeded values
+		// before auth_is_authenticated() runs. A clean subprocess avoids
+		// that whole class of issue. Only the trailing `return null` line
+		// is uncovered as a result.
+		$sessionId = bin2hex(random_bytes(13));
+		$settings  = ['admin_password' => password_hash('secret', PASSWORD_DEFAULT)];
+
+		$script = '<?php '.
+			'$_SERVER["REQUEST_METHOD"] = "POST"; '.
+			'$_SERVER["REQUEST_URI"]   = "/admin.php"; '.
+			'session_id('.var_export($sessionId, true).'); '.
+			'session_start(); '.
+			'$_SESSION["phoenix_authed"] = "1"; '.
+			'session_write_close(); '.
+			'require '.var_export(self::CONTROLLER_PATH, true).'; '.
+			'$result = admin_login_controller('.var_export($settings, true).'); '.
+			'echo "RESULT_TYPE:".gettype($result)."\n"; '.
+			'if (is_string($result)) { echo $result; }';
+		$result = $this->runPhpSubprocess($script);
+
+		$this->assertSame(0, $result['exit']);
+		$this->assertStringContainsString('RESULT_TYPE:NULL', $result['stdout']);
 	}
 
 	public function testReturnsLoginFormWhenNotAuthenticated(): void {
