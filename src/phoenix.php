@@ -37,8 +37,7 @@ if (is_readable(__DIR__.'/../config/phoenix.custom.php')) {
 
 require_once __DIR__.'/functions/function.tracker.error.php';
 
-////	Database Connection (inlined from once.db.connect.php)
-
+////	Database Connection
 require_once __DIR__.'/functions/function.db.is.configured.php';
 if (!db_is_configured($settings)) {
 	tracker_error('Connection Failed. Tracker is not configured.');

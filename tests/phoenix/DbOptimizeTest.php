@@ -24,4 +24,18 @@ class DbOptimizeTest extends PhoenixTestCase {
 		$this->assertTrue(db_optimize(self::$connection, self::$settings, self::$time, false, false));
 	}
 
+	public function testOptimizesExplicitTableOnly(): void {
+		// Pass an explicit $table with $and_default=false so only the
+		// `$tables[] = $table;` branch fires and the three default-table
+		// pushes are skipped. Same idempotency reasoning as the default case.
+		$this->assertTrue(db_optimize(self::$connection, self::$settings, self::$time, 'peers', false));
+	}
+
+	public function testOptimizesExplicitTableAlongsideDefaults(): void {
+		// $table set AND $and_default=true means both branches fire; the
+		// explicit table is added before the three defaults. Running CHECK/
+		// ANALYZE/REPAIR/OPTIMIZE twice on `peers` is harmless.
+		$this->assertTrue(db_optimize(self::$connection, self::$settings, self::$time, 'peers', true));
+	}
+
 }
