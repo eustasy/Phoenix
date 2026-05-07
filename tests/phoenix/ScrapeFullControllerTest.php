@@ -88,7 +88,10 @@ class ScrapeFullControllerTest extends PhoenixTestCase {
 		$this->assertSame(1, $decoded[self::HASH]['seeders']);
 		$this->assertSame(1, $decoded[self::HASH]['leechers']);
 		$this->assertSame(3, $decoded[self::HASH]['downloads']);
-		$this->assertSame(4096, $decoded[self::HASH]['size']);
+		// torrents_scrape_all intentionally doesn't select `size` (it's not
+		// part of BEP 15 and full scrape is meant to stay cheap), so the
+		// merge defaults size to 0 regardless of the table value.
+		$this->assertSame(0, $decoded[self::HASH]['size']);
 	}
 
 }
