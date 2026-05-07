@@ -133,7 +133,7 @@ if ( peer_changed($peer, $peer['old']) ) {
 ////	Cleanup (probabilistic)
 if (
 	!$settings['clean_with_cron'] &&
-	$chance <= $settings['clean_with_requests']
+	mt_rand(1, 100) <= $settings['clean_with_requests']
 ) {
 	require_once __DIR__.'/../src/functions/function.task.clean.php';
 	task_clean($connection, $settings, $time);

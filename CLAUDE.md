@@ -60,7 +60,12 @@ Only `public/` is meant to be web-served. The PDS layout puts `src/` (functions,
 
 ### Bootstrap (`src/phoenix.php`)
 
-Sets path constants on `$settings` (`functions`, `hooks`, `model`, `views`, `settings`), then loads `phoenix.default.php` followed by `phoenix.custom.php` (or hard-coded fallbacks if missing). It then `require_once`s `function.tracker.error.php` and establishes the database connection. After this point, scripts can rely on `$connection`, `$settings`, `$time`, and `$chance` being in scope.
+Orchestration only — the meaningful work lives in extracted, unit-testable functions:
+
+- `settings_load()` (in `function.settings.load.php`) loads `phoenix.default.php` followed by `phoenix.custom.php` (or hard-coded fallbacks if the custom file is missing) and returns the populated `$settings` array.
+- `db_connect()` (in `function.db.connect.php`) wraps `mysqli_connect()` in a try/catch so callers always get a `mysqli` or `false`, regardless of `mysqli_report()` mode (PHP 8.1+ defaults to throwing).
+
+Bootstrap then `require_once`s `function.tracker.error.php`, runs `db_is_configured`, applies `db_persist_host`, calls `db_connect`, and (for closed trackers) loads the allowed-torrents list. After this point, scripts can rely on `$connection`, `$settings`, and `$time` being in scope.
 
 **`tracker_error` is the one shared helper that lives in the bootstrap rather than each function.** Every entry point either bootstraps via `phoenix.php` or includes `function.tracker.error.php` explicitly (see `public/admin.php`, which loads it before its installer-mode branch can run without `phoenix.php`). Functions calling `tracker_error()` therefore do *not* `require_once` it themselves — the puff-style "declare your own deps" rule has this single carve-out. Any new entry point that skips `phoenix.php` must include `function.tracker.error.php` explicitly.
 
