@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 require_once __DIR__.'/../views/html.install.php';
 
-function admin_install_controller($settings, $config_path) {
+function admin_install_controller(string $config_path) {
 	error_reporting(0);
 
 	require_once __DIR__.'/../functions/function.install.sanitize.post.php';
@@ -57,10 +57,8 @@ function admin_install_controller($settings, $config_path) {
 	}
 
 	////	Create tables
-	$settings['db_prefix'] = $values['db_prefix'];
-	$settings['db_name']   = $values['db_name'];
 	require_once __DIR__.'/../model/db.create.php';
-	if (!db_create($test_conn, $settings)) {
+	if (!db_create($test_conn, $values)) {
 		$install_error = 'Connected, but could not create the tables.';
 		return view_install_html($settings_writable, $install_error, $form);
 	}

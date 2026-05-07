@@ -16,7 +16,7 @@ $config_exists = is_readable($config_path);
 ////	Installer Mode (no config file exists)
 if (!$config_exists) {
 	require_once __DIR__.'/../src/controller/admin.install.php';
-	echo admin_install_controller($settings, $config_path);
+	echo admin_install_controller($config_path);
 	exit;
 }
 

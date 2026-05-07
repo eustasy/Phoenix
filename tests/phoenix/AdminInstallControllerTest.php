@@ -45,7 +45,7 @@ class AdminInstallControllerTest extends PhoenixTestCase {
 		// attempt a connection. Run in-process so the branch is visible to
 		// the coverage instrumentation.
 		$_POST = [];
-		$html  = \admin_install_controller([], '/tmp/phoenix_should_not_exist.php');
+		$html  = \admin_install_controller('/tmp/phoenix_should_not_exist.php');
 
 		$this->assertIsString($html);
 		$this->assertStringContainsString('name="process" value="install"', $html);
@@ -63,7 +63,7 @@ class AdminInstallControllerTest extends PhoenixTestCase {
 			'db_user' => 'phoenix_user',
 			'db_name' => 'phoenix_db',
 		];
-		$html = \admin_install_controller([], '/tmp/phoenix_should_not_exist.php');
+		$html = \admin_install_controller('/tmp/phoenix_should_not_exist.php');
 
 		$this->assertIsString($html);
 		$this->assertStringContainsString('value="db.example.test"', $html);
@@ -81,7 +81,7 @@ class AdminInstallControllerTest extends PhoenixTestCase {
 			'db_pass' => 'phoenix_test_pass',
 			'db_name' => 'phoenix_test_db',
 		];
-		$html = \admin_install_controller([], '/tmp/phoenix_should_not_exist.php');
+		$html = \admin_install_controller('/tmp/phoenix_should_not_exist.php');
 
 		$this->assertIsString($html);
 		$this->assertStringContainsString('Could not connect to the database', $html);
@@ -126,7 +126,7 @@ class AdminInstallControllerTest extends PhoenixTestCase {
 		];
 
 		try {
-			$html = \admin_install_controller([], $configPath);
+			$html = \admin_install_controller($configPath);
 
 			$this->assertIsString($html);
 			$this->assertStringContainsString('could not write the configuration file', $html);
@@ -160,7 +160,7 @@ class AdminInstallControllerTest extends PhoenixTestCase {
 				'$_POST   = '.var_export($post, true).'; '.
 				'$_SERVER["REQUEST_METHOD"] = "POST"; '.
 				'require '.var_export(self::CONTROLLER_PATH, true).'; '.
-				'$result = admin_install_controller([], '.var_export($tmpConfig, true).'); '.
+				'$result = admin_install_controller('.var_export($tmpConfig, true).'); '.
 				'echo "RESULT_TYPE:".gettype($result)."\n"; '.
 				'if (is_string($result)) { echo $result; }';
 			$result = $this->runPhpSubprocess($script);
