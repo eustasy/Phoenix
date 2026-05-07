@@ -62,6 +62,8 @@ Only `public/` is meant to be web-served. The PDS layout puts `src/` (functions,
 
 Sets path constants on `$settings` (`functions`, `hooks`, `model`, `views`, `settings`), then loads `phoenix.default.php` followed by `phoenix.custom.php` (or hard-coded fallbacks if missing). It then `require_once`s `function.tracker.error.php` and establishes the database connection. After this point, scripts can rely on `$connection`, `$settings`, `$time`, and `$chance` being in scope.
 
+**`tracker_error` is the one shared helper that lives in the bootstrap rather than each function.** Every entry point either bootstraps via `phoenix.php` or includes `function.tracker.error.php` explicitly (see `public/admin.php`, which loads it before its installer-mode branch can run without `phoenix.php`). Functions calling `tracker_error()` therefore do *not* `require_once` it themselves — the puff-style "declare your own deps" rule has this single carve-out. Any new entry point that skips `phoenix.php` must include `function.tracker.error.php` explicitly.
+
 **Gotcha:** The DB connection logic mutates `$settings['db_host']` in place — when `db_persist` is true it prepends `p:`. Anywhere outside `mysqli_connect` that reads `db_host` (e.g. `bin/backup-database.php` writing a credentials file) must strip the `p:` prefix.
 
 ### Database

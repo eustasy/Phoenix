@@ -10,6 +10,6 @@ declare(strict_types=1);
 function phoenix_hook(string $name, mysqli $connection, array $settings, int $time, array &$peer): void {
 	$path = __DIR__.'/../hooks/phoenix.'.$name.'.php';
 	if ( is_readable($path) ) {
-		include $path;
+		include_once $path;
 	}
 }
