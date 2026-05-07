@@ -72,7 +72,7 @@ function view_admin_html($settings, $tables_installed, $database_size, $message 
 		if ( $tables_installed ) {
 			$mysql_html .= '<p class="box background-green-sea color-clouds">All your tables are installed.';
 			if ( $database_size ) {
-				$mysql_html .= ' Their current size is '.number_format($database_size['Total']).' bytes.';
+				$mysql_html .= ' Their current size is '.number_format((float) $database_size['Total']).' bytes.';
 			}
 			$mysql_html .= '</p>';
 		} else {
