@@ -14,7 +14,7 @@ function admin_install_controller($settings, $config_path) {
 	require_once __DIR__.'/../functions/function.install.sanitize.post.php';
 	$values = install_sanitize_post($_POST);
 
-	$settings_writable = is_writable(__DIR__.'/../../config/');
+	$settings_writable = is_writable(dirname($config_path));
 	$install_error     = null;
 
 	////	Prepare form values (repopulate after failed attempt)

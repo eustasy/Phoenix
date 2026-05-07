@@ -89,11 +89,32 @@ class AdminInstallControllerTest extends PhoenixTestCase {
 		$this->assertStringContainsString('name="process" value="install"', $html);
 	}
 
+	public function testReturnsFormWithErrorWhenConfigDirectoryIsNotWritable(): void {
+		// dirname() of $config_path drives the writable check, so pointing it
+		// at a non-existent directory triggers the not-writable branch
+		// without having to chmod a real path. The view renders its own
+		// "<code>config/</code> is not writable" warning rather than the
+		// $install_error string (which the view ignores when not writable).
+		$configPath = sys_get_temp_dir().'/phoenix_no_such_dir/phoenix.custom.php';
+
+		$_POST = ['process' => 'install'];
+		$html  = \admin_install_controller([], $configPath);
+
+		$this->assertIsString($html);
+		$this->assertStringContainsString('is not writable', $html);
+		// Should not have attempted a DB connect, so no "Could not connect"
+		// banner and no form should render alongside the warning.
+		$this->assertStringNotContainsString('Could not connect', $html);
+		$this->assertStringNotContainsString('<form', $html);
+	}
+
 	public function testReturnsFormWithErrorWhenConfigPathCannotBeWritten(): void {
 		// DB connect + db_create succeed, but file_put_contents fails because
-		// the target directory does not exist. Hits the "Connected and
-		// created tables, but could not write the configuration file" branch.
-		$configPath = sys_get_temp_dir().'/phoenix_no_such_dir/phoenix.custom.php';
+		// the target path is occupied by a directory of the same name. Hits
+		// the "Connected and created tables, but could not write the
+		// configuration file" branch.
+		$configPath = sys_get_temp_dir().'/phoenix_install_collide_'.bin2hex(random_bytes(4));
+		$this->assertTrue(mkdir($configPath));
 
 		$_POST = [
 			'process'   => 'install',
@@ -109,8 +130,10 @@ class AdminInstallControllerTest extends PhoenixTestCase {
 
 			$this->assertIsString($html);
 			$this->assertStringContainsString('could not write the configuration file', $html);
-			$this->assertFileDoesNotExist($configPath);
 		} finally {
+			if ( is_dir($configPath) ) {
+				rmdir($configPath);
+			}
 			$this->dropTestTables();
 		}
 	}
