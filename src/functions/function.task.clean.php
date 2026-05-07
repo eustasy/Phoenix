@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-require_once __DIR__.'/../model/task.log.php';
-require_once __DIR__.'/../model/peers.clean.php';
-require_once __DIR__.'/../model/tasks.clean.php';
-require_once __DIR__.'/../model/torrents.clean.php';
-
 function task_clean(mysqli $connection, array $settings, int $time): bool {
+	require_once __DIR__.'/../model/task.log.php';
+	require_once __DIR__.'/../model/peers.clean.php';
+	require_once __DIR__.'/../model/tasks.clean.php';
+	require_once __DIR__.'/../model/torrents.clean.php';
+
 	// Remove peers that have not announced within 3x the announce interval.
 	// 1x = the normal re-announce window; 2x = one missed announce (grace); 3x = clearly gone.
 	// Also purges rows with test-reserved prefixes/values left by the test suite.
