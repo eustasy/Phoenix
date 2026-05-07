@@ -60,9 +60,11 @@ class AdminLoginControllerTest extends PhoenixTestCase {
 	}
 
 	/**
-	 * Open a CLI session, write the given values, close it. The controller's
-	 * later session_start() picks the same id back up and sees the values
-	 * pre-populated in $_SESSION.
+	 * Open a CLI session and assign the given values into $_SESSION, leaving
+	 * the session active. The controller's later session_start() no-ops
+	 * (notice suppressed by @ on the call site) so $_SESSION retains the
+	 * values we just set, without depending on the save handler doing a
+	 * write/read round-trip across different CI configurations.
 	 *
 	 * @param array<string, mixed> $values
 	 */
@@ -72,7 +74,6 @@ class AdminLoginControllerTest extends PhoenixTestCase {
 		foreach ( $values as $k => $v ) {
 			$_SESSION[$k] = $v;
 		}
-		@session_write_close();
 	}
 
 	public function testReturnsNullWhenNoAdminPasswordSet(): void {
