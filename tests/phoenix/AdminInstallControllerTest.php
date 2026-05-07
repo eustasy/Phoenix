@@ -98,7 +98,7 @@ class AdminInstallControllerTest extends PhoenixTestCase {
 		$configPath = sys_get_temp_dir().'/phoenix_no_such_dir/phoenix.custom.php';
 
 		$_POST = ['process' => 'install'];
-		$html  = \admin_install_controller([], $configPath);
+		$html  = \admin_install_controller($configPath);
 
 		$this->assertIsString($html);
 		$this->assertStringContainsString('is not writable', $html);
