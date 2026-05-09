@@ -1,5 +1,5 @@
-### Phoenix (elementary OS)
-2020-04-02 (v3.1.5)  
+### Phoenix
+2026-05-09 (v3.2.0)  
 A modern fork of PeerTracker, a lightweight PHP/SQL BitTorrent Tracker.
 
 ---

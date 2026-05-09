@@ -1,5 +1,53 @@
 # Phoenix Changelog
 
+## v.3.2 - 09/05/2026 - Haggard
+* BREAKING: Requires at least PHP 7.1
+* BREAKING: Replace backup bash script with PHP; add backup_rotate setting. **Cron jobs will require changing and testing.**
+* BREAKING: Track size of downloads ([#34](https://github.com/eustasy/phoenix/issues/34)). **DB schema modifications required.**
+* FEATURE: Allow the admin script to create a configuration file ([#31](https://github.com/eustasy/phoenix/issues/31)).
+* FEATURE: Add an Index of publicly listed torrents ([#32](https://github.com/eustasy/phoenix/issues/32)).
+* FEATURE: Add a magnet link generator ([#33](https://github.com/eustasy/phoenix/issues/33)).
+* IMPROVES: Add authentication to the administration area ([#4](https://github.com/eustasy/phoenix/issues/4)).
+* IMPROVES: Add comments to all remaining uncommented files ([#35](https://github.com/eustasy/phoenix/issues/35)).
+* IMPROVES: Be more helpful when listing peers ([#36](https://github.com/eustasy/phoenix/issues/36)).
+* IMPROVES: Protect against spamming fake peers ([#37](https://github.com/eustasy/phoenix/issues/37)).
+* IMPROVES: Exclude peers table from database backup ([#43](https://github.com/eustasy/phoenix/issues/43)).
+* IMPROVES: Use `--defaults-extra-file` to avoid exposing DB password in process list.
+* IMPROVES: Better filtering of non-hex info_hash and peer_id values.
+* IMPROVES: Add most PHP typing.
+* BUGFIX: Incorrect uppercase in `tracker_error` - BEP madates lowercase.
+* BUGFIX: Sort non-compact bencode peer-dict keys per BEP 3.
+* BUGFIX: Fix parse_ipv4 IPv4-mapped IPv6 prefix stripping.
+* BUGFIX: Remove double decoding in `once.sanitize.tracker.php`.
+* BUGFIX: Unclosed integer in non-compact bencode.
+* BUGFIX: Several spelling errors.
+* BUGFIX: Honor external_ip setting in address sanitization.
+* BUGFIX: Honor random_peers and random_limit settings in peer selection.
+* BUGFIX: Filter all torrents on scrape with `tracker_filter_info_hashes`
+
+### SQL Migration
+
+```sql
+ALTER TABLE `your_db`.`your_prefix_peers`
+    MODIFY `ipv4` char(15) NOT NULL DEFAULT '',
+    MODIFY `ipv6` char(39) NOT NULL DEFAULT '',
+    MODIFY `left` bigint(20) unsigned NOT NULL DEFAULT '0',
+    ADD COLUMN `uploaded` bigint(20) unsigned NOT NULL DEFAULT '0' AFTER `portv6`,
+    ADD COLUMN `downloaded` bigint(20) unsigned NOT NULL DEFAULT '0' AFTER `uploaded`;
+
+ALTER TABLE `your_db`.`your_prefix_torrents`
+    ADD COLUMN `size` bigint(20) unsigned NULL AFTER `info_hash`,
+    ADD COLUMN `listed` tinyint(1) unsigned NOT NULL DEFAULT '0' AFTER `size`;
+```
+
+### Cron (Scheduled Task) Migration
+
+The new backup command is `php ~/phoenix/_cron/hourly/backup-database.php`
+
+### Configuration Migration
+
+Your custom config will continue to work, but do take a look at the new config options in [`_settings/phoenix.default.php`](_settings/phoenix.default.php)
+
 ## v.3.1 - 14/04/2016 - Unicorn
 * IMPROVES: Switched to MIT Licensing.
 * IMPROVES: Documented how to set up cron jobs ([#28](https://github.com/eustasy/phoenix/issues/28)).

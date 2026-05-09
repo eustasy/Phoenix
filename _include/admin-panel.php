@@ -92,18 +92,26 @@
 	// PHP Version
 	$php_version = PHP_VERSION;
 
-	// >= 5.5
-	if ( version_compare(PHP_VERSION, '5.5.0', '>=') ) {
+	// >= 7.1
+	if ( version_compare(PHP_VERSION, '7.1.0', '>=') ) {
 		echo '
-		<p class="box background-green-sea color-clouds">Your PHP version is >= 5.5</p>
+		<p class="box background-green-sea color-clouds">Your PHP version is >= 7.1</p>
 		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
 		$php_compat = true;
+
+	// >= 5.5
+	} else if ( version_compare(PHP_VERSION, '5.5.0', '>=') ) {
+		echo '
+		<p class="box background-sun-flower color-midnight-blue">Your PHP version is >= 5.5, but < 7.1.
+		We recommend updating to PHP >= 7.1</p>
+		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
+		$php_compat = 'Partial';
 
 	// >= 5.0
 	} else if ( version_compare(PHP_VERSION, '5.0.0', '>=') ) {
 		echo '
 		<p class="box background-sun-flower color-midnight-blue">Your PHP version is >= 5.0, but < 5.5.
-		We recommend updating to PHP >= 5.5</p>
+		We recommend updating to PHP >= 7.1</p>
 		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
 		$php_compat = 'Partial';
 

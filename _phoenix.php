@@ -1,6 +1,6 @@
 <?php
 
-$settings['phoenix_version'] = 'Phoenix Procedural v.3.1 2016-04-14 15:42:00Z eustasy';
+$settings['phoenix_version'] = 'Phoenix Procedural v3.2.0 2026-05-09 16:55:00Z eustasy';
 
 // If the root isn't a directory up, modify that here.
 $settings['root'] = __DIR__.'/';

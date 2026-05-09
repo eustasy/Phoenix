@@ -1,4 +1,4 @@
-# Phoenix v.3.1.5
+# Phoenix v3.2.0
 
 A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people that just want to host a tracker, not the torrent listing site.
 
@@ -8,7 +8,7 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 
 #### Required
 * A PHP compatible web-server.
-* PHP >= 5.4.0 with Core, SimpleXML, date, filter, json, mysqli, pcre, & standard extensions. (Generated using [PHP CompatInfo](http://php5.laurent-laville.org/compatinfo/)
+* PHP >= 7.1.0 with Core, SimpleXML, date, filter, json, mysqli, pcre, & standard extensions. (Generated using [PHP CompatInfo](http://php5.laurent-laville.org/compatinfo/)
 * A MySQLI supported database, such as MySQL >= 4.1
 
 #### Recommended
@@ -31,5 +31,5 @@ Configuration should take place in `_settings/phoenix.custom.php`, NOT `_setting
 3. Edit your crontab with `crontab -e`, and add a crontab like the following. You can edit the times, and should make sure the paths are correct by running the commands after the asterisks.
 ```
 15 * * * * php ~/phoenix/_cron/hourly/clean-and-optimize.php
-30 * * * * ~/phoenix/_cron/hourly/backup-database.sh
+30 * * * * php ~/phoenix/_cron/hourly/backup-database.php
 ```
