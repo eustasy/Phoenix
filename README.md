@@ -1,8 +1,5 @@
 # Phoenix v.3.1.5
 
-[![Normal](https://github.com/eustasy/phoenix/actions/workflows/normal.yml/badge.svg)](https://github.com/eustasy/phoenix/actions/workflows/normal.yml)
-[![Maintainability](https://qlty.sh/gh/eustasy/projects/Phoenix/maintainability.svg)](https://qlty.sh/gh/eustasy/projects/Phoenix)
-
 A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people that just want to host a tracker, not the torrent listing site.
 
 ## Installation
