@@ -54,7 +54,7 @@ function create_database(mysqli $connection, array $settings, bool $debug = fals
 		return false;
 	}
 	if ( $debug ) {
-		echo 'Database Creation succesful.'.PHP_EOL;
+		echo 'Database Creation successful.'.PHP_EOL;
 	}
 	return true;
 }
