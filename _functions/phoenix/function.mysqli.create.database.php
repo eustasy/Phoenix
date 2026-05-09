@@ -11,8 +11,8 @@ function create_database(mysqli $connection, array $settings, bool $debug = fals
 				'`peer_id` varchar(40) NOT NULL,' .
 				'`compactv4` varchar(12) NOT NULL,' .
 				'`compactv6` varchar(36) NOT NULL,' .
-				'`ipv4` char(15) NOT NULL DEFAULT \'0\',' .
-				'`ipv6` char(39) NOT NULL DEFAULT \'0\',' .
+				'`ipv4` char(15) NOT NULL DEFAULT \'\',' .
+				'`ipv6` char(39) NOT NULL DEFAULT \'\',' .
 				'`portv4` smallint(5) unsigned NOT NULL,' .
 				'`portv6` smallint(5) unsigned NOT NULL,' .
 				'`uploaded` bigint(20) unsigned NOT NULL DEFAULT \'0\',' .
