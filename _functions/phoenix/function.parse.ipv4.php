@@ -5,7 +5,9 @@
 // Strips a leading `::ffff:` IPv4-mapped IPv6 prefix when present.
 // Returns array('ip' => string, 'port' => int|false) on success, or false if the address is not valid IPv4.
 function parse_ipv4(string $address): array|false {
-	$candidate = trim($address, '::ffff:');
+	// IPv4-mapped IPv6 prefix is a literal 7-char string, not a character mask;
+	// trim() would also chew leading/trailing 'f' and ':' from the address proper.
+	$candidate = str_starts_with($address, '::ffff:') ? substr($address, 7) : $address;
 	$port      = false;
 	if ( strpos($candidate, ':') !== false ) {
 		$parts     = explode(':', $candidate, 2);
