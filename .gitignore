@@ -2,6 +2,5 @@
 *custom*
 _backups*
 normal-checks*
-.claude/settings.local.json
 vendor/
 composer.lock
