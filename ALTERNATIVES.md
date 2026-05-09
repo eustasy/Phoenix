@@ -2,7 +2,7 @@
 
 | Tracker | Status | Last Release | Last Commit | Repository / Notes |
 |---------|--------|--------------|-------------|-------------------|
-| **Phoenix** | Active |  v3.1.5 (2020) | 2026 | This project |
+| **Phoenix** | Active |  v3.2 (2026) | 2026 | This project |
 | [XBT](https://github.com/OlafvdSpek/xbt) | Active | — | 2025-12 | C++ tracker |
 | XBTIT | ⚠️ Unsecure | v3.1 (2010) | 6 years ago | linuxtracker.org |
 | TorrentFlux NG | Abandoned | v1.0 (2011) | 11 years ago | — |
