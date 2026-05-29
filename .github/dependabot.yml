@@ -6,8 +6,31 @@
 
 version: 2
 updates:
+  # main branch
   - package-ecosystem: "github-actions"
     directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      gha-patching:
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "composer"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-type: "all"
+    groups:
+      composer-patching:
+        update-types:
+          - "minor"
+          - "patch"
+  # 3.x maintenance branch
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "3.x"
     schedule:
       interval: "monthly"
     groups:
@@ -17,6 +40,7 @@ updates:
           - "patch"
   - package-ecosystem: "composer"
     directory: "/"
+    target-branch: "3.x"
     schedule:
       interval: "monthly"
     allow:
