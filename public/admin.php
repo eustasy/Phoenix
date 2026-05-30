@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 // Bootstrap tracker_error before any DB work so the installer-mode path
 // below can use it without going through phoenix.php's full DB connect.
-require_once __DIR__.'/../src/functions/function.tracker.error.php';
+require_once __DIR__.'/../src/functions/tracker.error.php';
 
 $config_path   = __DIR__.'/../config/phoenix.custom.php';
 $config_exists = is_readable($config_path);

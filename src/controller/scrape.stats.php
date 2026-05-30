@@ -11,7 +11,7 @@ declare(strict_types=1);
 function scrape_stats_controller(mysqli $connection, array $settings): string {
 	require_once __DIR__.'/../model/stats.peers.php';
 	require_once __DIR__.'/../model/stats.downloads.php';
-	require_once __DIR__.'/../functions/function.stats.merge.php';
+	require_once __DIR__.'/../functions/stats.merge.php';
 
 	$peer_counts     = stats_fetch_peer_counts($connection, $settings);
 	$download_totals = stats_fetch_download_totals($connection, $settings);

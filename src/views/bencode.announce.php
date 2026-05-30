@@ -26,8 +26,8 @@ function view_announce_bencode(
 	// Helpers loaded inside the function so coverage tracks them per-call
 	// (top-of-file require_once executes once per process and may show as
 	// uncovered if another test loaded the file first).
-	require_once __DIR__.'/../functions/function.peer.format.bencode.php';
-	require_once __DIR__.'/../functions/function.peers.format.compact.php';
+	require_once __DIR__.'/../functions/peer.format.bencode.php';
+	require_once __DIR__.'/../functions/peers.format.compact.php';
 	// Begin response — keys in lexicographic order per bencode spec.
 	$response = 'd8:completei'.$counts['complete'].
 		'e10:incompletei'.$counts['incomplete'].

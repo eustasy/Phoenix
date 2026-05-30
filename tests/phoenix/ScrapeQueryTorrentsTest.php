@@ -10,7 +10,7 @@ class ScrapeQueryTorrentsTest extends PhoenixTestCase {
 
 	public function testQueryTorrentsWithSingleHash() {
 		require_once __DIR__.'/../../src/model/torrents.scrape.php';
-		require_once __DIR__.'/../../src/functions/function.scrape.build.where.clause.php';
+		require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
 
 		$info_hash = str_repeat('a', 40);
 
@@ -32,7 +32,7 @@ class ScrapeQueryTorrentsTest extends PhoenixTestCase {
 
 	public function testQueryTorrentsWithMultipleHashes() {
 		require_once __DIR__.'/../../src/model/torrents.scrape.php';
-		require_once __DIR__.'/../../src/functions/function.scrape.build.where.clause.php';
+		require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
 
 		$info_hash_a = str_repeat('a', 40);
 		$info_hash_b = str_repeat('b', 40);
@@ -65,7 +65,7 @@ class ScrapeQueryTorrentsTest extends PhoenixTestCase {
 
 	public function testQueryTorrentsReturnsEmptyForUnknownHash() {
 		require_once __DIR__.'/../../src/model/torrents.scrape.php';
-		require_once __DIR__.'/../../src/functions/function.scrape.build.where.clause.php';
+		require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
 
 		$info_hash = str_repeat('z', 40);
 		$where = scrape_build_where_clause(array($info_hash));

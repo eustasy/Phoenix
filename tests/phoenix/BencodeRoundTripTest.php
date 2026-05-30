@@ -26,7 +26,7 @@ class BencodeRoundTripTest extends PhoenixTestCase {
 		require_once __DIR__.'/../../src/views/bencode.error.php';
 		require_once __DIR__.'/../../src/views/bencode.scrape.php';
 		require_once __DIR__.'/../../src/views/bencode.announce.php';
-		require_once __DIR__.'/../../src/functions/function.peer.format.bencode.php';
+		require_once __DIR__.'/../../src/functions/peer.format.bencode.php';
 	}
 
 	////	Decoder

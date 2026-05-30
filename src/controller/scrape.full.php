@@ -9,7 +9,7 @@ declare(strict_types=1);
 // failure calls tracker_error() (which exits).
 
 function scrape_full_controller(mysqli $connection, array $settings): string {
-	require_once __DIR__.'/../functions/function.scrape.merge.results.php';
+	require_once __DIR__.'/../functions/scrape.merge.results.php';
 	require_once __DIR__.'/../model/peers.scrape.all.php';
 	require_once __DIR__.'/../model/torrents.scrape.all.php';
 

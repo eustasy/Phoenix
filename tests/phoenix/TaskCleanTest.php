@@ -8,7 +8,7 @@ class TaskCleanTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/functions/function.task.clean.php';
+		require_once __DIR__.'/../../src/functions/task.clean.php';
 	}
 
 	public function testReturnsTrueOnSuccess(): void {

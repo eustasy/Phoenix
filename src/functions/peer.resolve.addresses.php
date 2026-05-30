@@ -8,8 +8,8 @@ declare(strict_types=1);
 // port could be parsed).
 
 function peer_resolve_addresses(array $addresses): array {
-	require_once __DIR__.'/function.parse.ipv4.php';
-	require_once __DIR__.'/function.parse.ipv6.php';
+	require_once __DIR__.'/parse.ipv4.php';
+	require_once __DIR__.'/parse.ipv6.php';
 
 	$result = array(
 		'ipv4'   => false,

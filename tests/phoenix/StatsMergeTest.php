@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 class StatsMergeTest extends TestCase {
 
 	public function testMergeStats() {
-		require_once __DIR__.'/../../src/functions/function.stats.merge.php';
+		require_once __DIR__.'/../../src/functions/stats.merge.php';
 
 		$peer_counts = array(
 			'seeders' => '10',
@@ -33,7 +33,7 @@ class StatsMergeTest extends TestCase {
 	}
 
 	public function testMergeStatsWithZeros() {
-		require_once __DIR__.'/../../src/functions/function.stats.merge.php';
+		require_once __DIR__.'/../../src/functions/stats.merge.php';
 
 		$peer_counts = array(
 			'seeders' => '0',
@@ -57,7 +57,7 @@ class StatsMergeTest extends TestCase {
 	}
 
 	public function testMergeStatsWithNullValues() {
-		require_once __DIR__.'/../../src/functions/function.stats.merge.php';
+		require_once __DIR__.'/../../src/functions/stats.merge.php';
 
 		$peer_counts = array(
 			'seeders' => null,
@@ -81,7 +81,7 @@ class StatsMergeTest extends TestCase {
 	}
 
 	public function testMergeStatsReturnsFalseWhenPeerCountsIsFalse() {
-		require_once __DIR__.'/../../src/functions/function.stats.merge.php';
+		require_once __DIR__.'/../../src/functions/stats.merge.php';
 
 		$download_totals = array(
 			'downloads' => '100',
@@ -94,7 +94,7 @@ class StatsMergeTest extends TestCase {
 	}
 
 	public function testMergeStatsReturnsFalseWhenDownloadTotalsIsFalse() {
-		require_once __DIR__.'/../../src/functions/function.stats.merge.php';
+		require_once __DIR__.'/../../src/functions/stats.merge.php';
 
 		$peer_counts = array(
 			'seeders' => '10',
@@ -108,7 +108,7 @@ class StatsMergeTest extends TestCase {
 	}
 
 	public function testMergeStatsReturnsFalseWhenBothAreFalse() {
-		require_once __DIR__.'/../../src/functions/function.stats.merge.php';
+		require_once __DIR__.'/../../src/functions/stats.merge.php';
 
 		$result = stats_merge(false, false);
 

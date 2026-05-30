@@ -8,7 +8,7 @@ class PeerFormatBencodeTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/functions/function.peer.format.bencode.php';
+		require_once __DIR__.'/../../src/functions/peer.format.bencode.php';
 	}
 
 	public function testIpv4WithPeerId(): void {

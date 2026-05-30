@@ -13,7 +13,7 @@ declare(strict_types=1);
 function announce_controller(mysqli $connection, array $settings, int $time, array $allowed_torrents = array()): string {
 
 	////	Sanitize & Validate Input
-	require_once __DIR__.'/../functions/function.sanitize.tracker.php';
+	require_once __DIR__.'/../functions/sanitize.tracker.php';
 	$peer = sanitize_tracker_params();
 
 	// info_hash: required, 40 hex chars. sanitize_tracker_params returns false
@@ -37,10 +37,10 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
 	}
 
 	////	Resolve IP Addresses & Ports
-	require_once __DIR__.'/../functions/function.parse.ipv4.php';
-	require_once __DIR__.'/../functions/function.parse.ipv6.php';
-	require_once __DIR__.'/../functions/function.peer.address.candidates.php';
-	require_once __DIR__.'/../functions/function.peer.resolve.addresses.php';
+	require_once __DIR__.'/../functions/parse.ipv4.php';
+	require_once __DIR__.'/../functions/parse.ipv6.php';
+	require_once __DIR__.'/../functions/peer.address.candidates.php';
+	require_once __DIR__.'/../functions/peer.resolve.addresses.php';
 
 	$peer['ipv4']   = false;
 	$peer['ipv6']   = false;
@@ -86,17 +86,17 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
 	}
 
 	////	Parse Optional Parameters
-	require_once __DIR__.'/../functions/function.peer.parse.announce.optional.php';
+	require_once __DIR__.'/../functions/peer.parse.announce.optional.php';
 	$peer = array_merge($peer, peer_parse_announce_optional($_GET, $settings));
 
 	////	Rate Limiting
-	require_once __DIR__.'/../functions/function.announce.check.rate.limit.php';
+	require_once __DIR__.'/../functions/announce.check.rate.limit.php';
 	announce_check_rate_limit($connection, $settings, $peer, $time);
 
 	////	Handle Peer Event
 	require_once __DIR__.'/../model/peer.select.php';
-	require_once __DIR__.'/../functions/function.peer.changed.php';
-	require_once __DIR__.'/../functions/function.phoenix.hook.php';
+	require_once __DIR__.'/../functions/peer.changed.php';
+	require_once __DIR__.'/../functions/phoenix.hook.php';
 
 	$peer['old'] = peer_select($connection, $settings, $peer);
 
@@ -136,13 +136,13 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
 		!$settings['clean_with_cron'] &&
 		mt_rand(1, 100) <= $settings['clean_with_requests']
 	) {
-		require_once __DIR__.'/../functions/function.task.clean.php';
+		require_once __DIR__.'/../functions/task.clean.php';
 		task_clean($connection, $settings, $time);
 	}
 
 	////	Build Peer List Response
 	require_once __DIR__.'/../model/peers.count.swarm.php';
-	require_once __DIR__.'/../functions/function.peer.select.strategy.php';
+	require_once __DIR__.'/../functions/peer.select.strategy.php';
 	require_once __DIR__.'/../model/peers.select.active.php';
 
 	$stale_threshold = $time - ($settings['announce_interval'] + $settings['min_interval']);

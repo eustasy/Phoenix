@@ -14,7 +14,7 @@ class PeerSelectStrategyTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/functions/function.peer.select.strategy.php';
+		require_once __DIR__.'/../../src/functions/peer.select.strategy.php';
 	}
 
 	public function testCompletedPeerFiltersToLeechers(): void {

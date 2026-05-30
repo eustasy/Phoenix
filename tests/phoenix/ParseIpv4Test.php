@@ -8,7 +8,7 @@ class ParseIpv4Test extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/functions/function.parse.ipv4.php';
+		require_once __DIR__.'/../../src/functions/parse.ipv4.php';
 	}
 
 	public function testPlainIpv4(): void {

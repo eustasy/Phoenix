@@ -8,7 +8,7 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/functions/function.announce.check.rate.limit.php';
+		require_once __DIR__.'/../../src/functions/announce.check.rate.limit.php';
 	}
 
 	public function testNoRateLimitWhenNoPeersExist() {
@@ -288,7 +288,7 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 	 * Helper to test rate limit error in subprocess (since tracker_error calls exit).
 	 */
 	private function assertRateLimitErrorInSubprocess($peer) {
-		$functionPath = __DIR__.'/../../src/functions/function.announce.check.rate.limit.php';
+		$functionPath = __DIR__.'/../../src/functions/announce.check.rate.limit.php';
 		$script = '<?php '.
 			'$settings = '.var_export(self::$settings, true).'; '.
 			'$connection = mysqli_connect('.
@@ -297,7 +297,7 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase {
 			var_export(self::$settings['db_pass'], true).', '.
 			var_export(self::$settings['db_name'], true).
 			'); '.
-			'require '.var_export(__DIR__.'/../../src/functions/function.tracker.error.php', true).'; '.
+			'require '.var_export(__DIR__.'/../../src/functions/tracker.error.php', true).'; '.
 			'require '.var_export($functionPath, true).'; '.
 			'announce_check_rate_limit($connection, $settings, '.
 			var_export($peer, true).', '.var_export(self::$time, true).');';

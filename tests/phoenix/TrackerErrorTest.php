@@ -6,7 +6,7 @@ namespace Phoenix\Tests;
 
 class TrackerErrorTest extends PhoenixTestCase {
 
-	private const FUNCTION_PATH = __DIR__.'/../../src/functions/function.tracker.error.php';
+	private const FUNCTION_PATH = __DIR__.'/../../src/functions/tracker.error.php';
 
 	/**
 	 * Drive tracker_error() in a subprocess (it calls exit(2) which would

@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 class ScrapeBuildWhereClauseTest extends TestCase {
 
 	public function testBuildWhereClauseWithSingleHash() {
-		require_once __DIR__.'/../../src/functions/function.scrape.build.where.clause.php';
+		require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
 
 		$info_hashes = array(str_repeat('a', 40));
 
@@ -20,7 +20,7 @@ class ScrapeBuildWhereClauseTest extends TestCase {
 	}
 
 	public function testBuildWhereClauseWithMultipleHashes() {
-		require_once __DIR__.'/../../src/functions/function.scrape.build.where.clause.php';
+		require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
 
 		$info_hashes = array(
 			str_repeat('a', 40),
@@ -37,7 +37,7 @@ class ScrapeBuildWhereClauseTest extends TestCase {
 	}
 
 	public function testBuildWhereClauseWithEmptyArray() {
-		require_once __DIR__.'/../../src/functions/function.scrape.build.where.clause.php';
+		require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
 
 		// An empty hash list must not produce a bare 'WHERE ' — that would be
 		// concatenated onto the model's SELECT and cause a syntax error.

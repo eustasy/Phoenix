@@ -18,25 +18,25 @@ $time = time();
 header('Access-Control-Allow-Origin: *');
 
 ////	Settings
-require_once __DIR__.'/functions/function.settings.load.php';
+require_once __DIR__.'/functions/settings.load.php';
 $settings = settings_load(
 	__DIR__.'/../config/phoenix.default.php',
 	__DIR__.'/../config/phoenix.custom.php'
 );
 $settings['phoenix_version'] = 'Phoenix Procedural v4.0beta1 2026-05-09 17:23:00Z eustasy';
 
-require_once __DIR__.'/functions/function.tracker.error.php';
+require_once __DIR__.'/functions/tracker.error.php';
 
 ////	Database Connection
-require_once __DIR__.'/functions/function.db.is.configured.php';
+require_once __DIR__.'/functions/db.is.configured.php';
 if (!db_is_configured($settings)) {
 	tracker_error('Connection Failed. Tracker is not configured.');
 }
 
-require_once __DIR__.'/functions/function.db.persist.host.php';
+require_once __DIR__.'/functions/db.persist.host.php';
 $settings['db_host'] = db_persist_host($settings['db_host'], (bool)$settings['db_persist']);
 
-require_once __DIR__.'/functions/function.db.connect.php';
+require_once __DIR__.'/functions/db.connect.php';
 $connection = db_connect($settings);
 if (!$connection) {
 	tracker_error('Connection Failed. Tracker may be mis-configured. '.mysqli_connect_error());

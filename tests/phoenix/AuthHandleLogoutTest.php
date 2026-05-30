@@ -16,7 +16,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	}
 
 	public function testDoesNothingWhenLogoutNotSet() {
-		require_once __DIR__.'/../../src/functions/function.auth.handle.logout.php';
+		require_once __DIR__.'/../../src/functions/auth.handle.logout.php';
 
 		auth_handle_logout();
 
@@ -27,7 +27,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	public function testIgnoresGetRequestEvenWithLogoutParam() {
 		// CSRF-resistant: a third-party <img src="…?logout=1"> would arrive as
 		// a GET, and must not be able to end the admin session.
-		require_once __DIR__.'/../../src/functions/function.auth.handle.logout.php';
+		require_once __DIR__.'/../../src/functions/auth.handle.logout.php';
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$_GET['logout'] = '1';
 
@@ -38,7 +38,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	}
 
 	public function testExitsAndRedirectsOnPostLogout() {
-		$functionPath = __DIR__.'/../../src/functions/function.auth.handle.logout.php';
+		$functionPath = __DIR__.'/../../src/functions/auth.handle.logout.php';
 		$script = '<?php '.
 			'session_start(); '.
 			'$_SESSION["phoenix_authed"] = true; '.
@@ -59,7 +59,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	public function testIgnoresPostWithoutLogoutField() {
 		// admin.php POSTs setup/clean/optimize requests; those must not be
 		// mis-interpreted as logout because they share the POST verb.
-		require_once __DIR__.'/../../src/functions/function.auth.handle.logout.php';
+		require_once __DIR__.'/../../src/functions/auth.handle.logout.php';
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 		$_POST['process'] = 'clean';
 
@@ -72,7 +72,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	public function testIgnoresEmptyRequestMethod() {
 		// Defensive null-coalescence: an unset REQUEST_METHOD must not be
 		// treated as POST.
-		require_once __DIR__.'/../../src/functions/function.auth.handle.logout.php';
+		require_once __DIR__.'/../../src/functions/auth.handle.logout.php';
 		unset($_SERVER['REQUEST_METHOD']);
 		$_POST['logout'] = '1';
 
@@ -84,7 +84,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	public function testIgnoresOtherHttpVerbs() {
 		// Anything that isn't literally POST must be ignored, even with the
 		// logout field set.
-		require_once __DIR__.'/../../src/functions/function.auth.handle.logout.php';
+		require_once __DIR__.'/../../src/functions/auth.handle.logout.php';
 		foreach ( ['PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'post'] as $verb ) {
 			$_SERVER['REQUEST_METHOD'] = $verb;
 			$_POST = ['logout' => '1'];
@@ -94,7 +94,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase {
 	}
 
 	public function testStripsQueryStringFromRedirect() {
-		$functionPath = __DIR__.'/../../src/functions/function.auth.handle.logout.php';
+		$functionPath = __DIR__.'/../../src/functions/auth.handle.logout.php';
 		$script = '<?php '.
 			'session_start(); '.
 			'$_SERVER["REQUEST_METHOD"] = "POST"; '.

@@ -8,7 +8,7 @@ class PeerParseAnnounceOptionalTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/functions/function.peer.parse.announce.optional.php';
+		require_once __DIR__.'/../../src/functions/peer.parse.announce.optional.php';
 	}
 
 	/** @return array<string, mixed> */

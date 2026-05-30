@@ -8,9 +8,9 @@ class PeerResolveAddressesTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/functions/function.parse.ipv4.php';
-		require_once __DIR__.'/../../src/functions/function.parse.ipv6.php';
-		require_once __DIR__.'/../../src/functions/function.peer.resolve.addresses.php';
+		require_once __DIR__.'/../../src/functions/parse.ipv4.php';
+		require_once __DIR__.'/../../src/functions/parse.ipv6.php';
+		require_once __DIR__.'/../../src/functions/peer.resolve.addresses.php';
 	}
 
 	public function testEmptyListYieldsAllFalse(): void {

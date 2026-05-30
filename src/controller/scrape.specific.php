@@ -10,9 +10,9 @@ declare(strict_types=1);
 // tracker_error() (which exits).
 
 function scrape_specific_controller(mysqli $connection, array $settings, array $valid_info_hashes): string {
-	require_once __DIR__.'/../functions/function.scrape.build.where.clause.php';
-	require_once __DIR__.'/../functions/function.scrape.initialize.results.php';
-	require_once __DIR__.'/../functions/function.scrape.merge.results.php';
+	require_once __DIR__.'/../functions/scrape.build.where.clause.php';
+	require_once __DIR__.'/../functions/scrape.initialize.results.php';
+	require_once __DIR__.'/../functions/scrape.merge.results.php';
 	require_once __DIR__.'/../model/peers.scrape.php';
 	require_once __DIR__.'/../model/torrents.scrape.php';
 

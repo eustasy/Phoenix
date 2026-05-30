@@ -8,7 +8,7 @@ declare(strict_types=1);
 require_once __DIR__.'/../src/phoenix.php';
 
 if ( $settings['clean_with_cron'] ) {
-	require_once __DIR__.'/../src/functions/function.task.clean.php';
+	require_once __DIR__.'/../src/functions/task.clean.php';
 	require_once __DIR__.'/../src/model/db.optimize.php';
 	task_clean($connection, $settings, $time);
 	db_optimize($connection, $settings, $time);

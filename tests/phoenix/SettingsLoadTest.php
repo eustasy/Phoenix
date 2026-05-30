@@ -8,7 +8,7 @@ class SettingsLoadTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/functions/function.settings.load.php';
+		require_once __DIR__.'/../../src/functions/settings.load.php';
 	}
 
 	/** @var list<string> */

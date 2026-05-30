@@ -17,7 +17,7 @@ class AuthIsAuthenticatedTest extends TestCase {
 	}
 
 	public function testReturnsFalseWhenNotAuthenticated() {
-		require_once __DIR__.'/../../src/functions/function.auth.is.authenticated.php';
+		require_once __DIR__.'/../../src/functions/auth.is.authenticated.php';
 
 		$result = auth_is_authenticated();
 
@@ -25,7 +25,7 @@ class AuthIsAuthenticatedTest extends TestCase {
 	}
 
 	public function testReturnsFalseWhenSessionKeyIsEmpty() {
-		require_once __DIR__.'/../../src/functions/function.auth.is.authenticated.php';
+		require_once __DIR__.'/../../src/functions/auth.is.authenticated.php';
 
 		$_SESSION['phoenix_authed'] = false;
 
@@ -35,7 +35,7 @@ class AuthIsAuthenticatedTest extends TestCase {
 	}
 
 	public function testReturnsTrueWhenAuthenticated() {
-		require_once __DIR__.'/../../src/functions/function.auth.is.authenticated.php';
+		require_once __DIR__.'/../../src/functions/auth.is.authenticated.php';
 
 		$_SESSION['phoenix_authed'] = true;
 
@@ -45,7 +45,7 @@ class AuthIsAuthenticatedTest extends TestCase {
 	}
 
 	public function testReturnsTrueWhenSessionKeyIsTruthy() {
-		require_once __DIR__.'/../../src/functions/function.auth.is.authenticated.php';
+		require_once __DIR__.'/../../src/functions/auth.is.authenticated.php';
 
 		$_SESSION['phoenix_authed'] = 'yes';
 

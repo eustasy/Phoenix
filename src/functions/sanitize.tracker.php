@@ -7,7 +7,7 @@ declare(strict_types=1);
 // Returns an associative array: info_hash, info_hashes, peer_id.
 
 function sanitize_tracker_params(?string $query_string = null): array {
-	require_once __DIR__.'/function.sanitize.maybe_binary_to_hex.php';
+	require_once __DIR__.'/sanitize.maybe_binary_to_hex.php';
 
 	if ($query_string === null) {
 		$query_string = $_SERVER['QUERY_STRING'] ?? '';

@@ -10,7 +10,7 @@ class ScrapeMergeResultsTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/functions/function.scrape.merge.results.php';
+		require_once __DIR__.'/../../src/functions/scrape.merge.results.php';
 	}
 
 	private function syntheticPeers(): mysqli_result {

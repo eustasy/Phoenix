@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 class ScrapeInitializeResultsTest extends TestCase {
 
 	public function testInitializeResultsWithSingleHash() {
-		require_once __DIR__.'/../../src/functions/function.scrape.initialize.results.php';
+		require_once __DIR__.'/../../src/functions/scrape.initialize.results.php';
 
 		$info_hashes = array(str_repeat('a', 40));
 
@@ -30,7 +30,7 @@ class ScrapeInitializeResultsTest extends TestCase {
 	}
 
 	public function testInitializeResultsWithMultipleHashes() {
-		require_once __DIR__.'/../../src/functions/function.scrape.initialize.results.php';
+		require_once __DIR__.'/../../src/functions/scrape.initialize.results.php';
 
 		$info_hashes = array(
 			str_repeat('a', 40),
@@ -57,7 +57,7 @@ class ScrapeInitializeResultsTest extends TestCase {
 	}
 
 	public function testInitializeResultsWithEmptyArray() {
-		require_once __DIR__.'/../../src/functions/function.scrape.initialize.results.php';
+		require_once __DIR__.'/../../src/functions/scrape.initialize.results.php';
 
 		$info_hashes = array();
 

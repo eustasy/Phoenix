@@ -10,7 +10,7 @@ class DbConnectTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/functions/function.db.connect.php';
+		require_once __DIR__.'/../../src/functions/db.connect.php';
 	}
 
 	protected function tearDown(): void {

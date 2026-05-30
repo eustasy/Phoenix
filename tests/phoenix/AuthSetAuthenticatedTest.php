@@ -13,7 +13,7 @@ class AuthSetAuthenticatedTest extends TestCase {
 	}
 
 	public function testSetsSessionVariable() {
-		require_once __DIR__.'/../../src/functions/function.auth.set.authenticated.php';
+		require_once __DIR__.'/../../src/functions/auth.set.authenticated.php';
 
 		$this->assertArrayNotHasKey('phoenix_authed', $_SESSION);
 
@@ -24,7 +24,7 @@ class AuthSetAuthenticatedTest extends TestCase {
 	}
 
 	public function testOverwritesExistingSessionVariable() {
-		require_once __DIR__.'/../../src/functions/function.auth.set.authenticated.php';
+		require_once __DIR__.'/../../src/functions/auth.set.authenticated.php';
 
 		$_SESSION['phoenix_authed'] = false;
 

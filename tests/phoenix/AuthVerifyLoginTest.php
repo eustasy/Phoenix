@@ -13,7 +13,7 @@ class AuthVerifyLoginTest extends TestCase {
 	}
 
 	public function testReturnsFalseWhenPasswordNotSet() {
-		require_once __DIR__.'/../../src/functions/function.auth.verify.login.php';
+		require_once __DIR__.'/../../src/functions/auth.verify.login.php';
 
 		$settings = array(
 			'admin_password' => password_hash('correct_password', PASSWORD_DEFAULT),
@@ -25,7 +25,7 @@ class AuthVerifyLoginTest extends TestCase {
 	}
 
 	public function testReturnsFalseWhenPasswordIsIncorrect() {
-		require_once __DIR__.'/../../src/functions/function.auth.verify.login.php';
+		require_once __DIR__.'/../../src/functions/auth.verify.login.php';
 
 		$_POST['password'] = 'wrong_password';
 		$settings = array(
@@ -38,7 +38,7 @@ class AuthVerifyLoginTest extends TestCase {
 	}
 
 	public function testReturnsTrueWhenPasswordIsCorrect() {
-		require_once __DIR__.'/../../src/functions/function.auth.verify.login.php';
+		require_once __DIR__.'/../../src/functions/auth.verify.login.php';
 
 		$_POST['password'] = 'correct_password';
 		$settings = array(
@@ -51,7 +51,7 @@ class AuthVerifyLoginTest extends TestCase {
 	}
 
 	public function testHandlesDifferentPasswordHashAlgorithms() {
-		require_once __DIR__.'/../../src/functions/function.auth.verify.login.php';
+		require_once __DIR__.'/../../src/functions/auth.verify.login.php';
 
 		$_POST['password'] = 'test123';
 		$settings = array(

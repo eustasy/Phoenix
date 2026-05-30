@@ -8,7 +8,7 @@ class InstallSanitizePostTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/functions/function.install.sanitize.post.php';
+		require_once __DIR__.'/../../src/functions/install.sanitize.post.php';
 	}
 
 	public function testEmptyPostYieldsDefaults(): void {
