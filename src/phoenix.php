@@ -23,7 +23,7 @@ $settings = settings_load(
 	__DIR__.'/../config/phoenix.default.php',
 	__DIR__.'/../config/phoenix.custom.php'
 );
-$settings['phoenix_version'] = 'Phoenix Procedural v4.0beta1 2026-05-09 17:23:00Z eustasy';
+$settings['phoenix_version'] = 'Phoenix Procedural v4.0beta2 2026-05-09 17:23:00Z eustasy';
 
 require_once __DIR__.'/functions/tracker.error.php';
 
