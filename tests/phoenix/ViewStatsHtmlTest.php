@@ -6,7 +6,7 @@ namespace Phoenix\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-class StatsRenderHtmlTest extends TestCase {
+class ViewStatsHtmlTest extends TestCase {
 
 	public function testRenderHtml() {
 		require_once __DIR__.'/../../src/views/html.stats.php';

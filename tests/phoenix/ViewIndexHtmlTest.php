@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-class IndexRenderHtmlTest extends PhoenixTestCase {
+class ViewIndexHtmlTest extends PhoenixTestCase {
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();

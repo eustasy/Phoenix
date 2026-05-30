@@ -6,7 +6,7 @@ namespace Phoenix\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-class StatsRenderXmlTest extends TestCase {
+class ViewStatsXmlTest extends TestCase {
 
 	public function testRenderXml() {
 		require_once __DIR__.'/../../src/views/xml.stats.php';

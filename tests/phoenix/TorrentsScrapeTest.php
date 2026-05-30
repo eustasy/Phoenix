@@ -6,7 +6,7 @@ namespace Phoenix\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-class ScrapeQueryTorrentsTest extends PhoenixTestCase {
+class TorrentsScrapeTest extends PhoenixTestCase {
 
 	public function testQueryTorrentsWithSingleHash() {
 		require_once __DIR__.'/../../src/model/torrents.scrape.php';

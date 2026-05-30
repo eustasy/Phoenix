@@ -6,7 +6,7 @@ namespace Phoenix\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-class ScrapeQueryPeersTest extends PhoenixTestCase {
+class PeersScrapeTest extends PhoenixTestCase {
 
 	public function testQueryPeersWithSingleHash() {
 		require_once __DIR__.'/../../src/model/peers.scrape.php';

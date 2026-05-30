@@ -115,4 +115,32 @@ class PeerAddressCandidatesTest extends PhoenixTestCase {
 		);
 	}
 
+	////	peer_xff_first
+	// Direct unit coverage for the header-chain splitter that the honor_xff
+	// branch above relies on.
+
+	public function testXffFirstReturnsLeftmostEntry(): void {
+		$this->assertSame('203.0.113.5', peer_xff_first('203.0.113.5, 198.51.100.7, 10.0.0.1'));
+	}
+
+	public function testXffFirstTrimsSurroundingWhitespace(): void {
+		$this->assertSame('203.0.113.5', peer_xff_first('   203.0.113.5  ,198.51.100.7'));
+	}
+
+	public function testXffFirstSkipsLeadingBlankEntries(): void {
+		$this->assertSame('203.0.113.5', peer_xff_first(' , , 203.0.113.5'));
+	}
+
+	public function testXffFirstReturnsSingleEntryUnchanged(): void {
+		$this->assertSame('203.0.113.5', peer_xff_first('203.0.113.5'));
+	}
+
+	public function testXffFirstReturnsNullWhenAllEntriesBlank(): void {
+		$this->assertNull(peer_xff_first(' , ,  '));
+	}
+
+	public function testXffFirstReturnsNullWhenEmpty(): void {
+		$this->assertNull(peer_xff_first(''));
+	}
+
 }
