@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 ////	view_announce_bencode
 // Renders a BitTorrent announce response as bencode (BEP 3).
-// Keys must be in lexicographic order per the bencode spec.
 //
 // Arguments:
 //   $counts: array{complete: int, incomplete: int} — swarm counts
@@ -16,6 +15,10 @@ declare(strict_types=1);
 // In compact mode, $rows must have 'compactv4' and 'compactv6' hex columns.
 // In non-compact mode, $rows must have 'ipv4', 'portv4', 'ipv6', 'portv6',
 // and 'peer_id' columns.
+//
+// The response is assembled as a plain PHP structure and handed to
+// bencode_encode(), which owns length prefixes and lexicographic key order —
+// the 'peers'/'peers6' ordering falls out of the sort automatically.
 function view_announce_bencode(
 	array $counts,
 	array $settings,
@@ -26,32 +29,36 @@ function view_announce_bencode(
 	// Helpers loaded inside the function so coverage tracks them per-call
 	// (top-of-file require_once executes once per process and may show as
 	// uncovered if another test loaded the file first).
-	require_once __DIR__.'/../functions/peer.format.bencode.php';
+	require_once __DIR__.'/../functions/bencode.encode.php';
+	require_once __DIR__.'/../functions/peer.format.dict.php';
 	require_once __DIR__.'/../functions/peers.format.compact.php';
-	// Begin response — keys in lexicographic order per bencode spec.
-	$response = 'd8:completei'.$counts['complete'].
-		'e10:incompletei'.$counts['incomplete'].
-		'e8:intervali'.$settings['announce_interval'].
-		'e12:min intervali'.$settings['min_interval'].
-		'e5:peers';
+
+	$response = array(
+		'complete'     => (int) $counts['complete'],
+		'incomplete'   => (int) $counts['incomplete'],
+		'interval'     => (int) $settings['announce_interval'],
+		'min interval' => (int) $settings['min_interval'],
+	);
 
 	if ( $compact ) {
 		// BEP 23 (IPv4, 6 bytes per peer) and BEP 7 (IPv6, 18 bytes per peer).
-		// peers_format_compact does the hex2bin assembly; we just bencode the
-		// length-prefixed binary strings here.
+		// peers_format_compact does the hex2bin assembly; the raw binary blobs
+		// are bencoded as plain byte strings.
 		$compact_peers = peers_format_compact($rows);
-		$response .= strlen($compact_peers['v4']).':'.$compact_peers['v4'];
-		$response .= '6:peers6'.strlen($compact_peers['v6']).':'.$compact_peers['v6'];
+		$response['peers']  = $compact_peers['v4'];
+		$response['peers6'] = $compact_peers['v6'];
 	} else {
-		// Non-compact mode: list of peer dictionaries.
-		// Each peer dict has 'ip', optionally 'peer id', then 'port' — the only
-		// lexicographic order BEP 3 permits.
-		$response .= 'l';
+		// Non-compact mode: 'peers' is a list of peer dictionaries. Rows with
+		// no usable address return null from peer_format_dict and are skipped.
+		$peers = array();
 		foreach ( $rows as $row ) {
-			$response .= peer_format_bencode($row, !$no_peer_id);
+			$peer = peer_format_dict($row, !$no_peer_id);
+			if ( $peer !== null ) {
+				$peers[] = $peer;
+			}
 		}
-		$response .= 'e';
+		$response['peers'] = $peers;
 	}
 
-	return $response.'e';
+	return bencode_encode($response);
 }

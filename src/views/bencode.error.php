@@ -7,5 +7,6 @@ declare(strict_types=1);
 // Returns the bencoded string but does NOT exit — caller is responsible for
 // echoing and terminating the script.
 function view_error_bencode(string $error): string {
-	return 'd14:failure reason'.strlen($error).':'.$error.'e';
+	require_once __DIR__.'/../functions/bencode.encode.php';
+	return bencode_encode(array('failure reason' => $error));
 }

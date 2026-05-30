@@ -15,16 +15,23 @@ declare(strict_types=1);
 //            - leechers: int
 //            - downloads: int
 //
+// The files dict is built as a PHP array keyed by raw binary info_hash and
+// cast to (object) so bencode_encode() emits it as a dict even when empty
+// (no torrents -> 'de', not an empty list). The encoder sorts the hashes and
+// each stats dict into the byte order BEP 15 wants.
+//
 // Returns: bencoded scrape response string.
 function view_scrape_bencode(array $scrape): string {
-	$bencode = 'd5:filesd';
+	require_once __DIR__.'/../functions/bencode.encode.php';
+
+	$files = array();
 	foreach ( $scrape as $torrent ) {
-		$bencode .= '20:'.hex2bin($torrent['info_hash']).
-			'd'.
-				'8:completei'.$torrent['seeders']  .'e'.
-				'10:downloadedi'.$torrent['downloads'].'e'.
-				'10:incompletei'.$torrent['leechers'] .'e'.
-			'e';
+		$files[hex2bin($torrent['info_hash'])] = array(
+			'complete'   => (int) $torrent['seeders'],
+			'downloaded' => (int) $torrent['downloads'],
+			'incomplete' => (int) $torrent['leechers'],
+		);
 	}
-	return $bencode.'ee';
+
+	return bencode_encode(array('files' => (object) $files));
 }

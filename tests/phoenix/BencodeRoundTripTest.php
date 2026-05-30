@@ -26,7 +26,8 @@ class BencodeRoundTripTest extends PhoenixTestCase {
 		require_once __DIR__.'/../../src/views/bencode.error.php';
 		require_once __DIR__.'/../../src/views/bencode.scrape.php';
 		require_once __DIR__.'/../../src/views/bencode.announce.php';
-		require_once __DIR__.'/../../src/functions/peer.format.bencode.php';
+		require_once __DIR__.'/../../src/functions/bencode.encode.php';
+		require_once __DIR__.'/../../src/functions/peer.format.dict.php';
 	}
 
 	////	Decoder
@@ -172,33 +173,33 @@ class BencodeRoundTripTest extends PhoenixTestCase {
 		$this->assertCount(4, $decoded['files']);
 	}
 
-	////	peer_format_bencode
+	////	peer_format_dict + bencode_encode
 
-	public function testPeerFormatBencodeShape(): void {
+	public function testPeerFormatDictShape(): void {
 		$row_v4 = ['ipv4' => '1.2.3.4', 'ipv6' => null, 'portv4' => 6881, 'portv6' => 0, 'peer_id' => str_repeat('aa', 20)];
 		$row_v6 = ['ipv4' => null, 'ipv6' => '2001:db8::1', 'portv4' => 0, 'portv6' => 6882, 'peer_id' => str_repeat('bb', 20)];
 
-		$decoded = $this->decode(peer_format_bencode($row_v4, true));
+		$decoded = $this->decode(bencode_encode(peer_format_dict($row_v4, true)));
 		$this->assertSortedKeys($decoded);
 		$this->assertSame('1.2.3.4', $decoded['ip']);
 		$this->assertSame(6881, $decoded['port']);
 		$this->assertSame(20, strlen($decoded['peer id']));
 
-		$decoded = $this->decode(peer_format_bencode($row_v4, false));
+		$decoded = $this->decode(bencode_encode(peer_format_dict($row_v4, false)));
 		$this->assertSortedKeys($decoded);
 		$this->assertArrayNotHasKey('peer id', $decoded);
 
-		$decoded = $this->decode(peer_format_bencode($row_v6, true));
+		$decoded = $this->decode(bencode_encode(peer_format_dict($row_v6, true)));
 		$this->assertSame('2001:db8::1', $decoded['ip']);
 		$this->assertSame(6882, $decoded['port']);
 	}
 
-	public function testPeerFormatBencodeReturnsEmptyWhenNoAddress(): void {
+	public function testPeerFormatDictReturnsNullWhenNoAddress(): void {
 		$row = ['ipv4' => null, 'ipv6' => null, 'portv4' => 0, 'portv6' => 0, 'peer_id' => str_repeat('00', 20)];
-		// Both branches return '' so the surrounding list doesn't pick up a
-		// stray closing 'e'.
-		$this->assertSame('', peer_format_bencode($row, true));
-		$this->assertSame('', peer_format_bencode($row, false));
+		// null rather than a dict, so the surrounding list skips the peer
+		// entirely instead of emitting an empty 'de'.
+		$this->assertNull(peer_format_dict($row, true));
+		$this->assertNull(peer_format_dict($row, false));
 	}
 
 	////	view_announce_bencode (non-compact)
