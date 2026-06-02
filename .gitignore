@@ -1,8 +1,7 @@
 *~
-*custom*
-backups/*
-normal-checks*
-.claude/settings.local.json
+*.custom.*
+*.local.*
+/backups/
 /vendor/
 /composer.lock
 /.phpunit.cache/
