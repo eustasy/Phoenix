@@ -23,7 +23,7 @@ jobs:
         php-version: ["8.3", "8.4", "8.5", "8.6"]
     services:
       mariadb:
-        image: mariadb:latest
+        image: mariadb:11.8@sha256:7974b628cbb4a37c4108d82f1e1d1123d1857ae3d94ab6fb20b8ad8580c271c8
         env:
           MARIADB_ROOT_PASSWORD: phoenix_root
           MARIADB_DATABASE: phoenix
