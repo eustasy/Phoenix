@@ -12,29 +12,31 @@ declare(strict_types=1);
 // Each returned entry has integer seeders, leechers, peers (= seeders +
 // leechers), size, downloads, and traffic (= size * downloads). intval()
 // guards against NULL from SUM() over an empty group.
-function scrape_merge_results(mysqli_result $peers, mysqli_result $torrents, array $scrape = array()): array {
-	while ( $row = mysqli_fetch_assoc($peers) ) {
-		$scrape[$row['info_hash']]['seeders']  = $row['seeders'];
-		$scrape[$row['info_hash']]['leechers'] = $row['leechers'];
-	}
-	while ( $row = mysqli_fetch_assoc($torrents) ) {
-		$scrape[$row['info_hash']]['size']      = $row['size'] ?? 0;
-		$scrape[$row['info_hash']]['downloads'] = $row['downloads'];
-	}
-	foreach ( $scrape as $hash => $entry ) {
-		$seeders   = intval($entry['seeders']   ?? 0);
-		$leechers  = intval($entry['leechers']  ?? 0);
-		$size      = intval($entry['size']      ?? 0);
-		$downloads = intval($entry['downloads'] ?? 0);
-		$scrape[$hash] = array(
-			'info_hash' => $hash,
-			'seeders'   => $seeders,
-			'leechers'  => $leechers,
-			'peers'     => $seeders + $leechers,
-			'size'      => $size,
-			'downloads' => $downloads,
-			'traffic'   => $size * $downloads,
-		);
-	}
-	return $scrape;
+function scrape_merge_results(mysqli_result $peers, mysqli_result $torrents, array $scrape = []): array
+{
+    while ($row = mysqli_fetch_assoc($peers)) {
+        $scrape[$row['info_hash']]['seeders'] = $row['seeders'];
+        $scrape[$row['info_hash']]['leechers'] = $row['leechers'];
+    }
+    while ($row = mysqli_fetch_assoc($torrents)) {
+        $scrape[$row['info_hash']]['size'] = $row['size'] ?? 0;
+        $scrape[$row['info_hash']]['downloads'] = $row['downloads'];
+    }
+    foreach ($scrape as $hash => $entry) {
+        $seeders = intval($entry['seeders'] ?? 0);
+        $leechers = intval($entry['leechers'] ?? 0);
+        $size = intval($entry['size'] ?? 0);
+        $downloads = intval($entry['downloads'] ?? 0);
+        $scrape[$hash] = [
+            'info_hash' => $hash,
+            'seeders' => $seeders,
+            'leechers' => $leechers,
+            'peers' => $seeders + $leechers,
+            'size' => $size,
+            'downloads' => $downloads,
+            'traffic' => $size * $downloads,
+        ];
+    }
+
+    return $scrape;
 }

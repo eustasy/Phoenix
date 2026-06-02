@@ -7,11 +7,13 @@ declare(strict_types=1);
 // Returns the peer row as an associative array, or false if no row matches
 // (also false on query error — same channel, callers truthy-test).
 
-function peer_select(mysqli $connection, array $settings, array $peer): array|false {
-	require_once __DIR__.'/db.fetch.once.php';
-	return db_fetch_once(
-		$connection,
-		'SELECT * FROM `'.$settings['db_prefix'].'peers` '.
-		'WHERE `info_hash`=\''.$peer['info_hash'].'\' AND `peer_id`=\''.$peer['peer_id'].'\';'
-	);
+function peer_select(mysqli $connection, array $settings, array $peer): array|false
+{
+    require_once __DIR__.'/db.fetch.once.php';
+
+    return db_fetch_once(
+        $connection,
+        'SELECT * FROM `'.$settings['db_prefix'].'peers` '.
+        'WHERE `info_hash`=\''.$peer['info_hash'].'\' AND `peer_id`=\''.$peer['peer_id'].'\';',
+    );
 }

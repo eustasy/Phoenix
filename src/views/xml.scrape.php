@@ -17,21 +17,23 @@ declare(strict_types=1);
 //            - traffic: int
 //
 // Returns: XML string.
-function view_scrape_xml(array $scrape): string {
-	// Wrapped in a <scrape> root so the document is well-formed even when
-	// $scrape contains zero or many torrents — a bare list of <torrent>
-	// siblings has no root element and isn't valid XML.
-	$xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><scrape>';
-	foreach ( $scrape as $torrent ) {
-		$xml .= '<torrent>'.
-			'<info_hash>'.$torrent['info_hash'].'</info_hash>'.
-			'<seeders>'  .$torrent['seeders']  .'</seeders>'.
-			'<leechers>' .$torrent['leechers'] .'</leechers>'.
-			'<peers>'    .$torrent['peers']    .'</peers>'.
-			'<size>'     .$torrent['size']     .'</size>'.
-			'<downloads>'.$torrent['downloads'].'</downloads>'.
-			'<traffic>'  .$torrent['traffic']  .'</traffic>'.
-		'</torrent>';
-	}
-	return $xml.'</scrape>';
+function view_scrape_xml(array $scrape): string
+{
+    // Wrapped in a <scrape> root so the document is well-formed even when
+    // $scrape contains zero or many torrents — a bare list of <torrent>
+    // siblings has no root element and isn't valid XML.
+    $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><scrape>';
+    foreach ($scrape as $torrent) {
+        $xml .= '<torrent>'.
+            '<info_hash>'.$torrent['info_hash'].'</info_hash>'.
+            '<seeders>'  .$torrent['seeders']  .'</seeders>'.
+            '<leechers>' .$torrent['leechers'] .'</leechers>'.
+            '<peers>'    .$torrent['peers']    .'</peers>'.
+            '<size>'     .$torrent['size']     .'</size>'.
+            '<downloads>'.$torrent['downloads'].'</downloads>'.
+            '<traffic>'  .$torrent['traffic']  .'</traffic>'.
+        '</torrent>';
+    }
+
+    return $xml.'</scrape>';
 }

@@ -4,79 +4,81 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-use PHPUnit\Framework\TestCase;
+class TorrentsScrapeTest extends PhoenixTestCase
+{
+    public function testQueryTorrentsWithSingleHash()
+    {
+        require_once __DIR__.'/../../src/model/torrents.scrape.php';
+        require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
 
-class TorrentsScrapeTest extends PhoenixTestCase {
+        $info_hash = str_repeat('a', 40);
 
-	public function testQueryTorrentsWithSingleHash() {
-		require_once __DIR__.'/../../src/model/torrents.scrape.php';
-		require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
+        // Insert test torrent
+        $sql = 'INSERT INTO `'.self::$settings['db_prefix'].'torrents` '.
+               '(`info_hash`, `name`, `size`, `downloads`) VALUES '.
+               "('".$info_hash."', '__TEST_a', 1000, 5);";
+        mysqli_query(self::$connection, $sql);
 
-		$info_hash = str_repeat('a', 40);
+        $where = scrape_build_where_clause([$info_hash]);
+        $result = torrents_scrape(self::$connection, self::$settings, $where);
 
-		// Insert test torrent
-		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'torrents` '.
-			   '(`info_hash`, `name`, `size`, `downloads`) VALUES '.
-			   "('".$info_hash."', '__TEST_a', 1000, 5);";
-		mysqli_query(self::$connection, $sql);
+        $this->assertNotFalse($result);
+        $row = mysqli_fetch_assoc($result);
+        $this->assertSame($info_hash, $row['info_hash']);
+        $this->assertSame('1000', $row['size']);
+        $this->assertSame('5', $row['downloads']);
+    }
 
-		$where = scrape_build_where_clause(array($info_hash));
-		$result = torrents_scrape(self::$connection, self::$settings, $where);
+    public function testQueryTorrentsWithMultipleHashes()
+    {
+        require_once __DIR__.'/../../src/model/torrents.scrape.php';
+        require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
 
-		$this->assertNotFalse($result);
-		$row = mysqli_fetch_assoc($result);
-		$this->assertSame($info_hash, $row['info_hash']);
-		$this->assertSame('1000', $row['size']);
-		$this->assertSame('5', $row['downloads']);
-	}
+        $info_hash_a = str_repeat('a', 40);
+        $info_hash_b = str_repeat('b', 40);
 
-	public function testQueryTorrentsWithMultipleHashes() {
-		require_once __DIR__.'/../../src/model/torrents.scrape.php';
-		require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
+        // Insert test torrents
+        $sql = 'INSERT INTO `'.self::$settings['db_prefix'].'torrents` '.
+               '(`info_hash`, `name`, `size`, `downloads`) VALUES '.
+               "('".$info_hash_a."', '__TEST_a', 1000, 5), ".
+               "('".$info_hash_b."', '__TEST_b', 2000, 3);";
+        mysqli_query(self::$connection, $sql);
 
-		$info_hash_a = str_repeat('a', 40);
-		$info_hash_b = str_repeat('b', 40);
+        $where = scrape_build_where_clause([$info_hash_a, $info_hash_b]);
+        $result = torrents_scrape(self::$connection, self::$settings, $where);
 
-		// Insert test torrents
-		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'torrents` '.
-			   '(`info_hash`, `name`, `size`, `downloads`) VALUES '.
-			   "('".$info_hash_a."', '__TEST_a', 1000, 5), ".
-			   "('".$info_hash_b."', '__TEST_b', 2000, 3);";
-		mysqli_query(self::$connection, $sql);
+        $this->assertNotFalse($result);
 
-		$where = scrape_build_where_clause(array($info_hash_a, $info_hash_b));
-		$result = torrents_scrape(self::$connection, self::$settings, $where);
+        $rows = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $rows[$row['info_hash']] = $row;
+        }
 
-		$this->assertNotFalse($result);
-		
-		$rows = array();
-		while ($row = mysqli_fetch_assoc($result)) {
-			$rows[$row['info_hash']] = $row;
-		}
+        $this->assertCount(2, $rows);
+        $this->assertArrayHasKey($info_hash_a, $rows);
+        $this->assertArrayHasKey($info_hash_b, $rows);
+        $this->assertSame('1000', $rows[$info_hash_a]['size']);
+        $this->assertSame('5', $rows[$info_hash_a]['downloads']);
+        $this->assertSame('2000', $rows[$info_hash_b]['size']);
+        $this->assertSame('3', $rows[$info_hash_b]['downloads']);
+    }
 
-		$this->assertCount(2, $rows);
-		$this->assertArrayHasKey($info_hash_a, $rows);
-		$this->assertArrayHasKey($info_hash_b, $rows);
-		$this->assertSame('1000', $rows[$info_hash_a]['size']);
-		$this->assertSame('5', $rows[$info_hash_a]['downloads']);
-		$this->assertSame('2000', $rows[$info_hash_b]['size']);
-		$this->assertSame('3', $rows[$info_hash_b]['downloads']);
-	}
+    public function testQueryTorrentsReturnsEmptyForUnknownHash()
+    {
+        require_once __DIR__.'/../../src/model/torrents.scrape.php';
+        require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
 
-	public function testQueryTorrentsReturnsEmptyForUnknownHash() {
-		require_once __DIR__.'/../../src/model/torrents.scrape.php';
-		require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
+        $info_hash = str_repeat('z', 40);
+        $where = scrape_build_where_clause([$info_hash]);
+        $result = torrents_scrape(self::$connection, self::$settings, $where);
 
-		$info_hash = str_repeat('z', 40);
-		$where = scrape_build_where_clause(array($info_hash));
-		$result = torrents_scrape(self::$connection, self::$settings, $where);
+        $this->assertNotFalse($result);
+        $this->assertSame(0, mysqli_num_rows($result));
+    }
 
-		$this->assertNotFalse($result);
-		$this->assertSame(0, mysqli_num_rows($result));
-	}
-
-	protected function tearDown(): void {
-		mysqli_query(self::$connection, 'DELETE FROM `'.self::$settings['db_prefix'].'torrents` WHERE `name` LIKE \'__TEST_%\'');
-	}
+    protected function tearDown(): void
+    {
+        mysqli_query(self::$connection, 'DELETE FROM `'.self::$settings['db_prefix'].'torrents` WHERE `name` LIKE \'__TEST_%\'');
+    }
 
 }

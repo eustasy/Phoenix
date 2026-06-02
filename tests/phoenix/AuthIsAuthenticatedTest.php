@@ -6,56 +6,62 @@ namespace Phoenix\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-class AuthIsAuthenticatedTest extends TestCase {
+class AuthIsAuthenticatedTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        // Ensure clean session state
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
+        $_SESSION = [];
+    }
 
-	protected function setUp(): void {
-		// Ensure clean session state
-		if (session_status() === PHP_SESSION_ACTIVE) {
-			session_destroy();
-		}
-		$_SESSION = array();
-	}
+    public function testReturnsFalseWhenNotAuthenticated()
+    {
+        require_once __DIR__.'/../../src/functions/auth.is.authenticated.php';
 
-	public function testReturnsFalseWhenNotAuthenticated() {
-		require_once __DIR__.'/../../src/functions/auth.is.authenticated.php';
+        $result = auth_is_authenticated();
 
-		$result = auth_is_authenticated();
+        $this->assertFalse($result);
+    }
 
-		$this->assertFalse($result);
-	}
+    public function testReturnsFalseWhenSessionKeyIsEmpty()
+    {
+        require_once __DIR__.'/../../src/functions/auth.is.authenticated.php';
 
-	public function testReturnsFalseWhenSessionKeyIsEmpty() {
-		require_once __DIR__.'/../../src/functions/auth.is.authenticated.php';
+        $_SESSION['phoenix_authed'] = false;
 
-		$_SESSION['phoenix_authed'] = false;
+        $result = auth_is_authenticated();
 
-		$result = auth_is_authenticated();
+        $this->assertFalse($result);
+    }
 
-		$this->assertFalse($result);
-	}
+    public function testReturnsTrueWhenAuthenticated()
+    {
+        require_once __DIR__.'/../../src/functions/auth.is.authenticated.php';
 
-	public function testReturnsTrueWhenAuthenticated() {
-		require_once __DIR__.'/../../src/functions/auth.is.authenticated.php';
+        $_SESSION['phoenix_authed'] = true;
 
-		$_SESSION['phoenix_authed'] = true;
+        $result = auth_is_authenticated();
 
-		$result = auth_is_authenticated();
+        $this->assertTrue($result);
+    }
 
-		$this->assertTrue($result);
-	}
+    public function testReturnsTrueWhenSessionKeyIsTruthy()
+    {
+        require_once __DIR__.'/../../src/functions/auth.is.authenticated.php';
 
-	public function testReturnsTrueWhenSessionKeyIsTruthy() {
-		require_once __DIR__.'/../../src/functions/auth.is.authenticated.php';
+        $_SESSION['phoenix_authed'] = 'yes';
 
-		$_SESSION['phoenix_authed'] = 'yes';
+        $result = auth_is_authenticated();
 
-		$result = auth_is_authenticated();
+        $this->assertTrue($result);
+    }
 
-		$this->assertTrue($result);
-	}
-
-	protected function tearDown(): void {
-		$_SESSION = array();
-	}
+    protected function tearDown(): void
+    {
+        $_SESSION = [];
+    }
 
 }

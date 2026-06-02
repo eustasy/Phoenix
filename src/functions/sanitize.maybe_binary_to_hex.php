@@ -9,15 +9,17 @@ declare(strict_types=1);
 // values, which are interpolated directly into single-quoted SQL strings. The
 // ctype_xdigit() check is what makes that interpolation safe — it guarantees
 // the returned value contains only [0-9a-f], which carries no SQL metacharacters.
-function maybe_binary_to_hex(string $binary): string|false {
-	$binary = urldecode($binary);
-	// BEP 3: info_hash and peer_id are 20-byte SHA-1 values, URL-encoded as raw binary.
-	// Some clients send them pre-encoded as 40-char hex strings; both forms are valid.
-	if ( strlen($binary) === 20 ) {
-		$binary = bin2hex($binary);
-	}
-	if ( strlen($binary) === 40 && ctype_xdigit($binary) ) {
-		return $binary;
-	}
-	return false;
+function maybe_binary_to_hex(string $binary): string|false
+{
+    $binary = urldecode($binary);
+    // BEP 3: info_hash and peer_id are 20-byte SHA-1 values, URL-encoded as raw binary.
+    // Some clients send them pre-encoded as 40-char hex strings; both forms are valid.
+    if (strlen($binary) === 20) {
+        $binary = bin2hex($binary);
+    }
+    if (strlen($binary) === 40 && ctype_xdigit($binary)) {
+        return $binary;
+    }
+
+    return false;
 }

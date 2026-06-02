@@ -9,25 +9,27 @@ declare(strict_types=1);
 // boot (any subsequent db_is_configured() check will reject the dummy
 // credentials). Returns the populated $settings array.
 
-function settings_load(string $default_path, string $custom_path): array {
-	$settings = array();
-	include $default_path;
+function settings_load(string $default_path, string $custom_path): array
+{
+    $settings = [];
+    include $default_path;
 
-	if ( is_readable($custom_path) ) {
-		include $custom_path;
-		return $settings;
-	}
+    if (is_readable($custom_path)) {
+        include $custom_path;
 
-	error_log(
-		'Configuration file "'.$custom_path.'" not readable.'.PHP_EOL.
-		'Falling back to defaults.'
-	);
-	$settings['db_host']      = 'localhost';
-	$settings['db_user']      = 'root';
-	$settings['db_pass']      = 'Password1';
-	$settings['db_name']      = 'phoenix';
-	$settings['db_persist']   = true;
-	$settings['open_tracker'] = true;
+        return $settings;
+    }
 
-	return $settings;
+    error_log(
+        'Configuration file "'.$custom_path.'" not readable.'.PHP_EOL.
+        'Falling back to defaults.',
+    );
+    $settings['db_host'] = 'localhost';
+    $settings['db_user'] = 'root';
+    $settings['db_pass'] = 'Password1';
+    $settings['db_name'] = 'phoenix';
+    $settings['db_persist'] = true;
+    $settings['open_tracker'] = true;
+
+    return $settings;
 }

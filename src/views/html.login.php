@@ -7,13 +7,14 @@ declare(strict_types=1);
 // Displays error message if $show_error is true.
 // Returns HTML string. Caller is responsible for echo and exit.
 
-function view_login_html($show_error = false): string {
-	$error_html = '';
-	if ( $show_error ) {
-		$error_html = '<p class="box background-pomegranate color-clouds">Incorrect password.</p>';
-	}
-	
-	return '<!DOCTYPE html>
+function view_login_html($show_error = false): string
+{
+    $error_html = '';
+    if ($show_error) {
+        $error_html = '<p class="box background-pomegranate color-clouds">Incorrect password.</p>';
+    }
+
+    return '<!DOCTYPE html>
 <html lang="en">
 <head>
 	<title>Phoenix &mdash; Login</title>

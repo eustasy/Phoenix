@@ -6,6 +6,7 @@ declare(strict_types=1);
 // Check if the current session is authenticated.
 // Returns true if authenticated, false otherwise.
 
-function auth_is_authenticated(): bool {
-	return !empty($_SESSION['phoenix_authed']);
+function auth_is_authenticated(): bool
+{
+    return ! empty($_SESSION['phoenix_authed']);
 }

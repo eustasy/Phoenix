@@ -8,11 +8,13 @@ declare(strict_types=1);
 // GROUP BY info_hash, returns seeders/leechers per torrent.
 // Used by: scrape.php (specific torrents).
 
-function peers_scrape($connection, $settings, $where_clause) {
-	$sql = 'SELECT
+function peers_scrape($connection, $settings, $where_clause)
+{
+    $sql = 'SELECT
 		`p`.`info_hash` AS `info_hash`,
 		SUM(`p`.`state`=\'1\') AS `seeders`,
 		SUM(`p`.`state`=\'0\') AS `leechers`
 	FROM `'.$settings['db_prefix'].'peers` AS `p`';
-	return mysqli_query($connection, $sql.$where_clause.' GROUP BY `info_hash`;');
+
+    return mysqli_query($connection, $sql.$where_clause.' GROUP BY `info_hash`;');
 }

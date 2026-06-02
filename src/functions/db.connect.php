@@ -11,15 +11,16 @@ declare(strict_types=1);
 // false. The @-prefix suppresses the connection warning in MYSQLI_REPORT_OFF
 // mode; the catch block handles the strict mode.
 
-function db_connect(array $settings): mysqli|false {
-	try {
-		return @mysqli_connect(
-			$settings['db_host'],
-			$settings['db_user'],
-			$settings['db_pass'],
-			$settings['db_name']
-		);
-	} catch (mysqli_sql_exception $e) {
-		return false;
-	}
+function db_connect(array $settings): mysqli|false
+{
+    try {
+        return @mysqli_connect(
+            $settings['db_host'],
+            $settings['db_user'],
+            $settings['db_pass'],
+            $settings['db_name'],
+        );
+    } catch (mysqli_sql_exception $e) {
+        return false;
+    }
 }

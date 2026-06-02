@@ -22,43 +22,46 @@ declare(strict_types=1);
 // files-dict with no torrents) cast it to (object) so it always emits as a
 // dict. Binary keys — e.g. raw 20-byte info_hashes — survive the object cast
 // intact, so a stdClass is the canonical way to carry them.
-function bencode_encode($value): string {
-	if ( is_int($value) ) {
-		return 'i'.$value.'e';
-	}
-	if ( is_bool($value) ) {
-		return 'i'.( $value ? '1' : '0' ).'e';
-	}
-	if ( is_string($value) ) {
-		return strlen($value).':'.$value;
-	}
+function bencode_encode($value): string
+{
+    if (is_int($value)) {
+        return 'i'.$value.'e';
+    }
+    if (is_bool($value)) {
+        return 'i'.($value ? '1' : '0').'e';
+    }
+    if (is_string($value)) {
+        return strlen($value).':'.$value;
+    }
 
-	////	Dictionary
-	// An object always (the explicit forced-dict form, including empty), or a
-	// non-empty array whose keys aren't a 0..n-1 sequence. Keys sort by raw
-	// byte order regardless of insertion order.
-	if ( is_object($value) || ( is_array($value) && $value !== array() && !array_is_list($value) ) ) {
-		$dict = (array) $value;
-		ksort($dict, SORT_STRING);
-		$out = 'd';
-		foreach ( $dict as $key => $item ) {
-			$key  = (string) $key;
-			$out .= strlen($key).':'.$key.bencode_encode($item);
-		}
-		return $out.'e';
-	}
+    ////	Dictionary
+    // An object always (the explicit forced-dict form, including empty), or a
+    // non-empty array whose keys aren't a 0..n-1 sequence. Keys sort by raw
+    // byte order regardless of insertion order.
+    if (is_object($value) || (is_array($value) && $value !== [] && ! array_is_list($value))) {
+        $dict = (array) $value;
+        ksort($dict, SORT_STRING);
+        $out = 'd';
+        foreach ($dict as $key => $item) {
+            $key = (string) $key;
+            $out .= strlen($key).':'.$key.bencode_encode($item);
+        }
 
-	////	List
-	// Sequential arrays, and the empty array, encode as a list.
-	if ( is_array($value) ) {
-		$out = 'l';
-		foreach ( $value as $item ) {
-			$out .= bencode_encode($item);
-		}
-		return $out.'e';
-	}
+        return $out.'e';
+    }
 
-	throw new \InvalidArgumentException(
-		'bencode_encode: unsupported type '.gettype($value)
-	);
+    ////	List
+    // Sequential arrays, and the empty array, encode as a list.
+    if (is_array($value)) {
+        $out = 'l';
+        foreach ($value as $item) {
+            $out .= bencode_encode($item);
+        }
+
+        return $out.'e';
+    }
+
+    throw new \InvalidArgumentException(
+        'bencode_encode: unsupported type '.gettype($value),
+    );
 }

@@ -4,48 +4,49 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-use PHPUnit\Framework\TestCase;
+class StatsFetchPeerCountsTest extends PhoenixTestCase
+{
+    public function testFetchPeerCounts()
+    {
+        require_once __DIR__.'/../../src/model/stats.peers.php';
 
-class StatsFetchPeerCountsTest extends PhoenixTestCase {
+        // Insert test peers
+        $info_hash_a = str_repeat('a', 40);
+        $info_hash_b = str_repeat('b', 40);
+        $peer_id_1 = str_repeat('1', 40);
+        $peer_id_2 = str_repeat('2', 40);
+        $peer_id_3 = str_repeat('3', 40);
 
-	public function testFetchPeerCounts() {
-		require_once __DIR__.'/../../src/model/stats.peers.php';
+        $sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
+               '(`info_hash`, `peer_id`, `state`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `updated`) VALUES '.
+               "('".$info_hash_a."', '".$peer_id_1."', '1', '', 'fc00::1', '', '', 0, 6881, ".self::$time.'), '.
+               "('".$info_hash_a."', '".$peer_id_2."', '0', '', 'fc00::2', '', '', 0, 6881, ".self::$time.'), '.
+               "('".$info_hash_b."', '".$peer_id_3."', '1', '', 'fc00::3', '', '', 0, 6881, ".self::$time.');';
+        mysqli_query(self::$connection, $sql);
 
-		// Insert test peers
-		$info_hash_a = str_repeat('a', 40);
-		$info_hash_b = str_repeat('b', 40);
-		$peer_id_1 = str_repeat('1', 40);
-		$peer_id_2 = str_repeat('2', 40);
-		$peer_id_3 = str_repeat('3', 40);
+        $result = stats_fetch_peer_counts(self::$connection, self::$settings);
 
-		$sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
-			   '(`info_hash`, `peer_id`, `state`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `updated`) VALUES '.
-			   "('".$info_hash_a."', '".$peer_id_1."', '1', '', 'fc00::1', '', '', 0, 6881, ".self::$time."), ".
-			   "('".$info_hash_a."', '".$peer_id_2."', '0', '', 'fc00::2', '', '', 0, 6881, ".self::$time."), ".
-			   "('".$info_hash_b."', '".$peer_id_3."', '1', '', 'fc00::3', '', '', 0, 6881, ".self::$time.");";
-		mysqli_query(self::$connection, $sql);
+        $this->assertIsArray($result);
+        $this->assertEquals('2', $result['seeders']);
+        $this->assertEquals('1', $result['leechers']);
+        $this->assertEquals('2', $result['torrents']);
+    }
 
-		$result = stats_fetch_peer_counts(self::$connection, self::$settings);
+    public function testFetchPeerCountsEmpty()
+    {
+        require_once __DIR__.'/../../src/model/stats.peers.php';
 
-		$this->assertIsArray($result);
-		$this->assertEquals('2', $result['seeders']);
-		$this->assertEquals('1', $result['leechers']);
-		$this->assertEquals('2', $result['torrents']);
-	}
+        $result = stats_fetch_peer_counts(self::$connection, self::$settings);
 
-	public function testFetchPeerCountsEmpty() {
-		require_once __DIR__.'/../../src/model/stats.peers.php';
+        $this->assertIsArray($result);
+        $this->assertEquals('0', $result['seeders']);
+        $this->assertEquals('0', $result['leechers']);
+        $this->assertEquals('0', $result['torrents']);
+    }
 
-		$result = stats_fetch_peer_counts(self::$connection, self::$settings);
-
-		$this->assertIsArray($result);
-		$this->assertEquals('0', $result['seeders']);
-		$this->assertEquals('0', $result['leechers']);
-		$this->assertEquals('0', $result['torrents']);
-	}
-
-	protected function tearDown(): void {
-		mysqli_query(self::$connection, 'DELETE FROM `'.self::$settings['db_prefix'].'peers` WHERE `peer_id` LIKE \'__TEST_%\' OR `peer_id` REGEXP \'^[0-9]+$\'');
-	}
+    protected function tearDown(): void
+    {
+        mysqli_query(self::$connection, 'DELETE FROM `'.self::$settings['db_prefix'].'peers` WHERE `peer_id` LIKE \'__TEST_%\' OR `peer_id` REGEXP \'^[0-9]+$\'');
+    }
 
 }

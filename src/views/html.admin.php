@@ -19,77 +19,78 @@ declare(strict_types=1);
 //                 class_exists('mysqli')). Override only used by tests so
 //                 the missing-extension branch can be exercised.
 
-function view_admin_html($settings, $tables_installed, $database_size, $message = false, $show_installed = false, $php_version = null, $has_mysqli = null): string {
-	// Composer enforces ^8.2 and ext-mysqli, but the project supports manual
-	// installs that bypass composer, so the runtime checks below stay in
-	// place; tests pass overrides to reach the failure branches.
-	$php_version = $php_version ?? PHP_VERSION;
-	$has_mysqli = $has_mysqli ?? class_exists('mysqli');
+function view_admin_html($settings, $tables_installed, $database_size, $message = false, $show_installed = false, $php_version = null, $has_mysqli = null): string
+{
+    // Composer enforces ^8.2 and ext-mysqli, but the project supports manual
+    // installs that bypass composer, so the runtime checks below stay in
+    // place; tests pass overrides to reach the failure branches.
+    $php_version ??= PHP_VERSION;
+    $has_mysqli ??= class_exists('mysqli');
 
-	// Build logout form. POST-only so a cross-site GET (e.g. an <img> tag)
-	// cannot end an admin session.
-	$logout_html = '';
-	if ( !empty($settings['admin_password']) ) {
-		$logout_html = '<form method="POST" class="text-right" style="display:inline">'.
-			'<input type="hidden" name="logout" value="1">'.
-			'<button type="submit" class="link-button" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline">Log out</button>'.
-			'</form>';
-	}
+    // Build logout form. POST-only so a cross-site GET (e.g. an <img> tag)
+    // cannot end an admin session.
+    $logout_html = '';
+    if (! empty($settings['admin_password'])) {
+        $logout_html = '<form method="POST" class="text-right" style="display:inline">'.
+            '<input type="hidden" name="logout" value="1">'.
+            '<button type="submit" class="link-button" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline">Log out</button>'.
+            '</form>';
+    }
 
-	// Build installation complete message
-	$installed_html = '';
-	if ( $show_installed ) {
-		$installed_html = '<p class="box background-green-sea color-clouds">Installation complete.</p>';
-	}
+    // Build installation complete message
+    $installed_html = '';
+    if ($show_installed) {
+        $installed_html = '<p class="box background-green-sea color-clouds">Installation complete.</p>';
+    }
 
-	// PHP version check
-	if ( version_compare($php_version, '8.2.0', '>=') ) {
-		$php_compat_html = '<p class="box background-green-sea color-clouds">Your PHP version is supported.</p>
+    // PHP version check
+    if (version_compare($php_version, '8.2.0', '>=')) {
+        $php_compat_html = '<p class="box background-green-sea color-clouds">Your PHP version is supported.</p>
 		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
-	} else {
-		$php_compat_html = '<p class="box background-pomegranate color-clouds">Phoenix requires PHP &gt;= 8.2.</p>
+    } else {
+        $php_compat_html = '<p class="box background-pomegranate color-clouds">Phoenix requires PHP &gt;= 8.2.</p>
 		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
-	}
+    }
 
-	// MySQL support check
-	$mysql_html = '';
-	if ( !$has_mysqli ) {
-		$mysql_html = '<p class="box background-pomegranate color-clouds">Your server does not support MySQL.</p>';
-	} else {
-		// mysqli_get_client_info typically returns "mysqlnd 8.x.y-…", but a
-		// build without a '-' suffix is valid; strpos() returns false there
-		// and substr() under strict_types refuses a false length.
-		$mysql_version = mysqli_get_client_info();
-		$dash = strpos($mysql_version, '-');
-		$mysql_version = trim(
-			$dash !== false ? substr($mysql_version, 0, $dash) : $mysql_version,
-			'mysqlnd '
-		);
-		$mysql_html = '<p class="box background-green-sea color-clouds">Your server supports MySQL.</p>
+    // MySQL support check
+    $mysql_html = '';
+    if (! $has_mysqli) {
+        $mysql_html = '<p class="box background-pomegranate color-clouds">Your server does not support MySQL.</p>';
+    } else {
+        // mysqli_get_client_info typically returns "mysqlnd 8.x.y-…", but a
+        // build without a '-' suffix is valid; strpos() returns false there
+        // and substr() under strict_types refuses a false length.
+        $mysql_version = mysqli_get_client_info();
+        $dash = strpos($mysql_version, '-');
+        $mysql_version = trim(
+            $dash !== false ? substr($mysql_version, 0, $dash) : $mysql_version,
+            'mysqlnd ',
+        );
+        $mysql_html = '<p class="box background-green-sea color-clouds">Your server supports MySQL.</p>
 		<p class="color-asbestos">MySQL Version: '.$mysql_version.'</p>';
 
-		// Tables status
-		if ( $tables_installed ) {
-			$mysql_html .= '<p class="box background-green-sea color-clouds">All your tables are installed.';
-			if ( $database_size ) {
-				$mysql_html .= ' Their current size is '.number_format((float) $database_size['Total']).' bytes.';
-			}
-			$mysql_html .= '</p>';
-		} else {
-			$mysql_html .= '<p class="box background-pomegranate color-clouds">Some or all of your tables are not installed.</p>';
-		}
+        // Tables status
+        if ($tables_installed) {
+            $mysql_html .= '<p class="box background-green-sea color-clouds">All your tables are installed.';
+            if ($database_size) {
+                $mysql_html .= ' Their current size is '.number_format((float) $database_size['Total']).' bytes.';
+            }
+            $mysql_html .= '</p>';
+        } else {
+            $mysql_html .= '<p class="box background-pomegranate color-clouds">Some or all of your tables are not installed.</p>';
+        }
 
-		// Utilities section
-		$mysql_html .= '<br><h1>Utilities</h1>';
+        // Utilities section
+        $mysql_html .= '<br><h1>Utilities</h1>';
 
-		// Message
-		if ( $message ) {
-			$mysql_html .= '<div class="box background-wisteria color-clouds"><h3>'.htmlspecialchars($message).'</h3></div>';
-		}
+        // Message
+        if ($message) {
+            $mysql_html .= '<div class="box background-wisteria color-clouds"><h3>'.htmlspecialchars($message).'</h3></div>';
+        }
 
-		// Setup/Reset form
-		if ( $settings['db_reset'] || !$tables_installed ) {
-			$mysql_html .= '<form class="mysql" action="" method="POST">
+        // Setup/Reset form
+        if ($settings['db_reset'] || ! $tables_installed) {
+            $mysql_html .= '<form class="mysql" action="" method="POST">
 				<p class="box background-pomegranate color-clouds">You should set
 				<code>$settings[\'db_reset\']</code>
 				to false to disable resets,<br>
@@ -99,30 +100,30 @@ function view_admin_html($settings, $tables_installed, $database_size, $message 
 				<input class="button background-belize-hole color-clouds float-right" type="submit" name="submit" value="Setup">
 				<div class="clear"></div>
 			</form>';
-		} else {
-			$mysql_html .= '<p class="text-left color-asbestos">Install, Upgrade, and Reset
+        } else {
+            $mysql_html .= '<p class="text-left color-asbestos">Install, Upgrade, and Reset
 				<span class="button background-clouds float-right">Disabled</span></p>
 				<div class="clear"></div>';
-		}
+        }
 
-		// Clean and Optimize forms (only if tables are installed)
-		if ( $tables_installed ) {
-			$mysql_html .= '<form class="mysql" action="" method="POST">
+        // Clean and Optimize forms (only if tables are installed)
+        if ($tables_installed) {
+            $mysql_html .= '<form class="mysql" action="" method="POST">
 					<p class="float-left text-left">Clean out redundant peers</p>
 					<input type="hidden" name="process" value="clean">
 					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Clean">
 					<div class="clear"></div>
 				</form>';
-			$mysql_html .= '<form class="mysql" action="" method="POST">
+            $mysql_html .= '<form class="mysql" action="" method="POST">
 					<p class="float-left text-left">Check, Analyze, Repair, and Optimize</p>
 					<input type="hidden" name="process" value="optimize">
 					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Optimize">
 					<div class="clear"></div>
 				</form>';
-		}
-	}
-	
-	return '<!DOCTYPE html>
+        }
+    }
+
+    return '<!DOCTYPE html>
 <html lang="en">
 <head>
 	<title>Phoenix Diagnostics and Utilities</title>

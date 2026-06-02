@@ -10,9 +10,9 @@ $peer = sanitize_tracker_params();
 
 ////	Stats Mode
 if (isset($_GET['stats'])) {
-	require_once __DIR__.'/../src/controller/scrape.stats.php';
-	echo scrape_stats_controller($connection, $settings);
-	exit;
+    require_once __DIR__.'/../src/controller/scrape.stats.php';
+    echo scrape_stats_controller($connection, $settings);
+    exit;
 }
 
 // Drop any info_hashes that failed sanitization (maybe_binary_to_hex returns
@@ -26,24 +26,24 @@ $valid_info_hashes = array_values(array_filter($peer['info_hashes']));
 // after filtering we error out rather than falling through to the
 // full-scrape branch — that would leak every tracked torrent to a user
 // who wasn't allowed to see any of the specific ones they requested.
-if (!empty($valid_info_hashes)) {
-	if (!$settings['open_tracker']) {
-		require_once __DIR__.'/../src/functions/tracker.filter.info.hashes.php';
-		$valid_info_hashes = tracker_filter_info_hashes($valid_info_hashes, $allowed_torrents);
-		if (empty($valid_info_hashes)) {
-			tracker_error('Torrent is not allowed.');
-		}
-	}
-	require_once __DIR__.'/../src/controller/scrape.specific.php';
-	echo scrape_specific_controller($connection, $settings, $valid_info_hashes);
-	exit;
+if (! empty($valid_info_hashes)) {
+    if (! $settings['open_tracker']) {
+        require_once __DIR__.'/../src/functions/tracker.filter.info.hashes.php';
+        $valid_info_hashes = tracker_filter_info_hashes($valid_info_hashes, $allowed_torrents);
+        if (empty($valid_info_hashes)) {
+            tracker_error('Torrent is not allowed.');
+        }
+    }
+    require_once __DIR__.'/../src/controller/scrape.specific.php';
+    echo scrape_specific_controller($connection, $settings, $valid_info_hashes);
+    exit;
 }
 
 ////	Full Scrape Mode
 if ($settings['full_scrape']) {
-	require_once __DIR__.'/../src/controller/scrape.full.php';
-	echo scrape_full_controller($connection, $settings);
-	exit;
+    require_once __DIR__.'/../src/controller/scrape.full.php';
+    echo scrape_full_controller($connection, $settings);
+    exit;
 }
 
 ////	Not Allowed

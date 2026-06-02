@@ -17,14 +17,15 @@ declare(strict_types=1);
 //   $settings: config array (needs phoenix_version)
 //
 // Returns: XML string.
-function view_stats_xml(array $stats, array $settings): string {
-	return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
-		'<tracker version="$Id: '.$settings['phoenix_version'].' $">'.
-		'<peers>'.$stats['peers'].'</peers>'.
-		'<seeders>'.$stats['seeders'].'</seeders>'.
-		'<leechers>'.$stats['leechers'].'</leechers>'.
-		'<torrents>'.$stats['torrents'].'</torrents>'.
-		'<downloads>'.$stats['downloads'].'</downloads>'.
-		'<traffic>'.$stats['traffic'].'</traffic>'.
-		'</tracker>';
+function view_stats_xml(array $stats, array $settings): string
+{
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
+        '<tracker version="$Id: '.$settings['phoenix_version'].' $">'.
+        '<peers>'.$stats['peers'].'</peers>'.
+        '<seeders>'.$stats['seeders'].'</seeders>'.
+        '<leechers>'.$stats['leechers'].'</leechers>'.
+        '<torrents>'.$stats['torrents'].'</torrents>'.
+        '<downloads>'.$stats['downloads'].'</downloads>'.
+        '<traffic>'.$stats['traffic'].'</traffic>'.
+        '</tracker>';
 }

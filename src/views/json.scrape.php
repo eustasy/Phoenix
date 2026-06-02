@@ -9,18 +9,20 @@ declare(strict_types=1);
 //	       info_hash, seeders, leechers, peers, size, downloads, traffic.
 //	Output: JSON string with torrents indexed by info_hash.
 
-function view_scrape_json($scrape) {
-	$json = array();
-	foreach ($scrape as $torrent) {
-		$json[$torrent['info_hash']] = array(
-			'info_hash' => $torrent['info_hash'],
-			'seeders'   => $torrent['seeders'],
-			'leechers'  => $torrent['leechers'],
-			'peers'     => $torrent['peers'],
-			'size'      => $torrent['size'],
-			'downloads' => $torrent['downloads'],
-			'traffic'   => $torrent['traffic'],
-		);
-	}
-	return json_encode($json);
+function view_scrape_json($scrape)
+{
+    $json = [];
+    foreach ($scrape as $torrent) {
+        $json[$torrent['info_hash']] = [
+            'info_hash' => $torrent['info_hash'],
+            'seeders' => $torrent['seeders'],
+            'leechers' => $torrent['leechers'],
+            'peers' => $torrent['peers'],
+            'size' => $torrent['size'],
+            'downloads' => $torrent['downloads'],
+            'traffic' => $torrent['traffic'],
+        ];
+    }
+
+    return json_encode($json);
 }

@@ -21,17 +21,18 @@ declare(strict_types=1);
 // each stats dict into the byte order BEP 15 wants.
 //
 // Returns: bencoded scrape response string.
-function view_scrape_bencode(array $scrape): string {
-	require_once __DIR__.'/../functions/bencode.encode.php';
+function view_scrape_bencode(array $scrape): string
+{
+    require_once __DIR__.'/../functions/bencode.encode.php';
 
-	$files = array();
-	foreach ( $scrape as $torrent ) {
-		$files[hex2bin($torrent['info_hash'])] = array(
-			'complete'   => (int) $torrent['seeders'],
-			'downloaded' => (int) $torrent['downloads'],
-			'incomplete' => (int) $torrent['leechers'],
-		);
-	}
+    $files = [];
+    foreach ($scrape as $torrent) {
+        $files[hex2bin($torrent['info_hash'])] = [
+            'complete' => (int) $torrent['seeders'],
+            'downloaded' => (int) $torrent['downloads'],
+            'incomplete' => (int) $torrent['leechers'],
+        ];
+    }
 
-	return bencode_encode(array('files' => (object) $files));
+    return bencode_encode(['files' => (object) $files]);
 }

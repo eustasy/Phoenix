@@ -19,231 +19,249 @@ use RuntimeException;
  * unterminated containers, and non-string dict keys, and assertSortedKeys()
  * walks the decoded tree to verify dict keys are in raw-byte sorted order.
  */
-class BencodeRoundTripTest extends PhoenixTestCase {
+class BencodeRoundTripTest extends PhoenixTestCase
+{
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+        require_once __DIR__.'/../../src/views/bencode.error.php';
+        require_once __DIR__.'/../../src/views/bencode.scrape.php';
+        require_once __DIR__.'/../../src/views/bencode.announce.php';
+        require_once __DIR__.'/../../src/functions/bencode.encode.php';
+        require_once __DIR__.'/../../src/functions/peer.format.dict.php';
+    }
 
-	public static function setUpBeforeClass(): void {
-		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/views/bencode.error.php';
-		require_once __DIR__.'/../../src/views/bencode.scrape.php';
-		require_once __DIR__.'/../../src/views/bencode.announce.php';
-		require_once __DIR__.'/../../src/functions/bencode.encode.php';
-		require_once __DIR__.'/../../src/functions/peer.format.dict.php';
-	}
+    ////	Decoder
 
-	////	Decoder
+    /**
+     * Decode one bencode value starting at $i.
+     * @return array{0: mixed, 1: int} [value, next_offset]
+     */
+    private static function bdecode(string $s, int $i): array
+    {
+        if ($i >= strlen($s)) {
+            throw new RuntimeException("unexpected EOF at $i");
+        }
+        $c = $s[$i];
 
-	/**
-	 * Decode one bencode value starting at $i.
-	 * @return array{0: mixed, 1: int} [value, next_offset]
-	 */
-	private static function bdecode(string $s, int $i): array {
-		if ($i >= strlen($s)) {
-			throw new RuntimeException("unexpected EOF at $i");
-		}
-		$c = $s[$i];
+        if ($c === 'i') {
+            $end = strpos($s, 'e', $i + 1);
+            if ($end === false) {
+                throw new RuntimeException("unterminated int at $i");
+            }
+            $num = substr($s, $i + 1, $end - $i - 1);
+            if (! preg_match('/^-?\d+$/', $num)) {
+                throw new RuntimeException("malformed int '$num' at $i");
+            }
 
-		if ($c === 'i') {
-			$end = strpos($s, 'e', $i + 1);
-			if ($end === false) {
-				throw new RuntimeException("unterminated int at $i");
-			}
-			$num = substr($s, $i + 1, $end - $i - 1);
-			if (!preg_match('/^-?\d+$/', $num)) {
-				throw new RuntimeException("malformed int '$num' at $i");
-			}
-			return [(int) $num, $end + 1];
-		}
+            return [(int) $num, $end + 1];
+        }
 
-		if ($c === 'l') {
-			$out = [];
-			$i++;
-			while ($i < strlen($s) && $s[$i] !== 'e') {
-				[$v, $i] = self::bdecode($s, $i);
-				$out[] = $v;
-			}
-			if ($i >= strlen($s)) {
-				throw new RuntimeException('unterminated list');
-			}
-			return [$out, $i + 1];
-		}
+        if ($c === 'l') {
+            $out = [];
+            $i++;
+            while ($i < strlen($s) && $s[$i] !== 'e') {
+                [$v, $i] = self::bdecode($s, $i);
+                $out[] = $v;
+            }
+            if ($i >= strlen($s)) {
+                throw new RuntimeException('unterminated list');
+            }
 
-		if ($c === 'd') {
-			$out = [];
-			$keys = [];
-			$i++;
-			while ($i < strlen($s) && $s[$i] !== 'e') {
-				[$k, $i] = self::bdecode($s, $i);
-				if (!is_string($k)) {
-					throw new RuntimeException("non-string dict key at $i");
-				}
-				[$v, $i] = self::bdecode($s, $i);
-				$out[$k] = $v;
-				$keys[] = $k;
-			}
-			if ($i >= strlen($s)) {
-				throw new RuntimeException('unterminated dict');
-			}
-			$out['__keys__'] = $keys;
-			return [$out, $i + 1];
-		}
+            return [$out, $i + 1];
+        }
 
-		if (ctype_digit($c)) {
-			$colon = strpos($s, ':', $i);
-			if ($colon === false) {
-				throw new RuntimeException("string missing colon at $i");
-			}
-			$len = (int) substr($s, $i, $colon - $i);
-			$start = $colon + 1;
-			if ($start + $len > strlen($s)) {
-				throw new RuntimeException("string overruns at $i");
-			}
-			return [substr($s, $start, $len), $start + $len];
-		}
+        if ($c === 'd') {
+            $out = [];
+            $keys = [];
+            $i++;
+            while ($i < strlen($s) && $s[$i] !== 'e') {
+                [$k, $i] = self::bdecode($s, $i);
+                if (! is_string($k)) {
+                    throw new RuntimeException("non-string dict key at $i");
+                }
+                [$v, $i] = self::bdecode($s, $i);
+                $out[$k] = $v;
+                $keys[] = $k;
+            }
+            if ($i >= strlen($s)) {
+                throw new RuntimeException('unterminated dict');
+            }
+            $out['__keys__'] = $keys;
 
-		throw new RuntimeException('unexpected byte 0x'.bin2hex($c)." at $i");
-	}
+            return [$out, $i + 1];
+        }
 
-	/** Decode and assert no trailing bytes. */
-	private function decode(string $s) {
-		[$v, $end] = self::bdecode($s, 0);
-		if ($end !== strlen($s)) {
-			$this->fail((strlen($s) - $end).' trailing byte(s) after decode: '.bin2hex(substr($s, $end, 16)));
-		}
-		return $v;
-	}
+        if (ctype_digit($c)) {
+            $colon = strpos($s, ':', $i);
+            if ($colon === false) {
+                throw new RuntimeException("string missing colon at $i");
+            }
+            $len = (int) substr($s, $i, $colon - $i);
+            $start = $colon + 1;
+            if ($start + $len > strlen($s)) {
+                throw new RuntimeException("string overruns at $i");
+            }
 
-	/** Recursively assert every dict's keys are in raw-byte sorted order. */
-	private function assertSortedKeys($value, string $where = 'root'): void {
-		if (is_array($value) && isset($value['__keys__'])) {
-			$keys = $value['__keys__'];
-			$sorted = $keys;
-			sort($sorted, SORT_STRING);
-			$this->assertSame($sorted, $keys, "dict at $where has out-of-order keys");
-			foreach ($value as $k => $v) {
-				if ($k === '__keys__') continue;
-				$this->assertSortedKeys($v, $where.'/'.$k);
-			}
-		} elseif (is_array($value)) {
-			foreach ($value as $i => $v) {
-				$this->assertSortedKeys($v, $where.'['.$i.']');
-			}
-		}
-	}
+            return [substr($s, $start, $len), $start + $len];
+        }
 
-	////	view_error_bencode
+        throw new RuntimeException('unexpected byte 0x'.bin2hex($c)." at $i");
+    }
 
-	public function testErrorBencode(): void {
-		foreach (['short message', '', 'héllo with utf-8'] as $msg) {
-			$out = view_error_bencode($msg);
-			$decoded = $this->decode($out);
-			$this->assertSame($msg, $decoded['failure reason']);
-			$this->assertSortedKeys($decoded);
-		}
-	}
+    /** Decode and assert no trailing bytes. */
+    private function decode(string $s)
+    {
+        [$v, $end] = self::bdecode($s, 0);
+        if ($end !== strlen($s)) {
+            $this->fail((strlen($s) - $end).' trailing byte(s) after decode: '.bin2hex(substr($s, $end, 16)));
+        }
 
-	////	view_scrape_bencode
+        return $v;
+    }
 
-	public function testScrapeBencodeEmpty(): void {
-		$decoded = $this->decode(view_scrape_bencode([]));
-		$this->assertArrayHasKey('files', $decoded);
-		$this->assertSame(['__keys__' => []], $decoded['files']);
-	}
+    /** Recursively assert every dict's keys are in raw-byte sorted order. */
+    private function assertSortedKeys($value, string $where = 'root'): void
+    {
+        if (is_array($value) && isset($value['__keys__'])) {
+            $keys = $value['__keys__'];
+            $sorted = $keys;
+            sort($sorted, SORT_STRING);
+            $this->assertSame($sorted, $keys, "dict at $where has out-of-order keys");
+            foreach ($value as $k => $v) {
+                if ($k === '__keys__') {
+                    continue;
+                }
+                $this->assertSortedKeys($v, $where.'/'.$k);
+            }
+        } elseif (is_array($value)) {
+            foreach ($value as $i => $v) {
+                $this->assertSortedKeys($v, $where.'['.$i.']');
+            }
+        }
+    }
 
-	public function testScrapeBencodeSingleAndMulti(): void {
-		$entries = [
-			str_repeat('a', 40) => ['info_hash' => str_repeat('a', 40), 'seeders' => 2, 'leechers' => 1, 'downloads' => 7],
-			str_repeat('b', 40) => ['info_hash' => str_repeat('b', 40), 'seeders' => 0, 'leechers' => 5, 'downloads' => 0],
-			str_repeat('c', 40) => ['info_hash' => str_repeat('c', 40), 'seeders' => 99, 'leechers' => 99, 'downloads' => 999],
-		];
+    ////	view_error_bencode
 
-		// Single-entry case.
-		$decoded = $this->decode(view_scrape_bencode([array_key_first($entries) => reset($entries)]));
-		$this->assertSortedKeys($decoded);
-		$key = hex2bin(str_repeat('a', 40));
-		$this->assertArrayHasKey($key, $decoded['files']);
-		$entry = $decoded['files'][$key];
-		$this->assertSame(2, $entry['complete']);
-		$this->assertSame(7, $entry['downloaded']);
-		$this->assertSame(1, $entry['incomplete']);
+    public function testErrorBencode(): void
+    {
+        foreach (['short message', '', 'héllo with utf-8'] as $msg) {
+            $out = view_error_bencode($msg);
+            $decoded = $this->decode($out);
+            $this->assertSame($msg, $decoded['failure reason']);
+            $this->assertSortedKeys($decoded);
+        }
+    }
 
-		// Multi-entry case.
-		$decoded = $this->decode(view_scrape_bencode($entries));
-		$this->assertSortedKeys($decoded);
-		// Three entries plus the recorded __keys__ helper.
-		$this->assertCount(4, $decoded['files']);
-	}
+    ////	view_scrape_bencode
 
-	////	peer_format_dict + bencode_encode
+    public function testScrapeBencodeEmpty(): void
+    {
+        $decoded = $this->decode(view_scrape_bencode([]));
+        $this->assertArrayHasKey('files', $decoded);
+        $this->assertSame(['__keys__' => []], $decoded['files']);
+    }
 
-	public function testPeerFormatDictShape(): void {
-		$row_v4 = ['ipv4' => '1.2.3.4', 'ipv6' => null, 'portv4' => 6881, 'portv6' => 0, 'peer_id' => str_repeat('aa', 20)];
-		$row_v6 = ['ipv4' => null, 'ipv6' => '2001:db8::1', 'portv4' => 0, 'portv6' => 6882, 'peer_id' => str_repeat('bb', 20)];
+    public function testScrapeBencodeSingleAndMulti(): void
+    {
+        $entries = [
+            str_repeat('a', 40) => ['info_hash' => str_repeat('a', 40), 'seeders' => 2, 'leechers' => 1, 'downloads' => 7],
+            str_repeat('b', 40) => ['info_hash' => str_repeat('b', 40), 'seeders' => 0, 'leechers' => 5, 'downloads' => 0],
+            str_repeat('c', 40) => ['info_hash' => str_repeat('c', 40), 'seeders' => 99, 'leechers' => 99, 'downloads' => 999],
+        ];
 
-		$decoded = $this->decode(bencode_encode(peer_format_dict($row_v4, true)));
-		$this->assertSortedKeys($decoded);
-		$this->assertSame('1.2.3.4', $decoded['ip']);
-		$this->assertSame(6881, $decoded['port']);
-		$this->assertSame(20, strlen($decoded['peer id']));
+        // Single-entry case.
+        $decoded = $this->decode(view_scrape_bencode([array_key_first($entries) => reset($entries)]));
+        $this->assertSortedKeys($decoded);
+        $key = hex2bin(str_repeat('a', 40));
+        $this->assertArrayHasKey($key, $decoded['files']);
+        $entry = $decoded['files'][$key];
+        $this->assertSame(2, $entry['complete']);
+        $this->assertSame(7, $entry['downloaded']);
+        $this->assertSame(1, $entry['incomplete']);
 
-		$decoded = $this->decode(bencode_encode(peer_format_dict($row_v4, false)));
-		$this->assertSortedKeys($decoded);
-		$this->assertArrayNotHasKey('peer id', $decoded);
+        // Multi-entry case.
+        $decoded = $this->decode(view_scrape_bencode($entries));
+        $this->assertSortedKeys($decoded);
+        // Three entries plus the recorded __keys__ helper.
+        $this->assertCount(4, $decoded['files']);
+    }
 
-		$decoded = $this->decode(bencode_encode(peer_format_dict($row_v6, true)));
-		$this->assertSame('2001:db8::1', $decoded['ip']);
-		$this->assertSame(6882, $decoded['port']);
-	}
+    ////	peer_format_dict + bencode_encode
 
-	public function testPeerFormatDictReturnsNullWhenNoAddress(): void {
-		$row = ['ipv4' => null, 'ipv6' => null, 'portv4' => 0, 'portv6' => 0, 'peer_id' => str_repeat('00', 20)];
-		// null rather than a dict, so the surrounding list skips the peer
-		// entirely instead of emitting an empty 'de'.
-		$this->assertNull(peer_format_dict($row, true));
-		$this->assertNull(peer_format_dict($row, false));
-	}
+    public function testPeerFormatDictShape(): void
+    {
+        $row_v4 = ['ipv4' => '1.2.3.4', 'ipv6' => null, 'portv4' => 6881, 'portv6' => 0, 'peer_id' => str_repeat('aa', 20)];
+        $row_v6 = ['ipv4' => null, 'ipv6' => '2001:db8::1', 'portv4' => 0, 'portv6' => 6882, 'peer_id' => str_repeat('bb', 20)];
 
-	////	view_announce_bencode (non-compact)
+        $decoded = $this->decode(bencode_encode(peer_format_dict($row_v4, true)));
+        $this->assertSortedKeys($decoded);
+        $this->assertSame('1.2.3.4', $decoded['ip']);
+        $this->assertSame(6881, $decoded['port']);
+        $this->assertSame(20, strlen($decoded['peer id']));
 
-	public function testAnnounceBencodeNonCompact(): void {
-		$counts = ['complete' => 5, 'incomplete' => 3];
-		$cfg    = ['announce_interval' => 1800, 'min_interval' => 900];
-		$row_v4 = ['ipv4' => '1.2.3.4', 'ipv6' => null, 'portv4' => 6881, 'portv6' => 0, 'peer_id' => str_repeat('aa', 20)];
-		$row_v6 = ['ipv4' => null, 'ipv6' => '2001:db8::1', 'portv4' => 0, 'portv6' => 6882, 'peer_id' => str_repeat('bb', 20)];
-		$row_no = ['ipv4' => null, 'ipv6' => null, 'portv4' => 0, 'portv6' => 0, 'peer_id' => str_repeat('00', 20)];
+        $decoded = $this->decode(bencode_encode(peer_format_dict($row_v4, false)));
+        $this->assertSortedKeys($decoded);
+        $this->assertArrayNotHasKey('peer id', $decoded);
 
-		// Empty peer list — must produce 'le' inside the response, not a stray 'e'.
-		$decoded = $this->decode(view_announce_bencode($counts, $cfg, [], false, false));
-		$this->assertSortedKeys($decoded);
-		$this->assertSame([], array_filter($decoded['peers'], fn ($k) => $k !== '__keys__', ARRAY_FILTER_USE_KEY));
+        $decoded = $this->decode(bencode_encode(peer_format_dict($row_v6, true)));
+        $this->assertSame('2001:db8::1', $decoded['ip']);
+        $this->assertSame(6882, $decoded['port']);
+    }
 
-		// Address-less rows are skipped, not emitted as broken dicts.
-		$decoded = $this->decode(view_announce_bencode($counts, $cfg, [$row_v4, $row_v6, $row_no], false, false));
-		$this->assertSortedKeys($decoded);
-		$this->assertCount(2, $decoded['peers']);
+    public function testPeerFormatDictReturnsNullWhenNoAddress(): void
+    {
+        $row = ['ipv4' => null, 'ipv6' => null, 'portv4' => 0, 'portv6' => 0, 'peer_id' => str_repeat('00', 20)];
+        // null rather than a dict, so the surrounding list skips the peer
+        // entirely instead of emitting an empty 'de'.
+        $this->assertNull(peer_format_dict($row, true));
+        $this->assertNull(peer_format_dict($row, false));
+    }
 
-		// no_peer_id flag honored.
-		$decoded = $this->decode(view_announce_bencode($counts, $cfg, [$row_v4], false, true));
-		$this->assertArrayNotHasKey('peer id', $decoded['peers'][0]);
-	}
+    ////	view_announce_bencode (non-compact)
 
-	////	view_announce_bencode (compact)
+    public function testAnnounceBencodeNonCompact(): void
+    {
+        $counts = ['complete' => 5, 'incomplete' => 3];
+        $cfg = ['announce_interval' => 1800, 'min_interval' => 900];
+        $row_v4 = ['ipv4' => '1.2.3.4', 'ipv6' => null, 'portv4' => 6881, 'portv6' => 0, 'peer_id' => str_repeat('aa', 20)];
+        $row_v6 = ['ipv4' => null, 'ipv6' => '2001:db8::1', 'portv4' => 0, 'portv6' => 6882, 'peer_id' => str_repeat('bb', 20)];
+        $row_no = ['ipv4' => null, 'ipv6' => null, 'portv4' => 0, 'portv6' => 0, 'peer_id' => str_repeat('00', 20)];
 
-	public function testAnnounceBencodeCompact(): void {
-		$counts = ['complete' => 5, 'incomplete' => 3];
-		$cfg    = ['announce_interval' => 1800, 'min_interval' => 900];
-		$compact_v4 = ['compactv4' => 'c0a80101aabb', 'compactv6' => null];
-		$compact_v6 = ['compactv4' => null,           'compactv6' => '20010db8000000000000000000000001ccdd'];
-		$compact_no = ['compactv4' => null,           'compactv6' => null];
+        // Empty peer list — must produce 'le' inside the response, not a stray 'e'.
+        $decoded = $this->decode(view_announce_bencode($counts, $cfg, [], false, false));
+        $this->assertSortedKeys($decoded);
+        $this->assertSame([], array_filter($decoded['peers'], fn ($k) => $k !== '__keys__', ARRAY_FILTER_USE_KEY));
 
-		$decoded = $this->decode(view_announce_bencode($counts, $cfg, [], true, false));
-		$this->assertSortedKeys($decoded);
-		$this->assertSame('', $decoded['peers']);
-		$this->assertSame('', $decoded['peers6']);
+        // Address-less rows are skipped, not emitted as broken dicts.
+        $decoded = $this->decode(view_announce_bencode($counts, $cfg, [$row_v4, $row_v6, $row_no], false, false));
+        $this->assertSortedKeys($decoded);
+        $this->assertCount(2, $decoded['peers']);
 
-		$decoded = $this->decode(view_announce_bencode($counts, $cfg, [$compact_v4, $compact_v6, $compact_no], true, false));
-		$this->assertSortedKeys($decoded);
-		$this->assertSame(hex2bin('c0a80101aabb'), $decoded['peers']);
-		$this->assertSame(hex2bin('20010db8000000000000000000000001ccdd'), $decoded['peers6']);
-	}
+        // no_peer_id flag honored.
+        $decoded = $this->decode(view_announce_bencode($counts, $cfg, [$row_v4], false, true));
+        $this->assertArrayNotHasKey('peer id', $decoded['peers'][0]);
+    }
+
+    ////	view_announce_bencode (compact)
+
+    public function testAnnounceBencodeCompact(): void
+    {
+        $counts = ['complete' => 5, 'incomplete' => 3];
+        $cfg = ['announce_interval' => 1800, 'min_interval' => 900];
+        $compact_v4 = ['compactv4' => 'c0a80101aabb', 'compactv6' => null];
+        $compact_v6 = ['compactv4' => null,           'compactv6' => '20010db8000000000000000000000001ccdd'];
+        $compact_no = ['compactv4' => null,           'compactv6' => null];
+
+        $decoded = $this->decode(view_announce_bencode($counts, $cfg, [], true, false));
+        $this->assertSortedKeys($decoded);
+        $this->assertSame('', $decoded['peers']);
+        $this->assertSame('', $decoded['peers6']);
+
+        $decoded = $this->decode(view_announce_bencode($counts, $cfg, [$compact_v4, $compact_v6, $compact_no], true, false));
+        $this->assertSortedKeys($decoded);
+        $this->assertSame(hex2bin('c0a80101aabb'), $decoded['peers']);
+        $this->assertSame(hex2bin('20010db8000000000000000000000001ccdd'), $decoded['peers6']);
+    }
 
 }

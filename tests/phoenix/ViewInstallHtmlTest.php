@@ -6,83 +6,91 @@ namespace Phoenix\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-class ViewInstallHtmlTest extends TestCase {
+class ViewInstallHtmlTest extends TestCase
+{
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+        require_once __DIR__.'/../../src/views/html.install.php';
+    }
 
-	public static function setUpBeforeClass(): void {
-		parent::setUpBeforeClass();
-		require_once __DIR__.'/../../src/views/html.install.php';
-	}
+    /** @return array<string, mixed> */
+    private function form(): array
+    {
+        return [
+            'db_host' => 'localhost',
+            'db_user' => 'root',
+            'db_name' => 'phoenix',
+            'db_prefix' => 'phoenix_',
+            'db_persist' => true,
+            'open_tracker' => true,
+            'public_index' => false,
+        ];
+    }
 
-	/** @return array<string, mixed> */
-	private function form(): array {
-		return [
-			'db_host'      => 'localhost',
-			'db_user'      => 'root',
-			'db_name'      => 'phoenix',
-			'db_prefix'    => 'phoenix_',
-			'db_persist'   => true,
-			'open_tracker' => true,
-			'public_index' => false,
-		];
-	}
+    public function testRendersFormWhenConfigDirIsWritable(): void
+    {
+        $html = view_install_html(true, null, $this->form());
+        $this->assertStringContainsString('<form method="POST"', $html);
+        $this->assertStringContainsString('name="process" value="install"', $html);
+        $this->assertStringContainsString('value="localhost"', $html);
+        $this->assertStringContainsString('value="phoenix_"', $html);
+        $this->assertStringNotContainsString('config/</code> is not writable', $html);
+    }
 
-	public function testRendersFormWhenConfigDirIsWritable(): void {
-		$html = view_install_html(true, null, $this->form());
-		$this->assertStringContainsString('<form method="POST"', $html);
-		$this->assertStringContainsString('name="process" value="install"', $html);
-		$this->assertStringContainsString('value="localhost"', $html);
-		$this->assertStringContainsString('value="phoenix_"', $html);
-		$this->assertStringNotContainsString('config/</code> is not writable', $html);
-	}
+    public function testShowsWritabilityWarningWhenConfigDirIsLocked(): void
+    {
+        // settings_writable=false swaps the form for an instructional banner;
+        // the form must NOT render so the user can't submit credentials that
+        // can't be persisted.
+        $html = view_install_html(false, null, $this->form());
+        $this->assertStringContainsString('config/</code> is not writable', $html);
+        $this->assertStringNotContainsString('<form method="POST"', $html);
+    }
 
-	public function testShowsWritabilityWarningWhenConfigDirIsLocked(): void {
-		// settings_writable=false swaps the form for an instructional banner;
-		// the form must NOT render so the user can't submit credentials that
-		// can't be persisted.
-		$html = view_install_html(false, null, $this->form());
-		$this->assertStringContainsString('config/</code> is not writable', $html);
-		$this->assertStringNotContainsString('<form method="POST"', $html);
-	}
+    public function testShowsErrorBannerWhenInstallFailed(): void
+    {
+        // install_error is set when a previous POST hit the "could not connect"
+        // or "could not write config" branch in admin_install_controller.
+        $html = view_install_html(true, 'Could not connect to the database', $this->form());
+        $this->assertStringContainsString('Could not connect to the database', $html);
+        $this->assertStringContainsString('background-pomegranate', $html);
+    }
 
-	public function testShowsErrorBannerWhenInstallFailed(): void {
-		// install_error is set when a previous POST hit the "could not connect"
-		// or "could not write config" branch in admin_install_controller.
-		$html = view_install_html(true, 'Could not connect to the database', $this->form());
-		$this->assertStringContainsString('Could not connect to the database', $html);
-		$this->assertStringContainsString('background-pomegranate', $html);
-	}
+    public function testEscapesErrorAndFormValues(): void
+    {
+        // Both branches html-encode their inputs; pin that against future
+        // refactors that might forget the htmlspecialchars wrap.
+        $evil = $this->form();
+        $evil['db_host'] = '"><script>alert(1)</script>';
+        $evil['db_user'] = '<b>raw</b>';
+        $html = view_install_html(true, '<bad>error</bad>', $evil);
+        $this->assertStringNotContainsString('<script>alert(1)</script>', $html);
+        $this->assertStringNotContainsString('<b>raw</b>', $html);
+        $this->assertStringNotContainsString('<bad>error</bad>', $html);
+        $this->assertStringContainsString('&lt;script&gt;', $html);
+    }
 
-	public function testEscapesErrorAndFormValues(): void {
-		// Both branches html-encode their inputs; pin that against future
-		// refactors that might forget the htmlspecialchars wrap.
-		$evil       = $this->form();
-		$evil['db_host']   = '"><script>alert(1)</script>';
-		$evil['db_user']   = '<b>raw</b>';
-		$html = view_install_html(true, '<bad>error</bad>', $evil);
-		$this->assertStringNotContainsString('<script>alert(1)</script>', $html);
-		$this->assertStringNotContainsString('<b>raw</b>', $html);
-		$this->assertStringNotContainsString('<bad>error</bad>', $html);
-		$this->assertStringContainsString('&lt;script&gt;', $html);
-	}
+    public function testCheckboxesReflectFormState(): void
+    {
+        $form = $this->form();
+        $form['db_persist'] = false;
+        $form['open_tracker'] = false;
+        $form['public_index'] = true;
+        $html = view_install_html(true, null, $form);
 
-	public function testCheckboxesReflectFormState(): void {
-		$form                  = $this->form();
-		$form['db_persist']    = false;
-		$form['open_tracker']  = false;
-		$form['public_index']  = true;
-		$html = view_install_html(true, null, $form);
+        // Only public_index should be checked.
+        $this->assertStringContainsString('name="public_index" value="1" checked', $html);
+        $this->assertStringContainsString('name="db_persist" value="1">', $html);
+        $this->assertStringContainsString('name="open_tracker" value="1">', $html);
+    }
 
-		// Only public_index should be checked.
-		$this->assertStringContainsString('name="public_index" value="1" checked', $html);
-		$this->assertStringContainsString('name="db_persist" value="1">', $html);
-		$this->assertStringContainsString('name="open_tracker" value="1">', $html);
-	}
-
-	public function testEmitsValidHtmlDocument(): void {
-		$html = view_install_html(true, null, $this->form());
-		$this->assertStringStartsWith('<!DOCTYPE html>', $html);
-		$this->assertStringContainsString('<title>Phoenix Setup</title>', $html);
-		$this->assertStringContainsString('</html>', $html);
-	}
+    public function testEmitsValidHtmlDocument(): void
+    {
+        $html = view_install_html(true, null, $this->form());
+        $this->assertStringStartsWith('<!DOCTYPE html>', $html);
+        $this->assertStringContainsString('<title>Phoenix Setup</title>', $html);
+        $this->assertStringContainsString('</html>', $html);
+    }
 
 }

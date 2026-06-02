@@ -5,8 +5,9 @@ declare(strict_types=1);
 ////	torrents_select_listed
 // Returns all listed torrents with peer counts (seeders/leechers) for the public index.
 // Returns an empty array if no listed torrents exist.
-function torrents_select_listed(mysqli $connection, array $settings): array {
-	$sql = 'SELECT
+function torrents_select_listed(mysqli $connection, array $settings): array
+{
+    $sql = 'SELECT
 			`t`.`info_hash` AS `info_hash`,
 			`t`.`name` AS `name`,
 			`t`.`size` AS `size`,
@@ -19,24 +20,24 @@ function torrents_select_listed(mysqli $connection, array $settings): array {
 		GROUP BY `t`.`info_hash`
 		ORDER BY `t`.`name`;';
 
-	$result = mysqli_query($connection, $sql);
-	if ( !$result ) {
-		tracker_error('Unable to get index.');
-	}
+    $result = mysqli_query($connection, $sql);
+    if (! $result) {
+        tracker_error('Unable to get index.');
+    }
 
-	$index = array();
-	while ( $row = mysqli_fetch_assoc($result) ) {
-		$index[] = array(
-			'info_hash' => $row['info_hash'],
-			'name'      => $row['name'],
-			'size'      => intval($row['size']),
-			'downloads' => intval($row['downloads']),
-			'seeders'   => intval($row['seeders']),
-			'leechers'  => intval($row['leechers']),
-			'peers'     => intval($row['seeders']) + intval($row['leechers']),
-			'traffic'   => intval($row['size']) * intval($row['downloads']),
-		);
-	}
+    $index = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $index[] = [
+            'info_hash' => $row['info_hash'],
+            'name' => $row['name'],
+            'size' => intval($row['size']),
+            'downloads' => intval($row['downloads']),
+            'seeders' => intval($row['seeders']),
+            'leechers' => intval($row['leechers']),
+            'peers' => intval($row['seeders']) + intval($row['leechers']),
+            'traffic' => intval($row['size']) * intval($row['downloads']),
+        ];
+    }
 
-	return $index;
+    return $index;
 }

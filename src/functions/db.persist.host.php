@@ -8,6 +8,7 @@ declare(strict_types=1);
 // as opt-in to a persistent connection. This prefix is sticky on the stored
 // db_host value, so any code that reads db_host outside mysqli_connect (e.g.
 // bin/backup-database.php) must strip it before use.
-function db_persist_host(string $host, bool $persist): string {
-	return $persist ? 'p:'.$host : $host;
+function db_persist_host(string $host, bool $persist): string
+{
+    return $persist ? 'p:'.$host : $host;
 }

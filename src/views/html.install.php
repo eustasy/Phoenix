@@ -11,20 +11,21 @@ declare(strict_types=1);
 //   $install_error - string|false, error message to display
 //   $form - array, form field values (db_host, db_user, db_name, db_prefix, db_persist, open_tracker, public_index)
 
-function view_install_html($settings_writable, $install_error, $form): string {
-	$error_html = '';
-	if ( $install_error ) {
-		$error_html = '<p class="box background-pomegranate color-clouds">'.htmlspecialchars($install_error).'</p>';
-	}
-	
-	$writable_warning = '';
-	$form_html = '';
-	if ( !$settings_writable ) {
-		$writable_warning = '<p class="box background-pomegranate color-clouds">
+function view_install_html($settings_writable, $install_error, $form): string
+{
+    $error_html = '';
+    if ($install_error) {
+        $error_html = '<p class="box background-pomegranate color-clouds">'.htmlspecialchars($install_error).'</p>';
+    }
+
+    $writable_warning = '';
+    $form_html = '';
+    if (! $settings_writable) {
+        $writable_warning = '<p class="box background-pomegranate color-clouds">
 			<code>config/</code> is not writable. Make it writable to proceed with installation.
 		</p>';
-	} else {
-		$form_html = $error_html.'
+    } else {
+        $form_html = $error_html.'
 		<form method="POST" action="">
 			<input type="hidden" name="process" value="install">
 			<h2>Database</h2>
@@ -63,9 +64,9 @@ function view_install_html($settings_writable, $install_error, $form): string {
 			<br>
 			<input class="button background-belize-hole color-clouds" type="submit" value="Install">
 		</form>';
-	}
-	
-	return '<!DOCTYPE html>
+    }
+
+    return '<!DOCTYPE html>
 <html lang="en">
 <head>
 	<title>Phoenix Setup</title>
