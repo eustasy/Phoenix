@@ -36,23 +36,23 @@ CI runs the workflow in `.github/workflows/normal.yml` against PHP 8.3–8.6. It
 
 The codebase follows what the changelog calls a "puff-style" layout — small, single-purpose files glued together by `require_once`:
 
-- **`src/functions/`** — one function per file. File `parse.ipv4.php` defines `parse_ipv4()`. Functions are pure-ish PHP (no top-level execution beyond defining the function). Business logic helpers: sanitization, validation, address parsing, peer selection strategies, etc. One function per file, `////    <function_name>` header comment, then a brief description, then the function.
-- **`src/model/`** — database operations. One function per file, each returns results or false. All queries live here.
-- **`src/views/`** — presentation layer. Bencode, XML, and HTML output functions. Receives normalized data arrays, never raw DB results or `$_GET`/`$_POST`. **Bencode is never hand-assembled in a view:** the `bencode.*.php` views build a plain PHP structure (ints, byte strings, lists, dicts) and hand it to `bencode_encode()` (`bencode.encode.php`), the single emitter. It owns length prefixes, balanced container tokens, and dict-key ordering — keys are sorted into raw byte order (`ksort(SORT_STRING)`) per BEP 3, so callers never pre-sort. An empty array encodes as an empty *list* (`le`); cast to `(object)` to force a dict (`de`), as `view_scrape_bencode` does for the binary-keyed, possibly-empty files dict. Cast numeric DB columns to `int` before encoding (mysqli returns them as strings, which would otherwise emit as bencode strings, not integers).
-- **`src/hooks/`** — empty stubs (e.g. `phoenix.peer.new.php`) that operators can fill in. The tracker calls `phoenix_hook()` at well-defined lifecycle points; that helper checks `is_readable()` and `include`s the hook from inside its own scope. Hooks therefore see exactly `$connection`, `$settings`, `$time`, and `$peer` (the last passed by reference, so mutations propagate). Keep them empty in this repo.
-- **`config/`** — `phoenix.default.php` is the template (do not modify). User configuration goes into `phoenix.custom.php` (gitignored, created by the installer).
-- **`bin/`** — standalone scripts intended for cron (`backup-database.php`, `clean-and-optimize.php`). They `require_once '../src/phoenix.php'` to bootstrap.
-- **`tests/phoenix/`** — one PHPUnit test class per function/component (see test runner notes below).
+* **`src/functions/`** — one function per file. File `parse.ipv4.php` defines `parse_ipv4()`. Functions are pure-ish PHP (no top-level execution beyond defining the function). Business logic helpers: sanitization, validation, address parsing, peer selection strategies, etc. One function per file, `////    <function_name>` header comment, then a brief description, then the function.
+* **`src/model/`** — database operations. One function per file, each returns results or false. All queries live here.
+* **`src/views/`** — presentation layer. Bencode, XML, and HTML output functions. Receives normalized data arrays, never raw DB results or `$_GET`/`$_POST`. **Bencode is never hand-assembled in a view:** the `bencode.*.php` views build a plain PHP structure (ints, byte strings, lists, dicts) and hand it to `bencode_encode()` (`bencode.encode.php`), the single emitter. It owns length prefixes, balanced container tokens, and dict-key ordering — keys are sorted into raw byte order (`ksort(SORT_STRING)`) per BEP 3, so callers never pre-sort. An empty array encodes as an empty *list* (`le`); cast to `(object)` to force a dict (`de`), as `view_scrape_bencode` does for the binary-keyed, possibly-empty files dict. Cast numeric DB columns to `int` before encoding (mysqli returns them as strings, which would otherwise emit as bencode strings, not integers).
+* **`src/hooks/`** — empty stubs (e.g. `phoenix.peer.new.php`) that operators can fill in. The tracker calls `phoenix_hook()` at well-defined lifecycle points; that helper checks `is_readable()` and `include`s the hook from inside its own scope. Hooks therefore see exactly `$connection`, `$settings`, `$time`, and `$peer` (the last passed by reference, so mutations propagate). Keep them empty in this repo.
+* **`config/`** — `phoenix.default.php` is the template (do not modify). User configuration goes into `phoenix.custom.php` (gitignored, created by the installer).
+* **`bin/`** — standalone scripts intended for cron (`backup-database.php`, `clean-and-optimize.php`). They `require_once '../src/phoenix.php'` to bootstrap.
+* **`tests/phoenix/`** — one PHPUnit test class per function/component (see test runner notes below).
 
 ### Entry points
 
 Every entry point sits in `public` and bootstraps via `require_once __DIR__.'/../src/phoenix.php'` (which loads settings, opens the DB, defines `tracker_error`):
 
-- `announce.php` — BEP 3 announce. Follows MVC pattern: sanitizes input, resolves peer addresses, handles peer events (new/change/access/stopped/completed), then builds and outputs bencode response.
-- `scrape.php` — BEP 15 scrape. `?stats` returns tracker stats; with `info_hash`(es) returns specific torrents; otherwise full scrape (if enabled).
-- `index.php` — public torrent index, gated by `$settings['public_index']`.
-- `admin.php` — admin panel and first-run installer. Requires no `phoenix.custom.php` to enter installer mode.
-- `magnet.php` — pure client-side magnet generator. **Does not bootstrap** `../src/phoenix.php` and does not touch the tracker — it's a self-contained utility page.
+* `announce.php` — BEP 3 announce. Follows MVC pattern: sanitizes input, resolves peer addresses, handles peer events (new/change/access/stopped/completed), then builds and outputs bencode response.
+* `scrape.php` — BEP 15 scrape. `?stats` returns tracker stats; with `info_hash`(es) returns specific torrents; otherwise full scrape (if enabled).
+* `index.php` — public torrent index, gated by `$settings['public_index']`.
+* `admin.php` — admin panel and first-run installer. Requires no `phoenix.custom.php` to enter installer mode.
+* `magnet.php` — pure client-side magnet generator. **Does not bootstrap** `../src/phoenix.php` and does not touch the tracker — it's a self-contained utility page.
 
 ### Web exposure
 
@@ -62,8 +62,8 @@ Only `public/` is meant to be web-served. The PDS layout puts `src/` (functions,
 
 Orchestration only — the meaningful work lives in extracted, unit-testable functions:
 
-- `settings_load()` (in `settings.load.php`) loads `phoenix.default.php` followed by `phoenix.custom.php` (or hard-coded fallbacks if the custom file is missing) and returns the populated `$settings` array.
-- `db_connect()` (in `db.connect.php`) wraps `mysqli_connect()` in a try/catch so callers always get a `mysqli` or `false`, regardless of `mysqli_report()` mode (PHP 8.1+ defaults to throwing).
+* `settings_load()` (in `settings.load.php`) loads `phoenix.default.php` followed by `phoenix.custom.php` (or hard-coded fallbacks if the custom file is missing) and returns the populated `$settings` array.
+* `db_connect()` (in `db.connect.php`) wraps `mysqli_connect()` in a try/catch so callers always get a `mysqli` or `false`, regardless of `mysqli_report()` mode (PHP 8.1+ defaults to throwing).
 
 Bootstrap then `require_once`s `tracker.error.php`, runs `db_is_configured`, applies `db_persist_host`, calls `db_connect`, and (for closed trackers) loads the allowed-torrents list. After this point, scripts can rely on `$connection`, `$settings`, and `$time` being in scope.
 
@@ -75,9 +75,9 @@ Bootstrap then `require_once`s `tracker.error.php`, runs `db_is_configured`, app
 
 Three MyISAM tables (chosen for write-heavy workload, no transactions/foreign keys):
 
-- `<prefix>peers` — active peers, ephemeral. PK `(info_hash, peer_id)`. Cleanup deletes rows where `updated < time - 3 * announce_interval`.
-- `<prefix>torrents` — tracked torrents. PK `info_hash`. Holds `name`, `size`, `listed`, `downloads`.
-- `<prefix>tasks` — task log (`name` PK).
+* `<prefix>peers` — active peers, ephemeral. PK `(info_hash, peer_id)`. Cleanup deletes rows where `updated < time - 3 * announce_interval`.
+* `<prefix>torrents` — tracked torrents. PK `info_hash`. Holds `name`, `size`, `listed`, `downloads`.
+* `<prefix>tasks` — task log (`name` PK).
 
 Schema lives in `sql/<table>.sql`, one CREATE TABLE per file using the literal default prefix `phoenix_`. `db_create()` reads each file, rewrites the prefix to `$settings['db_prefix']` if different, and executes against the connection's selected database. Files are also importable manually with `mysql <database> < sql/peers.sql` for installs that bypass the wizard.
 
@@ -110,18 +110,18 @@ To test functions that call `exit()` (notably `tracker_error()`), spawn a subpro
 
 These come from `.github/CONTRIBUTING.md` and consistent practice in the codebase:
 
-- **Tabs for indentation**, spaces for alignment.
-- **"Four stroke" section headers**: `////  Name`, followed by a short `//` description. Used both at file top-level and inside functions to mark logical sections.
-- **No closing `?>`** on PHP-only files.
-- **One function per file** in `src/functions/`, named `<category>.<verb>.php`.
-- **PHP-native solutions** over shell scripts when adding maintenance/utility code, so configuration stays in `$settings` rather than being spread across language boundaries (e.g. `bin/backup-database.php`, not `.sh`).
-- **Settings over hardcoded behavior**: any tunable parameter (size, count, on/off, path) gets a setting in `phoenix.default.php` with a sensible default.
+* **Tabs for indentation**, spaces for alignment.
+* **"Four stroke" section headers**: `////  Name`, followed by a short `//` description. Used both at file top-level and inside functions to mark logical sections.
+* **No closing `?>`** on PHP-only files.
+* **One function per file** in `src/functions/`, named `<category>.<verb>.php`.
+* **PHP-native solutions** over shell scripts when adding maintenance/utility code, so configuration stays in `$settings` rather than being spread across language boundaries (e.g. `bin/backup-database.php`, not `.sh`).
+* **Settings over hardcoded behavior**: any tunable parameter (size, count, on/off, path) gets a setting in `phoenix.default.php` with a sensible default.
 
 ## Commits
 
-- Use `Fix #<issue>: <Title from issue>.` verbatim from the GitHub issue when the work closes a tracked issue.
-- Otherwise use a short descriptive subject, present tense.
-- One concern per commit — avoid batching unrelated fixes.
-- Include `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` (or current model) trailer.
+* Use `Fix #<issue>: <Title from issue>.` verbatim from the GitHub issue when the work closes a tracked issue.
+* Otherwise use a short descriptive subject, present tense.
+* One concern per commit — avoid batching unrelated fixes.
+* Include `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` (or current model) trailer.
 
 Run `gh issue view <N>` before writing a commit message to confirm the issue is still open and to copy its title verbatim.

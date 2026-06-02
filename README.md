@@ -13,16 +13,19 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 ### What Do You Need?
 
 #### Required
+
 * PHP >= 8.2 with the `mysqli` and `xml` extensions. The bundled `date`, `filter`, `json`, `pcre`, and `session` extensions are also used (these ship enabled by default).
 * A PHP-compatible web server (Apache or Nginx).
 * A MySQL-compatible database.
 
 #### Recommended
+
 * [The latest supported version of PHP](https://www.php.net/supported-versions.php)
 * The latest version of Nginx (>= 1.18 with HTTP/2) or Apache 2.4.
 * The latest version of MariaDB.
 
 ### Install Guide
+
 1. Copy `config/phoenix.default.php` to `config/phoenix.custom.php`
 2. Edit the variables in `config/phoenix.custom.php`
 3. Upload Phoenix to your server.
@@ -34,7 +37,7 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 
 Phoenix follows an MVC-inspired structure optimized for procedural PHP:
 
-```
+```text
 phoenix/
 ├── public/              # Web-accessible entry points (controllers)
 │   ├── announce.php     # BitTorrent announce endpoint (BEP 3)
@@ -59,27 +62,31 @@ phoenix/
 
 ### Architecture Notes
 
-- **Controllers** (`public/*.php`) are thin orchestrators: sanitize input → call model → call view.
-- **Models** (`src/model/*.php`) handle all database operations. Each file exports one function that accepts `$connection`, `$settings`, and domain parameters.
-- **Views** (`src/views/*.php`) handle presentation. Bencode for BitTorrent protocol, HTML for humans, XML/JSON for debugging. The bencode views build a plain PHP structure and serialise it through a single emitter, `bencode_encode()`, which guarantees correct length prefixes and BEP-3 dict key ordering.
-- **Functions** (`src/functions/*.php`) contain business logic helpers that don't fit cleanly into model or view (sanitization, validation, address parsing, etc.).
-- **Hooks** (`src/hooks/*.php`) are optional operator-defined scripts called at lifecycle points (peer.new, peer.stopped, download.complete, etc.). Keep them empty in this repo.
+* **Controllers** (`public/*.php`) are thin orchestrators: sanitize input → call model → call view.
+* **Models** (`src/model/*.php`) handle all database operations. Each file exports one function that accepts `$connection`, `$settings`, and domain parameters.
+* **Views** (`src/views/*.php`) handle presentation. Bencode for BitTorrent protocol, HTML for humans, XML/JSON for debugging. The bencode views build a plain PHP structure and serialise it through a single emitter, `bencode_encode()`, which guarantees correct length prefixes and BEP-3 dict key ordering.
+* **Functions** (`src/functions/*.php`) contain business logic helpers that don't fit cleanly into model or view (sanitization, validation, address parsing, etc.).
+* **Hooks** (`src/hooks/*.php`) are optional operator-defined scripts called at lifecycle points (peer.new, peer.stopped, download.complete, etc.). Keep them empty in this repo.
 
 ## Configuration
+
 Configuration should take place in `config/phoenix.custom.php`, NOT `config/phoenix.default.php`. Phoenix _will_ attempt to use the default configuration if yours is missing.
 
 ## Server Configuration
+
 Phoenix ships with example web server configurations covering document root, `.php` extension stripping, and admin endpoint rate limiting:
 
 * [APACHE.md](./APACHE.md)
 * [NGINX.md](./NGINX.md)
 
 ### Cron (Automating Maintenance)
+
 1. Edit `config/phoenix.custom.php` and set:
-     - `$settings['backup_dir']` to change the backup directory. Defaults to `backups`.
-     - `$settings['clean_with_cron']` to `true` to enable the script and disable occaisional cleanup on announce.
+     * `$settings['backup_dir']` to change the backup directory. Defaults to `backups`.
+     * `$settings['clean_with_cron']` to `true` to enable the script and disable occaisional cleanup on announce.
 2. Edit your crontab with `crontab -e`, and add a crontab like the following. You can edit the times, and should make sure the paths are correct by running the commands after the asterisks.
-```
+
+```cron
 15 * * * * php ~/phoenix/bin/clean-and-optimize.php
 30 * * * * php ~/phoenix/bin/backup-database.php
 ```
