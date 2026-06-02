@@ -9,4 +9,4 @@ CREATE TABLE IF NOT EXISTS `phoenix_tasks` (
 	`name` varchar(16) NOT NULL,
 	`value` int(10) NOT NULL,
 	PRIMARY KEY (`name`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE = MyISAM DEFAULT CHARSET = latin1;

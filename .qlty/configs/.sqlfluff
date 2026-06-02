@@ -1,11 +1,11 @@
 [sqlfluff]
-dialect = postgres
+dialect = mysql
 templater = raw
 max_line_length = 140
-indent_unit = space
-tab_space_size = 4
 
 [sqlfluff:indentation]
+indent_unit = tab
+tab_space_size = 4
 indented_joins = false
 indented_using_on = true
 template_blocks_indent = false

@@ -68,6 +68,29 @@ name = "phpstan"
 [[plugin]]
 name = "sqlfluff"
 
+# qlty's bundled sqlfluff driver hard-codes `--dialect ansi`, and the CLI flag
+# overrides `dialect` in .sqlfluff — so ansi can't parse our MySQL/MariaDB DDL
+# (backtick identifiers, ENGINE=MyISAM, …) and every file errors with an
+# unparsable-section "PRS" violation. Those PRS objects lack the `fixes` field
+# qlty's sqlfluff output parser requires, so the whole invocation aborts. Re-
+# declare both drivers verbatim with `--dialect mysql` to fix it.
+[plugins.definitions.sqlfluff.drivers.lint]
+script = "sqlfluff lint ${target} --format json --nofail --dialect mysql"
+success_codes = [0]
+output = "stdout"
+output_format = "sqlfluff"
+batch = true
+output_missing = "parse"
+suggested = "config"
+
+[plugins.definitions.sqlfluff.drivers.fix]
+script = "sqlfluff fix --disable-progress-bar --quiet --dialect mysql ${target}"
+success_codes = [0]
+output = "rewrite"
+batch = true
+driver_type = "formatter"
+suggested = "config"
+
 [[plugin]]
 name = "yamllint"
 

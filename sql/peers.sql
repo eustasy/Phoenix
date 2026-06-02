@@ -25,5 +25,5 @@ CREATE TABLE IF NOT EXISTS `phoenix_peers` (
 	`left` bigint(20) unsigned NOT NULL DEFAULT '0',
 	`state` tinyint(1) unsigned NOT NULL DEFAULT '0',
 	`updated` int(10) unsigned NOT NULL,
-	PRIMARY KEY (`info_hash`,`peer_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+	PRIMARY KEY (`info_hash`, `peer_id`)
+) ENGINE = MyISAM DEFAULT CHARSET = latin1;
