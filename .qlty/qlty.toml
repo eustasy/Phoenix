@@ -154,6 +154,13 @@ file_patterns = [
   "**/.claude/**", # Claude Code config (tool-managed)
 ]
 
+# 1a. phpstan cannot analyse tests/ without PHPUnit classes (absent in qlty's
+#     phpstan env). Exclude at the qlty layer so phpstan never receives test
+#     files and avoids the "no files found to analyse" output_missing_error.
+[[exclude]]
+plugins = ["phpstan"]
+file_patterns = ["tests/**"]
+
 # 2. Keep prettier's scope identical in CI and on the qlty.sh dashboard. The
 #    per-language workflows only ever run prettier on JSON and JS/TS; every other
 #    language prettier supports has a dedicated owner, so it must not format them.

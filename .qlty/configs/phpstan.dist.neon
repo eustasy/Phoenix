@@ -12,11 +12,6 @@ parameters:
     scanDirectories:
         - %currentWorkingDirectory%/src
 
-    # Tests need PHPUnit known to phpstan (absent in qlty's phpstan env); they are exercised
-    # by the PHPUnit suite instead of static analysis.
-    excludePaths:
-        - %currentWorkingDirectory%/tests
-
     ignoreErrors:
         # Entry points receive $settings/$connection/$time/$allowed_torrents from
         # src/phoenix.php via require_once; phpstan cannot track include scope.
