@@ -1,7 +1,8 @@
 # Phoenix v4.0beta2
 
-[![Normal](https://github.com/eustasy/phoenix/actions/workflows/normal.yml/badge.svg)](https://github.com/eustasy/phoenix/actions/workflows/normal.yml)
-[![PHPUnit](https://github.com/eustasy/Phoenix/actions/workflows/phpunit.yml/badge.svg?branch=main)](https://github.com/eustasy/Phoenix/actions/workflows/phpunit.yml)
+[![Normal (PHP)](https://github.com/eustasy/Phoenix/actions/workflows/php.yml/badge.svg)](https://github.com/eustasy/Phoenix/actions/workflows/php.yml)
+[![Test (PHP)](https://github.com/eustasy/Phoenix/actions/workflows/test-php.yml/badge.svg)](https://github.com/eustasy/Phoenix/actions/workflows/test-php.yml)
+[![Normal (SQL)](https://github.com/eustasy/Phoenix/actions/workflows/sql.yml/badge.svg)](https://github.com/eustasy/Phoenix/actions/workflows/sql.yml)
 [![Maintainability](https://qlty.sh/gh/eustasy/projects/Phoenix/maintainability.svg)](https://qlty.sh/gh/eustasy/projects/Phoenix)
 [![Code Coverage](https://qlty.sh/gh/eustasy/projects/Phoenix/coverage.svg)](https://qlty.sh/gh/eustasy/projects/Phoenix)
 
