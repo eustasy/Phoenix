@@ -14,8 +14,8 @@ declare(strict_types=1);
 // Returns: JSON string.
 /**
  * @param array{complete: int, incomplete: int} $counts
- * @param array<string, mixed> $settings
- * @param array<int, array<string, mixed>> $rows
+ * @param PhoenixSettings $settings
+ * @param array<int, array<string, float|int|string|null>> $rows
  */
 function view_announce_json(array $counts, array $settings, array $rows): string
 {

@@ -20,8 +20,8 @@ declare(strict_types=1);
 //                 the missing-extension branch can be exercised.
 
 /**
- * @param array<string, mixed> $settings
- * @param array<string, mixed>|false $database_size
+ * @param PhoenixSettings $settings
+ * @param array<string, float|int|string|null>|false $database_size
  */
 function view_admin_html(array $settings, bool $tables_installed, array|false $database_size, string|false $message = false, bool $show_installed = false, ?string $php_version = null, ?bool $has_mysqli = null): string
 {
@@ -77,7 +77,7 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
         if ($tables_installed) {
             $mysql_html .= '<p class="box background-green-sea color-clouds">All your tables are installed.';
             if ($database_size) {
-                $mysql_html .= ' Their current size is '.number_format((float)(string) $database_size['Total']).' bytes.';
+                $mysql_html .= ' Their current size is '.number_format((float) ($database_size['Total'] ?? 0)).' bytes.';
             }
             $mysql_html .= '</p>';
         } else {

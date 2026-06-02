@@ -12,7 +12,7 @@ declare(strict_types=1);
 //   $form - array, form field values (db_host, db_user, db_name, db_prefix, db_persist, open_tracker, public_index)
 
 /**
- * @param array<string, mixed> $form
+ * @param array{db_host: string, db_user: string, db_name: string, db_prefix: string, db_persist: bool, open_tracker: bool, public_index: bool} $form
  */
 function view_install_html(bool $settings_writable, string|null $install_error, array $form): string
 {
@@ -33,19 +33,19 @@ function view_install_html(bool $settings_writable, string|null $install_error, 
 			<input type="hidden" name="process" value="install">
 			<h2>Database</h2>
 			<div class="field"><label>Host</label>
-				<input type="text" name="db_host" value="'.htmlspecialchars((string) $form['db_host']).'">
+				<input type="text" name="db_host" value="'.htmlspecialchars($form['db_host']).'">
 			</div>
 			<div class="field"><label>Username</label>
-				<input type="text" name="db_user" value="'.htmlspecialchars((string) $form['db_user']).'">
+				<input type="text" name="db_user" value="'.htmlspecialchars($form['db_user']).'">
 			</div>
 			<div class="field"><label>Password</label>
 				<input type="password" name="db_pass">
 			</div>
 			<div class="field"><label>Database Name</label>
-				<input type="text" name="db_name" value="'.htmlspecialchars((string) $form['db_name']).'">
+				<input type="text" name="db_name" value="'.htmlspecialchars($form['db_name']).'">
 			</div>
 			<div class="field"><label>Table Prefix</label>
-				<input type="text" name="db_prefix" value="'.htmlspecialchars((string) $form['db_prefix']).'">
+				<input type="text" name="db_prefix" value="'.htmlspecialchars($form['db_prefix']).'">
 			</div>
 			<div class="field checkbox">
 				<label><input type="checkbox" name="db_persist" value="1"'.($form['db_persist'] ? ' checked' : '').'>

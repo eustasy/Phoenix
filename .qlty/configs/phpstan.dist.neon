@@ -1,6 +1,10 @@
 parameters:
     level: 9
 
+    typeAliases:
+        PhoenixSettings: 'array{db_host: string, db_user: string, db_pass: string, db_name: string, db_reset: bool, db_prefix: string, db_persist: bool, open_tracker: bool, announce_interval: int, min_interval: int, default_peers: int, max_peers: int, external_ip: bool, default_compact: bool, full_scrape: bool, random_peers: bool, random_limit: int, clean_with_requests: int, clean_with_cron: bool, honor_xff: bool, public_index: bool, admin_password: string, backup_dir: string, backup_rotate: int, phoenix_version: string}'
+        PhoenixPeer: 'array{info_hash: string|false, info_hashes: array<int, string>, peer_id: string|false, ipv4?: string|false, ipv6?: string|false, port?: int|false, portv4?: int|false, portv6?: int|false, left?: int, state?: int, compact?: int, no_peer_id?: int, uploaded?: int, downloaded?: int, numwant?: int, old?: array<string, string|null>|false}'
+
     # src/ is procedural (one function per file, no composer autoload) and qlty analyses one
     # target file at a time. scanDirectories makes every src symbol (functions, controllers,
     # model, views) resolvable no matter which file qlty is checking — this is what removes
@@ -20,4 +24,10 @@ parameters:
             identifier: variable.undefined
             paths:
                 - %currentWorkingDirectory%/bin
+                - %currentWorkingDirectory%/public
+        # Entry points: phpstan cannot narrow types through include scope (array_filter
+        # on sanitize_tracker_params result in scrape.php, etc.)
+        -
+            identifier: argument.type
+            paths:
                 - %currentWorkingDirectory%/public

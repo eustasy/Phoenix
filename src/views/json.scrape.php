@@ -9,7 +9,7 @@ declare(strict_types=1);
 //	       info_hash, seeders, leechers, peers, size, downloads, traffic.
 //	Output: JSON string with torrents indexed by info_hash.
 
-/** @param array<string, array<string, mixed>> $scrape */
+/** @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, traffic: int}> $scrape */
 function view_scrape_json(array $scrape): string
 {
     $json = [];

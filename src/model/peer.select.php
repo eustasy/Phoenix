@@ -8,9 +8,9 @@ declare(strict_types=1);
 // (also false on query error — same channel, callers truthy-test).
 
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @param array<string, mixed> $peer
- * @return array<string, mixed>|false
+ * @return array<string, float|int|string|null>|false
  */
 function peer_select(mysqli $connection, array $settings, array $peer): array|false
 {

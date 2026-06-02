@@ -8,7 +8,7 @@ declare(strict_types=1);
 // Calls tracker_error() and exits if rate limit is exceeded.
 
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @param array<string, mixed> $peer
  */
 function announce_check_rate_limit(mysqli $connection, array $settings, array $peer, int $time): void

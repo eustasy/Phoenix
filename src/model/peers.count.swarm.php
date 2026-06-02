@@ -9,7 +9,7 @@ declare(strict_types=1);
 // Used by: announce response (interval calculation).
 
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @return array{complete: int, incomplete: int}
  */
 function peers_count_swarm(mysqli $connection, array $settings, string $info_hash, int $stale_threshold): array
@@ -26,7 +26,7 @@ function peers_count_swarm(mysqli $connection, array $settings, string $info_has
     );
 
     return [
-        'complete' => $counts ? intval((string) $counts['complete']) : 0,
-        'incomplete' => $counts ? intval((string) $counts['incomplete']) : 0,
+        'complete' => $counts ? intval($counts['complete']) : 0,
+        'incomplete' => $counts ? intval($counts['incomplete']) : 0,
     ];
 }

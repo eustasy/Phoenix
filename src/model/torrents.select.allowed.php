@@ -6,7 +6,7 @@ declare(strict_types=1);
 // Returns the list of permitted info_hashes for closed-tracker mode.
 // Returns an empty array (not an error) when no torrents are registered.
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @return array<int, string>
  */
 function torrents_select_allowed(mysqli $connection, array $settings): array
@@ -18,5 +18,5 @@ function torrents_select_allowed(mysqli $connection, array $settings): array
         return [];
     }
 
-    return array_map('strval', $allowed_torrents);
+    return array_map(fn (float|int|string|null $x): string => $x !== null ? (string) $x : '', $allowed_torrents);
 }

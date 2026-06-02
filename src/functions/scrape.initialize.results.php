@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 /**
  * @param array<int, string> $info_hashes
- * @return array<string, array<string, mixed>>
+ * @return array<string, array<string, int|string|null>>
  */
 function scrape_initialize_results(array $info_hashes): array
 {

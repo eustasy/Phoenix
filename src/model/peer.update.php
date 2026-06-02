@@ -8,7 +8,7 @@ declare(strict_types=1);
 // Returns true on success, calls tracker_error() on failure.
 
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @param array<string, mixed> $peer
  */
 function peer_update(mysqli $connection, array $settings, int $time, array $peer): true

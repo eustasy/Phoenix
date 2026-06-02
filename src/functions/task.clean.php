@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-/** @param array<string, mixed> $settings */
+/** @param PhoenixSettings $settings */
 function task_clean(mysqli $connection, array $settings, int $time): bool
 {
     require_once __DIR__.'/../model/task.log.php';

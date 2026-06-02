@@ -9,7 +9,7 @@ declare(strict_types=1);
 // Used by: scrape.php (specific torrents).
 
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  */
 function peers_scrape(mysqli $connection, array $settings, string $where_clause): mysqli_result|false
 {

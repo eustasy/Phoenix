@@ -14,7 +14,7 @@ declare(strict_types=1);
 //  - left < 0    : state unknown (left not reported); order by recency.
 /**
  * @param array<string, mixed> $peer
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @return array{where: string, order: string}
  */
 function peer_select_strategy(array $peer, int $complete, int $incomplete, array $settings): array
@@ -33,7 +33,7 @@ function peer_select_strategy(array $peer, int $complete, int $incomplete, array
     }
     if ($peer['left'] > 0) {
         $randomise = $settings['random_peers']
-            && ($complete + $incomplete) > intval((string) $settings['random_limit']);
+            && ($complete + $incomplete) > $settings['random_limit'];
 
         return [
             'where' => '',

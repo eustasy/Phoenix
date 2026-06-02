@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ////	db_fetch_column
 // Executes $sql and returns the first column of every result row as a flat indexed array.
-/** @return array<int, mixed> */
+/** @return array<int, float|int|string|null> */
 function db_fetch_column(mysqli $connection, string $sql): array
 {
     $result = mysqli_query($connection, $sql);

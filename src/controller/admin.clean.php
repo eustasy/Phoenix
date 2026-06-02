@@ -6,7 +6,7 @@ declare(strict_types=1);
 //  Handles peers list cleanup action.
 //  Returns message string on completion.
 
-/** @param array<string, mixed> $settings */
+/** @param PhoenixSettings $settings */
 function admin_clean_action(mysqli $connection, array $settings, int $time): string
 {
     require_once __DIR__.'/../functions/task.clean.php';

@@ -19,7 +19,7 @@ declare(strict_types=1);
 // Returns: XML string.
 /**
  * @param array<string, int> $stats
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  */
 function view_stats_xml(array $stats, array $settings): string
 {

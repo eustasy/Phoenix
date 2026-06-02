@@ -6,7 +6,7 @@ declare(strict_types=1);
 //  Handles authentication for admin panel.
 //  Returns HTML output if login required, or null if authenticated.
 
-/** @param array<string, mixed> $settings */
+/** @param PhoenixSettings $settings */
 function admin_login_controller(array $settings): ?string
 {
     if (empty($settings['admin_password'])) {

@@ -6,8 +6,8 @@ declare(strict_types=1);
 // Returns all listed torrents with peer counts (seeders/leechers) for the public index.
 // Returns an empty array if no listed torrents exist.
 /**
- * @param array<string, mixed> $settings
- * @return list<array<string, mixed>>
+ * @param PhoenixSettings $settings
+ * @return list<array{info_hash: string|null, name: string|null, size: int, downloads: int, seeders: int, leechers: int, peers: int, traffic: int}>
  */
 function torrents_select_listed(mysqli $connection, array $settings): array
 {
@@ -32,8 +32,8 @@ function torrents_select_listed(mysqli $connection, array $settings): array
     $index = [];
     while ($row = mysqli_fetch_assoc($result)) {
         $index[] = [
-            'info_hash' => $row['info_hash'],
-            'name' => $row['name'],
+            'info_hash' => is_string($row['info_hash']) ? $row['info_hash'] : null,
+            'name' => is_string($row['name']) ? $row['name'] : null,
             'size' => intval($row['size']),
             'downloads' => intval($row['downloads']),
             'seeders' => intval($row['seeders']),

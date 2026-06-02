@@ -5,7 +5,7 @@ declare(strict_types=1);
 ////	task_log
 // Records or replaces the last execution value for a named maintenance task.
 // REPLACE INTO updates the existing row if the task name (primary key) already exists.
-/** @param array<string, mixed> $settings */
+/** @param PhoenixSettings $settings */
 function task_log(mysqli $connection, array $settings, string $task, int $value): bool
 {
     $result = mysqli_query(

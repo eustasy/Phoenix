@@ -6,7 +6,7 @@ declare(strict_types=1);
 // Query torrent statistics for the given info_hashes.
 // Returns mysqli_result or false on failure.
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  */
 function torrents_scrape(mysqli $connection, array $settings, string $where_clause): mysqli_result|false
 {

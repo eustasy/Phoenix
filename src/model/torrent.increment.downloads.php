@@ -8,7 +8,7 @@ declare(strict_types=1);
 // Used when a peer announces event=completed.
 // Silently returns true even on failure (non-critical operation).
 
-/** @param array<string, mixed> $settings */
+/** @param PhoenixSettings $settings */
 function torrent_increment_downloads(mysqli $connection, array $settings, string $info_hash): true
 {
     mysqli_query(

@@ -8,7 +8,7 @@ declare(strict_types=1);
 // associative array intended to be merged into $peer.
 /**
  * @param array<string, string> $get
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @return array<string, mixed>
  */
 function peer_parse_announce_optional(array $get, array $settings): array

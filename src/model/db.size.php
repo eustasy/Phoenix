@@ -9,8 +9,8 @@ declare(strict_types=1);
 // the query fails or no rows match (e.g. an empty schema).
 
 /**
- * @param array<string, mixed> $settings
- * @return array<string, mixed>|false
+ * @param PhoenixSettings $settings
+ * @return array<string, float|int|string|null>|false
  */
 function db_size(mysqli $connection, array $settings): array|false
 {

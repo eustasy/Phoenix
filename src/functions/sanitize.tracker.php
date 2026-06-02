@@ -6,7 +6,7 @@ declare(strict_types=1);
 // Parse and sanitize info_hash and peer_id from a query string for tracker endpoints.
 // Returns an associative array: info_hash, info_hashes, peer_id.
 
-/** @return array<string, mixed> */
+/** @return array{info_hash: string|false, info_hashes: array<int, string|false>, peer_id: string|false} */
 function sanitize_tracker_params(?string $query_string = null): array
 {
     require_once __DIR__.'/sanitize.maybe_binary_to_hex.php';

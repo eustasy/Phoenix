@@ -9,7 +9,7 @@ declare(strict_types=1);
 // Used by: scrape.php (full scrape when enabled).
 
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  */
 function peers_scrape_all(mysqli $connection, array $settings): mysqli_result|false
 {

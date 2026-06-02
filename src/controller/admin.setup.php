@@ -7,7 +7,7 @@ declare(strict_types=1);
 //  Returns message string on completion.
 
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @return string|false
  */
 function admin_setup_action(mysqli $connection, array $settings, int $time, bool $tables_installed): string|false

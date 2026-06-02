@@ -8,7 +8,7 @@ declare(strict_types=1);
 // $connection, $settings, $time, and $peer. $peer is passed by reference
 // so hooks may mutate it for the remainder of the request lifecycle.
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @param array<string, mixed> $peer
  */
 function phoenix_hook(string $name, mysqli $connection, array $settings, int $time, array &$peer): void

@@ -9,7 +9,7 @@ declare(strict_types=1);
 // panel's first-run flag.
 
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @param array<int, string> $tables
  */
 function db_tables_installed(mysqli $connection, array $settings, array $tables = ['peers', 'tasks', 'torrents']): bool

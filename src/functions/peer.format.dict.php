@@ -16,17 +16,17 @@ declare(strict_types=1);
 // Ports are cast to int so they bencode as integers, not strings — mysqli
 // hands back numeric columns as strings.
 /**
- * @param array<string, mixed> $row
+ * @param array<string, float|int|string|null> $row
  * @return array<string, mixed>|null
  */
 function peer_format_dict(array $row, bool $include_peer_id): ?array
 {
     if ($row['ipv4'] != null) {
         $ip = (string) $row['ipv4'];
-        $port = (int)(string) $row['portv4'];
+        $port = (int) $row['portv4'];
     } elseif ($row['ipv6'] != null) {
         $ip = (string) $row['ipv6'];
-        $port = (int)(string) $row['portv6'];
+        $port = (int) $row['portv6'];
     } else {
         return null;
     }

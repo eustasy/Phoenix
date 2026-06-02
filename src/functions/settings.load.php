@@ -12,6 +12,7 @@ declare(strict_types=1);
 /** @return PhoenixSettings */
 function settings_load(string $default_path, string $custom_path): array
 {
+    /** @var PhoenixSettings $settings */
     $settings = [];
     include $default_path;
 

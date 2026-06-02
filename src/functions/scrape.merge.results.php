@@ -13,8 +13,8 @@ declare(strict_types=1);
 // leechers), size, downloads, and traffic (= size * downloads). intval()
 // guards against NULL from SUM() over an empty group.
 /**
- * @param array<string, array<string, mixed>> $scrape
- * @return array<string, array<string, mixed>>
+ * @param array<string, array<string, int|string|null>> $scrape
+ * @return array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, traffic: int}>
  */
 function scrape_merge_results(mysqli_result $peers, mysqli_result $torrents, array $scrape = []): array
 {
@@ -28,13 +28,14 @@ function scrape_merge_results(mysqli_result $peers, mysqli_result $torrents, arr
         $scrape[$hash]['size'] = $row['size'] ?? 0;
         $scrape[$hash]['downloads'] = $row['downloads'];
     }
+    $result = [];
     foreach ($scrape as $hash => $entry) {
-        $seeders = intval((string) ($entry['seeders'] ?? 0));
-        $leechers = intval((string) ($entry['leechers'] ?? 0));
-        $size = intval((string) ($entry['size'] ?? 0));
-        $downloads = intval((string) ($entry['downloads'] ?? 0));
-        $scrape[(string) $hash] = [
-            'info_hash' => $hash,
+        $seeders = intval($entry['seeders'] ?? 0);
+        $leechers = intval($entry['leechers'] ?? 0);
+        $size = intval($entry['size'] ?? 0);
+        $downloads = intval($entry['downloads'] ?? 0);
+        $result[(string) $hash] = [
+            'info_hash' => (string) $hash,
             'seeders' => $seeders,
             'leechers' => $leechers,
             'peers' => $seeders + $leechers,
@@ -44,5 +45,5 @@ function scrape_merge_results(mysqli_result $peers, mysqli_result $torrents, arr
         ];
     }
 
-    return $scrape;
+    return $result;
 }

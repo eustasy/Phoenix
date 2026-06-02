@@ -10,10 +10,10 @@ declare(strict_types=1);
 // Returns array of peer rows, calls tracker_error() on failure.
 
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @param array<string, mixed> $peer
  * @param array{where: string, order: string} $strategy
- * @return array<int, array<string, mixed>>
+ * @return array<int, array<string, float|int|string|null>>
  */
 function peers_select_active(mysqli $connection, array $settings, array $peer, int $stale_threshold, array $strategy): array
 {

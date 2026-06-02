@@ -9,7 +9,7 @@ declare(strict_types=1);
 // Returns int count.
 
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @param array<string, mixed> $peer
  */
 function peers_count_rate(mysqli $connection, array $settings, array $peer, int $threshold): int
@@ -37,5 +37,5 @@ function peers_count_rate(mysqli $connection, array $settings, array $peer, int 
         'AND `updated`>'.$threshold.';',
     );
 
-    return $rate ? intval((string) $rate['count']) : 0;
+    return $rate ? intval($rate['count']) : 0;
 }

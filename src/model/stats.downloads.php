@@ -6,8 +6,8 @@ declare(strict_types=1);
 // Fetch download and traffic totals from the database.
 // Returns array with downloads and traffic, or false on failure.
 /**
- * @param array<string, mixed> $settings
- * @return array<string, mixed>|false
+ * @param PhoenixSettings $settings
+ * @return array<string, float|int|string|null>|false
  */
 function stats_fetch_download_totals(mysqli $connection, array $settings): array|false
 {

@@ -21,8 +21,8 @@ declare(strict_types=1);
 // the 'peers'/'peers6' ordering falls out of the sort automatically.
 /**
  * @param array{complete: int, incomplete: int} $counts
- * @param array<string, mixed> $settings
- * @param array<int, array<string, mixed>> $rows
+ * @param PhoenixSettings $settings
+ * @param array<int, array<string, float|int|string|null>> $rows
  */
 function view_announce_bencode(
     array $counts,
@@ -41,8 +41,8 @@ function view_announce_bencode(
     $response = [
         'complete' => (int) $counts['complete'],
         'incomplete' => (int) $counts['incomplete'],
-        'interval' => (int)(string) $settings['announce_interval'],
-        'min interval' => (int)(string) $settings['min_interval'],
+        'interval' => $settings['announce_interval'],
+        'min interval' => $settings['min_interval'],
     ];
 
     if ($compact) {

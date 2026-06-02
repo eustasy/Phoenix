@@ -10,7 +10,7 @@ declare(strict_types=1);
 // tracker_error() (which exits).
 
 /**
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  * @param array<int, string> $valid_info_hashes
  */
 function scrape_specific_controller(mysqli $connection, array $settings, array $valid_info_hashes): string

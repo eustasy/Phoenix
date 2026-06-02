@@ -10,7 +10,7 @@ declare(strict_types=1);
 // array{v4: string, v6: string} of raw binary (NOT bencoded — the caller
 // handles the length prefix).
 /**
- * @param array<int, array<string, mixed>> $rows
+ * @param array<int, array<string, float|int|string|null>> $rows
  * @return array{v4: string, v6: string}
  */
 function peers_format_compact(array $rows): array
@@ -18,10 +18,10 @@ function peers_format_compact(array $rows): array
     $v4 = '';
     $v6 = '';
     foreach ($rows as $row) {
-        if ($row['compactv4'] != null) {
+        if ($row['compactv4'] !== null && $row['compactv4'] !== '') {
             $v4 .= hex2bin((string) $row['compactv4']);
         }
-        if ($row['compactv6'] != null) {
+        if ($row['compactv6'] !== null && $row['compactv6'] !== '') {
             $v6 .= hex2bin((string) $row['compactv6']);
         }
     }

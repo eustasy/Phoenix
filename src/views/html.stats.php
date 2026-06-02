@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 /**
  * @param array<string, int> $stats
- * @param array<string, mixed> $settings
+ * @param PhoenixSettings $settings
  */
 function view_stats_html(array $stats, array $settings): string
 {
