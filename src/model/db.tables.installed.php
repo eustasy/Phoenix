@@ -26,7 +26,7 @@ function db_tables_installed(mysqli $connection, array $settings, array $tables 
         'WHERE `TABLE_SCHEMA` = \''.$settings['db_name'].'\' '.
         'AND `TABLE_NAME` IN ('.implode(',', $prefixed).');',
     );
-    if (! $result) {
+    if (! $result instanceof mysqli_result) {
         return false;
     }
     $row = mysqli_fetch_assoc($result);

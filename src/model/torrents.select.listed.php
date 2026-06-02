@@ -21,7 +21,7 @@ function torrents_select_listed(mysqli $connection, array $settings): array
 		ORDER BY `t`.`name`;';
 
     $result = mysqli_query($connection, $sql);
-    if (! $result) {
+    if (! $result instanceof mysqli_result) {
         tracker_error('Unable to get index.');
     }
 

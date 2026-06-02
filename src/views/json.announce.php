@@ -38,5 +38,5 @@ function view_announce_json(array $counts, array $settings, array $rows): string
         'interval' => $settings['announce_interval'],
         'min_interval' => $settings['min_interval'],
         'peers' => $peers,
-    ]);
+    ]) ?: '';
 }

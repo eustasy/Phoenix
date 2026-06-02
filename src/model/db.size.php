@@ -22,7 +22,7 @@ function db_size(mysqli $connection, array $settings): array|false
         'GROUP BY `table_schema`;',
         MYSQLI_STORE_RESULT,
     );
-    if (! $result) {
+    if (! $result instanceof mysqli_result) {
         return false;
     }
     $row = mysqli_fetch_assoc($result);

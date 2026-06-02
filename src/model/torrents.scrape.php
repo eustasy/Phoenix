@@ -13,5 +13,7 @@ function torrents_scrape(mysqli $connection, array $settings, string $where_clau
 		`p`.`downloads` AS `downloads`
 	FROM `'.$settings['db_prefix'].'torrents` AS `p`';
 
-    return mysqli_query($connection, $sql.$where_clause.' GROUP BY `info_hash`;');
+    $result = mysqli_query($connection, $sql.$where_clause.' GROUP BY `info_hash`;');
+
+    return $result instanceof mysqli_result ? $result : false;
 }

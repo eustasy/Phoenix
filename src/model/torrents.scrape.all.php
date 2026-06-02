@@ -7,7 +7,7 @@ declare(strict_types=1);
 // Returns mysqli_result or false on failure.
 function torrents_scrape_all(mysqli $connection, array $settings): mysqli_result|false
 {
-    return mysqli_query(
+    $result = mysqli_query(
         $connection,
         'SELECT
 			`t`.`info_hash` AS `info_hash`,
@@ -15,4 +15,6 @@ function torrents_scrape_all(mysqli $connection, array $settings): mysqli_result
 			`t`.`downloads` AS `downloads`
 		FROM `'.$settings['db_prefix'].'torrents` AS `t`;',
     );
+
+    return $result instanceof mysqli_result ? $result : false;
 }

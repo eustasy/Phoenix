@@ -20,7 +20,7 @@ function peers_select_active(mysqli $connection, array $settings, array $peer, i
         'LIMIT '.$peer['numwant'].';';
 
     $query = mysqli_query($connection, $sql);
-    if (! $query) {
+    if (! $query instanceof mysqli_result) {
         tracker_error('Failed to select peers.');
     }
 

@@ -7,7 +7,7 @@ declare(strict_types=1);
 function db_fetch_column(mysqli $connection, string $sql): array
 {
     $result = mysqli_query($connection, $sql);
-    if (! $result) {
+    if (! $result instanceof mysqli_result) {
         tracker_error('Failed to build array.');
     }
     $response = [];

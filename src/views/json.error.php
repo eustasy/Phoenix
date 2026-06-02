@@ -7,5 +7,5 @@ declare(strict_types=1);
 // caller is responsible for echoing and terminating the script.
 function view_error_json(string $error): string
 {
-    return json_encode(['error' => $error]);
+    return json_encode(['error' => $error]) ?: '';
 }
