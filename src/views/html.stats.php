@@ -6,7 +6,11 @@ declare(strict_types=1);
 // Render tracker statistics as HTML.
 // Returns HTML string. Caller is responsible for setting Content-Type header.
 
-function view_stats_html($stats, $settings): string
+/**
+ * @param array<string, int> $stats
+ * @param array<string, mixed> $settings
+ */
+function view_stats_html(array $stats, array $settings): string
 {
     return '<!DocType html><html><head><meta charset="UTF-8">'.
          '<title>Phoenix: $Id: '.$settings['phoenix_version'].' $</title>'.

@@ -6,7 +6,11 @@ declare(strict_types=1);
 //  Handles database setup/reset action.
 //  Returns message string on completion.
 
-function admin_setup_action($connection, $settings, $time, $tables_installed)
+/**
+ * @param array<string, mixed> $settings
+ * @return string|false
+ */
+function admin_setup_action(mysqli $connection, array $settings, int $time, bool $tables_installed): string|false
 {
     require_once __DIR__.'/../model/db.drop.php';
     require_once __DIR__.'/../model/db.create.php';

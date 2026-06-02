@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+/** @param array<string, mixed> $settings */
 function db_optimize(mysqli $connection, array $settings, int $time, string|false $table = false, bool $and_default = true): bool
 {
     require_once __DIR__.'/task.log.php';

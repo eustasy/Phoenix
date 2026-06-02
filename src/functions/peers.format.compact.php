@@ -9,16 +9,20 @@ declare(strict_types=1);
 // whose hex blob is empty are skipped for that family. Returns
 // array{v4: string, v6: string} of raw binary (NOT bencoded — the caller
 // handles the length prefix).
+/**
+ * @param array<int, array<string, mixed>> $rows
+ * @return array{v4: string, v6: string}
+ */
 function peers_format_compact(array $rows): array
 {
     $v4 = '';
     $v6 = '';
     foreach ($rows as $row) {
         if ($row['compactv4'] != null) {
-            $v4 .= hex2bin($row['compactv4']);
+            $v4 .= hex2bin((string) $row['compactv4']);
         }
         if ($row['compactv6'] != null) {
-            $v6 .= hex2bin($row['compactv6']);
+            $v6 .= hex2bin((string) $row['compactv6']);
         }
     }
 

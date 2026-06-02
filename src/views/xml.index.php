@@ -18,13 +18,14 @@ declare(strict_types=1);
 //           - traffic: int
 //
 // Returns: XML string.
+/** @param array<int, array<string, mixed>> $index */
 function view_index_xml(array $index): string
 {
     $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><torrents>';
     foreach ($index as $torrent) {
         $xml .= '<torrent>'.
             '<info_hash>'.$torrent['info_hash'].'</info_hash>'.
-            '<name>'.htmlspecialchars($torrent['name'], ENT_XML1, 'UTF-8').'</name>'.
+            '<name>'.htmlspecialchars((string) $torrent['name'], ENT_XML1, 'UTF-8').'</name>'.
             '<size>'.$torrent['size'].'</size>'.
             '<downloads>'.$torrent['downloads'].'</downloads>'.
             '<seeders>'.$torrent['seeders'].'</seeders>'.

@@ -9,7 +9,11 @@ declare(strict_types=1);
 //	       $settings array for phoenix_version.
 //	Output: JSON string with a top-level 'tracker' object.
 
-function view_stats_json($stats, $settings)
+/**
+ * @param array<string, int> $stats
+ * @param array<string, mixed> $settings
+ */
+function view_stats_json(array $stats, array $settings): string
 {
     return json_encode([
         'tracker' => [
@@ -21,5 +25,5 @@ function view_stats_json($stats, $settings)
             'downloads' => $stats['downloads'],
             'traffic' => $stats['traffic'],
         ],
-    ]);
+    ]) ?: '';
 }

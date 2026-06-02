@@ -12,6 +12,11 @@ declare(strict_types=1);
 //   $rows: array of peer rows from peers_select_active()
 //
 // Returns: JSON string.
+/**
+ * @param array{complete: int, incomplete: int} $counts
+ * @param array<string, mixed> $settings
+ * @param array<int, array<string, mixed>> $rows
+ */
 function view_announce_json(array $counts, array $settings, array $rows): string
 {
     $peers = [];

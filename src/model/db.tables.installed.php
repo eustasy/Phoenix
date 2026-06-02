@@ -8,6 +8,10 @@ declare(strict_types=1);
 // for the three Phoenix tables (peers/tasks/torrents) used by the admin
 // panel's first-run flag.
 
+/**
+ * @param array<string, mixed> $settings
+ * @param array<int, string> $tables
+ */
 function db_tables_installed(mysqli $connection, array $settings, array $tables = ['peers', 'tasks', 'torrents']): bool
 {
     if (empty($tables)) {

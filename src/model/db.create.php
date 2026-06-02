@@ -12,6 +12,7 @@ declare(strict_types=1);
 //
 // MyISAM is chosen over InnoDB: the tracker is write-heavy and never needs
 // transactions or foreign keys.
+/** @param array<string, mixed> $settings */
 function db_create(mysqli $connection, array $settings, bool $debug = false): bool
 {
 
@@ -32,7 +33,7 @@ function db_create(mysqli $connection, array $settings, bool $debug = false): bo
         // Schema files use the literal default prefix `phoenix_`; rewrite to
         // the install's actual prefix before executing.
         if ($settings['db_prefix'] !== 'phoenix_') {
-            $sql = str_replace('phoenix_', $settings['db_prefix'], $sql);
+            $sql = str_replace('phoenix_', (string) $settings['db_prefix'], $sql);
         }
 
         $result = mysqli_query($connection, $sql);

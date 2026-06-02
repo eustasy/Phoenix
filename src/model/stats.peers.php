@@ -5,6 +5,10 @@ declare(strict_types=1);
 ////	stats_fetch_peer_counts
 // Fetch peer statistics from the database.
 // Returns array with seeders, leechers, and torrent count, or false on failure.
+/**
+ * @param array<string, mixed> $settings
+ * @return array<string, mixed>|false
+ */
 function stats_fetch_peer_counts(mysqli $connection, array $settings): array|false
 {
     require_once __DIR__.'/db.fetch.once.php';

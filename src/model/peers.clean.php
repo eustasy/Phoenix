@@ -8,6 +8,7 @@ declare(strict_types=1);
 // Also purges rows with test-reserved prefixes/values left by the test suite.
 // Returns true on success, false on failure.
 
+/** @param array<string, mixed> $settings */
 function peers_clean(mysqli $connection, array $settings, int $threshold): bool
 {
     $result = mysqli_query(

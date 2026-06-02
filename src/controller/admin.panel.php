@@ -9,6 +9,7 @@ declare(strict_types=1);
 // Returns the rendered HTML string. Caller is responsible for echoing
 // and exiting.
 
+/** @param array<string, mixed> $settings */
 function admin_panel_controller(mysqli $connection, array $settings, int $time): string
 {
     $process = '';

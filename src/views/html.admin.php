@@ -19,7 +19,11 @@ declare(strict_types=1);
 //                 class_exists('mysqli')). Override only used by tests so
 //                 the missing-extension branch can be exercised.
 
-function view_admin_html($settings, $tables_installed, $database_size, $message = false, $show_installed = false, $php_version = null, $has_mysqli = null): string
+/**
+ * @param array<string, mixed> $settings
+ * @param array<string, mixed>|false $database_size
+ */
+function view_admin_html(array $settings, bool $tables_installed, array|false $database_size, string|false $message = false, bool $show_installed = false, ?string $php_version = null, ?bool $has_mysqli = null): string
 {
     // Composer enforces ^8.2 and ext-mysqli, but the project supports manual
     // installs that bypass composer, so the runtime checks below stay in
@@ -73,7 +77,7 @@ function view_admin_html($settings, $tables_installed, $database_size, $message 
         if ($tables_installed) {
             $mysql_html .= '<p class="box background-green-sea color-clouds">All your tables are installed.';
             if ($database_size) {
-                $mysql_html .= ' Their current size is '.number_format((float) $database_size['Total']).' bytes.';
+                $mysql_html .= ' Their current size is '.number_format((float)(string) $database_size['Total']).' bytes.';
             }
             $mysql_html .= '</p>';
         } else {

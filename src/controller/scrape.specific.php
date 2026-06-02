@@ -9,6 +9,10 @@ declare(strict_types=1);
 // Returns the rendered XML/JSON/bencode body. On scrape failure calls
 // tracker_error() (which exits).
 
+/**
+ * @param array<string, mixed> $settings
+ * @param array<int, string> $valid_info_hashes
+ */
 function scrape_specific_controller(mysqli $connection, array $settings, array $valid_info_hashes): string
 {
     require_once __DIR__.'/../functions/scrape.build.where.clause.php';

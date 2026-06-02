@@ -6,7 +6,8 @@ declare(strict_types=1);
 //  Handles database optimization action.
 //  Returns message string on completion.
 
-function admin_optimize_action($connection, $settings, $time)
+/** @param array<string, mixed> $settings */
+function admin_optimize_action(mysqli $connection, array $settings, int $time): string
 {
     require_once __DIR__.'/../model/db.optimize.php';
 

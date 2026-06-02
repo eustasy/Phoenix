@@ -19,6 +19,11 @@ declare(strict_types=1);
 // The response is assembled as a plain PHP structure and handed to
 // bencode_encode(), which owns length prefixes and lexicographic key order —
 // the 'peers'/'peers6' ordering falls out of the sort automatically.
+/**
+ * @param array{complete: int, incomplete: int} $counts
+ * @param array<string, mixed> $settings
+ * @param array<int, array<string, mixed>> $rows
+ */
 function view_announce_bencode(
     array $counts,
     array $settings,
@@ -36,8 +41,8 @@ function view_announce_bencode(
     $response = [
         'complete' => (int) $counts['complete'],
         'incomplete' => (int) $counts['incomplete'],
-        'interval' => (int) $settings['announce_interval'],
-        'min interval' => (int) $settings['min_interval'],
+        'interval' => (int)(string) $settings['announce_interval'],
+        'min interval' => (int)(string) $settings['min_interval'],
     ];
 
     if ($compact) {

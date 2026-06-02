@@ -10,6 +10,10 @@ declare(strict_types=1);
 // client expects no body). Calls tracker_error() on validation failure
 // (which exits, same contract as before).
 
+/**
+ * @param array<string, mixed> $settings
+ * @param array<int, string> $allowed_torrents
+ */
 function announce_controller(mysqli $connection, array $settings, int $time, array $allowed_torrents = []): string
 {
 
@@ -20,7 +24,7 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
     // info_hash: required, 40 hex chars. sanitize_tracker_params returns false
     // when the value is missing or fails validation — under strict_types the
     // strlen() call below would raise a TypeError on false, so check first.
-    if ($peer['info_hash'] === false || strlen($peer['info_hash']) !== 40) {
+    if ($peer['info_hash'] === false || strlen((string) $peer['info_hash']) !== 40) {
         tracker_error('Info Hash is invalid.');
     }
 
@@ -33,7 +37,7 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
     }
 
     // peer_id: required, 40 hex chars (see info_hash note above).
-    if ($peer['peer_id'] === false || strlen($peer['peer_id']) !== 40) {
+    if ($peer['peer_id'] === false || strlen((string) $peer['peer_id']) !== 40) {
         tracker_error('Peer ID is invalid.');
     }
 
@@ -116,7 +120,7 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
     if ($event === 'completed') {
         $peer['state'] = 1;
         require_once __DIR__.'/../model/torrent.increment.downloads.php';
-        torrent_increment_downloads($connection, $settings, $peer['info_hash']);
+        torrent_increment_downloads($connection, $settings, (string) $peer['info_hash']);
         phoenix_hook('download.complete', $connection, $settings, $time, $peer);
     }
 

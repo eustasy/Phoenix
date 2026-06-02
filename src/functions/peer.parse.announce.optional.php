@@ -6,6 +6,11 @@ declare(strict_types=1);
 // Sanitises the optional announce parameters from $_GET, applying tracker
 // defaults from $settings where the request is silent. Returns an
 // associative array intended to be merged into $peer.
+/**
+ * @param array<string, string> $get
+ * @param array<string, mixed> $settings
+ * @return array<string, mixed>
+ */
 function peer_parse_announce_optional(array $get, array $settings): array
 {
 

@@ -12,6 +12,11 @@ declare(strict_types=1);
 //   $rows: array of peer rows from peers_select_active()
 //
 // Returns: XML string.
+/**
+ * @param array{complete: int, incomplete: int} $counts
+ * @param array<string, mixed> $settings
+ * @param array<int, array<string, mixed>> $rows
+ */
 function view_announce_xml(array $counts, array $settings, array $rows): string
 {
     $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.

@@ -7,6 +7,10 @@ declare(strict_types=1);
 // This prevents rapid fake-peer injection by using a tighter time window (min_interval/5).
 // Calls tracker_error() and exits if rate limit is exceeded.
 
+/**
+ * @param array<string, mixed> $settings
+ * @param array<string, mixed> $peer
+ */
 function announce_check_rate_limit(mysqli $connection, array $settings, array $peer, int $time): void
 {
     require_once __DIR__.'/../model/peers.count.rate.php';

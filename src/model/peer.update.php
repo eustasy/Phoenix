@@ -7,6 +7,10 @@ declare(strict_types=1);
 // Used when peer address and state are unchanged (no migration or completion).
 // Returns true on success, calls tracker_error() on failure.
 
+/**
+ * @param array<string, mixed> $settings
+ * @param array<string, mixed> $peer
+ */
 function peer_update(mysqli $connection, array $settings, int $time, array $peer): true
 {
     $peer_update = mysqli_query(

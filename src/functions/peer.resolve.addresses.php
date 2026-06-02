@@ -7,6 +7,10 @@ declare(strict_types=1);
 // the first valid IPv6 found, plus their associated ports (or false when no
 // port could be parsed).
 
+/**
+ * @param array<int, string> $addresses
+ * @return array<string, string|int|false>
+ */
 function peer_resolve_addresses(array $addresses): array
 {
     require_once __DIR__.'/parse.ipv4.php';

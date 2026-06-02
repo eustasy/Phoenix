@@ -9,6 +9,7 @@ declare(strict_types=1);
 // boot (any subsequent db_is_configured() check will reject the dummy
 // credentials). Returns the populated $settings array.
 
+/** @return PhoenixSettings */
 function settings_load(string $default_path, string $custom_path): array
 {
     $settings = [];

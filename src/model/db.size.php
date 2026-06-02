@@ -8,6 +8,10 @@ declare(strict_types=1);
 // Data, Indexes, Total, Free (each an int byte count). Returns false when
 // the query fails or no rows match (e.g. an empty schema).
 
+/**
+ * @param array<string, mixed> $settings
+ * @return array<string, mixed>|false
+ */
 function db_size(mysqli $connection, array $settings): array|false
 {
     $result = mysqli_query(

@@ -7,6 +7,10 @@ declare(strict_types=1);
 // Used when a peer announces with event=stopped.
 // Returns true on success, calls tracker_error() on failure.
 
+/**
+ * @param array<string, mixed> $settings
+ * @param array<string, mixed> $peer
+ */
 function peer_delete(mysqli $connection, array $settings, array $peer): true
 {
     $peer_delete = mysqli_query(

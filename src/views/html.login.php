@@ -7,7 +7,7 @@ declare(strict_types=1);
 // Displays error message if $show_error is true.
 // Returns HTML string. Caller is responsible for echo and exit.
 
-function view_login_html($show_error = false): string
+function view_login_html(bool $show_error = false): string
 {
     $error_html = '';
     if ($show_error) {

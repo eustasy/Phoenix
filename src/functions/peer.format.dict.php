@@ -15,21 +15,25 @@ declare(strict_types=1);
 // keys into the raw byte order BEP 3 requires ('ip' < 'peer id' < 'port').
 // Ports are cast to int so they bencode as integers, not strings — mysqli
 // hands back numeric columns as strings.
+/**
+ * @param array<string, mixed> $row
+ * @return array<string, mixed>|null
+ */
 function peer_format_dict(array $row, bool $include_peer_id): ?array
 {
     if ($row['ipv4'] != null) {
-        $ip = $row['ipv4'];
-        $port = (int) $row['portv4'];
+        $ip = (string) $row['ipv4'];
+        $port = (int)(string) $row['portv4'];
     } elseif ($row['ipv6'] != null) {
-        $ip = $row['ipv6'];
-        $port = (int) $row['portv6'];
+        $ip = (string) $row['ipv6'];
+        $port = (int)(string) $row['portv6'];
     } else {
         return null;
     }
 
     $dict = ['ip' => $ip, 'port' => $port];
     if ($include_peer_id) {
-        $dict['peer id'] = hex2bin($row['peer_id']);
+        $dict['peer id'] = hex2bin((string) $row['peer_id']);
     }
 
     return $dict;

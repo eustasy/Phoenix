@@ -7,6 +7,11 @@ declare(strict_types=1);
 // Returns the peer row as an associative array, or false if no row matches
 // (also false on query error — same channel, callers truthy-test).
 
+/**
+ * @param array<string, mixed> $settings
+ * @param array<string, mixed> $peer
+ * @return array<string, mixed>|false
+ */
 function peer_select(mysqli $connection, array $settings, array $peer): array|false
 {
     require_once __DIR__.'/db.fetch.once.php';

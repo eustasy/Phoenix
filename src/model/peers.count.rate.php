@@ -8,6 +8,10 @@ declare(strict_types=1);
 // updated after threshold. Used for rate limiting to prevent rapid fake-peer injection.
 // Returns int count.
 
+/**
+ * @param array<string, mixed> $settings
+ * @param array<string, mixed> $peer
+ */
 function peers_count_rate(mysqli $connection, array $settings, array $peer, int $threshold): int
 {
     require_once __DIR__.'/db.fetch.once.php';
@@ -33,5 +37,5 @@ function peers_count_rate(mysqli $connection, array $settings, array $peer, int 
         'AND `updated`>'.$threshold.';',
     );
 
-    return $rate ? intval($rate['count']) : 0;
+    return $rate ? intval((string) $rate['count']) : 0;
 }

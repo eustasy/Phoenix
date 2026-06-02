@@ -5,6 +5,10 @@ declare(strict_types=1);
 ////	torrents_select_listed
 // Returns all listed torrents with peer counts (seeders/leechers) for the public index.
 // Returns an empty array if no listed torrents exist.
+/**
+ * @param array<string, mixed> $settings
+ * @return list<array<string, mixed>>
+ */
 function torrents_select_listed(mysqli $connection, array $settings): array
 {
     $sql = 'SELECT

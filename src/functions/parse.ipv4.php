@@ -6,6 +6,7 @@ declare(strict_types=1);
 // Attempts to parse an address string as IPv4, optionally with a `:port` suffix.
 // Strips a leading `::ffff:` IPv4-mapped IPv6 prefix when present.
 // Returns array('ip' => string, 'port' => int|false) on success, or false if the address is not valid IPv4.
+/** @return array{ip: string, port: int|false}|false */
 function parse_ipv4(string $address): array|false
 {
     // IPv4-mapped IPv6 prefix is a literal 7-char string, not a character mask;

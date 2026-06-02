@@ -6,7 +6,8 @@ declare(strict_types=1);
 //  Handles authentication for admin panel.
 //  Returns HTML output if login required, or null if authenticated.
 
-function admin_login_controller($settings)
+/** @param array<string, mixed> $settings */
+function admin_login_controller(array $settings): ?string
 {
     if (empty($settings['admin_password'])) {
         // No password configured, skip auth

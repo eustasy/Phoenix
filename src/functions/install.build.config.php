@@ -8,6 +8,7 @@ declare(strict_types=1);
 // quotes, backslashes, and embedded null bytes) and booleans (emitting the
 // bare `true` / `false` literals) for us. db_reset is always emitted as
 // `false` so a freshly-installed tracker never re-runs setup unattended.
+/** @param array<string, mixed> $values */
 function install_build_config(array $values): string
 {
     $keys = [

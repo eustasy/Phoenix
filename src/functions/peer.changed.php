@@ -5,6 +5,10 @@ declare(strict_types=1);
 ////	peer_changed
 // Returns true if any of the announce-relevant fields differ between the
 // new peer state and the previous row, or if there is no previous row.
+/**
+ * @param array<string, mixed> $peer
+ * @param array<string, mixed>|false $old
+ */
 function peer_changed(array $peer, array|false $old): bool
 {
     return

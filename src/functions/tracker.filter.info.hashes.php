@@ -12,6 +12,11 @@ declare(strict_types=1);
 // Returns an empty array when nothing in $info_hashes is allowed; the
 // caller is responsible for treating that as a "not allowed" error.
 
+/**
+ * @param array<int, string> $info_hashes
+ * @param array<int, string> $allowed_torrents
+ * @return array<int, string>
+ */
 function tracker_filter_info_hashes(array $info_hashes, array $allowed_torrents): array
 {
     return array_values(array_intersect($info_hashes, $allowed_torrents));

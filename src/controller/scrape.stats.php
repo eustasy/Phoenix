@@ -8,6 +8,7 @@ declare(strict_types=1);
 // dispatches to the XML/JSON/HTML view based on $_GET flags. Returns the
 // rendered body. On data-fetch failure calls tracker_error() (which exits).
 
+/** @param array<string, mixed> $settings */
 function scrape_stats_controller(mysqli $connection, array $settings): string
 {
     require_once __DIR__.'/../model/stats.peers.php';

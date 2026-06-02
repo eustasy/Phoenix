@@ -22,7 +22,7 @@ declare(strict_types=1);
 // files-dict with no torrents) cast it to (object) so it always emits as a
 // dict. Binary keys — e.g. raw 20-byte info_hashes — survive the object cast
 // intact, so a stdClass is the canonical way to carry them.
-function bencode_encode($value): string
+function bencode_encode(mixed $value): string
 {
     if (is_int($value)) {
         return 'i'.$value.'e';

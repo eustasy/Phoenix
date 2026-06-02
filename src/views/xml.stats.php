@@ -17,6 +17,10 @@ declare(strict_types=1);
 //   $settings: config array (needs phoenix_version)
 //
 // Returns: XML string.
+/**
+ * @param array<string, int> $stats
+ * @param array<string, mixed> $settings
+ */
 function view_stats_xml(array $stats, array $settings): string
 {
     return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.

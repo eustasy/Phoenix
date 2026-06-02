@@ -9,6 +9,12 @@ declare(strict_types=1);
 // ORDER/LIMIT: per strategy (seeders-first, random, etc.)
 // Returns array of peer rows, calls tracker_error() on failure.
 
+/**
+ * @param array<string, mixed> $settings
+ * @param array<string, mixed> $peer
+ * @param array{where: string, order: string} $strategy
+ * @return array<int, array<string, mixed>>
+ */
 function peers_select_active(mysqli $connection, array $settings, array $peer, int $stale_threshold, array $strategy): array
 {
     $where = '`info_hash`=\''.$peer['info_hash'].'\' '.

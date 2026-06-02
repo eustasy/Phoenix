@@ -17,6 +17,7 @@ declare(strict_types=1);
 //            - traffic: int
 //
 // Returns: XML string.
+/** @param array<string, array<string, mixed>> $scrape */
 function view_scrape_xml(array $scrape): string
 {
     // Wrapped in a <scrape> root so the document is well-formed even when

@@ -8,6 +8,7 @@ declare(strict_types=1);
 // before invoking. Returns the rendered XML/JSON/bencode body. On scrape
 // failure calls tracker_error() (which exits).
 
+/** @param array<string, mixed> $settings */
 function scrape_full_controller(mysqli $connection, array $settings): string
 {
     require_once __DIR__.'/../functions/scrape.merge.results.php';

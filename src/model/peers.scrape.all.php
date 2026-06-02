@@ -8,9 +8,12 @@ declare(strict_types=1);
 // GROUP BY info_hash, returns all torrents in the tracker.
 // Used by: scrape.php (full scrape when enabled).
 
-function peers_scrape_all($connection, $settings)
+/**
+ * @param array<string, mixed> $settings
+ */
+function peers_scrape_all(mysqli $connection, array $settings): mysqli_result|false
 {
-    return mysqli_query(
+    $result = mysqli_query(
         $connection,
         'SELECT
 			`p`.`info_hash` AS `info_hash`,
@@ -19,4 +22,6 @@ function peers_scrape_all($connection, $settings)
 		FROM `'.$settings['db_prefix'].'peers` AS `p`
 		GROUP BY `p`.`info_hash`;',
     );
+
+    return $result instanceof mysqli_result ? $result : false;
 }

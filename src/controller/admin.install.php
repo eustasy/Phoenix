@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 require_once __DIR__.'/../views/html.install.php';
 
-function admin_install_controller(string $config_path)
+function admin_install_controller(string $config_path): string
 {
     error_reporting(0);
 
@@ -48,7 +48,7 @@ function admin_install_controller(string $config_path)
     $test_host = $values['db_persist'] ? 'p:' : '';
     $test_host .= $values['db_host'];
     try {
-        $test_conn = @mysqli_connect($test_host, $values['db_user'], $values['db_pass'], $values['db_name']);
+        $test_conn = @mysqli_connect($test_host, (string) $values['db_user'], (string) $values['db_pass'], (string) $values['db_name']);
     } catch (mysqli_sql_exception $e) {
         $test_conn = false;
     }

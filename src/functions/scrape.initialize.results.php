@@ -7,6 +7,10 @@ declare(strict_types=1);
 // BEP 15 requires responses for all requested hashes, even if unknown.
 // Returns array indexed by info_hash with zeroed stats.
 
+/**
+ * @param array<int, string> $info_hashes
+ * @return array<string, array<string, mixed>>
+ */
 function scrape_initialize_results(array $info_hashes): array
 {
     $scrape = [];
