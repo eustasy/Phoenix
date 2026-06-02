@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ["8.3", "8.4", "8.5", "8.6"]
+        php-version: ["8.2", "8.3", "8.4", "8.5", "8.6"]
     services:
       mariadb:
         image: mariadb:12.3.2@sha256:f0b0a2b36cd621f919a7bbbff44d894aa274e3d32feecf032138557a483a6522

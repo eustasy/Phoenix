@@ -21,14 +21,14 @@ vendor/bin/phpunit --filter ParseIpv4Test
 # Run a single test method.
 vendor/bin/phpunit --filter 'ParseIpv4Test::testIpv4WithPort'
 
-# CI lint checks (run by GitHub Actions in addition to PHPUnit).
-./.normal/check-php.sh
-sql-lint .
-php .normal/check-json.php
-php .normal/check-xml.php
+# Lint, static analysis, and format checks (run by GitHub Actions via qlty).
+# `qlty check` runs every configured linter: phpstan + php-cs-fixer (PHP),
+# sqlfluff (SQL), and markdownlint (Markdown).
+qlty check          # check changed files
+qlty check --all    # check the whole tree, as CI does
 ```
 
-CI runs the workflow in `.github/workflows/normal.yml` against PHP 8.3–8.6. It runs both the lint checks and the PHPUnit suite (the latter against a MariaDB service container).
+CI runs the workflows in `.github/workflows/`: `php.yml` (phpstan + php-cs-fixer via qlty) and `test-php.yml` (the PHPUnit suite against a MariaDB service container) across PHP 8.2–8.6, plus `sql.yml` (sqlfluff), `md.yml` (markdownlint), and `security.yml`.
 
 ## Architecture
 
@@ -36,6 +36,7 @@ CI runs the workflow in `.github/workflows/normal.yml` against PHP 8.3–8.6. It
 
 The codebase follows what the changelog calls a "puff-style" layout — small, single-purpose files glued together by `require_once`:
 
+* **`src/controller/`** — request handlers, one per endpoint/action (`announce.php`, `scrape.{full,specific,stats}.php`, `admin.*.php`). Each exposes a `*_controller()` function the matching `public/*.php` entry point calls after bootstrap; this is where per-request input sanitization, model calls, and view selection live.
 * **`src/functions/`** — one function per file. File `parse.ipv4.php` defines `parse_ipv4()`. Functions are pure-ish PHP (no top-level execution beyond defining the function). Business logic helpers: sanitization, validation, address parsing, peer selection strategies, etc. One function per file, `////    <function_name>` header comment, then a brief description, then the function.
 * **`src/model/`** — database operations. One function per file, each returns results or false. All queries live here.
 * **`src/views/`** — presentation layer. Bencode, XML, and HTML output functions. Receives normalized data arrays, never raw DB results or `$_GET`/`$_POST`. **Bencode is never hand-assembled in a view:** the `bencode.*.php` views build a plain PHP structure (ints, byte strings, lists, dicts) and hand it to `bencode_encode()` (`bencode.encode.php`), the single emitter. It owns length prefixes, balanced container tokens, and dict-key ordering — keys are sorted into raw byte order (`ksort(SORT_STRING)`) per BEP 3, so callers never pre-sort. An empty array encodes as an empty *list* (`le`); cast to `(object)` to force a dict (`de`), as `view_scrape_bencode` does for the binary-keyed, possibly-empty files dict. Cast numeric DB columns to `int` before encoding (mysqli returns them as strings, which would otherwise emit as bencode strings, not integers).
@@ -46,17 +47,17 @@ The codebase follows what the changelog calls a "puff-style" layout — small, s
 
 ### Entry points
 
-Every entry point sits in `public` and bootstraps via `require_once __DIR__.'/../src/phoenix.php'` (which loads settings, opens the DB, defines `tracker_error`):
+Every entry point sits in `public`, bootstraps via `require_once __DIR__.'/../src/phoenix.php'` (which loads settings, opens the DB, defines `tracker_error`), then delegates the real work to request handlers in `src/controller/` — `*_controller()` functions returning a response string the entry point echoes. The `public/*.php` files stay thin (`announce.php` is ~12 lines); `index.php` is the exception, calling its model and view directly:
 
-* `announce.php` — BEP 3 announce. Follows MVC pattern: sanitizes input, resolves peer addresses, handles peer events (new/change/access/stopped/completed), then builds and outputs bencode response.
-* `scrape.php` — BEP 15 scrape. `?stats` returns tracker stats; with `info_hash`(es) returns specific torrents; otherwise full scrape (if enabled).
+* `announce.php` → `announce_controller()` (`src/controller/announce.php`) — BEP 3 announce: sanitizes input, resolves peer addresses, handles peer events (new/change/access/stopped/completed), then builds and outputs the bencode response.
+* `scrape.php` — BEP 15 scrape; routes by mode to `scrape_stats_controller` / `scrape_specific_controller` / `scrape_full_controller` (`src/controller/scrape.*.php`). `?stats` returns tracker stats; with `info_hash`(es) returns specific torrents (closed trackers filter to allowed ones first); otherwise full scrape (if enabled).
 * `index.php` — public torrent index, gated by `$settings['public_index']`.
-* `admin.php` — admin panel and first-run installer. Requires no `phoenix.custom.php` to enter installer mode.
+* `admin.php` — admin panel and first-run installer; routes to `admin_install_controller` (no config yet), else `admin_login_controller` then `admin_panel_controller` (`src/controller/admin.*.php`). Requires no `phoenix.custom.php` to enter installer mode.
 * `magnet.php` — pure client-side magnet generator. **Does not bootstrap** `../src/phoenix.php` and does not touch the tracker — it's a self-contained utility page.
 
 ### Web exposure
 
-Only `public/` is meant to be web-served. The PDS layout puts `src/` (functions, model, views, hooks), `bin/` (cron scripts), `config/` (database credentials in `phoenix.custom.php`), and `tests/` one level above the document root, so when the server is configured correctly none of them are reachable over HTTP. Server-config docs live in `APACHE.md` and `NGINX.md`; both cover document root configuration, stripping `.php` from URLs, and rate-limiting the admin endpoint.
+Only `public/` is meant to be web-served. The PDS layout puts `src/` (controllers, functions, model, views, hooks), `bin/` (cron scripts), `config/` (database credentials in `phoenix.custom.php`), and `tests/` one level above the document root, so when the server is configured correctly none of them are reachable over HTTP. Server-config docs live in `APACHE.md` and `NGINX.md`; both cover document root configuration, stripping `.php` from URLs, and rate-limiting the admin endpoint.
 
 ### Bootstrap (`src/phoenix.php`)
 
@@ -122,6 +123,6 @@ These come from `.github/CONTRIBUTING.md` and consistent practice in the codebas
 * Use `Fix #<issue>: <Title from issue>.` verbatim from the GitHub issue when the work closes a tracked issue.
 * Otherwise use a short descriptive subject, present tense.
 * One concern per commit — avoid batching unrelated fixes.
-* Include `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` (or current model) trailer.
+* Include `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>` (or current model) trailer.
 
 Run `gh issue view <N>` before writing a commit message to confirm the issue is still open and to copy its title verbatim.

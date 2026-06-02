@@ -39,7 +39,7 @@ Phoenix follows an MVC-inspired structure optimized for procedural PHP:
 
 ```text
 phoenix/
-├── public/              # Web-accessible entry points (controllers)
+├── public/              # Web-accessible entry points (thin; delegate to src/controller/)
 │   ├── announce.php     # BitTorrent announce endpoint (BEP 3)
 │   ├── scrape.php       # BitTorrent scrape endpoint (BEP 15)
 │   ├── index.php        # Public torrent listing (optional)
@@ -47,6 +47,7 @@ phoenix/
 │   └── magnet.php       # Client-side magnet link generator
 ├── src/
 │   ├── phoenix.php      # Bootstrap: loads config, connects to DB
+│   ├── controller/      # Request handlers, one per endpoint/action (*_controller())
 │   ├── functions/       # Business logic helpers (one function per file)
 │   ├── model/           # Database operations (one query function per file)
 │   ├── views/           # Presentation layer (bencode, XML, HTML)
@@ -62,7 +63,8 @@ phoenix/
 
 ### Architecture Notes
 
-* **Controllers** (`public/*.php`) are thin orchestrators: sanitize input → call model → call view.
+* **Entry points** (`public/*.php`) are thin: they bootstrap, then delegate to a controller.
+* **Controllers** (`src/controller/*.php`) orchestrate each request: sanitize input → call model → call view. (`public/index.php` is small enough to skip the controller and call its model and view directly.)
 * **Models** (`src/model/*.php`) handle all database operations. Each file exports one function that accepts `$connection`, `$settings`, and domain parameters.
 * **Views** (`src/views/*.php`) handle presentation. Bencode for BitTorrent protocol, HTML for humans, XML/JSON for debugging. The bencode views build a plain PHP structure and serialise it through a single emitter, `bencode_encode()`, which guarantees correct length prefixes and BEP-3 dict key ordering.
 * **Functions** (`src/functions/*.php`) contain business logic helpers that don't fit cleanly into model or view (sanitization, validation, address parsing, etc.).
