@@ -62,7 +62,7 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
         tracker_error('Unable to obtain client IP');
     }
 
-    $resolved = peer_resolve_addresses($candidates);
+    $resolved = peer_resolve_addresses($candidates, (bool)$settings['reject_private_ips']);
     $peer['ipv4'] = $resolved['ipv4'];
     $peer['ipv6'] = $resolved['ipv6'];
     $peer['portv4'] = $resolved['portv4'];

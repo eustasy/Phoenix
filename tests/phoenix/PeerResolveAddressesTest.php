@@ -81,4 +81,46 @@ class PeerResolveAddressesTest extends PhoenixTestCase
         $this->assertFalse($result['portv4']);
     }
 
+    ////	reject_private flag
+
+    public function testPrivateAddressKeptWhenRejectDisabled(): void
+    {
+        // Default behaviour: a private REMOTE_ADDR is accepted as-is.
+        $result = peer_resolve_addresses(['10.0.0.1:6881']);
+        $this->assertSame('10.0.0.1', $result['ipv4']);
+        $this->assertSame(6881, $result['portv4']);
+    }
+
+    public function testPrivateAddressSkippedWhenRejectEnabled(): void
+    {
+        $result = peer_resolve_addresses(['10.0.0.1:6881'], true);
+        $this->assertFalse($result['ipv4']);
+        $this->assertFalse($result['portv4']);
+    }
+
+    public function testPrivateFallsThroughToPublicCandidate(): void
+    {
+        // The BEP 3 NAT/proxy case: candidate order (already reversed by
+        // peer_address_candidates) puts the private REMOTE_ADDR first and a
+        // public client-declared external_ip after it. With rejection on,
+        // the private address is skipped and the public one is used.
+        $result = peer_resolve_addresses(['10.0.0.1:6881', '8.8.8.8:51413'], true);
+        $this->assertSame('8.8.8.8', $result['ipv4']);
+        $this->assertSame(51413, $result['portv4']);
+    }
+
+    public function testUlaIpv6SkippedWhenRejectEnabled(): void
+    {
+        $result = peer_resolve_addresses(['[fd00::1]:6881'], true);
+        $this->assertFalse($result['ipv6']);
+        $this->assertFalse($result['portv6']);
+    }
+
+    public function testPublicIpv6KeptWhenRejectEnabled(): void
+    {
+        $result = peer_resolve_addresses(['[2606:4700:4700::1111]:6881'], true);
+        $this->assertSame('2606:4700:4700::1111', $result['ipv6']);
+        $this->assertSame(6881, $result['portv6']);
+    }
+
 }

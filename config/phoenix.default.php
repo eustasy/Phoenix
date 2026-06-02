@@ -36,6 +36,11 @@ $settings['honor_xff'] = false;            /* If this server is behind a fronten
 /* will come in the form of a X-Forwarded-For. This option */
 /* should only be set if your frontend proxy properly handles */
 /* and filters XFF, else it allows for trivial IP spoofing */
+$settings['reject_private_ips'] = true;             /* drop private (RFC 1918) and reserved addresses when */
+/* resolving peers, so they are never handed out to the swarm. */
+/* Lets a private REMOTE_ADDR (NAT/proxy) fall through to a */
+/* public external_ip, per BEP 3. Set false for LAN/same-NAT */
+/* trackers, where peers legitimately have private addresses. */
 $settings['public_index'] = false;            /* serve a public index of listed torrents */
 
 ////	Admin Options

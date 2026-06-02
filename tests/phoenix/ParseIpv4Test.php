@@ -72,4 +72,42 @@ class ParseIpv4Test extends PhoenixTestCase
         $this->assertFalse(parse_ipv4('ff:ff:ff:ff'));
     }
 
+    ////	reject_private flag
+
+    public function testPrivateRangeAcceptedByDefault(): void
+    {
+        $r = parse_ipv4('192.168.1.1');
+        $this->assertIsArray($r);
+        $this->assertSame('192.168.1.1', $r['ip']);
+    }
+
+    public function testRejectsPrivateRangeWhenFlagSet(): void
+    {
+        $this->assertFalse(parse_ipv4('192.168.1.1', true));
+        $this->assertFalse(parse_ipv4('10.0.0.1', true));
+        $this->assertFalse(parse_ipv4('172.16.0.1', true));
+    }
+
+    public function testRejectsReservedRangeWhenFlagSet(): void
+    {
+        // Loopback and link-local are reserved, not RFC 1918 private.
+        $this->assertFalse(parse_ipv4('127.0.0.1', true));
+        $this->assertFalse(parse_ipv4('169.254.1.1', true));
+    }
+
+    public function testAcceptsPublicAddressWhenFlagSet(): void
+    {
+        $r = parse_ipv4('8.8.8.8', true);
+        $this->assertIsArray($r);
+        $this->assertSame('8.8.8.8', $r['ip']);
+    }
+
+    public function testKeepsPortWhenRejectingIsRequestedOnPublicAddress(): void
+    {
+        $r = parse_ipv4('8.8.8.8:6881', true);
+        $this->assertIsArray($r);
+        $this->assertSame('8.8.8.8', $r['ip']);
+        $this->assertSame(6881, $r['port']);
+    }
+
 }
