@@ -1,0 +1,23 @@
+parameters:
+    level: 9
+
+    # src/ is procedural (one function per file, no composer autoload) and qlty analyses one
+    # target file at a time. scanDirectories makes every src symbol (functions, controllers,
+    # model, views) resolvable no matter which file qlty is checking — this is what removes
+    # the source-wide "function/method not found".
+    scanDirectories:
+        - %currentWorkingDirectory%/src
+
+    # Tests need PHPUnit known to phpstan (absent in qlty's phpstan env); they are exercised
+    # by the PHPUnit suite instead of static analysis.
+    excludePaths:
+        - %currentWorkingDirectory%/tests
+
+    ignoreErrors:
+        # Entry points receive $settings/$connection/$time/$allowed_torrents from
+        # src/phoenix.php via require_once; phpstan cannot track include scope.
+        -
+            identifier: variable.undefined
+            paths:
+                - %currentWorkingDirectory%/bin
+                - %currentWorkingDirectory%/public

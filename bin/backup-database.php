@@ -82,7 +82,8 @@ if (! unlink($cnf_file)) {
 }
 
 if ($exit_code !== 0) {
-    $error = is_readable($errfile) ? trim(file_get_contents($errfile)) : '';
+    $contents = is_readable($errfile) ? file_get_contents($errfile) : '';
+    $error    = is_string($contents) ? trim($contents) : '';
     echo 'Backup failed.' . ($error ? ' ' . $error : '') . PHP_EOL;
     exit(1);
 }
