@@ -1,0 +1,30 @@
+line-length = 140
+target-version = "py311"
+
+[lint]
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "B",   # flake8-bugbear
+  "C4",  # flake8-comprehensions
+  "UP",  # pyupgrade
+  "S",   # flake8-bandit (security)
+  "SIM", # flake8-simplify
+]
+
+# flake8-bandit's S101 flags bare `assert`, idiomatic in pytest but a real bug in
+# production code (assertions are stripped under `python -O`). Allow it only under
+# tests/ so it still fires everywhere else. ruff is now the sole runner of the bandit
+# ruleset — the standalone bandit plugin was dropped as redundant with the "S" select.
+[lint.per-file-ignores]
+"**/tests/**" = ["S101"]
+
+[lint.isort]
+known-first-party = []
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
