@@ -9,7 +9,8 @@ use PHPUnit\Framework\TestCase;
 // Base class for the end-to-end smoke suite. Drives the real public/*.php entry
 // points over HTTP against a running `php -S` server (SMOKE_BASE_URL). Uses the
 // stream wrapper rather than a client dependency; redirects are NOT followed so
-// installer/login 302s can be asserted directly.
+// installer/login 302s can be asserted directly. Supports sending request
+// headers (e.g. a Cookie) so the authenticated admin panel can be reached.
 abstract class SmokeTestCase extends TestCase
 {
     protected function baseUrl(): string
@@ -38,9 +39,10 @@ abstract class SmokeTestCase extends TestCase
     /**
      * @param array<string, scalar> $query
      * @param array<string, scalar> $form
+     * @param array<string, string> $headers
      * @return array{status: int, headers: list<string>, body: string}
      */
-    protected function http(string $method, string $path, array $query = [], array $form = []): array
+    protected function http(string $method, string $path, array $query = [], array $form = [], array $headers = []): array
     {
         $url = $this->baseUrl().$path;
         if ($query !== []) {
@@ -54,41 +56,50 @@ abstract class SmokeTestCase extends TestCase
             'timeout' => 10,
         ];
         if ($form !== []) {
-            $http['header'] = "Content-Type: application/x-www-form-urlencoded\r\n";
+            $headers['Content-Type'] = 'application/x-www-form-urlencoded';
             $http['content'] = http_build_query($form);
+        }
+        if ($headers !== []) {
+            $header_lines = '';
+            foreach ($headers as $name => $value) {
+                $header_lines .= $name.': '.$value."\r\n";
+            }
+            $http['header'] = $header_lines;
         }
 
         $body = @file_get_contents($url, false, stream_context_create(['http' => $http]));
-        $headers = $http_response_header ?? [];
+        $responseHeaders = $http_response_header ?? [];
 
         $status = 0;
-        if (isset($headers[0]) && preg_match('~HTTP/\S+\s+(\d+)~', $headers[0], $m)) {
+        if (isset($responseHeaders[0]) && preg_match('~HTTP/\S+\s+(\d+)~', $responseHeaders[0], $m)) {
             $status = (int) $m[1];
         }
 
         return [
             'status' => $status,
-            'headers' => $headers,
+            'headers' => $responseHeaders,
             'body' => $body === false ? '' : $body,
         ];
     }
 
     /**
      * @param array<string, scalar> $query
+     * @param array<string, string> $headers
      * @return array{status: int, headers: list<string>, body: string}
      */
-    protected function get(string $path, array $query = []): array
+    protected function get(string $path, array $query = [], array $headers = []): array
     {
-        return $this->http('GET', $path, $query);
+        return $this->http('GET', $path, $query, [], $headers);
     }
 
     /**
      * @param array<string, scalar> $form
+     * @param array<string, string> $headers
      * @return array{status: int, headers: list<string>, body: string}
      */
-    protected function post(string $path, array $form = []): array
+    protected function post(string $path, array $form = [], array $headers = []): array
     {
-        return $this->http('POST', $path, [], $form);
+        return $this->http('POST', $path, [], $form, $headers);
     }
 
     /** @param array{status: int, headers: list<string>, body: string} $response */
@@ -101,5 +112,24 @@ abstract class SmokeTestCase extends TestCase
         }
 
         return null;
+    }
+
+    /**
+     * Extract the session cookie (as a ready-to-send `PHPSESSID=…` pair) from a
+     * response's Set-Cookie headers. Returns the LAST match — login regenerates
+     * the session id, so the final Set-Cookie carries the authenticated one.
+     *
+     * @param array{status: int, headers: list<string>, body: string} $response
+     */
+    protected function sessionCookie(array $response): ?string
+    {
+        $cookie = null;
+        foreach ($response['headers'] as $line) {
+            if (stripos($line, 'Set-Cookie:') === 0 && preg_match('~(PHPSESSID=[^;]+)~', $line, $m)) {
+                $cookie = $m[1];
+            }
+        }
+
+        return $cookie;
     }
 }

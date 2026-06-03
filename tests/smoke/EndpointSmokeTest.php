@@ -128,4 +128,37 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertSame(200, $r['status']);
         $this->assertStringContainsString('<', $r['body']);
     }
+
+    #[Depends('testInstallSucceeds')]
+    public function testPublicIndexAsXml(): void
+    {
+        $r = $this->get('/index.php', ['xml' => '1']);
+        $this->assertSame(200, $r['status']);
+        $this->assertStringContainsString('<torrents>', $r['body']);
+    }
+
+    #[Depends('testInstallSucceeds')]
+    public function testPublicIndexAsJson(): void
+    {
+        $r = $this->get('/index.php', ['json' => '1']);
+        $this->assertSame(200, $r['status']);
+        $this->assertIsArray(json_decode($r['body'], true));
+    }
+
+    #[Depends('testInstallSucceeds')]
+    public function testAdminPanelReachableAfterLogin(): void
+    {
+        // Log in, capture the regenerated session cookie, then load the panel
+        // with it — exercises the authenticated admin path end-to-end.
+        $login = $this->post('/admin.php', ['process' => 'login', 'password' => self::ADMIN_PW]);
+        $this->assertSame(302, $login['status']);
+
+        $cookie = $this->sessionCookie($login);
+        $this->assertNotNull($cookie, 'a successful login should set a session cookie');
+
+        $panel = $this->get('/admin.php', [], ['Cookie' => $cookie]);
+        $this->assertSame(200, $panel['status']);
+        $this->assertStringContainsString('Phoenix Diagnostics and Utilities', $panel['body']);
+        $this->assertStringNotContainsString('name="password"', $panel['body']);
+    }
 }
