@@ -17,15 +17,20 @@ declare(strict_types=1);
  */
 function peers_select_active(mysqli $connection, array $settings, array $peer, int $stale_threshold, array $strategy): array
 {
-    $where = '`info_hash`=\''.$peer['info_hash'].'\' '.
-        'AND `peer_id`!=\''.$peer['peer_id'].'\' '.
-        'AND `updated`>'.$stale_threshold.
+    $where = '`info_hash`=? '.
+        'AND `peer_id`!=? '.
+        'AND `updated`>?'.
         $strategy['where'];
+    // LIMIT cannot be a bound parameter in a mysqli prepared statement, so it
+    // stays interpolated. numwant is intval'd upstream; narrow + cast to an int
+    // here so the literal is injection-safe. The strategy where/order fragments
+    // are static SQL with no user values (see peer_select_strategy).
+    $limit = is_numeric($peer['numwant']) ? (int) $peer['numwant'] : 0;
     $sql = 'SELECT * FROM `'.$settings['db_prefix'].'peers` '.
         'WHERE '.$where.$strategy['order'].' '.
-        'LIMIT '.$peer['numwant'].';';
+        'LIMIT '.$limit.';';
 
-    $query = mysqli_query($connection, $sql);
+    $query = mysqli_execute_query($connection, $sql, [$peer['info_hash'], $peer['peer_id'], $stale_threshold]);
     if (! $query instanceof mysqli_result) {
         tracker_error('Failed to select peers.');
     }

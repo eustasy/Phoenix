@@ -49,22 +49,23 @@ delete `admin.php`. But it fails **open**: an operator who skips the warning exp
   password" notice and refuse the panel/actions instead of granting access.
 * Files: `src/controller/admin.login.php`, `config/phoenix.default.php`.
 
-### 1.2 The SQL layer has no defense-in-depth  _(confirmed — architectural)_
+### 1.2 The SQL layer has no defense-in-depth  _(addressed — 2026-06-03)_
 
-There are **zero** `mysqli_real_escape_string` calls and no prepared statements;
-every query is string-concatenated. It's safe _today_ only because every interpolated
-value is hex-validated (`info_hash`/`peer_id`), `intval()`-cast (ports, `left`,
-`uploaded`, `downloaded`, `numwant`, timestamps), a validated IP, or operator config
-(`db_prefix`/`db_name`). The invariant "every value reaching SQL is pre-sanitised" is
-load-bearing and unenforced — one future field added to an `INSERT`/`WHERE` without
-sanitising is an injection.
+Previously every query was string-concatenated, with safety resting on an unenforced
+invariant ("every value reaching SQL is pre-sanitised"). The queries that carry
+client-supplied values now bind them as statement parameters via `mysqli_execute_query()`
+(PHP 8.2+): the hot-path writes (`peer_insert`, `peer_update`, `peer_delete`,
+`torrent_increment_downloads`), the announce reads (`peer_select`, `peers_count_swarm`,
+`peers_count_rate`, `peers_select_active`), and the scrape reads (`peers_scrape` /
+`torrents_scrape`, via a parameterized `scrape_build_where_clause`). Table/column names
+stay interpolated (operator config, not bindable); `LIMIT` stays interpolated with an
+integer narrowing, since mysqli can't bind a string LIMIT.
 
-* **Fix:** migrate the hot-path writes (`peer_insert`, `peer_update`, `peer_delete`,
-  `torrent_increment_downloads`) and the scrape/count reads to `mysqli_prepare`/`bind_param`
-  — the durable fix. The PHPStan now in CI guards undefined keys/functions/types but does
-  **not** track taint, so it cannot catch unsanitised interpolation; a one-off Psalm taint
-  pass can audit that invariant (see P4) until prepared statements make it moot.
-* Files: `src/model/*.php`.
+* **Remaining (low priority, no client exposure):** the cron/cleanup DELETEs, stats,
+  allowed/listed, and `task_log` still interpolate — but only `db_prefix` + integers /
+  internal constants, never client input, so there's no injection surface to close.
+* Files: `src/model/*.php`, `src/functions/scrape.build.where.clause.php`,
+  `src/controller/scrape.specific.php`.
 
 ### 1.3 No brute-force throttle on admin login  _(confirmed)_
 
@@ -137,7 +138,9 @@ through to a public client-declared IP per BEP 3.
   track taint. A single `psalm --taint-analysis` run, annotating `maybe_binary_to_hex()`
   with `@psalm-taint-escape sql`, would verify no `$_GET`/`$_POST` value reaches a query
   unsanitised (the P1.2 invariant). qlty has no Psalm plugin, so run it standalone as a
-  periodic audit, not a CI gate — and prepared statements (P1.2) would make it unnecessary.
+  periodic audit, not a CI gate. Now that the client-data queries bind their parameters
+  (P1.2), this is largely moot — useful mainly as a one-off check of the queries that
+  remain interpolated (operator config + integers).
 * **XML/HTML are hand-assembled** (string concat). Safe today (non-`name` fields are
   hex/int; `name` is escaped). Optional: a small xml-escape helper for consistency,
   mirroring `bencode_encode` as the single bencode emitter.
@@ -156,10 +159,8 @@ through to a public client-declared IP per BEP 3.
 ## Suggested sequencing (when acting on this)
 
 1. P1.1 (fail-closed empty password) — small, high value.
-2. P1.2 prepared statements on hot-path queries (optionally preceded by the one-off
-   Psalm taint audit — P4).
-3. P1.3 login throttle, P1.5 ACAO scope, P1.6 trusted-proxy docs.
-4. P2 comment fix, P5 smoke tests.
+2. P1.3 login throttle, P1.5 ACAO scope, P1.6 trusted-proxy docs.
+3. P2 comment fix, P5 smoke tests.
 
 ## Verification (for any future change)
 

@@ -23,7 +23,7 @@ class PeersScrapeTest extends PhoenixTestCase
         mysqli_query(self::$connection, $sql);
 
         $where = scrape_build_where_clause([$info_hash]);
-        $result = peers_scrape(self::$connection, self::$settings, $where);
+        $result = peers_scrape(self::$connection, self::$settings, $where['where'], $where['params']);
 
         $this->assertNotFalse($result);
         $row = mysqli_fetch_assoc($result);
@@ -52,7 +52,7 @@ class PeersScrapeTest extends PhoenixTestCase
         mysqli_query(self::$connection, $sql);
 
         $where = scrape_build_where_clause([$info_hash_a, $info_hash_b]);
-        $result = peers_scrape(self::$connection, self::$settings, $where);
+        $result = peers_scrape(self::$connection, self::$settings, $where['where'], $where['params']);
 
         $this->assertNotFalse($result);
 
@@ -77,7 +77,7 @@ class PeersScrapeTest extends PhoenixTestCase
 
         $info_hash = str_repeat('z', 40);
         $where = scrape_build_where_clause([$info_hash]);
-        $result = peers_scrape(self::$connection, self::$settings, $where);
+        $result = peers_scrape(self::$connection, self::$settings, $where['where'], $where['params']);
 
         $this->assertNotFalse($result);
         $this->assertSame(0, mysqli_num_rows($result));

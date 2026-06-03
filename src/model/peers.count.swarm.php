@@ -21,8 +21,9 @@ function peers_count_swarm(mysqli $connection, array $settings, string $info_has
             'IFNULL(SUM(`state`=\'1\'), 0) AS `complete`, '.
             'IFNULL(SUM(`state`=\'0\'), 0) AS `incomplete` '.
         'FROM `'.$settings['db_prefix'].'peers` '.
-        'WHERE `info_hash`=\''.$info_hash.'\' '.
-        'AND `updated`>'.$stale_threshold.';',
+        'WHERE `info_hash`=? '.
+        'AND `updated`>?;',
+        [$info_hash, $stale_threshold],
     );
 
     return [

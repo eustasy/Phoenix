@@ -19,6 +19,7 @@ function peer_select(mysqli $connection, array $settings, array $peer): array|fa
     return db_fetch_once(
         $connection,
         'SELECT * FROM `'.$settings['db_prefix'].'peers` '.
-        'WHERE `info_hash`=\''.$peer['info_hash'].'\' AND `peer_id`=\''.$peer['peer_id'].'\';',
+        'WHERE `info_hash`=? AND `peer_id`=?;',
+        [$peer['info_hash'], $peer['peer_id']],
     );
 }

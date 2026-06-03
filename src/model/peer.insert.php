@@ -26,34 +26,29 @@ function peer_insert(mysqli $connection, array $settings, int $time, array $peer
         $compactv6 = bin2hex(inet_pton($peer['ipv6']).pack('n', $peer['portv6']));
     }
 
-    $peer_new = mysqli_query(
+    // Values bind as statement parameters (mysqli_execute_query treats each as a
+    // string — identical to the previous quote-everything SQL). Table/column
+    // names cannot be bound, so db_prefix stays interpolated (operator config).
+    $peer_new = mysqli_execute_query(
         $connection,
         'REPLACE INTO `'.$settings['db_prefix'].'peers` '.
-        '(`info_hash`, `peer_id`, `compactv4`, `compactv6`, `ipv4`, `ipv6`, `portv4`,`portv6`, `uploaded`, `downloaded`, `left`, `state`, `updated`) '.
-        'VALUES ('.
-            // 40-byte info_hash in HEX
-            '\''.$peer['info_hash'].'\', '.
-            // 40-byte peer_id in HEX
-            '\''.$peer['peer_id'].'\', '.
-            // 12-byte compacted peer info
-            '\''.$compactv4.'\', '.
-            '\''.$compactv6.'\', '.
-            // dotted decimal string ip
-            '\''.$peer['ipv4'].'\', '.
-            '\''.$peer['ipv6'].'\', '.
-            // integer port
-            '\''.$peer['portv4'].'\', '.
-            '\''.$peer['portv6'].'\', '.
-            // transfer counters
-            '\''.$peer['uploaded'].'\', '.
-            '\''.$peer['downloaded'].'\', '.
-            // integer left
-            '\''.$peer['left'].'\', '.
-            // integer state
-            '\''.$peer['state'].'\', '.
-            // unix timestamp
-            '\''.$time.'\''.
-        ');',
+        '(`info_hash`, `peer_id`, `compactv4`, `compactv6`, `ipv4`, `ipv6`, `portv4`, `portv6`, `uploaded`, `downloaded`, `left`, `state`, `updated`) '.
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+            $peer['info_hash'],   // 40-byte info_hash in HEX
+            $peer['peer_id'],     // 40-byte peer_id in HEX
+            $compactv4,           // compacted peer info (hex)
+            $compactv6,
+            $peer['ipv4'],        // dotted-decimal / colon-hex IP strings
+            $peer['ipv6'],
+            $peer['portv4'],      // integer ports
+            $peer['portv6'],
+            $peer['uploaded'],    // transfer counters
+            $peer['downloaded'],
+            $peer['left'],        // integer left
+            $peer['state'],       // integer state
+            $time,                // unix timestamp
+        ],
     );
 
     if (! $peer_new) {

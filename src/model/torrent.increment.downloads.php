@@ -11,16 +11,14 @@ declare(strict_types=1);
 /** @param PhoenixSettings $settings */
 function torrent_increment_downloads(mysqli $connection, array $settings, string $info_hash): true
 {
-    mysqli_query(
+    mysqli_execute_query(
         $connection,
         'INSERT INTO `'.$settings['db_prefix'].'torrents` '.
         '(`info_hash`, `downloads`) '.
-        'VALUES ('.
-            '\''.$info_hash.'\', '.
-            '1'.
-        ') '.
+        'VALUES (?, 1) '.
         'ON DUPLICATE KEY UPDATE '.
             '`downloads`=`downloads`+1;',
+        [$info_hash],
     );
 
     // Silently fail (non-critical operation)

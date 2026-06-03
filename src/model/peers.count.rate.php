@@ -17,24 +17,30 @@ function peers_count_rate(mysqli $connection, array $settings, array $peer, int 
     require_once __DIR__.'/db.fetch.once.php';
 
     $ip_parts = [];
+    $ip_params = [];
     if ($peer['ipv4']) {
-        $ip_parts[] = '`ipv4`=\''.$peer['ipv4'].'\'';
+        $ip_parts[] = '`ipv4`=?';
+        $ip_params[] = $peer['ipv4'];
     }
     if ($peer['ipv6']) {
-        $ip_parts[] = '`ipv6`=\''.$peer['ipv6'].'\'';
+        $ip_parts[] = '`ipv6`=?';
+        $ip_params[] = $peer['ipv6'];
     }
 
     if (empty($ip_parts)) {
         return 0;
     }
 
+    // Placeholder order must match the SQL: info_hash, then the IP parts,
+    // then peer_id, then the freshness threshold.
     $rate = db_fetch_once(
         $connection,
         'SELECT COUNT(*) AS `count` FROM `'.$settings['db_prefix'].'peers` '.
-        'WHERE `info_hash`=\''.$peer['info_hash'].'\' '.
+        'WHERE `info_hash`=? '.
         'AND ('.implode(' OR ', $ip_parts).') '.
-        'AND `peer_id`!=\''.$peer['peer_id'].'\' '.
-        'AND `updated`>'.$threshold.';',
+        'AND `peer_id`!=? '.
+        'AND `updated`>?;',
+        array_merge([$peer['info_hash']], $ip_params, [$peer['peer_id'], $threshold]),
     );
 
     return $rate ? intval($rate['count']) : 0;

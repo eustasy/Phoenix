@@ -10,8 +10,9 @@ declare(strict_types=1);
 
 /**
  * @param PhoenixSettings $settings
+ * @param array<int, string> $params
  */
-function peers_scrape(mysqli $connection, array $settings, string $where_clause): mysqli_result|false
+function peers_scrape(mysqli $connection, array $settings, string $where_clause, array $params = []): mysqli_result|false
 {
     $sql = 'SELECT
 		`p`.`info_hash` AS `info_hash`,
@@ -19,7 +20,7 @@ function peers_scrape(mysqli $connection, array $settings, string $where_clause)
 		SUM(`p`.`state`=\'0\') AS `leechers`
 	FROM `'.$settings['db_prefix'].'peers` AS `p`';
 
-    $result = mysqli_query($connection, $sql.$where_clause.' GROUP BY `info_hash`;');
+    $result = mysqli_execute_query($connection, $sql.$where_clause.' GROUP BY `info_hash`;', $params);
 
     return $result instanceof mysqli_result ? $result : false;
 }

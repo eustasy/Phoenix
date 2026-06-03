@@ -13,10 +13,11 @@ declare(strict_types=1);
  */
 function peer_delete(mysqli $connection, array $settings, array $peer): true
 {
-    $peer_delete = mysqli_query(
+    $peer_delete = mysqli_execute_query(
         $connection,
         'DELETE FROM `'.$settings['db_prefix'].'peers` '.
-        'WHERE info_hash=\''.$peer['info_hash'].'\' AND peer_id=\''.$peer['peer_id'].'\';',
+        'WHERE info_hash=? AND peer_id=?;',
+        [$peer['info_hash'], $peer['peer_id']],
     );
     if (! $peer_delete) {
         tracker_error('Failed to remove peer.');

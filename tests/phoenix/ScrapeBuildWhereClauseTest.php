@@ -12,39 +12,43 @@ class ScrapeBuildWhereClauseTest extends TestCase
     {
         require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
 
-        $info_hashes = [str_repeat('a', 40)];
+        $hash = str_repeat('a', 40);
+        $result = scrape_build_where_clause([$hash]);
 
-        $result = scrape_build_where_clause($info_hashes);
-
-        $expected = 'WHERE  `p`.`info_hash`=\''.str_repeat('a', 40).'\'';
-        $this->assertSame($expected, $result);
+        $this->assertSame('WHERE `p`.`info_hash`=?', $result['where']);
+        $this->assertSame([$hash], $result['params']);
     }
 
     public function testBuildWhereClauseWithMultipleHashes()
     {
         require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
 
-        $info_hashes = [
+        $hashes = [
             str_repeat('a', 40),
             str_repeat('b', 40),
             str_repeat('c', 40),
         ];
 
-        $result = scrape_build_where_clause($info_hashes);
+        $result = scrape_build_where_clause($hashes);
 
-        $expected = 'WHERE  `p`.`info_hash`=\''.str_repeat('a', 40).'\''.
-                    ' OR `p`.`info_hash`=\''.str_repeat('b', 40).'\''.
-                    ' OR `p`.`info_hash`=\''.str_repeat('c', 40).'\'';
-        $this->assertSame($expected, $result);
+        $this->assertSame(
+            'WHERE `p`.`info_hash`=? OR `p`.`info_hash`=? OR `p`.`info_hash`=?',
+            $result['where'],
+        );
+        // One placeholder per hash, hashes returned in order for positional bind.
+        $this->assertSame($hashes, $result['params']);
     }
 
     public function testBuildWhereClauseWithEmptyArray()
     {
         require_once __DIR__.'/../../src/functions/scrape.build.where.clause.php';
 
-        // An empty hash list must not produce a bare 'WHERE ' — that would be
+        // An empty hash list must not produce a bare 'WHERE' — that would be
         // concatenated onto the model's SELECT and cause a syntax error.
-        $this->assertSame('', scrape_build_where_clause([]));
+        $result = scrape_build_where_clause([]);
+
+        $this->assertSame('', $result['where']);
+        $this->assertSame([], $result['params']);
     }
 
 }

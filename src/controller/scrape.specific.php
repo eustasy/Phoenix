@@ -23,10 +23,10 @@ function scrape_specific_controller(mysqli $connection, array $settings, array $
 
     // Pre-initialize the result map so requested-but-unknown hashes still
     // get a zero-count reply rather than being omitted from the response.
-    $where = scrape_build_where_clause($valid_info_hashes);
+    $clause = scrape_build_where_clause($valid_info_hashes);
     $scrape = scrape_initialize_results($valid_info_hashes);
-    $peers = peers_scrape($connection, $settings, $where);
-    $torrents = torrents_scrape($connection, $settings, $where);
+    $peers = peers_scrape($connection, $settings, $clause['where'], $clause['params']);
+    $torrents = torrents_scrape($connection, $settings, $clause['where'], $clause['params']);
 
     if (! $peers || ! $torrents) {
         tracker_error('Unable to scrape for that torrent.');

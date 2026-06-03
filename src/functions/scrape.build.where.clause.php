@@ -3,23 +3,25 @@
 declare(strict_types=1);
 
 ////	scrape_build_where_clause
-// Build WHERE clause for scraping multiple info_hashes.
-// Returns SQL WHERE clause string, or '' when there are no hashes (so callers
-// don't accidentally append a bare 'WHERE ' to their query).
+// Build a parameterized WHERE clause for scraping multiple info_hashes.
+// Returns ['where' => clause with `?` placeholders, 'params' => the hashes in
+// order]. 'where' is '' (and params empty) when there are no hashes, so callers
+// don't accidentally append a bare 'WHERE' to their query. The hashes bind as
+// statement parameters instead of being interpolated into the SQL.
 
-/** @param array<int|string, string> $info_hashes */
-function scrape_build_where_clause(array $info_hashes): string
+/**
+ * @param array<int|string, string> $info_hashes
+ * @return array{where: string, params: array<int, string>}
+ */
+function scrape_build_where_clause(array $info_hashes): array
 {
     if (empty($info_hashes)) {
-        return '';
+        return ['where' => '', 'params' => []];
     }
-    $where = 'WHERE ';
-    foreach ($info_hashes as $count => $info_hash) {
-        if ($count > 0) {
-            $where .= ' OR';
-        }
-        $where .= ' `p`.`info_hash`=\''.$info_hash.'\'';
-    }
+    $conditions = array_fill(0, count($info_hashes), '`p`.`info_hash`=?');
 
-    return $where;
+    return [
+        'where' => 'WHERE '.implode(' OR ', $conditions),
+        'params' => array_values($info_hashes),
+    ];
 }
