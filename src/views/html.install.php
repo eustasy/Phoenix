@@ -61,8 +61,8 @@ function view_install_html(bool $settings_writable, string|null $install_error, 
 				Public Index &mdash; list torrents on the index page</label>
 			</div>
 			<h2>Admin</h2>
-			<div class="field"><label>Admin Password (leave blank for no authentication)</label>
-				<input type="password" name="admin_password">
+			<div class="field"><label>Admin Password (required)</label>
+				<input type="password" name="admin_password" required>
 			</div>
 			<br>
 			<input class="button background-belize-hole color-clouds" type="submit" value="Install">

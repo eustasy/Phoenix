@@ -37,17 +37,18 @@ the announce/scrape flows.
 
 ## P1 — Security / hardening
 
-### 1.1 Empty `admin_password` ⇒ the admin panel is unauthenticated  _(confirmed)_
+### 1.1 Empty `admin_password` ⇒ the admin panel is unauthenticated  _(addressed — 2026-06-03)_
 
-`admin_login_controller()` returns `null` (skips auth) when the password is empty;
-`config/phoenix.default.php` documents this (`empty = no auth`) and warns to set it or
-delete `admin.php`. But it fails **open**: an operator who skips the warning exposes
-`clean`, `optimize`, and `setup` — and `setup` can **DROP/recreate the tables** when
-`db_reset` is true.
+`admin_login_controller()` skips auth when `admin_password` is empty. Rather than fail
+closed at runtime (which would lock out a deliberately password-less, hand-rolled config),
+the **installer now requires a non-empty admin password** (`admin_install_controller`
+rejects the submission and re-prompts otherwise; `install_sanitize_post` already bcrypt-
+hashes it). A normal setup therefore can't finish without one, so the only password-less
+state is the pre-setup first run — which is installer mode itself, not the live panel. The
+documented "empty = no auth" escape hatch remains for operators who intentionally run
+without auth via a manual `phoenix.custom.php`.
 
-* **Fix:** fail closed — when `admin_password` is empty, render a "set an admin
-  password" notice and refuse the panel/actions instead of granting access.
-* Files: `src/controller/admin.login.php`, `config/phoenix.default.php`.
+* Files: `src/controller/admin.install.php`, `src/views/html.install.php`.
 
 ### 1.2 The SQL layer has no defense-in-depth  _(addressed — 2026-06-03)_
 
@@ -175,8 +176,7 @@ through to a public client-declared IP per BEP 3.
 
 ## Suggested sequencing (when acting on this)
 
-1. P1.1 (fail-closed empty password) — small, high value.
-2. P2 comment fix, P5 smoke tests.
+1. P5 — an end-to-end smoke test per endpoint (the last open item).
 
 ## Verification (for any future change)
 

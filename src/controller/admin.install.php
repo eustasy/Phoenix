@@ -38,6 +38,15 @@ function admin_install_controller(string $config_path): string
         return view_install_html($settings_writable, $install_error, $form);
     }
 
+    // Require an admin password at setup so a fresh install is never left with an
+    // unauthenticated panel. Operators who deliberately want no auth can still
+    // hand-edit phoenix.custom.php — see the admin_password note there.
+    if ($values['admin_password'] === '') {
+        $install_error = 'Set an admin password to protect the control panel.';
+
+        return view_install_html($settings_writable, $install_error, $form);
+    }
+
     if (! $settings_writable) {
         $install_error = 'The <code>config/</code> directory is not writable. Please make it writable and try again.';
 

@@ -86,6 +86,7 @@ class AdminInstallControllerTest extends PhoenixTestCase
             'db_user' => 'phoenix_test_user',
             'db_pass' => 'phoenix_test_pass',
             'db_name' => 'phoenix_test_db',
+            'admin_password' => 'test-admin-pw',
         ];
         $html = \admin_install_controller('/tmp/phoenix_should_not_exist.php');
 
@@ -104,7 +105,7 @@ class AdminInstallControllerTest extends PhoenixTestCase
         // $install_error string (which the view ignores when not writable).
         $configPath = sys_get_temp_dir().'/phoenix_no_such_dir/phoenix.custom.php';
 
-        $_POST = ['process' => 'install'];
+        $_POST = ['process' => 'install', 'admin_password' => 'test-admin-pw'];
         $html = \admin_install_controller($configPath);
 
         $this->assertIsString($html);
@@ -131,6 +132,7 @@ class AdminInstallControllerTest extends PhoenixTestCase
             'db_pass' => self::$settings['db_pass'],
             'db_name' => self::$settings['db_name'],
             'db_prefix' => self::TEST_PREFIX,
+            'admin_password' => 'test-admin-pw',
         ];
 
         try {
@@ -164,6 +166,7 @@ class AdminInstallControllerTest extends PhoenixTestCase
                 'db_pass' => self::$settings['db_pass'],
                 'db_name' => self::$settings['db_name'],
                 'db_prefix' => self::TEST_PREFIX,
+                'admin_password' => 'test-admin-pw',
             ];
             $script = '<?php '.
                 '$_POST   = '.var_export($post, true).'; '.
@@ -189,6 +192,22 @@ class AdminInstallControllerTest extends PhoenixTestCase
             }
             $this->dropTestTables();
         }
+    }
+
+    public function testRejectsInstallWithoutAdminPassword(): void
+    {
+        // A fresh install must set a password, or the panel would be left
+        // unauthenticated. With a writable config dir and process=install but
+        // no password, re-render the form with the prompt and write no config.
+        $configPath = sys_get_temp_dir().'/phoenix_pw_required_'.bin2hex(random_bytes(4)).'.php';
+
+        $_POST = ['process' => 'install'];
+        $html = \admin_install_controller($configPath);
+
+        $this->assertIsString($html);
+        $this->assertStringContainsString('Set an admin password', $html);
+        $this->assertStringContainsString('name="process" value="install"', $html);
+        $this->assertFileDoesNotExist($configPath);
     }
 
 }
