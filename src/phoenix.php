@@ -18,9 +18,6 @@ ini_set('default_charset', 'iso-8859-1');
 
 $time = time();
 
-// Allow Access from Anywhere
-header('Access-Control-Allow-Origin: *');
-
 ////	Settings
 require_once __DIR__.'/functions/settings.load.php';
 $settings = settings_load(

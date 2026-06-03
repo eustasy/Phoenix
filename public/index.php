@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 ////	Public Torrent Index
+
+// Allow cross-origin reads — browser-based tools may read the public index. Sent
+// before bootstrap so error responses carry it too. Scoped to the public read
+// endpoints (announce/scrape/index); the admin panel deliberately omits it.
+header('Access-Control-Allow-Origin: *');
+
 require_once __DIR__.'/../src/phoenix.php';
 
 if (! $settings['public_index']) {

@@ -87,13 +87,14 @@ already surfaced via `tracker_error()`.
 
 * Files: `src/phoenix.php`, `src/functions/error.configure.php`, `config/phoenix.default.php`.
 
-### 1.5 `Access-Control-Allow-Origin: *` on every response  _(confirmed — low)_
+### 1.5 `Access-Control-Allow-Origin: *` on every response  _(addressed — 2026-06-03)_
 
-Set globally in the bootstrap, so admin responses carry it too. Low risk (no
-`Allow-Credentials`, `SameSite=Lax`), but unnecessary on admin.
+The header was emitted from the shared bootstrap, so admin and index responses
+carried it too. It now lives in the two protocol entry points (`public/announce.php`,
+`public/scrape.php`), sent before bootstrap so error responses still carry it, and is
+no longer sent on the admin or index endpoints.
 
-* **Fix:** scope the header to the announce/scrape endpoints.
-* File: `src/phoenix.php`.
+* Files: `src/phoenix.php`, `public/announce.php`, `public/scrape.php`.
 
 ### 1.6 Client-controlled source IPs — defaults safe; partially reinforced  _(partially addressed — 2026-06-02)_
 
@@ -159,7 +160,7 @@ through to a public client-declared IP per BEP 3.
 ## Suggested sequencing (when acting on this)
 
 1. P1.1 (fail-closed empty password) — small, high value.
-2. P1.3 login throttle, P1.5 ACAO scope, P1.6 trusted-proxy docs.
+2. P1.3 login throttle, P1.6 trusted-proxy docs.
 3. P2 comment fix, P5 smoke tests.
 
 ## Verification (for any future change)
