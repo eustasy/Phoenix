@@ -1,0 +1,99 @@
+name: Smoke (PHP)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["**.php", "sql/**", "tests/smoke/**", ".github/workflows/smoke-php.yml"]
+  pull_request:
+    branches: [main]
+    paths: ["**.php", "sql/**", "tests/smoke/**", ".github/workflows/smoke-php.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: E2E smoke + coverage
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ["8.2", "8.3", "8.4", "8.5", "8.6"]
+    services:
+      mariadb:
+        image: mariadb:12.3.2@sha256:f0b0a2b36cd621f919a7bbbff44d894aa274e3d32feecf032138557a483a6522
+        env:
+          MARIADB_ROOT_PASSWORD: phoenix_root
+          MARIADB_DATABASE: phoenix
+          MARIADB_USER: phoenix
+          MARIADB_PASSWORD: phoenix_pass
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      SMOKE_BASE_URL: http://127.0.0.1:8123
+      SMOKE_COV_DIR: ${{ github.workspace }}/coverage/smoke-pcov
+      SMOKE_DB_HOST: 127.0.0.1
+      SMOKE_DB_USER: phoenix
+      SMOKE_DB_PASS: phoenix_pass
+      SMOKE_DB_NAME: phoenix
+      SMOKE_DB_PREFIX: phoenix_
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # v2.37.1
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mysqli
+          tools: composer:v2
+          coverage: pcov
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run smoke tests against the built-in server
+        run: |
+          # Force installer mode: the suite installs over HTTP (writes config + creates tables).
+          rm -f config/phoenix.custom.php
+          mkdir -p "$SMOKE_COV_DIR"
+
+          php -d pcov.enabled=1 \
+              -d pcov.directory="$PWD" \
+              -d pcov.exclude='~/(vendor|tests)/~' \
+              -d auto_prepend_file=tests/smoke/coverage-prepend.php \
+              -S 127.0.0.1:8123 -t public >/tmp/smoke-server.log 2>&1 &
+          echo "$!" > /tmp/smoke-server.pid
+
+          for _ in $(seq 1 40); do
+            curl -sf "$SMOKE_BASE_URL/magnet.php" >/dev/null 2>&1 && break
+            sleep 0.5
+          done
+
+          set +e
+          vendor/bin/phpunit -c phpunit.smoke.xml.dist
+          status=$?
+          set -e
+
+          kill "$(cat /tmp/smoke-server.pid)" 2>/dev/null || true
+          if [ "$status" -ne 0 ]; then
+            echo "::group::server log"; cat /tmp/smoke-server.log; echo "::endgroup::"
+          fi
+          exit "$status"
+
+      - name: Merge e2e coverage to Clover
+        if: matrix.php-version == '8.6'
+        run: php tests/smoke/merge-coverage.php "$SMOKE_COV_DIR" coverage/smoke-clover.xml
+
+      - name: Upload coverage to Qlty
+        if: matrix.php-version == '8.6'
+        uses: qltysh/qlty-action/coverage@a19242102d17e497f437d7466aa01b528537e899 # v2.2.0
+        with:
+          coverage-token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+          files: coverage/smoke-clover.xml

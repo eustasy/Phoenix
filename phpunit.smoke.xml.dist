@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+		bootstrap="tests/smoke/bootstrap.php"
+		colors="true"
+		cacheDirectory=".phpunit.smoke.cache"
+		failOnRisky="true"
+		failOnWarning="true">
+	<testsuites>
+		<testsuite name="Phoenix Smoke">
+			<directory>tests/smoke</directory>
+			<exclude>tests/smoke/SmokeTestCase.php</exclude>
+		</testsuite>
+	</testsuites>
+	<!-- No <source>: e2e coverage is collected in the php -S server via PCOV
+	     (tests/smoke/coverage-prepend.php), not from this runner process. -->
+</phpunit>

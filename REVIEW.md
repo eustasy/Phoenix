@@ -168,15 +168,21 @@ through to a public client-declared IP per BEP 3.
 ## P5 — Testing / CI
 
 * Unit coverage is strong (82 test classes); clover coverage is uploaded to qlty on 8.6.
-* **Gap:** no end-to-end smoke test driving `public/announce.php` / `public/scrape.php`
-  over HTTP (controllers are unit-tested, which covers most logic). Consider one
-  integration smoke test per endpoint.
+* **End-to-end smoke tests** _(addressed — 2026-06-03)_ — `tests/smoke/` drives every
+  `public/*.php` entry point over real HTTP (`php -S`) through the full deployment
+  lifecycle (install → announce → scrape → index → admin login → magnet), in a new
+  `smoke-php.yml` workflow. Coverage is collected in the server via PCOV
+  (`coverage-prepend.php`), merged to Clover (`merge-coverage.php`), and uploaded to qlty,
+  which unions it with the unit clover; `public/` was added to the coverage `<source>` so
+  the entry-point glue now counts.
 
 ---
 
 ## Suggested sequencing (when acting on this)
 
-1. P5 — an end-to-end smoke test per endpoint (the last open item).
+All P1–P5 items are addressed (P3 needed no action). Remaining options are nice-to-haves:
+the `honor_xff` trusted-proxy CIDR gating is done, and the Psalm taint audit was run once
+(§P4); a recurring Psalm gate was intentionally not added.
 
 ## Verification (for any future change)
 
