@@ -67,7 +67,7 @@ jobs:
           php -d pcov.enabled=1 \
               -d pcov.directory="$PWD" \
               -d pcov.exclude='~/(vendor|tests)/~' \
-              -d auto_prepend_file=tests/smoke/coverage-prepend.php \
+              -d auto_prepend_file="$PWD/tests/smoke/coverage-prepend.php" \
               -S 127.0.0.1:8123 -t public >/tmp/smoke-server.log 2>&1 &
           echo "$!" > /tmp/smoke-server.pid
 
