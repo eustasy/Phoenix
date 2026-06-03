@@ -101,7 +101,7 @@ longer sent on the admin endpoint.
 
 * Files: `src/phoenix.php`, `public/announce.php`, `public/scrape.php`, `public/index.php`.
 
-### 1.6 Client-controlled source IPs — defaults safe; partially reinforced  _(partially addressed — 2026-06-02)_
+### 1.6 Client-controlled source IPs — defaults safe; reinforced  _(reinforced — 2026-06-03)_
 
 `external_ip` and `honor_xff` both default to `false`, and `honor_xff` carries an inline
 warning about trivial spoofing. When enabled, a client can set the address handed to the
@@ -112,9 +112,13 @@ reserved addresses during peer resolution, so they can no longer be injected int
 swarm or used to dodge the rate limiter, and a private `REMOTE_ADDR` (NAT/proxy) falls
 through to a public client-declared IP per BEP 3.
 
-* **Still open:** reinforce the trusted-proxy requirement in `APACHE.md`/`NGINX.md`;
-  consider gating `honor_xff` behind a configurable trusted-proxy CIDR rather than
-  blanket trust.
+* **Done (2026-06-03):** `APACHE.md` / `NGINX.md` now document running behind a proxy —
+  prefer the server's real-IP module (`mod_remoteip` / `ngx_http_realip_module`) with
+  `honor_xff = false`, and if `honor_xff` is enabled the proxy must overwrite
+  `X-Forwarded-For` so a client cannot supply it.
+* **Optional, still open:** gate `honor_xff` behind a configurable trusted-proxy CIDR in
+  `peer_address_candidates()` rather than blanket trust, so a misconfigured proxy can't be
+  bypassed by a direct client connection.
 * Files: `APACHE.md`, `NGINX.md`, `src/functions/peer.address.candidates.php`.
 
 ---
@@ -165,8 +169,9 @@ through to a public client-declared IP per BEP 3.
 ## Suggested sequencing (when acting on this)
 
 1. P1.1 (fail-closed empty password) — small, high value.
-2. P1.6 trusted-proxy docs.
-3. P2 comment fix, P5 smoke tests.
+2. P2 comment fix, P5 smoke tests.
+
+(P1.6's optional `honor_xff` trusted-proxy CIDR gating remains as a follow-up — see §1.6.)
 
 ## Verification (for any future change)
 

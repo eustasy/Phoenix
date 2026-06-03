@@ -31,6 +31,27 @@ RewriteRule ^([^/.]+)$ $1.php [L]
 
 The same rule covers `/scrape`, `/index`, and `/admin`.
 
+## Running behind a proxy (`X-Forwarded-For` / `honor_xff`)
+
+By default Phoenix uses the connection's source address (`REMOTE_ADDR`) as the peer IP. Behind a reverse proxy or load balancer that address is the proxy, not the client — the real client IP arrives in the `X-Forwarded-For` header instead.
+
+**Preferred:** let Apache rewrite the source address from a trusted proxy using [`mod_remoteip`](https://httpd.apache.org/docs/2.4/mod/mod_remoteip.html), and leave `honor_xff = false`:
+
+```apache
+RemoteIPHeader X-Forwarded-For
+RemoteIPTrustedProxy 10.0.0.0/8   # your proxy's address(es) — never 0.0.0.0/0
+```
+
+`REMOTE_ADDR` then holds the real client, so Phoenix needs no special setting.
+
+**Alternative:** set `honor_xff = true` in `config/phoenix.custom.php`, which trusts the leftmost `X-Forwarded-For` entry. Only do this if your proxy **overwrites** the header so a client cannot supply it:
+
+```apache
+RequestHeader set X-Forwarded-For "%{REMOTE_ADDR}s"
+```
+
+If Phoenix trusts an unsanitized header, any client can spoof its IP — poisoning swarms with arbitrary peer addresses (reflective DDoS) and evading the per-IP rate limiter. If this server is reachable directly (not only through the proxy), keep `honor_xff = false`.
+
 ## Rate limiting
 
 `admin.php` is the highest-risk endpoint — it accepts a password and can drop or recreate tables. Rate-limit it to slow brute-force attempts.
