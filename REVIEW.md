@@ -67,13 +67,18 @@ integer narrowing, since mysqli can't bind a string LIMIT.
 * Files: `src/model/*.php`, `src/functions/scrape.build.where.clause.php`,
   `src/controller/scrape.specific.php`.
 
-### 1.3 No brute-force throttle on admin login  _(confirmed)_
+### 1.3 No brute-force throttle on admin login  _(addressed — 2026-06-03)_
 
-A single shared password with unlimited attempts. The project already has a rate-limit
-pattern (`announce_check_rate_limit` / `peers_count_rate`).
+Failed admin logins now incur an escalating, capped, per-session delay
+(`auth_login_throttle_delay`): the delay grows with the consecutive-failure count held
+in the session and is capped at `admin_login_delay_max` (`admin_login_delay` is the base;
+0 disables). A successful login clears the counter. This is a per-session backoff — a
+cookie-less attacker still pays the base delay on each request — and complements the
+per-IP proxy rate-limiting documented in `APACHE.md` / `NGINX.md` (still the recommended
+primary defense; see P1.6).
 
-* **Fix:** per-IP attempt backoff/lockout, or a fixed delay on failure.
-* File: `src/controller/admin.login.php`.
+* Files: `src/controller/admin.login.php`, `src/functions/auth.login.throttle.delay.php`,
+  `config/phoenix.default.php`.
 
 ### 1.4 All runtime errors are silenced  _(addressed — 2026-06-03)_
 
@@ -160,7 +165,7 @@ through to a public client-declared IP per BEP 3.
 ## Suggested sequencing (when acting on this)
 
 1. P1.1 (fail-closed empty password) — small, high value.
-2. P1.3 login throttle, P1.6 trusted-proxy docs.
+2. P1.6 trusted-proxy docs.
 3. P2 comment fix, P5 smoke tests.
 
 ## Verification (for any future change)

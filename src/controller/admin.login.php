@@ -38,14 +38,35 @@ function admin_login_controller(array $settings): ?string
         if ($login_attempted) {
             require_once __DIR__.'/../functions/auth.verify.login.php';
             if (auth_verify_login($settings)) {
-                // Defeat session-fixation: any pre-login session id is now
-                // retired so an attacker who planted one cannot resume the
-                // authenticated session.
+                // Successful login clears the brute-force counter and retires
+                // any pre-login session id (anti session-fixation) so an
+                // attacker who planted one cannot resume the authed session.
+                unset($_SESSION['login_fails']);
                 session_regenerate_id(true);
                 require_once __DIR__.'/../functions/auth.set.authenticated.php';
                 auth_set_authenticated();
                 header('Location: '.$_SERVER['REQUEST_URI']);
                 exit;
+            }
+
+            // Failed login: escalating per-session delay to throttle brute
+            // force. A client that keeps its session cookie is slowed
+            // progressively; a cookie-less attacker still pays the base delay on
+            // each request. Complements — does not replace — the per-IP proxy
+            // rate-limiting documented in APACHE.md / NGINX.md.
+            $fails = (isset($_SESSION['login_fails']) && is_int($_SESSION['login_fails']))
+                ? $_SESSION['login_fails'] + 1
+                : 1;
+            $_SESSION['login_fails'] = $fails;
+
+            require_once __DIR__.'/../functions/auth.login.throttle.delay.php';
+            $delay = auth_login_throttle_delay(
+                $fails,
+                $settings['admin_login_delay'],
+                $settings['admin_login_delay_max'],
+            );
+            if ($delay > 0) {
+                sleep($delay);
             }
         }
 

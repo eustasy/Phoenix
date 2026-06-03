@@ -52,6 +52,8 @@ $settings['debug'] = false;            /* surface + verbosely log errors for loc
 ////	Admin Options
 $settings['admin_password'] = '';              /* bcrypt hash of the admin password; empty = no auth */
 /* WARNING: set this or delete public/admin.php when you're up and running */
+$settings['admin_login_delay'] = 2;               /* seconds to delay after a failed admin login (brute-force throttle); 0 disables */
+$settings['admin_login_delay_max'] = 8;               /* cap on the escalating per-session login delay */
 
 ////	Backup Options
 $settings['backup_dir'] = '';              /* absolute path to backup directory; empty = backups/ in the project root */
