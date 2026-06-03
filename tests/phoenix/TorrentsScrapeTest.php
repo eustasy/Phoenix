@@ -25,8 +25,12 @@ class TorrentsScrapeTest extends PhoenixTestCase
         $this->assertNotFalse($result);
         $row = mysqli_fetch_assoc($result);
         $this->assertSame($info_hash, $row['info_hash']);
-        $this->assertSame('1000', $row['size']);
-        $this->assertSame('5', $row['downloads']);
+        // Prepared statements use mysqli's binary protocol, so INT columns come
+        // back as native ints, not the text-protocol strings mysqli_query gave.
+        // (info_hash is char and seeders/leechers are SUM()/DECIMAL, so those
+        // stay strings — see PeersScrapeTest.)
+        $this->assertSame(1000, $row['size']);
+        $this->assertSame(5, $row['downloads']);
     }
 
     public function testQueryTorrentsWithMultipleHashes()
@@ -57,10 +61,10 @@ class TorrentsScrapeTest extends PhoenixTestCase
         $this->assertCount(2, $rows);
         $this->assertArrayHasKey($info_hash_a, $rows);
         $this->assertArrayHasKey($info_hash_b, $rows);
-        $this->assertSame('1000', $rows[$info_hash_a]['size']);
-        $this->assertSame('5', $rows[$info_hash_a]['downloads']);
-        $this->assertSame('2000', $rows[$info_hash_b]['size']);
-        $this->assertSame('3', $rows[$info_hash_b]['downloads']);
+        $this->assertSame(1000, $rows[$info_hash_a]['size']);
+        $this->assertSame(5, $rows[$info_hash_a]['downloads']);
+        $this->assertSame(2000, $rows[$info_hash_b]['size']);
+        $this->assertSame(3, $rows[$info_hash_b]['downloads']);
     }
 
     public function testQueryTorrentsReturnsEmptyForUnknownHash()
