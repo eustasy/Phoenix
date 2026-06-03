@@ -156,9 +156,11 @@ through to a public client-declared IP per BEP 3.
   periodic audit, not a CI gate. Now that the client-data queries bind their parameters
   (P1.2), this is largely moot — useful mainly as a one-off check of the queries that
   remain interpolated (operator config + integers).
-* **XML/HTML are hand-assembled** (string concat). Safe today (non-`name` fields are
-  hex/int; `name` is escaped). Optional: a small xml-escape helper for consistency,
-  mirroring `bencode_encode` as the single bencode emitter.
+* **XML/HTML are hand-assembled** (string concat) — safe (non-`name` fields are hex/int).
+  _(addressed — 2026-06-03)_ The XML views now route free text through a single
+  `xml_escape()` helper (`ENT_QUOTES | ENT_XML1`, attribute-safe), mirroring
+  `bencode_encode()` as the one emitter — so element text (and any future attribute
+  output) escapes consistently instead of via ad-hoc `htmlspecialchars()` calls.
 * (No dead code confirmed — an earlier automated guess flagging `parse_ipv4/6` was a
   false positive; both are used via `peer_resolve_addresses`.)
 

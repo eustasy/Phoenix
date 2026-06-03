@@ -21,11 +21,13 @@ declare(strict_types=1);
 /** @param list<array{info_hash: string|null, name: string|null, size: int, downloads: int, seeders: int, leechers: int, peers: int, traffic: int}> $index */
 function view_index_xml(array $index): string
 {
+    require_once __DIR__.'/../functions/xml.escape.php';
+
     $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><torrents>';
     foreach ($index as $torrent) {
         $xml .= '<torrent>'.
             '<info_hash>'.$torrent['info_hash'].'</info_hash>'.
-            '<name>'.htmlspecialchars($torrent['name'] ?? '', ENT_XML1, 'UTF-8').'</name>'.
+            '<name>'.xml_escape($torrent['name'] ?? '').'</name>'.
             '<size>'.$torrent['size'].'</size>'.
             '<downloads>'.$torrent['downloads'].'</downloads>'.
             '<seeders>'.$torrent['seeders'].'</seeders>'.

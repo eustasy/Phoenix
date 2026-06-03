@@ -7,6 +7,8 @@ declare(strict_types=1);
 // caller is responsible for echoing and terminating the script.
 function view_error_xml(string $error): string
 {
+    require_once __DIR__.'/../functions/xml.escape.php';
+
     return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
-        '<error>'.htmlspecialchars($error, ENT_XML1, 'UTF-8').'</error>';
+        '<error>'.xml_escape($error).'</error>';
 }
