@@ -148,14 +148,14 @@ through to a public client-declared IP per BEP 3.
 
 ## P4 — Maintainability
 
-* **(optional, one-and-done) Psalm taint audit of the SQL boundary.** PHPStan level 9 is
-  already in CI (via qlty) and backstops undefined keys/functions/types — but it does not
-  track taint. A single `psalm --taint-analysis` run, annotating `maybe_binary_to_hex()`
-  with `@psalm-taint-escape sql`, would verify no `$_GET`/`$_POST` value reaches a query
-  unsanitised (the P1.2 invariant). qlty has no Psalm plugin, so run it standalone as a
-  periodic audit, not a CI gate. Now that the client-data queries bind their parameters
-  (P1.2), this is largely moot — useful mainly as a one-off check of the queries that
-  remain interpolated (operator config + integers).
+* **Psalm taint audit** _(done — 2026-06-03)_ — ran `psalm --taint-analysis` (Psalm 5.26,
+  standalone; qlty has no Psalm plugin, no standing config added). Result: **no SQL taint
+  and no tainted HTML reaching the browser** — the P1.2 parameterization and the view
+  escaping (`htmlspecialchars` / `xml_escape`) hold. Psalm reported exactly one flow, a
+  **false positive**: `$_POST` → the installer's `install_build_config()`, which renders
+  values with `var_export()` (injection-safe PHP literals — see the "Overall assessment").
+  Psalm doesn't model `var_export()` as a taint-escape; if Psalm is ever adopted, a
+  `@psalm-taint-escape html` on that function clears it.
 * **XML/HTML are hand-assembled** (string concat) — safe (non-`name` fields are hex/int).
   _(addressed — 2026-06-03)_ The XML views now route free text through a single
   `xml_escape()` helper (`ENT_QUOTES | ENT_XML1`, attribute-safe), mirroring
