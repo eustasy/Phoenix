@@ -162,6 +162,26 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertStringNotContainsString('name="password"', $panel['body']);
     }
 
+    #[Depends('testInstallSucceeds')]
+    public function testAdminLogoutRedirectsAndEndsSession(): void
+    {
+        $login = $this->post('/admin.php', ['process' => 'login', 'password' => self::ADMIN_PW]);
+        $this->assertSame(302, $login['status']);
+        $cookie = $this->sessionCookie($login);
+        $this->assertNotNull($cookie);
+
+        // Logout is POST-only: it destroys the session and redirects (header +
+        // exit — uncoverable in-process, exercised here in the PCOV'd server).
+        $logout = $this->post('/admin.php', ['logout' => '1'], ['Cookie' => $cookie]);
+        $this->assertSame(302, $logout['status']);
+
+        // The session is gone: the same cookie now falls back to the login form.
+        $after = $this->get('/admin.php', [], ['Cookie' => $cookie]);
+        $this->assertSame(200, $after['status']);
+        $this->assertStringContainsString('name="password"', $after['body']);
+        $this->assertStringNotContainsString('Phoenix Diagnostics and Utilities', $after['body']);
+    }
+
     //// bin/ cron entry points (CLI, not HTTP)
 
     #[Depends('testInstallSucceeds')]
@@ -237,16 +257,30 @@ class EndpointSmokeTest extends SmokeTestCase
     }
 
     #[Depends('testInstallSucceeds')]
-    public function testClosedTrackerRejectsSpecificScrape(): void
+    public function testClosedTrackerRejectsScrapeInEachFormat(): void
     {
         // Close the tracker — the installer opens it. This runs LAST, so nothing
         // afterwards relies on open_tracker and no restore is needed.
         $this->closeTracker();
 
         // A never-tracked hash can't be in the allowed list, so a closed tracker
-        // must refuse to scrape it (bencode failure, HTTP 200).
-        $r = $this->get('/scrape.php', ['info_hash' => str_repeat('e', 40)]);
-        $this->assertSame(200, $r['status']);
-        $this->assertStringContainsString('Torrent is not allowed', $r['body']);
+        // refuses to scrape it via tracker_error(). Hitting all three of its
+        // serialisations covers the bencode/xml/json branches + error views in
+        // the PCOV'd server — the exit(2) makes them uncoverable in-process.
+        $hash = str_repeat('e', 40);
+
+        $bencode = $this->get('/scrape.php', ['info_hash' => $hash]);
+        $this->assertSame(200, $bencode['status']);
+        $this->assertStringContainsString('Torrent is not allowed', $bencode['body']);
+
+        $xml = $this->get('/scrape.php', ['info_hash' => $hash, 'xml' => '1']);
+        $this->assertSame(200, $xml['status']);
+        $this->assertStringContainsString('<error>', $xml['body']);
+        $this->assertStringContainsString('Torrent is not allowed', $xml['body']);
+
+        $json = $this->get('/scrape.php', ['info_hash' => $hash, 'json' => '1']);
+        $this->assertSame(200, $json['status']);
+        $this->assertIsArray(json_decode($json['body'], true));
+        $this->assertStringContainsString('Torrent is not allowed', $json['body']);
     }
 }
