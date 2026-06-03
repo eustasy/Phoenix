@@ -2,11 +2,15 @@
 
 declare(strict_types=1);
 
-////	Error Level
-// error_reporting(E_ALL);
-// error_reporting(E_ALL & ~E_WARNING);
-// error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
-error_reporting(0);
+////	Error Handling
+// Pre-settings baseline: log errors, never display them. Tracker responses are
+// bencode/binary, so a printed warning corrupts the body and discloses
+// internals. Set before anything else so failures during bootstrap are logged;
+// error_configure() layers the operator's debug/error_log overrides once
+// $settings is loaded.
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+error_reporting(E_ALL & ~E_DEPRECATED);
 
 // Ignore Disconnects
 ignore_user_abort(true);
@@ -24,6 +28,10 @@ $settings = settings_load(
     __DIR__.'/../config/phoenix.custom.php',
 );
 $settings['phoenix_version'] = 'Phoenix Procedural v4.0beta2 2026-05-09 17:23:00Z eustasy';
+
+////	Apply operator error settings (debug / error_log)
+require_once __DIR__.'/functions/error.configure.php';
+error_configure($settings);
 
 require_once __DIR__.'/functions/tracker.error.php';
 

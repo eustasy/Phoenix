@@ -43,6 +43,12 @@ $settings['reject_private_ips'] = true;             /* drop private (RFC 1918) a
 /* trackers, where peers legitimately have private addresses. */
 $settings['public_index'] = false;            /* serve a public index of listed torrents */
 
+////	Logging & Debugging
+$settings['error_log'] = '';              /* absolute path for PHP's error log; empty = server/PHP default */
+$settings['debug'] = false;            /* surface + verbosely log errors for local troubleshooting. */
+/* NEVER enable in production: display_errors corrupts bencode */
+/* responses and discloses internals. Errors are always logged. */
+
 ////	Admin Options
 $settings['admin_password'] = '';              /* bcrypt hash of the admin password; empty = no auth */
 /* WARNING: set this or delete public/admin.php when you're up and running */

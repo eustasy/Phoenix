@@ -74,14 +74,17 @@ pattern (`announce_check_rate_limit` / `peers_count_rate`).
 * **Fix:** per-IP attempt backoff/lockout, or a fixed delay on failure.
 * File: `src/controller/admin.login.php`.
 
-### 1.4 All runtime errors are silenced  _(confirmed — operability/security)_
+### 1.4 All runtime errors are silenced  _(addressed — 2026-06-03)_
 
-`src/phoenix.php` sets `error_reporting(0)` and the DB layer uses `@`-suppression, so a
-fatal yields a blank 200 with nothing logged.
+`src/phoenix.php` previously set `error_reporting(0)`, so a fatal yielded a blank 200
+with nothing logged. The bootstrap now sets a safe baseline before settings load (log on,
+display off, `error_reporting(E_ALL & ~E_DEPRECATED)`), and `error_configure()` layers two
+operator knobs: `error_log` (redirect PHP's log to a file) and `debug` (raise verbosity +
+display errors for local troubleshooting only — never in production, as display corrupts
+bencode responses). The DB layer's `@`-suppression remains, but connection failures are
+already surfaced via `tracker_error()`.
 
-* **Fix:** keep `display_errors` off but set `log_errors = 1` (to a file), or add a
-  `debug` setting that flips verbosity.
-* File: `src/phoenix.php`.
+* Files: `src/phoenix.php`, `src/functions/error.configure.php`, `config/phoenix.default.php`.
 
 ### 1.5 `Access-Control-Allow-Origin: *` on every response  _(confirmed — low)_
 
@@ -152,7 +155,7 @@ through to a public client-declared IP per BEP 3.
 
 ## Suggested sequencing (when acting on this)
 
-1. P1.1 (fail-closed empty password) + P1.4 (error logging) — small, high value.
+1. P1.1 (fail-closed empty password) — small, high value.
 2. P1.2 prepared statements on hot-path queries (optionally preceded by the one-off
    Psalm taint audit — P4).
 3. P1.3 login throttle, P1.5 ACAO scope, P1.6 trusted-proxy docs.
