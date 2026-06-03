@@ -161,4 +161,29 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertStringContainsString('Phoenix Diagnostics and Utilities', $panel['body']);
         $this->assertStringNotContainsString('name="password"', $panel['body']);
     }
+
+    //// bin/ cron entry points (CLI, not HTTP)
+
+    #[Depends('testInstallSucceeds')]
+    public function testCleanAndOptimizeCronRuns(): void
+    {
+        // Bootstraps against the installed config + DB and runs to completion.
+        // (clean_with_cron is off by default, so the body is a no-op — this
+        // smokes the cron entry point's bootstrap, which announce.php can't.)
+        $r = $this->runCli('clean-and-optimize.php');
+        $this->assertSame(0, $r['exit'], $r['stdout'].$r['stderr']);
+    }
+
+    #[Depends('testInstallSucceeds')]
+    public function testBackupDatabaseCronRuns(): void
+    {
+        $root = dirname(__DIR__, 2);
+        @mkdir($root.'/backups');
+
+        $r = $this->runCli('backup-database.php');
+        $this->assertSame(0, $r['exit'], $r['stdout'].$r['stderr']);
+
+        $dumps = glob($root.'/backups/'.$this->dbCreds()['db_name'].'.*.sql');
+        $this->assertNotEmpty($dumps, 'backup-database should write a .sql dump');
+    }
 }

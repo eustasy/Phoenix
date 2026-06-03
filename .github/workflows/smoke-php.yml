@@ -58,6 +58,9 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
+      - name: Ensure mysqldump is available (backup-database smoke)
+        run: command -v mysqldump >/dev/null || { sudo apt-get update && sudo apt-get install -y mariadb-client; }
+
       - name: Run smoke tests against the built-in server
         run: |
           # Force installer mode: the suite installs over HTTP (writes config + creates tables).

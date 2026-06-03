@@ -132,4 +132,36 @@ abstract class SmokeTestCase extends TestCase
 
         return $cookie;
     }
+
+    /**
+     * Run a bin/ cron script in a fresh PHP process — these aren't HTTP
+     * endpoints. PCOV is enabled with the same prepend the server uses, so the
+     * script's coverage lands in SMOKE_COV_DIR too (inherited from the env).
+     *
+     * @return array{exit: int, stdout: string, stderr: string}
+     */
+    protected function runCli(string $script): array
+    {
+        $root = dirname(__DIR__, 2);
+        $proc = proc_open(
+            [
+                PHP_BINARY,
+                '-d', 'pcov.enabled=1',
+                '-d', 'pcov.directory='.$root,
+                '-d', 'pcov.exclude=~/(vendor|tests)/~',
+                '-d', 'auto_prepend_file='.$root.'/tests/smoke/coverage-prepend.php',
+                $root.'/bin/'.$script,
+            ],
+            [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+            $pipes,
+        );
+        $this->assertIsResource($proc);
+        fclose($pipes[0]);
+        $stdout = (string) stream_get_contents($pipes[1]);
+        $stderr = (string) stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+
+        return ['exit' => proc_close($proc), 'stdout' => $stdout, 'stderr' => $stderr];
+    }
 }

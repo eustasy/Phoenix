@@ -19,7 +19,7 @@ if ($dumpDir === '' || $outFile === '') {
 }
 
 $root = dirname(__DIR__, 2);
-$keep = [$root.'/src/', $root.'/public/'];
+$keep = [$root.'/src/', $root.'/public/', $root.'/bin/'];
 
 /** @var array<string, array<int, int>> $merged */
 $merged = [];

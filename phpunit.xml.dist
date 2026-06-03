@@ -15,9 +15,11 @@
 	<source>
 		<include>
 			<directory>src</directory>
-			<!-- public/ entry points are exercised by the smoke suite (smoke-php.yml);
-			     the unit run reports them uncovered and qlty unions in the smoke clover. -->
+			<!-- public/ entry points and bin/ cron scripts are exercised by the smoke
+			     suite (smoke-php.yml); the unit run reports them uncovered and qlty
+			     unions in the smoke clover. -->
 			<directory>public</directory>
+			<directory>bin</directory>
 		</include>
 	</source>
 </phpunit>
