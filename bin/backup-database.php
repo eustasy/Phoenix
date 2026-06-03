@@ -40,48 +40,60 @@ file_put_contents(
     'password="' . str_replace('"', '""', $settings['db_pass']) . '"' . PHP_EOL,
 );
 
-// proc_open with an argument array bypasses the shell entirely, so no
-// escaping is needed and settings values cannot be misinterpreted as flags.
+// Two passes, each via proc_open with an argument array so nothing is passed
+// through a shell. Pass 1 dumps everything except the peers rows (torrents and
+// tasks with data, plus routines and triggers); pass 2 dumps the peers table
+// structure only. Peer rows are ephemeral — they expire and are recreated on
+// announce — but keeping the schema means a restore needn't re-run Setup to
+// recreate the table. Only standard flags are used, so this works with a MySQL
+// or a MariaDB client (use the one matching your server).
 $errfile = $filepath . '.err';
-$proc = proc_open(
-    [
-        'mysqldump',
-        '--defaults-extra-file=' . $cnf_file,
-        '--allow-keywords',
-        '--replace',
-        '--routines',
-        '--skip-add-drop-table',
-        '--skip-lock-tables',
-        '--single-transaction',
-        '--triggers',
-        '--tz-utc',
-        '--ignore-table=' . $settings['db_name'] . '.' . $settings['db_prefix'] . 'peers',
-        $settings['db_name'],
-    ],
-    [
-        0 => ['pipe', 'r'],
-        1 => ['file', $filepath, 'w'],
-        2 => ['file', $errfile,  'w'],
-    ],
-    $pipes,
-);
+$base = [
+    'mysqldump',
+    '--defaults-extra-file=' . $cnf_file,
+    '--allow-keywords',
+    '--replace',
+    '--skip-add-drop-table',
+    '--skip-lock-tables',
+    '--single-transaction',
+    '--tz-utc',
+];
+$peers_table = $settings['db_prefix'] . 'peers';
 
-if ($proc === false) {
-    if (! unlink($cnf_file)) {
-        echo 'Warning: could not remove credentials file ' . $cnf_file . PHP_EOL;
+// [ stdout file mode, extra args ]. 'w' truncates for the first pass; 'a'
+// appends the peers structure onto it for the second.
+$passes = [
+    ['w', array_merge($base, ['--routines', '--triggers', '--ignore-table=' . $settings['db_name'] . '.' . $peers_table, $settings['db_name']])],
+    ['a', array_merge($base, ['--no-data', $settings['db_name'], $peers_table])],
+];
+
+$failed = false;
+foreach ($passes as [$mode, $command]) {
+    $proc = proc_open(
+        $command,
+        [
+            0 => ['pipe', 'r'],
+            1 => ['file', $filepath, $mode],
+            2 => ['file', $errfile, $mode],
+        ],
+        $pipes,
+    );
+    if ($proc === false) {
+        $failed = true;
+        break;
     }
-    echo 'Backup failed: could not start mysqldump.' . PHP_EOL;
-    exit(1);
+    fclose($pipes[0]);
+    if (proc_close($proc) !== 0) {
+        $failed = true;
+        break;
+    }
 }
-
-fclose($pipes[0]);
-$exit_code = proc_close($proc);
 
 if (! unlink($cnf_file)) {
     echo 'Warning: could not remove credentials file ' . $cnf_file . PHP_EOL;
 }
 
-if ($exit_code !== 0) {
+if ($failed) {
     $contents = is_readable($errfile) ? file_get_contents($errfile) : '';
     $error = is_string($contents) ? trim($contents) : '';
     echo 'Backup failed.' . ($error ? ' ' . $error : '') . PHP_EOL;

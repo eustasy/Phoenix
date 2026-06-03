@@ -58,8 +58,17 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: Ensure mysqldump is available (backup-database smoke)
-        run: command -v mysqldump >/dev/null || { sudo apt-get update && sudo apt-get install -y mariadb-client; }
+      - name: Provide a MariaDB-compatible mysqldump (backup-database smoke)
+        run: |
+          # The runner ships Oracle MySQL's mysqldump, which queries
+          # information_schema.COLUMN_STATISTICS — absent in MariaDB (error 1109).
+          # Install MariaDB's client and shim `mysqldump` -> mariadb-dump (first on
+          # PATH) so bin/backup-database.php dumps the MariaDB service cleanly.
+          sudo apt-get update && sudo apt-get install -y mariadb-client
+          shim="$RUNNER_TEMP/mariadb-shim"
+          mkdir -p "$shim"
+          ln -sf "$(command -v mariadb-dump)" "$shim/mysqldump"
+          echo "$shim" >> "$GITHUB_PATH"
 
       - name: Run smoke tests against the built-in server
         run: |

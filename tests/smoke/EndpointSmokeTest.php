@@ -180,10 +180,32 @@ class EndpointSmokeTest extends SmokeTestCase
         $root = dirname(__DIR__, 2);
         @mkdir($root.'/backups');
 
+        // Seed a torrent row so the dump has real torrent data to check: a
+        // completed announce creates one via torrent_increment_downloads (and a
+        // peer row), exercising both sides of the data-vs-schema split.
+        $this->get('/announce.php', [
+            'info_hash' => self::HASH,
+            'peer_id' => self::PEER_ID,
+            'port' => '6881',
+            'left' => '0',
+            'event' => 'completed',
+        ]);
+
         $r = $this->runCli('backup-database.php');
         $this->assertSame(0, $r['exit'], $r['stdout'].$r['stderr']);
 
         $dumps = glob($root.'/backups/'.$this->dbCreds()['db_name'].'.*.sql');
         $this->assertNotEmpty($dumps, 'backup-database should write a .sql dump');
+
+        $dump = (string) file_get_contents($dumps[0]);
+        $prefix = $this->dbCreds()['db_prefix'];
+        // torrents + tasks + the peers structure are all present...
+        $this->assertStringContainsString($prefix.'torrents', $dump);
+        $this->assertStringContainsString($prefix.'tasks', $dump);
+        $this->assertStringContainsString($prefix.'peers', $dump);
+        // ...the torrent row IS dumped (its info_hash appears as data), but the
+        // peer row is NOT — peers is schema-only.
+        $this->assertStringContainsString(self::HASH, $dump);
+        $this->assertStringNotContainsString(self::PEER_ID, $dump);
     }
 }
