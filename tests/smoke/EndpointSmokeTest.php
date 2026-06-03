@@ -235,4 +235,18 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertStringContainsString(self::HASH, $dump);
         $this->assertStringNotContainsString(self::PEER_ID, $dump);
     }
+
+    #[Depends('testInstallSucceeds')]
+    public function testClosedTrackerRejectsSpecificScrape(): void
+    {
+        // Close the tracker — the installer opens it. This runs LAST, so nothing
+        // afterwards relies on open_tracker and no restore is needed.
+        $this->closeTracker();
+
+        // A never-tracked hash can't be in the allowed list, so a closed tracker
+        // must refuse to scrape it (bencode failure, HTTP 200).
+        $r = $this->get('/scrape.php', ['info_hash' => str_repeat('e', 40)]);
+        $this->assertSame(200, $r['status']);
+        $this->assertStringContainsString('Torrent is not allowed', $r['body']);
+    }
 }

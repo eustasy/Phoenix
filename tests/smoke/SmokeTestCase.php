@@ -190,15 +190,27 @@ abstract class SmokeTestCase extends TestCase
     }
 
     /**
-     * Turn on the cron maintenance path in the installed config (it's off by
-     * default), by appending an override to phoenix.custom.php.
+     * Append a `$settings[...] = ...;` override to the installed config. Loaded
+     * last by settings_load(), so it wins over the value the installer wrote.
      */
-    protected function enableCleanWithCron(): void
+    private function appendConfigOverride(string $assignment): void
     {
         file_put_contents(
             dirname(__DIR__, 2).'/config/phoenix.custom.php',
-            PHP_EOL."\$settings['clean_with_cron'] = true;".PHP_EOL,
+            PHP_EOL.$assignment.PHP_EOL,
             FILE_APPEND,
         );
+    }
+
+    /** Turn on the cron maintenance path (the installer leaves it off). */
+    protected function enableCleanWithCron(): void
+    {
+        $this->appendConfigOverride("\$settings['clean_with_cron'] = true;");
+    }
+
+    /** Close the tracker (the installer opens it). */
+    protected function closeTracker(): void
+    {
+        $this->appendConfigOverride("\$settings['open_tracker'] = false;");
     }
 }
