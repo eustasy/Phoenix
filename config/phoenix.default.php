@@ -38,7 +38,10 @@ $settings['max_peers'] = 100;
 $settings['external_ip'] = false;
 /* default to compact announces when not specified */
 $settings['default_compact'] = true;
-/* allow scrapes without info_hash */
+/* allow scrapes with no info_hash, which return EVERY torrent's stats. */
+/* Conventional for open trackers. Set false on a closed/private tracker: */
+/* a full scrape ignores the allowed-torrents filter, so leaving it on */
+/* exposes your whole torrent list to anyone who scrapes. */
 $settings['full_scrape'] = true;
 /* randomise peer selection to spread load */
 $settings['random_peers'] = true;

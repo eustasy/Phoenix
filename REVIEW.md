@@ -136,9 +136,10 @@ through to a public client-declared IP per BEP 3.
   old "not secure / should not be deployed" note now accurately describes the bcrypt auth,
   hardened session, and login throttle, and notes that auth is skipped when
   `admin_password` is empty (see P1.1).
-* **`full_scrape` defaults to `true`:** every torrent's stats are publicly scrapable by
-  default. Conventional for open trackers, but closed-tracker operators should know to
-  flip it. _(confirmed — minor)_
+* **`full_scrape` defaults to `true`** _(addressed — 2026-06-03)_ — every torrent's stats
+  are publicly scrapable by default, and a full scrape ignores the allowed-torrents filter
+  (`scrape_full_controller` → `*_scrape_all`). `config/phoenix.default.php` now documents
+  this and tells closed/private-tracker operators to set it `false`.
 
 ## P3 — Protocol conformance
 
