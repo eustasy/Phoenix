@@ -165,13 +165,40 @@ class EndpointSmokeTest extends SmokeTestCase
     //// bin/ cron entry points (CLI, not HTTP)
 
     #[Depends('testInstallSucceeds')]
-    public function testCleanAndOptimizeCronRuns(): void
+    public function testCleanAndOptimizeCronRemovesStalePeers(): void
     {
-        // Bootstraps against the installed config + DB and runs to completion.
-        // (clean_with_cron is off by default, so the body is a no-op — this
-        // smokes the cron entry point's bootstrap, which announce.php can't.)
+        $db = $this->db();
+        $prefix = $this->dbCreds()['db_prefix'];
+
+        // The cron maintenance is gated on clean_with_cron, which the installer
+        // leaves off — enable it so the script's body actually runs.
+        $this->enableCleanWithCron();
+
+        // Seed a stale peer (older than 3x announce_interval = 5400s) and a
+        // fresh one, under a distinct info_hash with plain-hex peer_ids (so the
+        // __TEST_ sentinel purge doesn't catch the one we expect to survive).
+        $hash = str_repeat('c', 40);
+        $stalePeer = str_repeat('9', 40);
+        $freshPeer = str_repeat('8', 40);
+        $now = time();
+        $stale = $now - (3 * 1800) - 600;
+        foreach ([[$stalePeer, $stale], [$freshPeer, $now]] as [$pid, $updated]) {
+            mysqli_query(
+                $db,
+                "REPLACE INTO `{$prefix}peers` ".
+                '(`info_hash`,`peer_id`,`compactv4`,`compactv6`,`portv4`,`portv6`,`state`,`updated`) '.
+                "VALUES ('{$hash}','{$pid}','','',0,0,0,{$updated})",
+            );
+        }
+
         $r = $this->runCli('clean-and-optimize.php');
         $this->assertSame(0, $r['exit'], $r['stdout'].$r['stderr']);
+
+        // Cleanup is selective: the stale peer is gone, the fresh one survives.
+        $this->assertSame(0, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}peers` WHERE `peer_id`='{$stalePeer}'"));
+        $this->assertSame(1, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}peers` WHERE `peer_id`='{$freshPeer}'"));
+        // ...and the run logged a `clean` task.
+        $this->assertGreaterThan(0, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}tasks` WHERE `name`='clean'"));
     }
 
     #[Depends('testInstallSucceeds')]

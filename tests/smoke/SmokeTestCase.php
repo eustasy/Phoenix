@@ -164,4 +164,41 @@ abstract class SmokeTestCase extends TestCase
 
         return ['exit' => proc_close($proc), 'stdout' => $stdout, 'stderr' => $stderr];
     }
+
+    /**
+     * Direct mysqli connection to the smoke database — for seeding and verifying
+     * effects of the CLI cron scripts that aren't observable over HTTP.
+     */
+    protected function db(): \mysqli
+    {
+        $c = $this->dbCreds();
+        mysqli_report(MYSQLI_REPORT_OFF);
+        $db = mysqli_connect($c['db_host'], $c['db_user'], $c['db_pass'], $c['db_name']);
+        $this->assertInstanceOf(\mysqli::class, $db);
+
+        return $db;
+    }
+
+    /** Run a COUNT/scalar query and return the first column of the first row as int. */
+    protected function scalar(\mysqli $db, string $sql): int
+    {
+        $result = mysqli_query($db, $sql);
+        $this->assertInstanceOf(\mysqli_result::class, $result);
+        $row = mysqli_fetch_row($result);
+
+        return (int) ($row[0] ?? 0);
+    }
+
+    /**
+     * Turn on the cron maintenance path in the installed config (it's off by
+     * default), by appending an override to phoenix.custom.php.
+     */
+    protected function enableCleanWithCron(): void
+    {
+        file_put_contents(
+            dirname(__DIR__, 2).'/config/phoenix.custom.php',
+            PHP_EOL."\$settings['clean_with_cron'] = true;".PHP_EOL,
+            FILE_APPEND,
+        );
+    }
 }
