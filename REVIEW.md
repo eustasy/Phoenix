@@ -132,9 +132,10 @@ through to a public client-declared IP per BEP 3.
   (`peer_select` → `peer_changed` → insert/update; `completed` →
   `torrent_increment_downloads` + state; `stopped` → delete) is sound, and swarm
   counts come from a dedicated `peers_count_swarm()` query, not the truncated peer list.
-* **Stale/contradictory comment:** `public/admin.php` says _"This page is not secure.
-  It should not be deployed in a production environment."_ despite real auth existing —
-  clarify or remove so operators aren't misled. _(confirmed)_
+* **Stale/contradictory comment** in `public/admin.php` _(addressed — 2026-06-03)_ — the
+  old "not secure / should not be deployed" note now accurately describes the bcrypt auth,
+  hardened session, and login throttle, and notes that auth is skipped when
+  `admin_password` is empty (see P1.1).
 * **`full_scrape` defaults to `true`:** every torrent's stats are publicly scrapable by
   default. Conventional for open trackers, but closed-tracker operators should know to
   flip it. _(confirmed — minor)_

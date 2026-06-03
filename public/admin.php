@@ -3,8 +3,11 @@
 declare(strict_types=1);
 
 ////	Admin Panel & Installer
-// This page is not secure.
-// It should not be deployed in a production environment.
+// Protected by a bcrypt password (admin_login_controller) with a hardened
+// session and a failed-login throttle — but ONLY when admin_password is set.
+// With it empty, auth is skipped: set a password, and remove or relocate this
+// file once setup is done. See the hardening notes in README.md / APACHE.md /
+// NGINX.md (post-setup removal, admin rate-limiting).
 
 // Bootstrap tracker_error before any DB work so the installer-mode path
 // below can use it without going through phoenix.php's full DB connect.
