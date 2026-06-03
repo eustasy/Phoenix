@@ -116,10 +116,13 @@ through to a public client-declared IP per BEP 3.
   prefer the server's real-IP module (`mod_remoteip` / `ngx_http_realip_module`) with
   `honor_xff = false`, and if `honor_xff` is enabled the proxy must overwrite
   `X-Forwarded-For` so a client cannot supply it.
-* **Optional, still open:** gate `honor_xff` behind a configurable trusted-proxy CIDR in
-  `peer_address_candidates()` rather than blanket trust, so a misconfigured proxy can't be
-  bypassed by a direct client connection.
-* Files: `APACHE.md`, `NGINX.md`, `src/functions/peer.address.candidates.php`.
+* **Also done (2026-06-03):** `peer_address_candidates()` gates `honor_xff` on a
+  configurable `trusted_proxies` CIDR list (`ip_in_cidr`): `X-Forwarded-For` is honored
+  only from connections within those ranges — so a bypassed/misconfigured proxy can't be
+  spoofed via a direct connection — with empty meaning trust any peer (for proxies that
+  have no stable range).
+* Files: `APACHE.md`, `NGINX.md`, `src/functions/peer.address.candidates.php`,
+  `src/functions/ip.in.cidr.php`, `config/phoenix.default.php`.
 
 ---
 
@@ -170,8 +173,6 @@ through to a public client-declared IP per BEP 3.
 
 1. P1.1 (fail-closed empty password) — small, high value.
 2. P2 comment fix, P5 smoke tests.
-
-(P1.6's optional `honor_xff` trusted-proxy CIDR gating remains as a follow-up — see §1.6.)
 
 ## Verification (for any future change)
 

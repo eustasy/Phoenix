@@ -58,7 +58,7 @@ class PeerAddressCandidatesTest extends PhoenixTestCase
 
     public function testProxyHeadersTakePrecedenceWhenHonorXffEnabled(): void
     {
-        $settings = ['external_ip' => false, 'honor_xff' => true];
+        $settings = ['external_ip' => false, 'honor_xff' => true, 'trusted_proxies' => []];
         $server = [
             'REMOTE_ADDR' => '10.0.0.1',
             'HTTP_CLIENT_IP' => '5.5.5.5',
@@ -76,7 +76,7 @@ class PeerAddressCandidatesTest extends PhoenixTestCase
         // Standard XFF chain: 'client, proxy1, proxy2'. The leftmost is the
         // originating client. The IP parsers cannot accept the raw header
         // (it isn't an IP), so we must split here.
-        $settings = ['external_ip' => false, 'honor_xff' => true];
+        $settings = ['external_ip' => false, 'honor_xff' => true, 'trusted_proxies' => []];
         $server = [
             'REMOTE_ADDR' => '10.0.0.1',
             'HTTP_X_FORWARDED_FOR' => '203.0.113.5, 198.51.100.7, 10.0.0.1',
@@ -89,7 +89,7 @@ class PeerAddressCandidatesTest extends PhoenixTestCase
 
     public function testXffWithExtraWhitespaceIsTrimmed(): void
     {
-        $settings = ['external_ip' => false, 'honor_xff' => true];
+        $settings = ['external_ip' => false, 'honor_xff' => true, 'trusted_proxies' => []];
         $server = [
             'REMOTE_ADDR' => '10.0.0.1',
             'HTTP_X_FORWARDED_FOR' => '   203.0.113.5  ,198.51.100.7',
@@ -102,7 +102,7 @@ class PeerAddressCandidatesTest extends PhoenixTestCase
 
     public function testXffSkippedWhenAllEntriesBlank(): void
     {
-        $settings = ['external_ip' => false, 'honor_xff' => true];
+        $settings = ['external_ip' => false, 'honor_xff' => true, 'trusted_proxies' => []];
         $server = [
             'REMOTE_ADDR' => '10.0.0.1',
             'HTTP_X_FORWARDED_FOR' => ' , ,  ',
@@ -115,7 +115,7 @@ class PeerAddressCandidatesTest extends PhoenixTestCase
 
     public function testClientIpHeaderIsAlsoSplit(): void
     {
-        $settings = ['external_ip' => false, 'honor_xff' => true];
+        $settings = ['external_ip' => false, 'honor_xff' => true, 'trusted_proxies' => []];
         $server = [
             'REMOTE_ADDR' => '10.0.0.1',
             'HTTP_CLIENT_IP' => '203.0.113.5, 198.51.100.7',
@@ -158,6 +158,38 @@ class PeerAddressCandidatesTest extends PhoenixTestCase
     public function testXffFirstReturnsNullWhenEmpty(): void
     {
         $this->assertNull(peer_xff_first(''));
+    }
+
+    ////	trusted_proxies gating
+
+    public function testXffHonoredWhenRemoteAddrInTrustedRange(): void
+    {
+        $settings = ['external_ip' => false, 'honor_xff' => true, 'trusted_proxies' => ['10.0.0.0/8']];
+        $server = ['REMOTE_ADDR' => '10.0.0.1', 'HTTP_X_FORWARDED_FOR' => '203.0.113.5'];
+        $this->assertSame(
+            ['203.0.113.5', '10.0.0.1'],
+            peer_address_candidates($settings, [], $server),
+        );
+    }
+
+    public function testXffIgnoredWhenRemoteAddrNotTrusted(): void
+    {
+        // Direct (untrusted) connection: X-Forwarded-For is dropped, so a
+        // client cannot spoof its address by connecting straight to the origin.
+        $settings = ['external_ip' => false, 'honor_xff' => true, 'trusted_proxies' => ['203.0.113.0/24']];
+        $server = ['REMOTE_ADDR' => '10.0.0.1', 'HTTP_X_FORWARDED_FOR' => '6.6.6.6'];
+        $this->assertSame(['10.0.0.1'], peer_address_candidates($settings, [], $server));
+    }
+
+    public function testEmptyTrustedProxiesHonorsAnyXff(): void
+    {
+        // Empty trusted_proxies = trust any peer (for proxies with no stable range).
+        $settings = ['external_ip' => false, 'honor_xff' => true, 'trusted_proxies' => []];
+        $server = ['REMOTE_ADDR' => '198.51.100.9', 'HTTP_X_FORWARDED_FOR' => '6.6.6.6'];
+        $this->assertSame(
+            ['6.6.6.6', '198.51.100.9'],
+            peer_address_candidates($settings, [], $server),
+        );
     }
 
 }

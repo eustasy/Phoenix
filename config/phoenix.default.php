@@ -56,6 +56,11 @@ $settings['clean_with_cron'] = false;
 /* should only be set if your frontend proxy properly handles */
 /* and filters XFF, else it allows for trivial IP spoofing */
 $settings['honor_xff'] = false;
+/* CIDR ranges of trusted reverse proxies. When honor_xff is on, an */
+/* X-Forwarded-For header is honored only from these ranges; leave */
+/* empty to honor it from any peer (for proxies without a stable IP */
+/* range). See APACHE.md / NGINX.md. */
+$settings['trusted_proxies'] = [];
 /* drop private (RFC 1918) and reserved addresses when */
 /* resolving peers, so they are never handed out to the swarm. */
 /* Lets a private REMOTE_ADDR (NAT/proxy) fall through to a */

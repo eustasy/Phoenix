@@ -50,7 +50,7 @@ RemoteIPTrustedProxy 10.0.0.0/8   # your proxy's address(es) — never 0.0.0.0/0
 RequestHeader set X-Forwarded-For "%{REMOTE_ADDR}s"
 ```
 
-If Phoenix trusts an unsanitized header, any client can spoof its IP — poisoning swarms with arbitrary peer addresses (reflective DDoS) and evading the per-IP rate limiter. If this server is reachable directly (not only through the proxy), keep `honor_xff = false`.
+If Phoenix trusts an unsanitized header, any client can spoof its IP — poisoning swarms with arbitrary peer addresses (reflective DDoS) and evading the per-IP rate limiter. To restrict trust, set `trusted_proxies` in `config/phoenix.custom.php` to your proxy's CIDR range(s); `X-Forwarded-For` is then honored only from connections within those ranges (leave empty to honor it from any peer). If this server is reachable directly (not only through the proxy), set `trusted_proxies` or keep `honor_xff = false`.
 
 ## Rate limiting
 
