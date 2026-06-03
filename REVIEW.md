@@ -89,12 +89,12 @@ already surfaced via `tracker_error()`.
 
 ### 1.5 `Access-Control-Allow-Origin: *` on every response  _(addressed — 2026-06-03)_
 
-The header was emitted from the shared bootstrap, so admin and index responses
-carried it too. It now lives in the two protocol entry points (`public/announce.php`,
-`public/scrape.php`), sent before bootstrap so error responses still carry it, and is
-no longer sent on the admin or index endpoints.
+The header was emitted from the shared bootstrap, so admin responses carried it too.
+It now lives in the public read entry points (`public/announce.php`, `public/scrape.php`,
+`public/index.php`), sent before bootstrap so error responses still carry it, and is no
+longer sent on the admin endpoint.
 
-* Files: `src/phoenix.php`, `public/announce.php`, `public/scrape.php`.
+* Files: `src/phoenix.php`, `public/announce.php`, `public/scrape.php`, `public/index.php`.
 
 ### 1.6 Client-controlled source IPs — defaults safe; partially reinforced  _(partially addressed — 2026-06-02)_
 
