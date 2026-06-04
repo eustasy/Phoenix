@@ -1,0 +1,32 @@
+# Normalize line endings. Mirrors `end_of_line = lf` in .editorconfig so the
+# tree stays LF in the repo and on checkout, even when edited on Windows/WSL.
+# This is what stops the recurring CRLF<->LF churn on otherwise-unchanged files.
+* text=auto eol=lf
+
+# Explicit declarations for the text types in this repo (documentation; the
+# rule above already covers them).
+*.php        text eol=lf
+*.sql        text eol=lf
+*.json       text eol=lf
+*.yml        text eol=lf
+*.yaml       text eol=lf
+*.md         text eol=lf
+*.toml       text eol=lf
+*.neon       text eol=lf
+*.dist       text eol=lf
+*.editorconfig text eol=lf
+*.gitignore  text eol=lf
+
+# Binary assets: none tracked today, declared defensively so any future image
+# or font added to the UI is never line-ending-normalized.
+*.png        binary
+*.jpg        binary
+*.jpeg       binary
+*.gif        binary
+*.ico        binary
+*.webp       binary
+*.svg        text eol=lf
+*.woff       binary
+*.woff2      binary
+*.ttf        binary
+*.pdf        binary
