@@ -193,7 +193,7 @@ abstract class SmokeTestCase extends TestCase
      * Append a `$settings[...] = ...;` override to the installed config. Loaded
      * last by settings_load(), so it wins over the value the installer wrote.
      */
-    private function appendConfigOverride(string $assignment): void
+    protected function appendConfigOverride(string $assignment): void
     {
         file_put_contents(
             dirname(__DIR__, 2).'/config/phoenix.custom.php',

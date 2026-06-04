@@ -227,6 +227,12 @@ class EndpointSmokeTest extends SmokeTestCase
         $root = dirname(__DIR__, 2);
         @mkdir($root.'/backups');
 
+        // Seed a backup old enough to be rotated out (backup_rotate defaults to
+        // 30 days) so the rotation pass actually deletes something.
+        $oldBackup = $root.'/backups/'.$this->dbCreds()['db_name'].'.20000101_0000.sql';
+        file_put_contents($oldBackup, "-- stale backup\n");
+        touch($oldBackup, time() - (40 * 86400));
+
         // Seed a torrent row so the dump has real torrent data to check: a
         // completed announce creates one via torrent_increment_downloads (and a
         // peer row), exercising both sides of the data-vs-schema split.
@@ -254,6 +260,23 @@ class EndpointSmokeTest extends SmokeTestCase
         // peer row is NOT — peers is schema-only.
         $this->assertStringContainsString(self::HASH, $dump);
         $this->assertStringNotContainsString(self::PEER_ID, $dump);
+
+        // Rotation deleted the stale backup (older than backup_rotate days).
+        $this->assertFileDoesNotExist($oldBackup);
+    }
+
+    #[Depends('testInstallSucceeds')]
+    public function testBackupDatabaseFailsWhenDirMissing(): void
+    {
+        // Point backup_dir at a path that doesn't exist: the script must bail
+        // out cleanly (exit 1) rather than try to dump.
+        $this->appendConfigOverride(
+            "\$settings['backup_dir'] = '".sys_get_temp_dir().'/phoenix-no-such-'.bin2hex(random_bytes(4))."';",
+        );
+
+        $r = $this->runCli('backup-database.php');
+        $this->assertSame(1, $r['exit']);
+        $this->assertStringContainsString('BACKUP_DIR_NOT_FOUND', $r['stdout']);
     }
 
     #[Depends('testInstallSucceeds')]
