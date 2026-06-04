@@ -1,5 +1,37 @@
 # Phoenix Changelog
 
+## v4.0beta3 - 04/06/2026
+
+The 4.0 line is a ground-up refactor of the 3.x codebase: a new on-disk layout, an MVC-inspired split of the old "puff" files, a full PHPUnit suite, CI with static analysis, and a security-review pass. The tracker protocol behaviour is unchanged. **Operators upgrading from 3.x should read the [3.x → 4.0 Migration Guide](MIGRATING.md) first** — the document root, configuration, and cron paths have all moved.
+
+* BREAKING: Adopt a Public Document Standard layout — only `public/` is web-served, with `src/`, `bin/`, `config/`, and `tests/` above the web root ([#48](https://github.com/eustasy/phoenix/issues/48)). **The web server document root must be re-pointed at `public/`.** See [APACHE.md](APACHE.md) / [NGINX.md](NGINX.md).
+* BREAKING: Maintenance scripts moved from `_cron/hourly/` to `bin/` (`bin/backup-database.php`, `bin/clean-and-optimize.php`). **Cron jobs must be updated.**
+* BREAKING: User configuration moved from `_settings/phoenix.custom.php` to `config/phoenix.custom.php` (template: `config/phoenix.default.php`). Existing overrides are forward-compatible.
+* BREAKING: Minimum PHP raised to 8.2, requiring the `mysqli` and `xml` extensions ([#41](https://github.com/eustasy/phoenix/issues/41)).
+* FEATURE: Tables are now defined in standalone `sql/*.sql` files (importable with `mysql <database> < sql/peers.sql`), loaded automatically by `db_create()`. Same schema as 3.2 — **no DB migration is required.**
+* FEATURE: Announce responses can be requested as JSON (`?json`) or XML (`?xml`), matching scrape's alternative formats.
+* IMPROVES: Reorganise the "puff" files into an MVC-inspired split — thin `public/` entry points delegating to `src/controller/`, `src/model/`, `src/views/`, and `src/functions/`.
+* IMPROVES: Funnel all bencode output through a single `bencode_encode()` emitter that owns length prefixes, container tokens, and BEP-3 dict-key ordering.
+* IMPROVES: Replace the bespoke test harness with a PHPUnit suite, plus endpoint smoke tests, run in CI across PHP 8.2–8.6 against a MariaDB service container.
+* IMPROVES: Add CI static analysis and formatting via qlty (phpstan + php-cs-fixer), sqlfluff, and markdownlint; configure Dependabot for Actions and Composer.
+* IMPROVES: Apply `declare(strict_types=1)` across the project and add PHP type declarations throughout.
+* IMPROVES: Add CSRF tokens to admin panel state-changing forms ([#59](https://github.com/eustasy/phoenix/issues/59)).
+* IMPROVES: Add a brute-force throttle to admin login, harden the session cookie, regenerate the session id on login, and make logout POST-only.
+* IMPROVES: Use prepared statements for client-data queries.
+* IMPROVES: Tighten the `Access-Control-Allow-Origin` scope and route source-IP handling through `reject_private_ips`, parsing multi-hop `X-Forwarded-For` correctly.
+* IMPROVES: Reject non-hex `info_hash` and `peer_id` values at the boundary.
+* IMPROVES: Add an XML-escape helper for stats/scrape XML output; pin `normalize.css` and `Colors.css` with SRI integrity and drop the jQuery dependency from the admin panel.
+* IMPROVES: Send a `Content-Type` header on bencode announce and scrape responses, and content-negotiate `tracker_error` output.
+* BUGFIX: Filter rejected `info_hash`es out of multi-torrent scrape so a closed tracker never leaks disallowed torrents ([#49](https://github.com/eustasy/phoenix/issues/49)).
+* BUGFIX: Wrap the XML scrape response in a `<scrape>` root element.
+* BUGFIX: Default the `ipv4`/`ipv6` peer columns to an empty-string sentinel rather than `'0'`.
+* BUGFIX: Skip bare query-string keys in `sanitize_tracker_params`, and guard announce input validation against a `false` sanitiser result.
+* BUGFIX: Consume the first `multi_query` result in `task_optimize`, and guard the admin MySQL-version `substr` against `strpos` returning `false`.
+
+### Database Migration
+
+None. 4.0 uses the same schema as 3.2. If upgrading from 3.1 or earlier, apply the **v.3.2** SQL migration below first; from 3.2 there are no database changes. See the [Migration Guide](MIGRATING.md) for full upgrade steps.
+
 ## v.3.2 - 09/05/2026 - Haggard
 
 * BREAKING: Requires at least PHP 7.1
