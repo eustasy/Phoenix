@@ -170,9 +170,21 @@ class EndpointSmokeTest extends SmokeTestCase
         $cookie = $this->sessionCookie($login);
         $this->assertNotNull($cookie);
 
-        // Logout is POST-only: it destroys the session and redirects (header +
+        // Logout is POST-only AND CSRF-protected (see #59): a POST without a
+        // valid token is refused — no redirect, session left intact — which
+        // also exercises the reject branch of auth_handle_logout server-side.
+        $forged = $this->post('/admin.php', ['logout' => '1'], ['Cookie' => $cookie]);
+        $this->assertSame(200, $forged['status']);
+
+        // Fetch the panel to read the per-session token from the logout form.
+        $panel = $this->get('/admin.php', [], ['Cookie' => $cookie]);
+        $this->assertSame(200, $panel['status']);
+        $token = $this->csrfToken($panel['body']);
+        $this->assertNotNull($token, 'panel should embed a CSRF token in the logout form');
+
+        // With the token, logout destroys the session and redirects (header +
         // exit — uncoverable in-process, exercised here in the PCOV'd server).
-        $logout = $this->post('/admin.php', ['logout' => '1'], ['Cookie' => $cookie]);
+        $logout = $this->post('/admin.php', ['logout' => '1', 'csrf' => $token], ['Cookie' => $cookie]);
         $this->assertSame(302, $logout['status']);
 
         // The session is gone: the same cookie now falls back to the login form.

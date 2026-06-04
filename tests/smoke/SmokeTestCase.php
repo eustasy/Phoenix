@@ -115,6 +115,19 @@ abstract class SmokeTestCase extends TestCase
     }
 
     /**
+     * Extract the per-session CSRF token from a rendered admin form (the hidden
+     * `csrf` field). State-changing admin POSTs require it (see #59).
+     */
+    protected function csrfToken(string $body): ?string
+    {
+        if (preg_match('~name="csrf" value="([^"]*)"~', $body, $m) && $m[1] !== '') {
+            return $m[1];
+        }
+
+        return null;
+    }
+
+    /**
      * Extract the session cookie (as a ready-to-send `PHPSESSID=…` pair) from a
      * response's Set-Cookie headers. Returns the LAST match — login regenerates
      * the session id, so the final Set-Cookie carries the authenticated one.
