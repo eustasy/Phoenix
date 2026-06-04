@@ -1,5 +1,7 @@
 # Phoenix Changelog
 
+> **Phoenix 4.0, on the [`main`](https://github.com/eustasy/Phoenix/tree/main) branch, is the recommended version for new installs.** It reorganises the on-disk layout — the web document root, configuration, and cron paths have all changed — and requires PHP >= 8.2. The database schema is unchanged from 3.2, so **no DB migration is required**. For the full upgrade steps, follow the [3.x → 4.0 Migration Guide](https://github.com/eustasy/Phoenix/blob/main/MIGRATING.md). This `3.x` branch is maintenance-only, for existing installs.
+
 ## v.3.2 - 09/05/2026 - Haggard
 * BREAKING: Requires at least PHP 7.1
 * BREAKING: Replace backup bash script with PHP; add backup_rotate setting. **Cron jobs will require changing and testing.**
