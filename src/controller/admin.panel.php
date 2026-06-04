@@ -12,6 +12,14 @@ declare(strict_types=1);
 /** @param PhoenixSettings $settings */
 function admin_panel_controller(mysqli $connection, array $settings, int $time): string
 {
+    require_once __DIR__.'/../functions/auth.csrf.token.php';
+    require_once __DIR__.'/../functions/auth.csrf.verify.php';
+
+    // CSRF is only meaningful when a password (and therefore a session) is in
+    // play; with admin_password empty the panel is unauthenticated anyway, so
+    // there is no boundary for a forged request to cross.
+    $csrf_enabled = ! empty($settings['admin_password']);
+
     $process = '';
     if (! empty($_POST['process'])) {
         // $process is only ever compared against literal action names below,
@@ -24,6 +32,16 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
     $tables_installed = db_tables_installed($connection, $settings);
 
     $message = false;
+
+    // Reject any state-changing POST whose CSRF token is missing or wrong, so
+    // a forged form cannot drive setup/clean/optimize against an authenticated
+    // admin. Surface a message and skip dispatch (rather than tracker_error())
+    // so the panel still renders and the admin can simply retry.
+    if ($process !== '' && $csrf_enabled && ! auth_csrf_verify()) {
+        $message = 'Security check failed. Please reload the page and try again.';
+        $process = '';
+    }
+
     if ($process === 'setup') {
         require_once __DIR__.'/admin.setup.php';
         $result = admin_setup_action($connection, $settings, $time, $tables_installed);
@@ -45,6 +63,8 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
         $database_size = db_size($connection, $settings);
     }
 
+    $csrf_token = $csrf_enabled ? auth_csrf_token() : '';
+
     require_once __DIR__.'/../views/html.admin.php';
 
     return view_admin_html(
@@ -53,5 +73,6 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
         $database_size,
         $message,
         isset($_GET['installed']),
+        $csrf_token,
     );
 }

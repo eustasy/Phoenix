@@ -98,6 +98,23 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertStringNotContainsString('name="process" value="optimize"', $notInstalled);
     }
 
+    public function testEmbedsCsrfTokenInForms(): void
+    {
+        // Every state-changing form carries the per-session token so the
+        // controller can reject forged POSTs. Exercise all four: logout
+        // (needs admin_password) and setup (needs db_reset) plus clean/optimize.
+        $html = view_admin_html(
+            $this->settings(['admin_password' => 'hash', 'db_reset' => true]),
+            true,
+            false,
+            false,
+            false,
+            'deadbeefToken',
+        );
+        // One csrf field per form: logout, setup, clean, optimize.
+        $this->assertSame(4, substr_count($html, 'name="csrf" value="deadbeefToken"'));
+    }
+
     public function testEscapesActionMessage(): void
     {
         // The setup/clean/optimize controllers return user-visible strings
@@ -126,7 +143,7 @@ class ViewAdminHtmlTest extends TestCase
         // Manual installs may bypass composer's php: ^8.2 constraint, so the
         // view must still warn when the runtime is too old. The override
         // parameter exists purely so this branch can be reached from tests.
-        $html = view_admin_html($this->settings(), true, false, false, false, '8.1.99');
+        $html = view_admin_html($this->settings(), true, false, false, false, '', '8.1.99');
         $this->assertStringContainsString('Phoenix requires PHP &gt;= 8.2.', $html);
         $this->assertStringContainsString('PHP Version: 8.1.99', $html);
         $this->assertStringNotContainsString('Your PHP version is supported.', $html);
@@ -137,7 +154,7 @@ class ViewAdminHtmlTest extends TestCase
         // Manual installs may bypass composer's ext-mysqli requirement, so the
         // view must still warn when mysqli is not loaded. When mysqli is
         // missing the panel short-circuits — no version line, no utilities.
-        $html = view_admin_html($this->settings(), true, false, false, false, null, false);
+        $html = view_admin_html($this->settings(), true, false, false, false, '', null, false);
         $this->assertStringContainsString('Your server does not support MySQL.', $html);
         $this->assertStringNotContainsString('Your server supports MySQL.', $html);
         $this->assertStringNotContainsString('name="process" value="setup"', $html);

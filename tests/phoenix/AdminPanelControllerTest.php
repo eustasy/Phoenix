@@ -16,14 +16,19 @@ class AdminPanelControllerTest extends PhoenixTestCase
     /** @var array<string, mixed> */
     private array $getBackup;
 
+    /** @var array<string, mixed> */
+    private array $sessionBackup;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->errorReporting = error_reporting();
         $this->postBackup = $_POST;
         $this->getBackup = $_GET;
+        $this->sessionBackup = $_SESSION ?? [];
         $_POST = [];
         $_GET = [];
+        $_SESSION = [];
     }
 
     protected function tearDown(): void
@@ -31,6 +36,7 @@ class AdminPanelControllerTest extends PhoenixTestCase
         error_reporting($this->errorReporting);
         $_POST = $this->postBackup;
         $_GET = $this->getBackup;
+        $_SESSION = $this->sessionBackup;
         parent::tearDown();
     }
 
@@ -58,16 +64,21 @@ class AdminPanelControllerTest extends PhoenixTestCase
 
     public function testProcessCleanRendersCleanMessage(): void
     {
+        // No admin_password → CSRF disabled, so this exercises pure dispatch.
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
         $_POST['process'] = 'clean';
-        $html = \admin_panel_controller(self::$connection, self::$settings, self::$time);
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
 
         $this->assertStringContainsString('The peers list has been cleaned.', $html);
     }
 
     public function testProcessOptimizeRendersOptimizeMessage(): void
     {
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
         $_POST['process'] = 'optimize';
-        $html = \admin_panel_controller(self::$connection, self::$settings, self::$time);
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
 
         $this->assertStringContainsString('Your MySQL Tracker Database has been optimized.', $html);
     }
@@ -80,6 +91,7 @@ class AdminPanelControllerTest extends PhoenixTestCase
         $settings = self::$settings;
         $settings['db_prefix'] = 'phoenix_panel_setup_test_';
 
+        $settings['admin_password'] = '';
         $_POST['process'] = 'setup';
         try {
             $html = \admin_panel_controller(self::$connection, $settings, self::$time);
@@ -96,13 +108,46 @@ class AdminPanelControllerTest extends PhoenixTestCase
     {
         // Anything other than setup/clean/optimize is ignored (no message
         // dispatch, controller still renders the panel).
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
         $_POST['process'] = 'mystery_action';
-        $html = \admin_panel_controller(self::$connection, self::$settings, self::$time);
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
 
         $this->assertIsString($html);
         $this->assertStringContainsString('Phoenix', $html);
         $this->assertStringNotContainsString('has been cleaned', $html);
         $this->assertStringNotContainsString('has been optimized', $html);
+    }
+
+    public function testRejectsProcessWithoutCsrfWhenPasswordSet(): void
+    {
+        // With a password set, a state-changing POST lacking a valid CSRF
+        // token is refused: the security message shows and the clean action
+        // does not run.
+        $settings = self::$settings;
+        $settings['admin_password'] = 'hash';
+        $_POST['process'] = 'clean';
+        // No csrf token in $_SESSION or $_POST.
+
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
+
+        $this->assertStringContainsString('Security check failed', $html);
+        $this->assertStringNotContainsString('The peers list has been cleaned.', $html);
+    }
+
+    public function testAcceptsProcessWithValidCsrfWhenPasswordSet(): void
+    {
+        // Matching session + POST token lets the action through.
+        $settings = self::$settings;
+        $settings['admin_password'] = 'hash';
+        $_SESSION['phoenix_csrf'] = 'tok';
+        $_POST['csrf'] = 'tok';
+        $_POST['process'] = 'clean';
+
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
+
+        $this->assertStringContainsString('The peers list has been cleaned.', $html);
+        $this->assertStringNotContainsString('Security check failed', $html);
     }
 
     public function testTablesInstalledFlagFalseUnderUnknownPrefix(): void

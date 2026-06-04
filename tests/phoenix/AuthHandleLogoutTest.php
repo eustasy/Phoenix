@@ -10,6 +10,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase
     {
         $_GET = [];
         $_POST = [];
+        $_SESSION = [];
         $_SERVER['REQUEST_URI'] = '/admin.php';
         $_SERVER['REQUEST_METHOD'] = 'GET';
     }
@@ -44,8 +45,10 @@ class AuthHandleLogoutTest extends PhoenixTestCase
         $script = '<?php '.
             'session_start(); '.
             '$_SESSION["phoenix_authed"] = true; '.
+            '$_SESSION["phoenix_csrf"] = "tok"; '.
             '$_SERVER["REQUEST_METHOD"] = "POST"; '.
             '$_POST["logout"] = "1"; '.
+            '$_POST["csrf"] = "tok"; '.
             '$_SERVER["REQUEST_URI"] = "/admin.php?other=param"; '.
             // Manually output what header() would send (testing the strtok logic)
             'echo "Location: ".strtok($_SERVER["REQUEST_URI"], "?")."\n"; '.
@@ -69,6 +72,34 @@ class AuthHandleLogoutTest extends PhoenixTestCase
         auth_handle_logout();
 
         // No exit means the action dispatch can still run after this returns.
+        $this->assertTrue(true);
+    }
+
+    public function testRejectsPostLogoutWithMissingCsrfToken()
+    {
+        // A POST logout with no CSRF token must not end the session. If the
+        // function failed to reject, it would reach exit() and kill this
+        // in-process worker — so simply returning is the assertion.
+        require_once __DIR__.'/../../src/functions/auth.handle.logout.php';
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['logout'] = '1';
+        // No $_POST['csrf'], no $_SESSION['phoenix_csrf'].
+
+        auth_handle_logout();
+
+        $this->assertTrue(true);
+    }
+
+    public function testRejectsPostLogoutWithWrongCsrfToken()
+    {
+        require_once __DIR__.'/../../src/functions/auth.handle.logout.php';
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['logout'] = '1';
+        $_SESSION['phoenix_csrf'] = 'expected';
+        $_POST['csrf'] = 'forged';
+
+        auth_handle_logout();
+
         $this->assertTrue(true);
     }
 
@@ -103,8 +134,10 @@ class AuthHandleLogoutTest extends PhoenixTestCase
         $functionPath = __DIR__.'/../../src/functions/auth.handle.logout.php';
         $script = '<?php '.
             'session_start(); '.
+            '$_SESSION["phoenix_csrf"] = "tok"; '.
             '$_SERVER["REQUEST_METHOD"] = "POST"; '.
             '$_POST["logout"] = "1"; '.
+            '$_POST["csrf"] = "tok"; '.
             '$_SERVER["REQUEST_URI"] = "/admin.php?foo=bar&baz=qux"; '.
             'echo "Location: ".strtok($_SERVER["REQUEST_URI"], "?")."\n"; '.
             'require '.var_export($functionPath, true).'; '.
@@ -121,6 +154,7 @@ class AuthHandleLogoutTest extends PhoenixTestCase
     {
         $_GET = [];
         $_POST = [];
+        $_SESSION = [];
     }
 
 }

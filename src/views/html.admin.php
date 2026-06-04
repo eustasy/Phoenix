@@ -12,6 +12,8 @@ declare(strict_types=1);
 //   $database_size - array|false, database size info (Data, Indexes, Total, Free)
 //   $message - string|false, optional message to display
 //   $show_installed - bool, whether to show "Installation complete" message
+//   $csrf_token - string, per-session token embedded in every form (empty when
+//                 no admin_password is set, since CSRF is not enforced then).
 //   $php_version - string|null, PHP version to report (defaults to PHP_VERSION).
 //                  Override only used by tests so the unsupported-version
 //                  branch can be exercised without spawning a different PHP.
@@ -23,8 +25,12 @@ declare(strict_types=1);
  * @param PhoenixSettings $settings
  * @param array<string, float|int|string|null>|false $database_size
  */
-function view_admin_html(array $settings, bool $tables_installed, array|false $database_size, string|false $message = false, bool $show_installed = false, ?string $php_version = null, ?bool $has_mysqli = null): string
+function view_admin_html(array $settings, bool $tables_installed, array|false $database_size, string|false $message = false, bool $show_installed = false, string $csrf_token = '', ?string $php_version = null, ?bool $has_mysqli = null): string
 {
+    // Hidden field carrying the CSRF token, embedded in every state-changing
+    // form. Escaped defensively even though the token is always hex.
+    $csrf_field = '<input type="hidden" name="csrf" value="'.htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8').'">';
+
     // Composer enforces ^8.2 and ext-mysqli, but the project supports manual
     // installs that bypass composer, so the runtime checks below stay in
     // place; tests pass overrides to reach the failure branches.
@@ -36,7 +42,7 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
     $logout_html = '';
     if (! empty($settings['admin_password'])) {
         $logout_html = '<form method="POST" class="text-right" style="display:inline">'.
-            '<input type="hidden" name="logout" value="1">'.
+            '<input type="hidden" name="logout" value="1">'.$csrf_field.
             '<button type="submit" class="link-button" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline">Log out</button>'.
             '</form>';
     }
@@ -100,7 +106,7 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
 				to false to disable resets,<br>
 				or delete <code>public/admin.php</code> when you\'re up and running.</p>
 				<p class="float-left text-left">Install, Upgrade, and Reset</p>
-				<input type="hidden" name="process" value="setup">
+				<input type="hidden" name="process" value="setup">'.$csrf_field.'
 				<input class="button background-belize-hole color-clouds float-right" type="submit" name="submit" value="Setup">
 				<div class="clear"></div>
 			</form>';
@@ -114,13 +120,13 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
         if ($tables_installed) {
             $mysql_html .= '<form class="mysql" action="" method="POST">
 					<p class="float-left text-left">Clean out redundant peers</p>
-					<input type="hidden" name="process" value="clean">
+					<input type="hidden" name="process" value="clean">'.$csrf_field.'
 					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Clean">
 					<div class="clear"></div>
 				</form>';
             $mysql_html .= '<form class="mysql" action="" method="POST">
 					<p class="float-left text-left">Check, Analyze, Repair, and Optimize</p>
-					<input type="hidden" name="process" value="optimize">
+					<input type="hidden" name="process" value="optimize">'.$csrf_field.'
 					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Optimize">
 					<div class="clear"></div>
 				</form>';
