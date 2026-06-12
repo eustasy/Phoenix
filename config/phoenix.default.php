@@ -104,6 +104,22 @@ $settings['api_keys'] = [];
 /* max accepted .torrent upload size in bytes for server-side parsing */
 $settings['torrent_upload_max'] = 1048576;
 
+////	Stat-Tracking Options
+/* log torrent events to the events table; off by default. */
+/* the table exists from install, so this is a pure config flip */
+$settings['stats_enabled'] = false;
+/* which announce events to log. 'completed' matches bits; */
+/* 'started'/'stopped' are higher-volume. 'access'/'change' are */
+/* intentionally unsupported — they fire on every keepalive */
+/* announce and would flood the table */
+$settings['stats_events'] = ['completed'];
+/* enrich events with a minified geo location (country + continent */
+/* only). requires the suggested geoip2/geoip2 composer library */
+$settings['stats_geo'] = false;
+/* absolute path to a MaxMind GeoLite2-Country.mmdb; empty = geo */
+/* disabled. not shipped — MaxMind's license forbids redistribution */
+$settings['stats_geo_database'] = '';
+
 ////	Backup Options
 /* absolute path to backup directory; empty = backups/ in the project root */
 $settings['backup_dir'] = '';

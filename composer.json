@@ -12,7 +12,11 @@
 		"ext-xml": "*"
 	},
 	"require-dev": {
+		"geoip2/geoip2": "^3.3",
 		"phpunit/phpunit": "^11.0 || ^12.0"
+	},
+	"suggest": {
+		"geoip2/geoip2": "Enables minified geo enrichment (country/continent) of stat-tracking events; see the stats_geo settings."
 	},
 	"autoload-dev": {
 		"psr-4": {

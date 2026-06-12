@@ -78,6 +78,18 @@ phoenix/
 
 Configuration should take place in `config/phoenix.custom.php`, NOT `config/phoenix.default.php`. Phoenix _will_ attempt to use the default configuration if yours is missing.
 
+### Stat-Tracking
+
+Phoenix can log torrent events (completions by default; optionally started/stopped via `stats_events`) to an `events` table — see the `stats_*` settings in `config/phoenix.default.php`. The table exists from install, so enabling it is a pure config flip: `$settings['stats_enabled'] = true;`. The ledger is privacy-preserving by design — a coarse client label and minified location are derived from the peer_id and IP, which are never themselves stored.
+
+To enrich events with the minified geo location (country + continent ISO codes):
+
+1. Run `composer require geoip2/geoip2`.
+2. Download a free [GeoLite2-Country database](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) from MaxMind (their license forbids Phoenix bundling it).
+3. Set `$settings['stats_geo'] = true;` and point `$settings['stats_geo_database']` at the `.mmdb` file.
+
+Geo enrichment degrades gracefully: when the library or database file is missing or unreadable, events are still logged, just with empty location codes.
+
 ## Server Configuration
 
 Phoenix ships with example web server configurations covering document root, `.php` extension stripping, and admin endpoint rate limiting:

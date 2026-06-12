@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 ////	db_create
-// Creates the peers, tasks, and torrents tables in the connection's currently
-// selected database, using $settings['db_prefix'] as the table prefix.
+// Creates the events, peers, tasks, and torrents tables in the connection's
+// currently selected database, using $settings['db_prefix'] as the table
+// prefix. The events table is created unconditionally so stat-tracking can
+// later be enabled with a config flip alone (see stats_enabled).
 //
 // Schema lives in sql/<table>.sql so it is lintable, importable manually, and
 // kept in one place. Each file uses the literal default prefix `phoenix_`,
@@ -17,7 +19,7 @@ function db_create(mysqli $connection, array $settings, bool $debug = false): bo
 {
     require_once __DIR__.'/../functions/db.apply.prefix.php';
 
-    $tables = ['peers', 'tasks', 'torrents'];
+    $tables = ['events', 'peers', 'tasks', 'torrents'];
 
     $failure = false;
     foreach ($tables as $table) {

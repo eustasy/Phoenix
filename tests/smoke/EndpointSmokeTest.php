@@ -392,6 +392,37 @@ class EndpointSmokeTest extends SmokeTestCase
     }
 
     #[Depends('testInstallSucceeds')]
+    public function testStatsEnabledLogsCompletedEvent(): void
+    {
+        // Flip stats on via a config override, then complete a download for a
+        // fresh distinct hash. The download.complete hook should log exactly one
+        // 'completed' row to the events table (created at install, empty until
+        // now). Runs before the closed-tracker test so the tracker is still open.
+        $this->appendConfigOverride("\$settings['stats_enabled'] = true;");
+
+        $db = $this->db();
+        $prefix = $this->dbCreds()['db_prefix'];
+        $hash = str_repeat('f', 40);
+
+        $r = $this->get('/announce.php', [
+            'info_hash' => $hash,
+            'peer_id' => self::PEER_ID,
+            'port' => '6881',
+            'left' => '0',
+            'event' => 'completed',
+        ]);
+        $this->assertSame(200, $r['status']);
+
+        $this->assertSame(
+            1,
+            $this->scalar(
+                $db,
+                "SELECT COUNT(*) FROM `{$prefix}events` WHERE `info_hash`='{$hash}' AND `event`='completed'",
+            ),
+        );
+    }
+
+    #[Depends('testInstallSucceeds')]
     public function testClosedTrackerRejectsScrapeInEachFormat(): void
     {
         // Close the tracker — the installer opens it. This runs LAST, so nothing
