@@ -6,6 +6,7 @@ declare(strict_types=1);
 function task_clean(mysqli $connection, array $settings, int $time): bool
 {
     require_once __DIR__.'/../model/task.log.php';
+    require_once __DIR__.'/../model/events.clean.php';
     require_once __DIR__.'/../model/peers.clean.php';
     require_once __DIR__.'/../model/tasks.clean.php';
     require_once __DIR__.'/../model/torrents.clean.php';
@@ -19,6 +20,10 @@ function task_clean(mysqli $connection, array $settings, int $time): bool
     // Clean tasks and torrents tables (test/sentinel rows)
     $cleaned = tasks_clean($connection, $settings) && $cleaned;
     $cleaned = torrents_clean($connection, $settings) && $cleaned;
+
+    // Prune the stat-tracking ledger (sentinels, plus rows older than
+    // stats_retention days when retention is set)
+    $cleaned = events_clean($connection, $settings, $time) && $cleaned;
 
     if ($cleaned) {
         task_log($connection, $settings, 'clean', $time);

@@ -203,8 +203,10 @@ class EndpointSmokeTest extends SmokeTestCase
         $prefix = $this->dbCreds()['db_prefix'];
 
         // The cron maintenance is gated on clean_with_cron, which the installer
-        // leaves off — enable it so the script's body actually runs.
+        // leaves off — enable it so the script's body actually runs. Set an
+        // events retention so the ledger-pruning side runs too.
         $this->enableCleanWithCron();
+        $this->appendConfigOverride("\$settings['stats_retention'] = 30;");
 
         // Seed a stale peer (older than 3x announce_interval = 5400s) and a
         // fresh one, under a distinct info_hash with plain-hex peer_ids (so the
@@ -223,12 +225,26 @@ class EndpointSmokeTest extends SmokeTestCase
             );
         }
 
+        // Seed an expired event (31 days old with 30-day retention) and a
+        // fresh one under the same hash; cleanup must prune only the expired.
+        $oldEvent = $now - (31 * 86400);
+        foreach ([$oldEvent, $now] as $eventTime) {
+            mysqli_query(
+                $db,
+                "INSERT INTO `{$prefix}events` (`time`,`info_hash`,`event`) ".
+                "VALUES ({$eventTime},'{$hash}','completed')",
+            );
+        }
+
         $r = $this->runCli('clean-and-optimize.php');
         $this->assertSame(0, $r['exit'], $r['stdout'].$r['stderr']);
 
         // Cleanup is selective: the stale peer is gone, the fresh one survives.
         $this->assertSame(0, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}peers` WHERE `peer_id`='{$stalePeer}'"));
         $this->assertSame(1, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}peers` WHERE `peer_id`='{$freshPeer}'"));
+        // Same selectivity for the events ledger under stats_retention.
+        $this->assertSame(0, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}events` WHERE `info_hash`='{$hash}' AND `time` <= {$oldEvent}"));
+        $this->assertSame(1, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}events` WHERE `info_hash`='{$hash}'"));
         // ...and the run logged a `clean` task.
         $this->assertGreaterThan(0, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}tasks` WHERE `name`='clean'"));
     }

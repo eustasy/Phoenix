@@ -119,6 +119,10 @@ $settings['stats_geo'] = false;
 /* absolute path to a MaxMind GeoLite2-Country.mmdb; empty = geo */
 /* disabled. not shipped — MaxMind's license forbids redistribution */
 $settings['stats_geo_database'] = '';
+/* days to keep logged events; 0 = keep forever. pruned during the */
+/* regular cleanup (announce-time or cron), even if stats_enabled */
+/* has since been turned off */
+$settings['stats_retention'] = 0;
 
 ////	Backup Options
 /* absolute path to backup directory; empty = backups/ in the project root */
