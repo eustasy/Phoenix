@@ -292,6 +292,56 @@ class EndpointSmokeTest extends SmokeTestCase
     }
 
     #[Depends('testInstallSucceeds')]
+    public function testApiAddsTorrentToTheIndex(): void
+    {
+        // Enable the API (the installer writes no keys), add a listed torrent,
+        // and confirm it shows up on the public index — exercises
+        // public/api.php end-to-end in both serialisations.
+        $this->appendConfigOverride("\$settings['api_keys'] = ['smoke' => 'smoke-api-key'];");
+
+        $hash = str_repeat('d', 40);
+        $r = $this->post('/api.php', [
+            'action' => 'add',
+            'key' => 'smoke-api-key',
+            'info_hash' => $hash,
+            'name' => 'Smoke API Torrent',
+            'size' => '2048',
+        ]);
+        $this->assertSame(200, $r['status']);
+        $decoded = json_decode($r['body'], true);
+        $this->assertIsArray($decoded);
+        $this->assertSame('smoke', $decoded['torrent']['user']);
+        $this->assertSame('Smoke API Torrent', $decoded['torrent']['name']);
+
+        // The add action is add-only: re-POSTing the same hash is refused,
+        // and with ?xml the error serialises as XML.
+        $xml = $this->post('/api.php?xml=1', [
+            'action' => 'add',
+            'key' => 'smoke-api-key',
+            'info_hash' => $hash,
+        ]);
+        $this->assertSame(200, $xml['status']);
+        $this->assertStringContainsString('<error>Torrent already exists.</error>', $xml['body']);
+
+        // A wrong key is refused, and the error serialises as JSON by default.
+        $bad = $this->post('/api.php', ['action' => 'add', 'key' => 'wrong-key', 'info_hash' => $hash]);
+        $this->assertSame(200, $bad['status']);
+        $this->assertSame(['error' => 'API key is invalid.'], json_decode($bad['body'], true));
+
+        // An unknown (or missing) action is refused at the router, before
+        // any action-specific handling.
+        $unknown = $this->post('/api.php', ['action' => 'frobnicate', 'key' => 'smoke-api-key']);
+        $this->assertSame(200, $unknown['status']);
+        $this->assertSame(['error' => 'API action is invalid.'], json_decode($unknown['body'], true));
+
+        // The torrent was added listed, so the public index now carries it.
+        $idx = $this->get('/index.php', ['json' => '1']);
+        $this->assertSame(200, $idx['status']);
+        $this->assertStringContainsString($hash, $idx['body']);
+        $this->assertStringContainsString('Smoke API Torrent', $idx['body']);
+    }
+
+    #[Depends('testInstallSucceeds')]
     public function testClosedTrackerRejectsScrapeInEachFormat(): void
     {
         // Close the tracker — the installer opens it. This runs LAST, so nothing

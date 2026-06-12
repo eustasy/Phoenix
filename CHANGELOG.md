@@ -1,5 +1,16 @@
 # Phoenix Changelog
 
+## Unreleased
+
+* FEATURE: Add a tracker management API (`public/api.php`), routed by an `action` parameter and authenticated by per-user API keys in the new `api_keys` setting (`'user' => 'key'` pairs). The first action is `add`, which adds a torrent — add-only, so an info_hash that is already tracked is an error — recording the key's user in a new `user` column on the torrents table. Responds with JSON by default, XML with `?xml`. **DB schema modifications required.**
+
+### SQL Migration (from 4.0beta3 or 3.2)
+
+```sql
+ALTER TABLE `your_db`.`your_prefix_torrents`
+    ADD COLUMN `user` varchar(255) NULL FIRST;
+```
+
 ## v4.0beta3 - 04/06/2026
 
 The 4.0 line is a ground-up refactor of the 3.x codebase: a new on-disk layout, an MVC-inspired split of the old "puff" files, a full PHPUnit suite, CI with static analysis, and a security-review pass. The tracker protocol behaviour is unchanged. **Operators upgrading from 3.x should read the [3.x → 4.0 Migration Guide](MIGRATING.md) first** — the document root, configuration, and cron paths have all moved.

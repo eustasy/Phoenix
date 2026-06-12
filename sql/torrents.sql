@@ -6,6 +6,7 @@
 -- and edit the table name first if your install uses a different prefix.
 
 CREATE TABLE IF NOT EXISTS `phoenix_torrents` (
+	`user` varchar(255) NULL,
 	`name` varchar(255) NULL,
 	`info_hash` varchar(40) NOT NULL,
 	`size` bigint(20) unsigned NULL,
