@@ -97,8 +97,8 @@ $settings['admin_login_delay'] = 2;
 $settings['admin_login_delay_max'] = 8;
 
 ////	API Options
-/* API keys permitted to add torrents via public/api.php, as */
-/* 'user' => 'key' pairs. The user a key belongs to is recorded */
+/* API keys permitted to use the management API under public/api/, */
+/* as 'user' => 'key' pairs. The user a key belongs to is recorded */
 /* on each torrent it adds. Empty array disables the API. */
 $settings['api_keys'] = [];
 /* max accepted .torrent upload size in bytes for server-side parsing */

@@ -26,10 +26,13 @@ Place the following in `public/.htaccess` (or in the `<Directory>` block above) 
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^([^/.]+)$ $1.php [L]
+RewriteRule ^([^.]+)$ $1.php [L]
 ```
 
-The same rule covers `/scrape`, `/index`, and `/admin`.
+The same rule covers `/scrape`, `/index`, and `/admin`. The pattern intentionally
+allows slashes (`[^.]+`, not `[^/.]+`) so the nested API paths
+(`/api/torrent/add` → `public/api/torrent/add.php`) resolve too; the `!-f` / `!-d`
+conditions keep it from clobbering real files or directories.
 
 ## Running behind a proxy (`X-Forwarded-For` / `honor_xff`)
 

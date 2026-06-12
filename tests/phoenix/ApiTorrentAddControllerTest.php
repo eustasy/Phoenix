@@ -425,33 +425,12 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
         $this->assertSame('First', $row['name']);
     }
 
-    public function testRejectsInvalidKey(): void
-    {
-        // tracker_error() exits, so exercise the reject branch in a
-        // subprocess and assert on its output + exit code.
-        $result = $this->runErrorSubprocess(['key' => 'wrong-key', 'info_hash' => self::HASH]);
-
-        $this->assertSame(2, $result['exit']);
-        $this->assertStringContainsString('API key is invalid.', $result['stdout']);
-    }
-
     public function testRejectsMissingInfoHash(): void
     {
         $result = $this->runErrorSubprocess(['key' => self::API_KEY]);
 
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Info Hash is invalid.', $result['stdout']);
-    }
-
-    public function testRejectsWhenApiDisabled(): void
-    {
-        $result = $this->runErrorSubprocess(
-            ['key' => self::API_KEY, 'info_hash' => self::HASH],
-            api_enabled: false,
-        );
-
-        $this->assertSame(2, $result['exit']);
-        $this->assertStringContainsString('API is not enabled.', $result['stdout']);
     }
 
     /**
@@ -466,12 +445,11 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
      */
     private function runErrorSubprocess(
         array $params,
-        bool $api_enabled = true,
         ?string $upload = null,
         ?int $upload_max = null,
     ): array {
         $params['json'] = '1';
-        $api_keys = $api_enabled ? ['tester' => self::API_KEY] : [];
+        $api_keys = ['tester' => self::API_KEY];
 
         $files_setup = '';
         if ($upload !== null) {

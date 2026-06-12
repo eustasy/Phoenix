@@ -46,7 +46,9 @@ phoenix/
 │   ├── announce.php     # BitTorrent announce endpoint (BEP 3)
 │   ├── scrape.php       # BitTorrent scrape endpoint (BEP 15)
 │   ├── index.php        # Public torrent listing (optional)
-│   ├── api.php          # Management API, routed by action (API-key authenticated)
+│   ├── api/             # Management API, one file per path (API-key authenticated)
+│   │   └── torrent/
+│   │       └── add.php  # POST/GET /api/torrent/add — add a torrent
 │   ├── admin.php        # Admin panel & installer
 │   └── magnet.php       # Client-side magnet link generator
 ├── src/

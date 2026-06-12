@@ -7,11 +7,11 @@ declare(strict_types=1);
 // insert the torrent (owned by the key's user) → render the response body.
 // Add-only: an info_hash that is already tracked is an error, so a torrent
 // can never be rewritten — or taken over — through this endpoint.
-// Dispatched from public/api.php for `action=add`; parameters come from
-// POST or GET interchangeably. Returns the rendered body string — JSON by
-// default, XML when ?xml is set. Calls tracker_error() on validation/auth
-// failure (which exits); public/api.php pre-sets the JSON flag so those
-// errors serialise as JSON unless the caller asked for XML.
+// Driven by public/api/torrent/add.php; parameters come from POST or GET
+// interchangeably. Returns the rendered body string — JSON by default, XML
+// when ?xml is set. Calls tracker_error() on validation/auth failure (which
+// exits); the entry point pre-sets the JSON flag so those errors serialise as
+// JSON unless the caller asked for XML.
 //
 // Meta population has two layers. A multipart `.torrent` upload (field name
 // `torrent`) is parsed server-side and supplies the BASE for every field —
@@ -24,17 +24,10 @@ function api_torrent_add_controller(mysqli $connection, array $settings): string
 {
 
     ////	Authenticate
-    // No configured keys means the API is off — refuse before reading input.
-    if (empty($settings['api_keys'])) {
-        tracker_error('API is not enabled.');
-    }
-
-    require_once __DIR__.'/../functions/api.authenticate.key.php';
-    $key = $_POST['key'] ?? $_GET['key'] ?? '';
-    $user = api_authenticate_key($settings, is_string($key) ? $key : '');
-    if ($user === false) {
-        tracker_error('API key is invalid.');
-    }
+    // Shared across every API controller: refuses when the API is off or the
+    // key is invalid, otherwise returns the user the key belongs to.
+    require_once __DIR__.'/../functions/api.authenticate.request.php';
+    $user = api_authenticate_request($settings);
 
     ////	Optional .torrent upload
     // When a file is uploaded under `torrent`, parse it server-side and use its

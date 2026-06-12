@@ -31,7 +31,7 @@ server {
 
 ## Stripping `.php`
 
-The `try_files $uri $uri/ $uri.php$is_args$args;` directive in the snippet above maps `/announce` to `/announce.php` via an internal rewrite, so clients can announce to `https://tracker.example.com/announce` without the `.php` suffix. The same applies to `/scrape`, `/index`, and `/admin`.
+The `try_files $uri $uri/ $uri.php$is_args$args;` directive in the snippet above maps `/announce` to `/announce.php` via an internal rewrite, so clients can announce to `https://tracker.example.com/announce` without the `.php` suffix. The same applies to `/scrape`, `/index`, `/admin`, and the nested API paths (e.g. `/api/torrent/add` → `public/api/torrent/add.php`) — `try_files` already resolves subdirectories, so no extra rule is needed.
 
 ## Running behind a proxy (`X-Forwarded-For` / `honor_xff`)
 
