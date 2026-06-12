@@ -22,7 +22,7 @@ class TorrentAddTest extends PhoenixTestCase
 
     /**
      * @param array<string, mixed> $overrides
-     * @return array{user: string, info_hash: string, name: string|null, size: int, listed: int}
+     * @return array{user: string, info_hash: string, name: string|null, size: int, listed: int, filename: string|null, files: string|null, trackers: string|null, webseeds: string|null}
      */
     private function torrent(array $overrides = []): array
     {
@@ -32,6 +32,10 @@ class TorrentAddTest extends PhoenixTestCase
             'name' => 'Test Torrent',
             'size' => 1024,
             'listed' => 1,
+            'filename' => null,
+            'files' => null,
+            'trackers' => null,
+            'webseeds' => null,
         ], $overrides);
     }
 
@@ -40,7 +44,8 @@ class TorrentAddTest extends PhoenixTestCase
     {
         $result = mysqli_query(
             self::$connection,
-            'SELECT `user`, `name`, `size`, `listed`, `downloads` '.
+            'SELECT `user`, `name`, `size`, `listed`, `downloads`, '.
+            '`filename`, `files`, `trackers`, `webseeds` '.
             'FROM `'.self::$settings['db_prefix'].'torrents` '.
             'WHERE `info_hash` = \''.$info_hash.'\';',
         );
@@ -112,5 +117,46 @@ class TorrentAddTest extends PhoenixTestCase
         $row = $this->fetchRow('__TEST_ADD_1__');
         $this->assertIsArray($row);
         $this->assertNull($row['name']);
+    }
+
+    public function testMetaColumnsDefaultToNull(): void
+    {
+        torrent_add(self::$connection, self::$settings, $this->torrent());
+
+        $row = $this->fetchRow('__TEST_ADD_1__');
+        $this->assertIsArray($row);
+        $this->assertNull($row['filename']);
+        $this->assertNull($row['files']);
+        $this->assertNull($row['trackers']);
+        $this->assertNull($row['webseeds']);
+    }
+
+    public function testMetaColumnsStoredVerbatim(): void
+    {
+        // The model stores whatever storage strings the controller hands it.
+        $files = '[{"path":"dir/a.mkv","length":100},{"path":"b.txt","length":5}]';
+        $trackers = "http://primary/announce\nhttp://second/announce";
+        $webseeds = 'http://seed.example/files/';
+
+        torrent_add(self::$connection, self::$settings, $this->torrent([
+            'filename' => 'movie.mkv',
+            'files' => $files,
+            'trackers' => $trackers,
+            'webseeds' => $webseeds,
+        ]));
+
+        $row = $this->fetchRow('__TEST_ADD_1__');
+        $this->assertIsArray($row);
+        $this->assertSame('movie.mkv', $row['filename']);
+        $this->assertSame($files, $row['files']);
+        $this->assertSame($trackers, $row['trackers']);
+        $this->assertSame($webseeds, $row['webseeds']);
+
+        // The JSON column round-trips back to the structured list.
+        $decoded = json_decode((string) $row['files'], true);
+        $this->assertSame([
+            ['path' => 'dir/a.mkv', 'length' => 100],
+            ['path' => 'b.txt', 'length' => 5],
+        ], $decoded);
     }
 }

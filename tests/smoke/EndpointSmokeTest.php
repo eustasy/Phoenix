@@ -342,6 +342,56 @@ class EndpointSmokeTest extends SmokeTestCase
     }
 
     #[Depends('testInstallSucceeds')]
+    public function testApiAddsTorrentFromUpload(): void
+    {
+        // Drive the API's server-side .torrent parse path: build a single-file
+        // torrent in-test, upload it multipart, and assert the response carries
+        // the parsed name/size/meta. The API key was enabled by the earlier
+        // testApiAddsTorrentToTheIndex; this run uses a DISTINCT info_hash
+        // (derived from the fixture, never str_repeat('d',40)).
+        require_once dirname(__DIR__, 2).'/src/functions/bencode.encode.php';
+
+        $info = [
+            'name' => 'Uploaded Smoke.iso',
+            'length' => 4242,
+            'piece length' => 16384,
+            'pieces' => str_repeat("\x00", 20),
+        ];
+        $raw = \bencode_encode([
+            'info' => $info,
+            'announce' => 'http://tracker.smoke/announce',
+            'url-list' => 'http://seed.smoke/files/',
+        ]);
+        $hash = sha1(\bencode_encode($info));
+        $this->assertNotSame(str_repeat('d', 40), $hash);
+
+        $r = $this->postMultipart(
+            '/api.php',
+            [
+                'action' => 'add',
+                'key' => 'smoke-api-key',
+            ],
+            [
+                'name' => 'torrent',
+                'filename' => 'upload.torrent',
+                'content' => $raw,
+                'type' => 'application/x-bittorrent',
+            ],
+        );
+        $this->assertSame(200, $r['status'], $r['body']);
+
+        $decoded = json_decode($r['body'], true);
+        $this->assertIsArray($decoded);
+        $this->assertSame($hash, $decoded['torrent']['info_hash']);
+        $this->assertSame('Uploaded Smoke.iso', $decoded['torrent']['name']);
+        $this->assertSame(4242, $decoded['torrent']['size']);
+        $this->assertSame('Uploaded Smoke.iso', $decoded['torrent']['filename']);
+        $this->assertSame([['path' => 'Uploaded Smoke.iso', 'length' => 4242]], $decoded['torrent']['files']);
+        $this->assertSame(['http://tracker.smoke/announce'], $decoded['torrent']['trackers']);
+        $this->assertSame(['http://seed.smoke/files/'], $decoded['torrent']['webseeds']);
+    }
+
+    #[Depends('testInstallSucceeds')]
     public function testClosedTrackerRejectsScrapeInEachFormat(): void
     {
         // Close the tracker — the installer opens it. This runs LAST, so nothing

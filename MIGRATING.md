@@ -113,6 +113,29 @@ mv public/admin.php src/admin.php
 
 Move it back into `public/` temporarily if you ever need to re-run setup.
 
+## 7. Schema upgrades (4.1 and later)
+
+From 4.1 onwards, schema changes ship as idempotent, date-ordered SQL files in
+`sql/migrations/`. Every file uses `ADD COLUMN IF NOT EXISTS` (or equivalent)
+so it is safe to run more than once and causes no errors when the column is
+already present.
+
+**Via the admin panel:** navigate to `public/admin.php`, log in, and click
+**Upgrade Schema**. The panel runs every migration file in filename order and
+reports success or failure.
+
+**Manually:** import each file in order against your database. If your install
+uses a prefix other than the default `phoenix_`, edit the table names in the file
+before importing (or let `db_migrate()` rewrite them by running via the panel).
+
+```bash
+mysql <database> < sql/migrations/2026-05-09-3.2-haggard.sql
+mysql <database> < sql/migrations/2026-06-12-4.1-torrent-user-and-meta.sql
+```
+
+New installs created with 4.1 or later get the current schema directly from
+`sql/*.sql` via `db_create()` and do not need to run migrations.
+
 ## Checklist
 
 * [ ] Runtime is PHP >= 8.2 with `mysqli` and `xml`.

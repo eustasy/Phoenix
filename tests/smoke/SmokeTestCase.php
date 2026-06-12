@@ -40,9 +40,12 @@ abstract class SmokeTestCase extends TestCase
      * @param array<string, scalar> $query
      * @param array<string, scalar> $form
      * @param array<string, string> $headers
+     * @param string|null $rawBody pre-built request body; when set it replaces
+     *                             the urlencoded $form body (the caller owns the
+     *                             Content-Type header, e.g. multipart uploads)
      * @return array{status: int, headers: list<string>, body: string}
      */
-    protected function http(string $method, string $path, array $query = [], array $form = [], array $headers = []): array
+    protected function http(string $method, string $path, array $query = [], array $form = [], array $headers = [], ?string $rawBody = null): array
     {
         $url = $this->baseUrl().$path;
         if ($query !== []) {
@@ -55,7 +58,9 @@ abstract class SmokeTestCase extends TestCase
             'follow_location' => 0,   // assert redirects rather than chase them
             'timeout' => 10,
         ];
-        if ($form !== []) {
+        if ($rawBody !== null) {
+            $http['content'] = $rawBody;
+        } elseif ($form !== []) {
             $headers['Content-Type'] = 'application/x-www-form-urlencoded';
             $http['content'] = http_build_query($form);
         }
@@ -100,6 +105,39 @@ abstract class SmokeTestCase extends TestCase
     protected function post(string $path, array $form = [], array $headers = []): array
     {
         return $this->http('POST', $path, [], $form, $headers);
+    }
+
+    /**
+     * POST a multipart/form-data body — http()/post() only emit urlencoded
+     * bodies, so this hand-builds the multipart envelope (text fields + a single
+     * named file part) and sends it through the same stream context. Used to
+     * drive the API's `.torrent` upload path end-to-end.
+     *
+     * @param array<string, scalar> $fields text form fields
+     * @param array{name: string, filename: string, content: string, type?: string} $file
+     * @return array{status: int, headers: list<string>, body: string}
+     */
+    protected function postMultipart(string $path, array $fields, array $file): array
+    {
+        $boundary = '----PhoenixSmoke'.bin2hex(random_bytes(8));
+        $eol = "\r\n";
+
+        $body = '';
+        foreach ($fields as $name => $value) {
+            $body .= '--'.$boundary.$eol;
+            $body .= 'Content-Disposition: form-data; name="'.$name.'"'.$eol.$eol;
+            $body .= $value.$eol;
+        }
+        $body .= '--'.$boundary.$eol;
+        $body .= 'Content-Disposition: form-data; name="'.$file['name'].'"; filename="'.$file['filename'].'"'.$eol;
+        $body .= 'Content-Type: '.($file['type'] ?? 'application/octet-stream').$eol.$eol;
+        $body .= $file['content'].$eol;
+        $body .= '--'.$boundary.'--'.$eol;
+
+        return $this->http('POST', $path, [], [], [
+            'Content-Type' => 'multipart/form-data; boundary='.$boundary,
+            'Content-Length' => (string) strlen($body),
+        ], $body);
     }
 
     /** @param array{status: int, headers: list<string>, body: string} $response */

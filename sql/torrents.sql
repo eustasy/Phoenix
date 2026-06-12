@@ -12,5 +12,9 @@ CREATE TABLE IF NOT EXISTS `phoenix_torrents` (
 	`size` bigint(20) unsigned NULL,
 	`listed` tinyint(1) unsigned NOT NULL DEFAULT '0',
 	`downloads` int(10) unsigned NOT NULL DEFAULT '0',
+	`filename` varchar(255) NULL,
+	`files` longtext NULL,
+	`trackers` longtext NULL,
+	`webseeds` longtext NULL,
 	PRIMARY KEY (`info_hash`)
 ) ENGINE = MyISAM DEFAULT CHARSET = latin1;

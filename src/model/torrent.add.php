@@ -7,10 +7,25 @@ declare(strict_types=1);
 // tracked (added earlier, or auto-created by an announce) is refused, never
 // updated. Returns true on insert, 'exists' on a duplicate info_hash, or
 // false on any other failure.
+//
+// The four meta columns (filename, files, trackers, webseeds) are stored
+// verbatim from the storage-ready strings the controller hands in — JSON text
+// for `files`, newline-joined URLs for `trackers`/`webseeds`, or null when the
+// caller supplied nothing usable.
 
 /**
  * @param PhoenixSettings $settings
- * @param array{user: string, info_hash: string, name: string|null, size: int, listed: int} $torrent
+ * @param array{
+ *     user: string,
+ *     info_hash: string,
+ *     name: string|null,
+ *     size: int,
+ *     listed: int,
+ *     filename: string|null,
+ *     files: string|null,
+ *     trackers: string|null,
+ *     webseeds: string|null,
+ * } $torrent
  * @return true|'exists'|false
  */
 function torrent_add(mysqli $connection, array $settings, array $torrent): bool|string
@@ -24,14 +39,19 @@ function torrent_add(mysqli $connection, array $settings, array $torrent): bool|
         $result = mysqli_execute_query(
             $connection,
             'INSERT INTO `'.$settings['db_prefix'].'torrents` '.
-            '(`user`, `name`, `info_hash`, `size`, `listed`) '.
-            'VALUES (?, ?, ?, ?, ?);',
+            '(`user`, `name`, `info_hash`, `size`, `listed`, '.
+            '`filename`, `files`, `trackers`, `webseeds`) '.
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
             [
                 $torrent['user'],
                 $torrent['name'],
                 $torrent['info_hash'],
                 $torrent['size'],
                 $torrent['listed'],
+                $torrent['filename'],
+                $torrent['files'],
+                $torrent['trackers'],
+                $torrent['webseeds'],
             ],
         );
     } catch (mysqli_sql_exception) {

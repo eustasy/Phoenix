@@ -15,6 +15,7 @@ declare(strict_types=1);
 /** @param array{db_prefix: string} $settings */
 function db_create(mysqli $connection, array $settings, bool $debug = false): bool
 {
+    require_once __DIR__.'/../functions/db.apply.prefix.php';
 
     $tables = ['peers', 'tasks', 'torrents'];
 
@@ -32,9 +33,7 @@ function db_create(mysqli $connection, array $settings, bool $debug = false): bo
 
         // Schema files use the literal default prefix `phoenix_`; rewrite to
         // the install's actual prefix before executing.
-        if ($settings['db_prefix'] !== 'phoenix_') {
-            $sql = str_replace('phoenix_', $settings['db_prefix'], $sql);
-        }
+        $sql = db_apply_prefix($sql, $settings['db_prefix']);
 
         $result = mysqli_query($connection, $sql);
         if (! $result) {

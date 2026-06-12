@@ -3,12 +3,21 @@
 ## Unreleased
 
 * FEATURE: Add a tracker management API (`public/api.php`), routed by an `action` parameter and authenticated by per-user API keys in the new `api_keys` setting (`'user' => 'key'` pairs). The first action is `add`, which adds a torrent — add-only, so an info_hash that is already tracked is an error — recording the key's user in a new `user` column on the torrents table. Responds with JSON by default, XML with `?xml`. **DB schema modifications required.**
+* FEATURE: Track torrent meta — `filename`, a structured `files` list, extra `trackers`, and `webseeds` — in four new nullable columns on the torrents table. Populated via the API add (explicit fields or a `.torrent` upload parsed server-side, capped by the new `torrent_upload_max` setting) and served on the public index JSON/XML when the new `index_show_meta` setting is on (default off; output unchanged). **DB schema modifications required.**
+* FEATURE: Add a minimal migration mechanism: idempotent SQL files under `sql/migrations/` (importable manually with `mysql <database> < sql/migrations/<file>.sql`), runnable from a new admin-panel "Upgrade Schema" action.
+* FEATURE: The public index now serves a ready-made magnet link for every torrent in all three formats (HTML link column, JSON `magnet` field, XML `<magnet>` element), assembled from the stored info_hash/name/size, the new `announce_url` setting as the first `tr=` tier, and — only when `index_show_meta` is on — the stored trackers and webseeds.
 
 ### SQL Migration (from 4.0beta3 or 3.2)
 
+Run the files in `sql/migrations/` (or use the admin panel's Upgrade Schema action), which apply:
+
 ```sql
 ALTER TABLE `your_db`.`your_prefix_torrents`
-    ADD COLUMN `user` varchar(255) NULL FIRST;
+    ADD COLUMN IF NOT EXISTS `user` varchar(255) NULL FIRST,
+    ADD COLUMN IF NOT EXISTS `filename` varchar(255) NULL,
+    ADD COLUMN IF NOT EXISTS `files` longtext NULL,
+    ADD COLUMN IF NOT EXISTS `trackers` longtext NULL,
+    ADD COLUMN IF NOT EXISTS `webseeds` longtext NULL;
 ```
 
 ## v4.0beta3 - 04/06/2026

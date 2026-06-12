@@ -72,6 +72,12 @@ $settings['trusted_proxies'] = [];
 $settings['reject_private_ips'] = true;
 /* serve a public index of listed torrents */
 $settings['public_index'] = false;
+/* include torrent meta (filename, files, trackers, webseeds) */
+/* in the public index output */
+$settings['index_show_meta'] = false;
+/* canonical announce URL of this tracker, embedded as the first */
+/* tracker in index magnet links; empty = omit */
+$settings['announce_url'] = '';
 
 ////	Logging & Debugging
 /* absolute path for PHP's error log; empty = server/PHP default */
@@ -95,6 +101,8 @@ $settings['admin_login_delay_max'] = 8;
 /* 'user' => 'key' pairs. The user a key belongs to is recorded */
 /* on each torrent it adds. Empty array disables the API. */
 $settings['api_keys'] = [];
+/* max accepted .torrent upload size in bytes for server-side parsing */
+$settings['torrent_upload_max'] = 1048576;
 
 ////	Backup Options
 /* absolute path to backup directory; empty = backups/ in the project root */

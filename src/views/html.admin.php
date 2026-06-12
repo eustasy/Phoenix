@@ -130,6 +130,12 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
 					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Optimize">
 					<div class="clear"></div>
 				</form>';
+            $mysql_html .= '<form class="mysql" action="" method="POST">
+					<p class="float-left text-left">Apply idempotent schema migrations</p>
+					<input type="hidden" name="process" value="migrate">'.$csrf_field.'
+					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Upgrade Schema">
+					<div class="clear"></div>
+				</form>';
         }
     }
 

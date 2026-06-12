@@ -55,6 +55,9 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
     } elseif ($process === 'optimize') {
         require_once __DIR__.'/admin.optimize.php';
         $message = admin_optimize_action($connection, $settings, $time);
+    } elseif ($process === 'migrate') {
+        require_once __DIR__.'/admin.migrate.php';
+        $message = admin_migrate_action($connection, $settings, $time);
     }
 
     $database_size = false;

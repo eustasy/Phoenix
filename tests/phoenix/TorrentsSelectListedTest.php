@@ -24,13 +24,27 @@ class TorrentsSelectListedTest extends PhoenixTestCase
         );
     }
 
-    private function insertTorrent(string $infoHash, string $name, int $size, int $listed, int $downloads): void
-    {
+    /**
+     * @param array<string, string|null> $meta Optional meta columns: filename, files, trackers, webseeds.
+     */
+    private function insertTorrent(
+        string $infoHash,
+        string $name,
+        int $size,
+        int $listed,
+        int $downloads,
+        array $meta = [],
+    ): void {
+        $filename = isset($meta['filename']) ? '\''.mysqli_real_escape_string(self::$connection, $meta['filename']).'\'' : 'NULL';
+        $files = isset($meta['files']) ? '\''.mysqli_real_escape_string(self::$connection, $meta['files']).'\'' : 'NULL';
+        $trackers = isset($meta['trackers']) ? '\''.mysqli_real_escape_string(self::$connection, $meta['trackers']).'\'' : 'NULL';
+        $webseeds = isset($meta['webseeds']) ? '\''.mysqli_real_escape_string(self::$connection, $meta['webseeds']).'\'' : 'NULL';
+
         mysqli_query(
             self::$connection,
             'INSERT INTO `'.self::$settings['db_prefix'].'torrents` '.
-            '(`info_hash`, `name`, `size`, `listed`, `downloads`) VALUES '.
-            '(\''.$infoHash.'\', \''.$name.'\', '.$size.', '.$listed.', '.$downloads.');',
+            '(`info_hash`, `name`, `size`, `listed`, `downloads`, `filename`, `files`, `trackers`, `webseeds`) VALUES '.
+            '(\''.$infoHash.'\', \''.$name.'\', '.$size.', '.$listed.', '.$downloads.', '.$filename.', '.$files.', '.$trackers.', '.$webseeds.');',
         );
     }
 
@@ -62,6 +76,7 @@ class TorrentsSelectListedTest extends PhoenixTestCase
     {
         // Single listed torrent with no peers — exercises the no-peer
         // IFNULL(SUM(...),0) branch and the `peers`/`traffic` derivations.
+        // Meta columns are NULL so normalized to null.
         $this->insertTorrent('__TEST_listed__', 'Solo', 1024, 1, 5);
 
         $result = \torrents_select_listed(self::$connection, self::$settings);
@@ -76,7 +91,85 @@ class TorrentsSelectListedTest extends PhoenixTestCase
             'leechers' => 0,
             'peers' => 0,
             'traffic' => 1024 * 5,
+            'filename' => null,
+            'files' => null,
+            'trackers' => null,
+            'webseeds' => null,
         ], $result[0]);
+    }
+
+    public function testMetaNullColumnsNormalizeToNull(): void
+    {
+        // When the DB columns are NULL, normalized meta must all be null.
+        $this->insertTorrent('__TEST_meta_null__', 'NullMeta', 0, 1, 0);
+
+        $result = \torrents_select_listed(self::$connection, self::$settings);
+        $this->assertCount(1, $result);
+        $this->assertNull($result[0]['filename']);
+        $this->assertNull($result[0]['files']);
+        $this->assertNull($result[0]['trackers']);
+        $this->assertNull($result[0]['webseeds']);
+    }
+
+    public function testMetaFilenamePassedThrough(): void
+    {
+        $this->insertTorrent('__TEST_meta_fn__', 'WithFilename', 0, 1, 0, [
+            'filename' => 'my.file.mkv',
+        ]);
+
+        $result = \torrents_select_listed(self::$connection, self::$settings);
+        $this->assertCount(1, $result);
+        $this->assertSame('my.file.mkv', $result[0]['filename']);
+    }
+
+    public function testMetaFilesDecodedToList(): void
+    {
+        $json = json_encode([
+            ['path' => 'dir/file.mkv', 'length' => 1234567],
+            ['path' => 'dir/sub.srt', 'length' => 890],
+        ]);
+        $this->assertIsString($json);
+
+        $this->insertTorrent('__TEST_meta_files__', 'WithFiles', 0, 1, 0, [
+            'files' => $json,
+        ]);
+
+        $result = \torrents_select_listed(self::$connection, self::$settings);
+        $this->assertCount(1, $result);
+        $this->assertSame([
+            ['path' => 'dir/file.mkv', 'length' => 1234567],
+            ['path' => 'dir/sub.srt',  'length' => 890],
+        ], $result[0]['files']);
+    }
+
+    public function testMetaInvalidJsonFilesBecomesNull(): void
+    {
+        $this->insertTorrent('__TEST_meta_badjson__', 'BadJson', 0, 1, 0, [
+            'files' => 'not-valid-json',
+        ]);
+
+        $result = \torrents_select_listed(self::$connection, self::$settings);
+        $this->assertCount(1, $result);
+        $this->assertNull($result[0]['files']);
+    }
+
+    public function testMetaTrackersAndWebseedsSplitOnNewlines(): void
+    {
+        $this->insertTorrent('__TEST_meta_urls__', 'WithUrls', 0, 1, 0, [
+            'trackers' => "https://tracker1.example/announce\nhttps://tracker2.example/announce\n",
+            'webseeds' => "https://seed1.example/\nhttps://seed2.example/",
+        ]);
+
+        $result = \torrents_select_listed(self::$connection, self::$settings);
+        $this->assertCount(1, $result);
+        $this->assertSame(
+            ['https://tracker1.example/announce', 'https://tracker2.example/announce'],
+            $result[0]['trackers'],
+        );
+        $this->assertSame(
+            ['https://seed1.example/', 'https://seed2.example/'],
+            $result[0]['webseeds'],
+        );
     }
 
     public function testCountsSeedersAndLeechersFromPeers(): void

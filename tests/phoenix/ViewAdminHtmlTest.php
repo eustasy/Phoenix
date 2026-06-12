@@ -92,10 +92,12 @@ class ViewAdminHtmlTest extends TestCase
         $installed = view_admin_html($this->settings(), true, false);
         $this->assertStringContainsString('name="process" value="clean"', $installed);
         $this->assertStringContainsString('name="process" value="optimize"', $installed);
+        $this->assertStringContainsString('name="process" value="migrate"', $installed);
 
         $notInstalled = view_admin_html($this->settings(), false, false);
         $this->assertStringNotContainsString('name="process" value="clean"', $notInstalled);
         $this->assertStringNotContainsString('name="process" value="optimize"', $notInstalled);
+        $this->assertStringNotContainsString('name="process" value="migrate"', $notInstalled);
     }
 
     public function testEmbedsCsrfTokenInForms(): void
@@ -111,8 +113,8 @@ class ViewAdminHtmlTest extends TestCase
             false,
             'deadbeefToken',
         );
-        // One csrf field per form: logout, setup, clean, optimize.
-        $this->assertSame(4, substr_count($html, 'name="csrf" value="deadbeefToken"'));
+        // One csrf field per form: logout, setup, clean, optimize, migrate.
+        $this->assertSame(5, substr_count($html, 'name="csrf" value="deadbeefToken"'));
     }
 
     public function testEscapesActionMessage(): void
@@ -160,6 +162,7 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertStringNotContainsString('name="process" value="setup"', $html);
         $this->assertStringNotContainsString('name="process" value="clean"', $html);
         $this->assertStringNotContainsString('name="process" value="optimize"', $html);
+        $this->assertStringNotContainsString('name="process" value="migrate"', $html);
     }
 
 }
