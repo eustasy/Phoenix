@@ -10,7 +10,8 @@ declare(strict_types=1);
 //
 // Decoding goes through bencode_decode(), which also hands back the exact raw byte
 // slice of the 'info' dict so the info-hash is sha1() of those bytes (never a
-// re-encode, which could reorder keys and corrupt the hash).
+// re-encode, which could reorder keys and corrupt the hash). The per-section
+// extraction lives in the torrent.parse.* files, one function each.
 //
 // Returns false on malformed bencode, a missing/non-dict 'info', or no usable file
 // data; otherwise:
@@ -38,6 +39,9 @@ declare(strict_types=1);
 function torrent_parse(string $raw): array|false
 {
     require_once __DIR__.'/bencode.decode.php';
+    require_once __DIR__.'/torrent.parse.files.php';
+    require_once __DIR__.'/torrent.parse.trackers.php';
+    require_once __DIR__.'/torrent.parse.webseeds.php';
 
     $decoded = bencode_decode($raw);
     if ($decoded === false) {
@@ -99,157 +103,4 @@ function torrent_parse(string $raw): array|false
         'trackers' => torrent_parse_trackers($root),
         'webseeds' => torrent_parse_webseeds($root),
     ];
-}
-
-////	torrent_parse_files
-// Builds the multi-file 'files' list and total size. Each element joins its
-// 'path' components with '/' (preferring 'path.utf-8' per BEP 23) and carries a
-// non-negative integer 'length'. Malformed elements are skipped, not fatal —
-// but if no valid element survives the torrent is rejected.
-
-/**
- * @param array<mixed> $entries
- * @return array{0: list<array{path: string, length: int}>, 1: int}|false
- */
-function torrent_parse_files(array $entries): array|false
-{
-    $files = [];
-    $size = 0;
-
-    foreach ($entries as $entry) {
-        if (! is_array($entry)) {
-            continue;
-        }
-
-        ////	Length
-        if (! isset($entry['length']) || ! is_int($entry['length']) || $entry['length'] < 0) {
-            continue;
-        }
-        $length = $entry['length'];
-
-        ////	Path
-        // Prefer the UTF-8 path; both are lists of byte-string components.
-        $parts = null;
-        if (isset($entry['path.utf-8']) && is_array($entry['path.utf-8'])) {
-            $parts = $entry['path.utf-8'];
-        } elseif (isset($entry['path']) && is_array($entry['path'])) {
-            $parts = $entry['path'];
-        }
-        if ($parts === null || $parts === []) {
-            continue;
-        }
-
-        $clean = [];
-        $valid = true;
-        foreach ($parts as $part) {
-            if (! is_string($part)) {
-                $valid = false;
-                break;
-            }
-            $clean[] = $part;
-        }
-        if (! $valid) {
-            continue;
-        }
-
-        $files[] = [
-            'path' => implode('/', $clean),
-            'length' => $length,
-        ];
-        $size += $length;
-    }
-
-    if ($files === []) {
-        return false;
-    }
-
-    return [$files, $size];
-}
-
-////	torrent_parse_trackers
-// Flattens announce sources into an ordered, de-duplicated list: the single
-// 'announce' string first, then every URL in 'announce-list' (BEP 12: a list of
-// lists of strings). URLs are trimmed; blanks and duplicates are dropped.
-
-/**
- * @param array<string, mixed> $root
- * @return list<string>
- */
-function torrent_parse_trackers(array $root): array
-{
-    $urls = [];
-
-    if (isset($root['announce']) && is_string($root['announce'])) {
-        $urls[] = $root['announce'];
-    }
-
-    if (isset($root['announce-list']) && is_array($root['announce-list'])) {
-        foreach ($root['announce-list'] as $tier) {
-            if (! is_array($tier)) {
-                continue;
-            }
-            foreach ($tier as $url) {
-                if (is_string($url)) {
-                    $urls[] = $url;
-                }
-            }
-        }
-    }
-
-    return torrent_parse_normalise_urls($urls);
-}
-
-////	torrent_parse_webseeds
-// Normalises the BEP 19 'url-list' web seeds. It may be a single byte string or
-// a list of byte strings; either way the result is a trimmed, de-duplicated list
-// with blanks dropped.
-
-/**
- * @param array<string, mixed> $root
- * @return list<string>
- */
-function torrent_parse_webseeds(array $root): array
-{
-    if (! isset($root['url-list'])) {
-        return [];
-    }
-
-    $raw = $root['url-list'];
-    $urls = [];
-    if (is_string($raw)) {
-        $urls[] = $raw;
-    } elseif (is_array($raw)) {
-        foreach ($raw as $url) {
-            if (is_string($url)) {
-                $urls[] = $url;
-            }
-        }
-    }
-
-    return torrent_parse_normalise_urls($urls);
-}
-
-////	torrent_parse_normalise_urls
-// Shared URL cleanup: trim each entry, drop blanks, and drop duplicates while
-// preserving first-seen order.
-
-/**
- * @param list<string> $urls
- * @return list<string>
- */
-function torrent_parse_normalise_urls(array $urls): array
-{
-    $out = [];
-    foreach ($urls as $url) {
-        $url = trim($url);
-        if ($url === '') {
-            continue;
-        }
-        if (in_array($url, $out, true)) {
-            continue;
-        }
-        $out[] = $url;
-    }
-
-    return $out;
 }

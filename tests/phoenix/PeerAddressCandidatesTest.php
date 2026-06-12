@@ -10,6 +10,8 @@ class PeerAddressCandidatesTest extends PhoenixTestCase
     {
         parent::setUpBeforeClass();
         require_once __DIR__.'/../../src/functions/peer.address.candidates.php';
+        require_once __DIR__.'/../../src/functions/peer.proxy.trusted.php';
+        require_once __DIR__.'/../../src/functions/peer.xff.first.php';
     }
 
     public function testReturnsEmptyWhenNoSourcesAvailable(): void

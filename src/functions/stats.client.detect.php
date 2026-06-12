@@ -15,6 +15,8 @@ declare(strict_types=1);
 // fits the events.client varchar(64) column.
 function stats_client_detect(string $peer_id): string
 {
+    require_once __DIR__.'/stats.client.version.php';
+
     // Azureus-style two-letter client codes ('-XX####-'). Extend as needed;
     // an unrecognised code falls through to the literal code below.
     static $azureus = [
@@ -73,17 +75,4 @@ function stats_client_detect(string $peer_id): string
     }
 
     return 'Unknown';
-}
-
-////	stats_client_version
-// Renders the four Azureus version characters as a dotted version
-// ('4620' -> '4.6.2.0'). Returns '' when any character is non-numeric, so a
-// best-effort label drops the version rather than emitting nonsense.
-function stats_client_version(string $chars): string
-{
-    if (strlen($chars) !== 4 || ! ctype_digit($chars)) {
-        return '';
-    }
-
-    return implode('.', str_split($chars));
 }
