@@ -46,7 +46,8 @@ phoenix/
 │   ├── announce.php     # BitTorrent announce endpoint (BEP 3)
 │   ├── scrape.php       # BitTorrent scrape endpoint (BEP 15)
 │   ├── index.php        # Public torrent listing (optional)
-│   ├── api/             # Management API, one file per path (API-key authenticated)
+│   ├── api/             # Management API, one file per path (key-authenticated; index is public)
+│   │   ├── index.php    # GET /api — Phoenix version (no auth)
 │   │   ├── torrents.php # GET /api/torrents — list every torrent + swarm stats
 │   │   └── torrent/
 │   │       ├── add.php    # POST/GET /api/torrent/add — add a torrent

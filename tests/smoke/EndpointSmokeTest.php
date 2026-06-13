@@ -438,6 +438,24 @@ class EndpointSmokeTest extends SmokeTestCase
     }
 
     #[Depends('testInstallSucceeds')]
+    public function testApiIndexReturnsVersion(): void
+    {
+        // The /api discovery index returns the running Phoenix version,
+        // unauthenticated (no key), in both serialisations.
+        $r = $this->get('/api/index.php');
+        $this->assertSame(200, $r['status'], $r['body']);
+        $decoded = json_decode($r['body'], true);
+        $this->assertIsArray($decoded);
+        $this->assertArrayHasKey('phoenix', $decoded);
+        $this->assertStringContainsString('Phoenix', (string) $decoded['phoenix']['version']);
+
+        $xml = $this->get('/api/index.php', ['xml' => '1']);
+        $this->assertSame(200, $xml['status']);
+        $this->assertStringContainsString('<version>', $xml['body']);
+        $this->assertStringContainsString('Phoenix', $xml['body']);
+    }
+
+    #[Depends('testInstallSucceeds')]
     public function testApiDelistAndListTogglesPublicIndex(): void
     {
         // Expand the API keys: an 'other' owner (for the ownership-refusal test)
