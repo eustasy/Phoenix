@@ -47,6 +47,7 @@ phoenix/
 │   ├── scrape.php       # BitTorrent scrape endpoint (BEP 15)
 │   ├── index.php        # Public torrent listing (optional)
 │   ├── api/             # Management API, one file per path (API-key authenticated)
+│   │   ├── torrents.php # GET /api/torrents — list every torrent + swarm stats
 │   │   └── torrent/
 │   │       └── add.php  # POST/GET /api/torrent/add — add a torrent
 │   ├── admin.php        # Admin panel & installer

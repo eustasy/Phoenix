@@ -399,6 +399,45 @@ class EndpointSmokeTest extends SmokeTestCase
     }
 
     #[Depends('testInstallSucceeds')]
+    public function testApiListsAllTorrents(): void
+    {
+        // The two earlier API tests added torrents under the 'smoke' key; the
+        // list endpoint must surface them with their user and listed flag.
+        // Exercises public/api/torrents.php in both serialisations.
+        $listHash = str_repeat('d', 40);
+
+        $r = $this->get('/api/torrents.php', ['key' => 'smoke-api-key']);
+        $this->assertSame(200, $r['status'], $r['body']);
+        $decoded = json_decode($r['body'], true);
+        $this->assertIsArray($decoded);
+        $this->assertArrayHasKey('torrents', $decoded);
+
+        $row = null;
+        foreach ($decoded['torrents'] as $torrent) {
+            if (($torrent['info_hash'] ?? null) === $listHash) {
+                $row = $torrent;
+                break;
+            }
+        }
+        $this->assertNotNull($row, 'the added torrent should appear in /api/torrents');
+        $this->assertSame('smoke', $row['user']);
+        $this->assertSame(1, $row['listed']);
+        $this->assertSame('Smoke API Torrent', $row['name']);
+
+        // ?xml serialises the same collection as XML.
+        $xml = $this->get('/api/torrents.php', ['key' => 'smoke-api-key', 'xml' => '1']);
+        $this->assertSame(200, $xml['status']);
+        $this->assertStringContainsString('<torrents>', $xml['body']);
+        $this->assertStringContainsString('<info_hash>'.$listHash.'</info_hash>', $xml['body']);
+        $this->assertStringContainsString('<user>smoke</user>', $xml['body']);
+
+        // A wrong key is refused (auth shared with the add endpoint).
+        $bad = $this->get('/api/torrents.php', ['key' => 'wrong-key']);
+        $this->assertSame(200, $bad['status']);
+        $this->assertSame(['error' => 'API key is invalid.'], json_decode($bad['body'], true));
+    }
+
+    #[Depends('testInstallSucceeds')]
     public function testStatsEnabledLogsCompletedEvent(): void
     {
         // Flip stats on via a config override, then complete a download for a
