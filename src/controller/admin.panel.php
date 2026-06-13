@@ -28,9 +28,11 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
 
             return admin_backups_controller($connection, $settings, $time);
 
-            // Extension point: issue #58 adds the 'settings' case here, requiring
-            // + delegating to its own page controller (one function per file, as
-            // with admin.dashboard.php / admin.torrents.php / admin.backups.php).
+        case 'settings':
+            require_once __DIR__.'/admin.settings.php';
+
+            return admin_settings_controller($settings);
+
         case 'dashboard':
         default:
             require_once __DIR__.'/admin.dashboard.php';
