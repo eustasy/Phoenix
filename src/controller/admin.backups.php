@@ -25,6 +25,27 @@ function admin_backups_controller(mysqli $connection, array $settings, int $time
 
     $message = false;
 
+    // Downloads are GET reads — no CSRF needed (the response isn't cross-origin
+    // readable), and the name is validated strictly against the backup list so
+    // there is no path traversal risk.
+    if (isset($_GET['download'])) {
+        require_once __DIR__.'/../functions/db.backup.path.php';
+        $name = is_string($_GET['download']) ? $_GET['download'] : '';
+        $path = db_backup_path($settings, $name);
+        if ($path === false) {
+            $message = 'Backup not found.';
+        } else {
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="'.basename($path).'"');
+            $size = filesize($path);
+            if ($size !== false) {
+                header('Content-Length: '.$size);
+            }
+            readfile($path);
+            exit;
+        }
+    }
+
     if ($process !== '' && $csrf_enabled && ! auth_csrf_verify()) {
         $message = 'Security check failed. Please reload the page and try again.';
         $process = '';

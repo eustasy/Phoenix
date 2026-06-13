@@ -43,10 +43,11 @@ function view_admin_backups_html(array $settings, array $backups, string|false $
                 '<td><code>'.htmlspecialchars($backup['name']).'</code></td>'.
                 '<td>'.number_format($backup['size']).' bytes</td>'.
                 '<td>'.date('Y-m-d H:i', $backup['mtime']).'</td>'.
+                '<td><a href="?page=backups&amp;download='.urlencode($backup['name']).'">Download</a></td>'.
                 '</tr>';
         }
         $body .= '<table class="data-table">'.
-            '<thead><tr><th>File</th><th>Size</th><th>Created</th></tr></thead>'.
+            '<thead><tr><th>File</th><th>Size</th><th>Created</th><th>Actions</th></tr></thead>'.
             '<tbody>'.$rows.'</tbody></table>';
     }
 

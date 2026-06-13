@@ -78,4 +78,47 @@ class AdminBackupsControllerTest extends PhoenixTestCase
         $this->assertStringContainsString('BACKUP_DIR_NOT_FOUND', $html);
         $this->assertStringNotContainsString('Security check failed', $html);
     }
+
+    public function testInvalidDownloadShowsNotFound(): void
+    {
+        // An unknown name must not exit — it sets a message and renders the page.
+        $_GET['download'] = 'nope.sql';
+
+        $html = \admin_backups_controller(self::$connection, self::$settings, self::$time);
+
+        $this->assertStringContainsString('Backup not found.', $html);
+    }
+
+    public function testValidDownloadStreamsFile(): void
+    {
+        // Streaming calls header() + readfile() + exit, so run in a subprocess.
+        $db_name = self::$settings['db_name'];
+        $filename = $db_name.'.20240101_0000.sql';
+        $content = '-- known backup content '.bin2hex(random_bytes(4));
+
+        $bootstrapPath = var_export(dirname(__DIR__).'/bootstrap.php', true);
+        $controllerPath = var_export(dirname(__DIR__, 2).'/src/controller/admin.backups.php', true);
+
+        $script = '<?php
+$tmpDir = sys_get_temp_dir().\'/phx_dl_\'.bin2hex(random_bytes(4)).\'/\';
+mkdir($tmpDir, 0700, true);
+$filename = '.var_export($filename, true).';
+file_put_contents($tmpDir.$filename, '.var_export($content, true).');
+$_GET = [\'download\' => $filename, \'page\' => \'backups\'];
+$_POST = [];
+$_SESSION = [];
+require_once '.$bootstrapPath.';
+require_once '.$controllerPath.';
+$settings = $GLOBALS[\'phoenix_settings\'];
+$settings[\'backup_dir\'] = $tmpDir;
+admin_backups_controller($GLOBALS[\'phoenix_connection\'], $settings, $GLOBALS[\'phoenix_time\']);
+@unlink($tmpDir.$filename);
+@rmdir($tmpDir);
+';
+
+        $result = $this->runPhpSubprocess($script);
+
+        $this->assertSame(0, $result['exit']);
+        $this->assertStringContainsString($content, $result['stdout']);
+    }
 }
