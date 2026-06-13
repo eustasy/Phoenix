@@ -51,7 +51,8 @@ phoenix/
 │   │   └── torrent/
 │   │       ├── add.php    # POST/GET /api/torrent/add — add a torrent
 │   │       ├── list.php   # POST/GET /api/torrent/list — show on the index
-│   │       └── delist.php # POST/GET /api/torrent/delist — hide from the index
+│   │       ├── delist.php # POST/GET /api/torrent/delist — hide from the index
+│   │       └── delete.php # POST/GET /api/torrent/delete — delete (+ its peers)
 │   ├── admin.php        # Admin panel & installer
 │   └── magnet.php       # Client-side magnet link generator
 ├── src/

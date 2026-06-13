@@ -107,6 +107,9 @@ $settings['admin_login_delay_max'] = 8;
 $settings['api_keys'] = [];
 /* max accepted .torrent upload size in bytes for server-side parsing */
 $settings['torrent_upload_max'] = 1048576;
+/* allow torrents to be deleted via the API. Off by default since */
+/* deletion is destructive; the '*' admin can always delete regardless. */
+$settings['api_allow_delete'] = false;
 
 ////	Stat-Tracking Options
 /* log torrent events to the events table; off by default. */

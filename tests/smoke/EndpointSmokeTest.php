@@ -521,6 +521,50 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertStringContainsString($hash, $this->get('/index.php', ['json' => '1'])['body']);
     }
 
+    #[Depends('testApiDelistAndListTogglesPublicIndex')]
+    public function testApiDeleteRemovesTorrentAndPeers(): void
+    {
+        // Add a dedicated torrent owned by 'smoke' and seed it a couple of peers
+        // directly (so the owner isn't disturbed by an announce).
+        $hash = str_repeat('1', 40);
+        $add = $this->post('/api/torrent/add.php', [
+            'key' => 'smoke-api-key',
+            'info_hash' => $hash,
+            'name' => 'Doomed Torrent',
+        ]);
+        $this->assertSame(200, $add['status'], $add['body']);
+
+        $db = $this->db();
+        $prefix = $this->dbCreds()['db_prefix'];
+        foreach ([str_repeat('a', 40), str_repeat('b', 40)] as $pid) {
+            mysqli_query(
+                $db,
+                "INSERT INTO `{$prefix}peers` ".
+                '(`info_hash`,`peer_id`,`compactv4`,`compactv6`,`portv4`,`portv6`,`state`,`updated`) '.
+                "VALUES ('{$hash}','{$pid}','','',0,0,0,".time().')',
+            );
+        }
+        $this->assertSame(2, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}peers` WHERE `info_hash`='{$hash}'"));
+
+        // Deletion is off by default: 'smoke' (a non-admin) is refused and the
+        // torrent survives — the gate fires before any lookup.
+        $disabled = $this->post('/api/torrent/delete.php', ['key' => 'smoke-api-key', 'info_hash' => $hash]);
+        $this->assertSame(200, $disabled['status']);
+        $this->assertSame(['error' => 'Torrent deletion is disabled.'], json_decode($disabled['body'], true));
+        $this->assertSame(1, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}torrents` WHERE `info_hash`='{$hash}'"));
+
+        // Enable deletion, then 'smoke' can remove its own torrent.
+        $this->appendConfigOverride("\$settings['api_allow_delete'] = true;");
+        $del = $this->post('/api/torrent/delete.php', ['key' => 'smoke-api-key', 'info_hash' => $hash]);
+        $this->assertSame(200, $del['status'], $del['body']);
+        $this->assertSame($hash, json_decode($del['body'], true)['torrent']['info_hash']);
+
+        // Gone from the table, from /api/torrents, and its peers are removed.
+        $this->assertSame(0, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}torrents` WHERE `info_hash`='{$hash}'"));
+        $this->assertSame(0, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}peers` WHERE `info_hash`='{$hash}'"));
+        $this->assertStringNotContainsString($hash, $this->get('/api/torrents.php', ['key' => 'smoke-api-key'])['body']);
+    }
+
     /**
      * Log in as admin and return the authenticated session cookie plus the
      * CSRF token embedded in the panel — the two credentials the API's session
