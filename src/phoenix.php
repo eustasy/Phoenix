@@ -24,7 +24,7 @@ $settings = settings_load(
     __DIR__.'/../config/phoenix.default.php',
     __DIR__.'/../config/phoenix.custom.php',
 );
-$settings['phoenix_version'] = 'Phoenix Procedural v4.0beta3 2026-05-09 17:23:00Z eustasy';
+$settings['phoenix_version'] = 'Phoenix v4.1beta4 2026-06-13 03:45:00Z eustasy';
 
 ////	Apply operator error settings (debug / error_log)
 require_once __DIR__.'/functions/error.configure.php';

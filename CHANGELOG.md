@@ -1,6 +1,6 @@
 # Phoenix Changelog
 
-## Unreleased
+## v4.1beta4 - 13/06/2026
 
 * FEATURE: Add a tracker management API under `public/api/`, with one thin entry-point file per path (no action router) and authenticated by per-user API keys in the new `api_keys` setting (`'user' => 'key'` pairs). The first endpoint is `/api/torrent/add` (`public/api/torrent/add.php`), which adds a torrent — add-only, so an info_hash that is already tracked is an error — recording the key's user in a new `user` column on the torrents table. Parameters come from POST or GET; responds with JSON by default, XML with `?xml`. **DB schema modifications required.**
 * FEATURE: Add `/api/torrents` (`public/api/torrents.php`) to the management API — a read endpoint listing every torrent (listed and unlisted, any owner) with swarm stats (seeders/leechers/peers/traffic) plus each torrent's `user` and `listed` flag. Any valid key sees the full list, so keys should only be issued to trusted operators (per-key scopes are a follow-up). JSON by default, XML with `?xml`.
