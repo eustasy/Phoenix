@@ -146,13 +146,13 @@ function api_torrent_add_controller(mysqli $connection, array $settings): string
     ];
 
     if (isset($_GET['xml'])) {
-        require_once __DIR__.'/../views/xml.torrent.add.php';
+        require_once __DIR__.'/../views/xml.torrent.php';
         header('Content-Type: text/xml');
 
-        return view_torrent_add_xml($view);
+        return view_torrent_xml($view);
     }
-    require_once __DIR__.'/../views/json.torrent.add.php';
+    require_once __DIR__.'/../views/json.torrent.php';
     header('Content-Type: application/json');
 
-    return view_torrent_add_json($view);
+    return view_torrent_json($view);
 }

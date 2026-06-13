@@ -49,7 +49,9 @@ phoenix/
 │   ├── api/             # Management API, one file per path (API-key authenticated)
 │   │   ├── torrents.php # GET /api/torrents — list every torrent + swarm stats
 │   │   └── torrent/
-│   │       └── add.php  # POST/GET /api/torrent/add — add a torrent
+│   │       ├── add.php    # POST/GET /api/torrent/add — add a torrent
+│   │       ├── list.php   # POST/GET /api/torrent/list — show on the index
+│   │       └── delist.php # POST/GET /api/torrent/delist — hide from the index
 │   ├── admin.php        # Admin panel & installer
 │   └── magnet.php       # Client-side magnet link generator
 ├── src/

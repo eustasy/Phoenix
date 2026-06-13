@@ -438,6 +438,111 @@ class EndpointSmokeTest extends SmokeTestCase
     }
 
     #[Depends('testInstallSucceeds')]
+    public function testApiDelistAndListTogglesPublicIndex(): void
+    {
+        // Expand the API keys: an 'other' owner (for the ownership-refusal test)
+        // and the '*' admin. The latest api_keys assignment wins, so 'smoke'
+        // keeps working alongside the new owners.
+        $this->appendConfigOverride(
+            "\$settings['api_keys'] = ['smoke' => 'smoke-api-key', 'other' => 'other-api-key', '*' => 'admin-api-key'];",
+        );
+
+        $hash = str_repeat('d', 40);
+
+        // Delist it: the public index must drop it.
+        $delist = $this->post('/api/torrent/delist.php', ['key' => 'smoke-api-key', 'info_hash' => $hash]);
+        $this->assertSame(200, $delist['status'], $delist['body']);
+        $this->assertSame(0, json_decode($delist['body'], true)['torrent']['listed']);
+        $this->assertStringNotContainsString($hash, $this->get('/index.php', ['json' => '1'])['body']);
+
+        // List it again: the index carries it once more.
+        $list = $this->post('/api/torrent/list.php', ['key' => 'smoke-api-key', 'info_hash' => $hash]);
+        $this->assertSame(200, $list['status'], $list['body']);
+        $this->assertSame(1, json_decode($list['body'], true)['torrent']['listed']);
+        $this->assertStringContainsString($hash, $this->get('/index.php', ['json' => '1'])['body']);
+    }
+
+    #[Depends('testApiDelistAndListTogglesPublicIndex')]
+    public function testApiMutationRejectsAnotherUsersKey(): void
+    {
+        // 'd' is owned by 'smoke'; the 'other' key gets the non-disclosing
+        // 'Torrent not found.' and the torrent is left untouched (still listed).
+        $hash = str_repeat('d', 40);
+        $r = $this->post('/api/torrent/delist.php', ['key' => 'other-api-key', 'info_hash' => $hash]);
+        $this->assertSame(200, $r['status']);
+        $this->assertSame(['error' => 'Torrent not found.'], json_decode($r['body'], true));
+        $this->assertStringContainsString($hash, $this->get('/index.php', ['json' => '1'])['body']);
+    }
+
+    #[Depends('testApiDelistAndListTogglesPublicIndex')]
+    public function testApiAdminKeyMayMutateAnotherUsersTorrent(): void
+    {
+        // The '*' admin key acts on a torrent it does not own, then restores it.
+        $hash = str_repeat('d', 40);
+        $delist = $this->post('/api/torrent/delist.php', ['key' => 'admin-api-key', 'info_hash' => $hash]);
+        $this->assertSame(200, $delist['status'], $delist['body']);
+        $this->assertSame(0, json_decode($delist['body'], true)['torrent']['listed']);
+
+        $this->post('/api/torrent/list.php', ['key' => 'admin-api-key', 'info_hash' => $hash]);
+        $this->assertStringContainsString($hash, $this->get('/index.php', ['json' => '1'])['body']);
+    }
+
+    #[Depends('testApiDelistAndListTogglesPublicIndex')]
+    public function testApiAdminSessionMayMutateWithCsrf(): void
+    {
+        // The session auth path: a logged-in admin (no API key) may drive the
+        // mutation endpoints, but only with a valid CSRF token.
+        $hash = str_repeat('d', 40);
+        $session = $this->adminSession();
+
+        // A live session WITHOUT a CSRF token is refused (cookie alone can't
+        // authorise a state change — that's the CSRF guard).
+        $noCsrf = $this->post('/api/torrent/delist.php', ['info_hash' => $hash], ['Cookie' => $session['cookie']]);
+        $this->assertSame(200, $noCsrf['status']);
+        $this->assertSame(['error' => 'CSRF token is invalid.'], json_decode($noCsrf['body'], true));
+        // Untouched: still listed.
+        $this->assertStringContainsString($hash, $this->get('/index.php', ['json' => '1'])['body']);
+
+        // With the token, the session authorises as the admin.
+        $ok = $this->post(
+            '/api/torrent/delist.php',
+            ['info_hash' => $hash, 'csrf' => $session['csrf']],
+            ['Cookie' => $session['cookie']],
+        );
+        $this->assertSame(200, $ok['status'], $ok['body']);
+        $this->assertSame(0, json_decode($ok['body'], true)['torrent']['listed']);
+
+        // Restore via the same session.
+        $this->post(
+            '/api/torrent/list.php',
+            ['info_hash' => $hash, 'csrf' => $session['csrf']],
+            ['Cookie' => $session['cookie']],
+        );
+        $this->assertStringContainsString($hash, $this->get('/index.php', ['json' => '1'])['body']);
+    }
+
+    /**
+     * Log in as admin and return the authenticated session cookie plus the
+     * CSRF token embedded in the panel — the two credentials the API's session
+     * auth path needs.
+     *
+     * @return array{cookie: string, csrf: string}
+     */
+    private function adminSession(): array
+    {
+        $login = $this->post('/admin.php', ['process' => 'login', 'password' => self::ADMIN_PW]);
+        $this->assertSame(302, $login['status']);
+        $cookie = $this->sessionCookie($login);
+        $this->assertNotNull($cookie);
+
+        $panel = $this->get('/admin.php', [], ['Cookie' => $cookie]);
+        $token = $this->csrfToken($panel['body']);
+        $this->assertNotNull($token, 'panel should embed a CSRF token');
+
+        return ['cookie' => $cookie, 'csrf' => $token];
+    }
+
+    #[Depends('testInstallSucceeds')]
     public function testStatsEnabledLogsCompletedEvent(): void
     {
         // Flip stats on via a config override, then complete a download for a

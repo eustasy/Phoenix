@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-class ViewTorrentAddJsonTest extends PhoenixTestCase
+class ViewTorrentJsonTest extends PhoenixTestCase
 {
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        require_once __DIR__.'/../../src/views/json.torrent.add.php';
+        require_once __DIR__.'/../../src/views/json.torrent.php';
     }
 
     /**
      * @param array<string, mixed> $overrides
-     * @return array{user: string, info_hash: string, name: string|null, size: int, listed: int, filename: string|null, files: list<array{path: string, length: int}>|null, trackers: list<string>|null, webseeds: list<string>|null}
+     * @return array{user: string|null, info_hash: string, name: string|null, size: int, listed: int, filename: string|null, files: list<array{path: string, length: int}>|null, trackers: list<string>|null, webseeds: list<string>|null}
      */
     private function torrent(array $overrides = []): array
     {
@@ -33,12 +33,12 @@ class ViewTorrentAddJsonTest extends PhoenixTestCase
 
     public function testReturnsValidJson(): void
     {
-        $this->assertJson(view_torrent_add_json($this->torrent()));
+        $this->assertJson(view_torrent_json($this->torrent()));
     }
 
     public function testIncludesTorrentObject(): void
     {
-        $decoded = json_decode(view_torrent_add_json($this->torrent()), true);
+        $decoded = json_decode(view_torrent_json($this->torrent()), true);
 
         $this->assertIsArray($decoded['torrent']);
         $this->assertSame('alice', $decoded['torrent']['user']);
@@ -52,16 +52,27 @@ class ViewTorrentAddJsonTest extends PhoenixTestCase
     {
         $torrent = $this->torrent();
         $torrent['name'] = null;
-        $decoded = json_decode(view_torrent_add_json($torrent), true);
+        $decoded = json_decode(view_torrent_json($torrent), true);
 
         $this->assertArrayHasKey('name', $decoded['torrent']);
         $this->assertNull($decoded['torrent']['name']);
     }
 
+    public function testNullUserSurvives(): void
+    {
+        // An admin acting on an unowned torrent renders a null user.
+        $torrent = $this->torrent();
+        $torrent['user'] = null;
+        $decoded = json_decode(view_torrent_json($torrent), true);
+
+        $this->assertArrayHasKey('user', $decoded['torrent']);
+        $this->assertNull($decoded['torrent']['user']);
+    }
+
     public function testNullMetaFieldsAreNull(): void
     {
         // The meta keys are always present in the object; absent meta is null.
-        $decoded = json_decode(view_torrent_add_json($this->torrent()), true);
+        $decoded = json_decode(view_torrent_json($this->torrent()), true);
 
         foreach (['filename', 'files', 'trackers', 'webseeds'] as $key) {
             $this->assertArrayHasKey($key, $decoded['torrent']);
@@ -71,7 +82,7 @@ class ViewTorrentAddJsonTest extends PhoenixTestCase
 
     public function testMetaFieldsRendered(): void
     {
-        $decoded = json_decode(view_torrent_add_json($this->torrent([
+        $decoded = json_decode(view_torrent_json($this->torrent([
             'filename' => 'movie.mkv',
             'files' => [
                 ['path' => 'a/b.mkv', 'length' => 42],

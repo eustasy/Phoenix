@@ -99,7 +99,11 @@ $settings['admin_login_delay_max'] = 8;
 ////	API Options
 /* API keys permitted to use the management API under public/api/, */
 /* as 'user' => 'key' pairs. The user a key belongs to is recorded */
-/* on each torrent it adds. Empty array disables the API. */
+/* on each torrent it adds, and scopes the list/delist/delete actions */
+/* to that user's own torrents. Empty array disables the API. The */
+/* reserved owner '*' is the admin: its key may act on ANY torrent, */
+/* including announce-created rows with no owner. Use distinct, */
+/* lowercase user names (the user column collates case-insensitively). */
 $settings['api_keys'] = [];
 /* max accepted .torrent upload size in bytes for server-side parsing */
 $settings['torrent_upload_max'] = 1048576;

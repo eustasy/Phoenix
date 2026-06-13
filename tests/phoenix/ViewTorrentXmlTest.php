@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-class ViewTorrentAddXmlTest extends PhoenixTestCase
+class ViewTorrentXmlTest extends PhoenixTestCase
 {
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        require_once __DIR__.'/../../src/views/xml.torrent.add.php';
+        require_once __DIR__.'/../../src/views/xml.torrent.php';
     }
 
     /**
      * @param array<string, mixed> $overrides
-     * @return array{user: string, info_hash: string, name: string|null, size: int, listed: int, filename: string|null, files: list<array{path: string, length: int}>|null, trackers: list<string>|null, webseeds: list<string>|null}
+     * @return array{user: string|null, info_hash: string, name: string|null, size: int, listed: int, filename: string|null, files: list<array{path: string, length: int}>|null, trackers: list<string>|null, webseeds: list<string>|null}
      */
     private function torrent(array $overrides = []): array
     {
@@ -33,7 +33,7 @@ class ViewTorrentAddXmlTest extends PhoenixTestCase
 
     public function testRendersWellFormedXml(): void
     {
-        $xml = view_torrent_add_xml($this->torrent());
+        $xml = view_torrent_xml($this->torrent());
 
         $this->assertStringStartsWith('<?xml', $xml);
         $doc = simplexml_load_string($xml);
@@ -51,7 +51,7 @@ class ViewTorrentAddXmlTest extends PhoenixTestCase
         $torrent['user'] = 'a & b';
         $torrent['name'] = 'x < y > z';
 
-        $doc = simplexml_load_string(view_torrent_add_xml($torrent));
+        $doc = simplexml_load_string(view_torrent_xml($torrent));
 
         // Body must be parseable; the entities round-trip back to the original.
         $this->assertNotFalse($doc);
@@ -64,17 +64,29 @@ class ViewTorrentAddXmlTest extends PhoenixTestCase
         $torrent = $this->torrent();
         $torrent['name'] = null;
 
-        $doc = simplexml_load_string(view_torrent_add_xml($torrent));
+        $doc = simplexml_load_string(view_torrent_xml($torrent));
 
         $this->assertNotFalse($doc);
         $this->assertSame('', (string) $doc->name);
+    }
+
+    public function testNullUserRendersEmptyElement(): void
+    {
+        // An admin acting on an unowned torrent renders an empty <user/>.
+        $torrent = $this->torrent();
+        $torrent['user'] = null;
+
+        $doc = simplexml_load_string(view_torrent_xml($torrent));
+
+        $this->assertNotFalse($doc);
+        $this->assertSame('', (string) $doc->user);
     }
 
     public function testNullMetaElementsOmitted(): void
     {
         // With all meta null, none of the four meta elements appear at all
         // (omission, not an empty element).
-        $xml = view_torrent_add_xml($this->torrent());
+        $xml = view_torrent_xml($this->torrent());
 
         $this->assertStringNotContainsString('<filename>', $xml);
         $this->assertStringNotContainsString('<files>', $xml);
@@ -84,7 +96,7 @@ class ViewTorrentAddXmlTest extends PhoenixTestCase
 
     public function testMetaElementsRendered(): void
     {
-        $doc = simplexml_load_string(view_torrent_add_xml($this->torrent([
+        $doc = simplexml_load_string(view_torrent_xml($this->torrent([
             'filename' => 'movie.mkv',
             'files' => [
                 ['path' => 'a/b.mkv', 'length' => 42],
@@ -115,7 +127,7 @@ class ViewTorrentAddXmlTest extends PhoenixTestCase
     {
         // A filename and a file path with XML-significant characters must
         // round-trip through entities rather than break the document.
-        $doc = simplexml_load_string(view_torrent_add_xml($this->torrent([
+        $doc = simplexml_load_string(view_torrent_xml($this->torrent([
             'filename' => 'a & b <tag>.mkv',
             'files' => [['path' => 'x/<y>&z.txt', 'length' => 1]],
         ])));
