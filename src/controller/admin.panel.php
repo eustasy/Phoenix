@@ -18,9 +18,14 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
     $page = isset($_GET['page']) ? (string) $_GET['page'] : 'dashboard';
 
     switch ($page) {
-        // Extension point: issues #55–#58 add 'torrents'/'backups'/'settings'
-        // cases here, each requiring + delegating to its own admin_*_page()
-        // page controller (one function per file, as with admin.dashboard.php).
+        case 'torrents':
+            require_once __DIR__.'/admin.torrents.php';
+
+            return admin_torrents_controller($connection, $settings);
+
+            // Extension point: issues #57–#58 add 'backups'/'settings' cases here,
+            // each requiring + delegating to its own page controller (one function
+            // per file, as with admin.dashboard.php / admin.torrents.php).
         case 'dashboard':
         default:
             require_once __DIR__.'/admin.dashboard.php';

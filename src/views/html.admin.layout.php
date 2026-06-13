@@ -20,11 +20,14 @@ declare(strict_types=1);
 //                  marked current (aria-current + .current class)
 //   $csrf_token  - per-session token for the logout form (empty when no
 //                  admin_password is set, since CSRF is not enforced then)
+//   $wide        - when true, widen the page column. Data pages (Torrents,
+//                  Backups) opt in for tables; the diagnostics dashboard stays
+//                  in the default narrow column.
 
 /**
  * @param PhoenixSettings $settings
  */
-function view_admin_layout_html(array $settings, string $title, string $body, string $active, string $csrf_token = ''): string
+function view_admin_layout_html(array $settings, string $title, string $body, string $active, string $csrf_token = '', bool $wide = false): string
 {
     // Hidden field carrying the CSRF token for the logout form. Escaped
     // defensively even though the token is always hex.
@@ -147,9 +150,27 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
 			font-weight: bold;
 			text-decoration: underline;
 		}
+		body.wide {
+			max-width: 1100px;
+		}
+		table.data-table {
+			border-collapse: collapse;
+			margin: 1em auto;
+			text-align: left;
+			width: 100%;
+		}
+		table.data-table th,
+		table.data-table td {
+			border-bottom: 1px solid #ecf0f1;
+			padding: .4em .6em;
+			vertical-align: top;
+		}
+		table.data-table code {
+			word-break: break-all;
+		}
 	</style>
 </head>
-<body>
+<body'.($wide ? ' class="wide"' : '').'>
 	<p class="text-center color-9">'.$settings['phoenix_version'].'</p>
 	'.$logout_html.'
 	'.$nav_html.'
