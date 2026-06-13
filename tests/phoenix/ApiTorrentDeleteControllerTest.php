@@ -66,7 +66,7 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
         );
     }
 
-    private function insertPeer(string $infoHash, string $peerId): void
+    private function insertPeerRow(string $infoHash, string $peerId): void
     {
         mysqli_query(
             self::$connection,
@@ -99,8 +99,8 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
     public function testDeletesOwnTorrentAndPeersWhenAllowed(): void
     {
         $this->insertTorrent(self::HASH_OWN, 'tester');
-        $this->insertPeer(self::HASH_OWN, '__TEST_peer_1__');
-        $this->insertPeer(self::HASH_OWN, '__TEST_peer_2__');
+        $this->insertPeerRow(self::HASH_OWN, '__TEST_peer_1__');
+        $this->insertPeerRow(self::HASH_OWN, '__TEST_peer_2__');
 
         $_GET = [];
         $_POST = ['key' => self::API_KEY, 'info_hash' => self::HASH_OWN];

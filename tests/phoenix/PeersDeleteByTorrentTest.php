@@ -20,7 +20,7 @@ class PeersDeleteByTorrentTest extends PhoenixTestCase
         );
     }
 
-    private function insertPeer(string $infoHash, string $peerId): void
+    private function insertPeerRow(string $infoHash, string $peerId): void
     {
         mysqli_query(
             self::$connection,
@@ -42,9 +42,9 @@ class PeersDeleteByTorrentTest extends PhoenixTestCase
 
     public function testRemovesOnlyTheTargetTorrentsPeers(): void
     {
-        $this->insertPeer('__TEST_keep__', '__TEST_peer_k1__');
-        $this->insertPeer('__TEST_drop__', '__TEST_peer_d1__');
-        $this->insertPeer('__TEST_drop__', '__TEST_peer_d2__');
+        $this->insertPeerRow('__TEST_keep__', '__TEST_peer_k1__');
+        $this->insertPeerRow('__TEST_drop__', '__TEST_peer_d1__');
+        $this->insertPeerRow('__TEST_drop__', '__TEST_peer_d2__');
 
         $this->assertTrue(\peers_delete_by_torrent(self::$connection, self::$settings, '__TEST_drop__'));
 
