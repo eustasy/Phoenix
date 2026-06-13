@@ -150,6 +150,33 @@ class AdminPanelControllerTest extends PhoenixTestCase
         $this->assertStringNotContainsString('Security check failed', $html);
     }
 
+    public function testPageDashboardRendersDashboard(): void
+    {
+        // Explicit ?page=dashboard routes to the dashboard.
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
+        $_GET['page'] = 'dashboard';
+
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
+
+        $this->assertIsString($html);
+        $this->assertStringContainsString('Phoenix', $html);
+    }
+
+    public function testUnknownPageFallsBackToDashboard(): void
+    {
+        // An unrecognised ?page= value falls back to the dashboard (lenient
+        // — it renders rather than erroring).
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
+        $_GET['page'] = 'bogus';
+
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
+
+        $this->assertIsString($html);
+        $this->assertStringContainsString('Phoenix', $html);
+    }
+
     public function testTablesInstalledFlagFalseUnderUnknownPrefix(): void
     {
         // With a db_prefix that has no tables installed, db_size shouldn't

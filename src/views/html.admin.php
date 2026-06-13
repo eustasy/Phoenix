@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 ////	view_admin_html
-// Render the admin panel with diagnostics and utilities.
+// Render the admin panel's dashboard page: the diagnostics and utilities
+// body, wrapped in the shared admin layout (chrome, version line, logout
+// form, navigation). The layout owns the full HTML document; this view
+// builds only the Dashboard body and hands it off.
 // Returns HTML string. Caller is responsible for echo and exit.
 //
 // Parameters:
@@ -36,16 +39,6 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
     // place; tests pass overrides to reach the failure branches.
     $php_version ??= PHP_VERSION;
     $has_mysqli ??= class_exists('mysqli');
-
-    // Build logout form. POST-only so a cross-site GET (e.g. an <img> tag)
-    // cannot end an admin session.
-    $logout_html = '';
-    if (! empty($settings['admin_password'])) {
-        $logout_html = '<form method="POST" class="text-right" style="display:inline">'.
-            '<input type="hidden" name="logout" value="1">'.$csrf_field.
-            '<button type="submit" class="link-button" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline">Log out</button>'.
-            '</form>';
-    }
 
     // Build installation complete message
     $installed_html = '';
@@ -139,93 +132,14 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
         }
     }
 
-    return '<!DOCTYPE html>
-<html lang="en">
-<head>
-	<title>Phoenix Diagnostics and Utilities</title>
-	<meta charset="UTF-8">
-	<script>
-		// Disable every submit button on the page when any .mysql form is
-		// submitted, to prevent double-submission across the mutually
-		// exclusive setup/clean/optimize forms.
-		document.addEventListener(\'DOMContentLoaded\', function () {
-			document.querySelectorAll(\'form.mysql\').forEach(function (form) {
-				form.addEventListener(\'submit\', function () {
-					document.querySelectorAll(\'input[type="submit"]\').forEach(function (btn) {
-						btn.disabled = true;
-					});
-				});
-			});
-		});
-	</script>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css" integrity="sha256-WAgYcAck1C1/zEl5sBl5cfyhxtLgKGdpI3oKyJffVRI=" crossorigin="anonymous">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/eustasy/colors.css@2.0.9/flatui.min.css" integrity="sha256-88LCIpF5risV+CCY/1CbWvHUJ7Rxg5KIj1tTg4ZUZLQ=" crossorigin="anonymous">
-	<style>
-		body {
-			margin: 0 auto;
-			max-width: 600px;
-			padding: 1% 10%;
-			text-align: center;
-			width: 80%;
-		}
-		h1,
-		h2,
-		h3,
-		h4,
-		h5,
-		h6 {
-			font-weight: normal;
-		}
-		a {
-			text-decoration: none;
-		}
-		input {
-			border: none;
-		}
-		input:disabled {
-			background: #ecf0f1;
-			color: #7f8c8d;
-		}
-		.box {
-			padding: 1em;
-		}
-		.button {
-			border-radius: .2em;
-			padding: .3em;
-		}
-		p .button {
-			margin-top: -.3em;
-		}
-		.button.p-like {
-			margin: 0.7em 0;
-		}
-		.clear {
-			clear: both;
-		}
-		.float-left {
-			float: left;
-		}
-		.float-right {
-			float: right;
-		}
-		.text-center {
-			text-align: center;
-		}
-		.text-left {
-			text-align: left;
-		}
-		.text-right {
-			text-align: right;
-		}
-	</style>
-</head>
-<body>
-	<h1>Compatibility Check</h1>
-	<p class="text-center color-9">'.$settings['phoenix_version'].'</p>
-	'.$logout_html.'
+    // Assemble the dashboard body; the layout supplies the surrounding page
+    // chrome (head, version line, logout form, navigation).
+    $body = '<h1>Compatibility Check</h1>
 	'.$installed_html.'
 	'.$php_compat_html.'
-	'.$mysql_html.'
-</body>
-</html>';
+	'.$mysql_html;
+
+    require_once __DIR__.'/html.admin.layout.php';
+
+    return view_admin_layout_html($settings, 'Dashboard', $body, 'dashboard', $csrf_token);
 }

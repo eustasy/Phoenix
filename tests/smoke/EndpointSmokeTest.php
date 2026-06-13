@@ -158,7 +158,10 @@ class EndpointSmokeTest extends SmokeTestCase
 
         $panel = $this->get('/admin.php', [], ['Cookie' => $cookie]);
         $this->assertSame(200, $panel['status']);
-        $this->assertStringContainsString('Phoenix Diagnostics and Utilities', $panel['body']);
+        // 'Compatibility Check' is the dashboard's heading (post-#54 the page
+        // <title> is "Phoenix Admin: Dashboard"); it appears only on the authed
+        // panel, never the login form.
+        $this->assertStringContainsString('Compatibility Check', $panel['body']);
         $this->assertStringNotContainsString('name="password"', $panel['body']);
     }
 
@@ -191,7 +194,7 @@ class EndpointSmokeTest extends SmokeTestCase
         $after = $this->get('/admin.php', [], ['Cookie' => $cookie]);
         $this->assertSame(200, $after['status']);
         $this->assertStringContainsString('name="password"', $after['body']);
-        $this->assertStringNotContainsString('Phoenix Diagnostics and Utilities', $after['body']);
+        $this->assertStringNotContainsString('Compatibility Check', $after['body']);
     }
 
     //// bin/ cron entry points (CLI, not HTTP)

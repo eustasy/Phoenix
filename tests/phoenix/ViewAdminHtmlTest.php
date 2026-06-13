@@ -28,7 +28,7 @@ class ViewAdminHtmlTest extends TestCase
     {
         $html = view_admin_html($this->settings(), true, false);
         $this->assertStringStartsWith('<!DOCTYPE html>', $html);
-        $this->assertStringContainsString('<title>Phoenix Diagnostics and Utilities</title>', $html);
+        $this->assertStringContainsString('<title>Phoenix Admin: Dashboard</title>', $html);
         $this->assertStringContainsString('Phoenix Test v.0', $html);
     }
 
