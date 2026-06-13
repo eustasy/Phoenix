@@ -23,13 +23,22 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
     /** @var array<string, mixed> */
     private array $postBackup;
 
+    /** @var array<string, mixed> */
+    private array $serverBackup;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->errorReporting = error_reporting();
         $this->getBackup = $_GET;
         $this->postBackup = $_POST;
+        $this->serverBackup = $_SERVER;
         error_reporting(0);
+        $_GET = [];
+        $_POST = [];
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer '.self::API_KEY;
+        unset($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
     }
 
     protected function tearDown(): void
@@ -37,6 +46,7 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
         error_reporting($this->errorReporting);
         $_GET = $this->getBackup;
         $_POST = $this->postBackup;
+        $_SERVER = $this->serverBackup;
         $hashes = '(\''.self::HASH_OWN.'\', \''.self::HASH_OTHER.'\', \''.self::HASH_UNOWNED.'\')';
         mysqli_query(self::$connection, 'DELETE FROM `'.self::$settings['db_prefix'].'torrents` WHERE `info_hash` IN '.$hashes.';');
         mysqli_query(self::$connection, 'DELETE FROM `'.self::$settings['db_prefix'].'peers` WHERE `info_hash` IN '.$hashes.';');
@@ -101,18 +111,14 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
         $this->insertTorrent(self::HASH_OWN, 'tester');
         $this->insertPeerRow(self::HASH_OWN, '__TEST_peer_1__');
         $this->insertPeerRow(self::HASH_OWN, '__TEST_peer_2__');
-
-        $_GET = [];
-        $_POST = ['key' => self::API_KEY, 'info_hash' => self::HASH_OWN];
+        $_POST = ['info_hash' => self::HASH_OWN];
 
         $json = \api_torrent_delete_controller(self::$connection, $this->settingsWithKeys(true));
         $decoded = json_decode($json, true);
         $this->assertIsArray($decoded);
-        // The deleted row is rendered as it was.
         $this->assertSame(self::HASH_OWN, $decoded['torrent']['info_hash']);
         $this->assertSame('tester', $decoded['torrent']['user']);
 
-        // Row and its peers are gone.
         $this->assertFalse($this->torrentExists(self::HASH_OWN));
         $this->assertSame(0, $this->peerCount(self::HASH_OWN));
     }
@@ -122,8 +128,8 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
         // Deletion is off, but the '*' admin is exempt and may delete a
         // null-owner torrent.
         $this->insertTorrent(self::HASH_UNOWNED, null);
-        $_GET = [];
-        $_POST = ['key' => self::ADMIN_KEY, 'info_hash' => self::HASH_UNOWNED];
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer '.self::ADMIN_KEY;
+        $_POST = ['info_hash' => self::HASH_UNOWNED];
 
         $json = \api_torrent_delete_controller(self::$connection, $this->settingsWithKeys(false));
         $decoded = json_decode($json, true);
@@ -135,7 +141,7 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
     public function testRendersXmlWhenXmlFlagSet(): void
     {
         $this->insertTorrent(self::HASH_OWN, 'tester');
-        $_POST = ['key' => self::API_KEY, 'info_hash' => self::HASH_OWN];
+        $_POST = ['info_hash' => self::HASH_OWN];
         $_GET = ['xml' => '1'];
 
         $xml = \api_torrent_delete_controller(self::$connection, $this->settingsWithKeys(true));
@@ -147,7 +153,7 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
     {
         // Gate fires before any lookup; the torrent survives.
         $this->insertTorrent(self::HASH_OWN, 'tester');
-        $result = $this->runErrorSubprocess(['key' => self::API_KEY, 'info_hash' => self::HASH_OWN], allowDelete: false);
+        $result = $this->runErrorSubprocess(['info_hash' => self::HASH_OWN], allowDelete: false);
 
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Torrent deletion is disabled.', $result['stdout']);
@@ -159,7 +165,7 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
         // Deletion enabled, but the torrent is someone else's: 'Torrent not
         // found.' and the row survives.
         $this->insertTorrent(self::HASH_OTHER, 'other');
-        $result = $this->runErrorSubprocess(['key' => self::API_KEY, 'info_hash' => self::HASH_OTHER], allowDelete: true);
+        $result = $this->runErrorSubprocess(['info_hash' => self::HASH_OTHER], allowDelete: true);
 
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Torrent not found.', $result['stdout']);
@@ -168,16 +174,26 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
 
     public function testRejectsMissingInfoHash(): void
     {
-        $result = $this->runErrorSubprocess(['key' => self::API_KEY], allowDelete: true);
+        $result = $this->runErrorSubprocess([], allowDelete: true);
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Info Hash is invalid.', $result['stdout']);
     }
 
+    public function testRejectsNonPost(): void
+    {
+        $result = $this->runErrorSubprocess(['info_hash' => self::HASH_OWN], allowDelete: true, method: 'GET');
+        $this->assertSame(2, $result['exit']);
+        $this->assertStringContainsString('Method not allowed.', $result['stdout']);
+    }
+
     /**
+     * Run the controller in a subprocess (tracker_error exits). Authenticates
+     * with the valid 'tester' key via the Authorization header.
+     *
      * @param array<string, string> $params
      * @return array{stdout: string, stderr: string, exit: int}
      */
-    private function runErrorSubprocess(array $params, bool $allowDelete): array
+    private function runErrorSubprocess(array $params, bool $allowDelete, string $method = 'POST'): array
     {
         $params['json'] = '1';
         $api_keys = ['tester' => self::API_KEY, '*' => self::ADMIN_KEY];
@@ -185,6 +201,8 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
         return $this->runPhpSubprocess(
             '<?php
             $_GET = '.var_export($params, true).';
+            $_SERVER[\'REQUEST_METHOD\'] = '.var_export($method, true).';
+            $_SERVER[\'HTTP_AUTHORIZATION\'] = '.var_export('Bearer '.self::API_KEY, true).';
             require_once '.var_export(dirname(__DIR__).'/bootstrap.php', true).';
             require_once '.var_export(dirname(__DIR__, 2).'/src/controller/api.torrent.delete.php', true).';
             $settings = $GLOBALS[\'phoenix_settings\'];

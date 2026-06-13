@@ -11,23 +11,19 @@ class ApiAuthenticateRequestTest extends PhoenixTestCase
     private const API_KEY = '__TEST_api_key__';
 
     /** @var array<string, mixed> */
-    private array $getBackup;
-
-    /** @var array<string, mixed> */
-    private array $postBackup;
+    private array $serverBackup;
 
     protected function setUp(): void
     {
         parent::setUp();
-        // Preserve $_GET/$_POST across the in-process tests.
-        $this->getBackup = $_GET;
-        $this->postBackup = $_POST;
+        // Preserve $_SERVER (the Authorization header lives here) across tests.
+        $this->serverBackup = $_SERVER;
+        unset($_SERVER['HTTP_AUTHORIZATION'], $_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
     }
 
     protected function tearDown(): void
     {
-        $_GET = $this->getBackup;
-        $_POST = $this->postBackup;
+        $_SERVER = $this->serverBackup;
         parent::tearDown();
     }
 
@@ -40,67 +36,70 @@ class ApiAuthenticateRequestTest extends PhoenixTestCase
         return $settings;
     }
 
-    public function testReturnsUserForValidKeyFromPost(): void
+    public function testReturnsUserForValidBearerKey(): void
     {
-        $_GET = [];
-        $_POST = ['key' => self::API_KEY];
+        // The read auth resolves a key from the Authorization header; no CSRF
+        // and no session needed on the key path.
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer '.self::API_KEY;
 
         $this->assertSame('tester', \api_authenticate_request($this->settingsWithKeys()));
     }
 
-    public function testReturnsUserForValidKeyFromGet(): void
+    public function testReturnsAdminForAdminKey(): void
     {
-        $_POST = [];
-        $_GET = ['key' => self::API_KEY];
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer __TEST_admin_key__';
+        $settings = self::$settings;
+        $settings['api_keys'] = ['tester' => self::API_KEY, '*' => '__TEST_admin_key__'];
 
-        $this->assertSame('tester', \api_authenticate_request($this->settingsWithKeys()));
+        $this->assertSame('*', \api_authenticate_request($settings));
     }
 
     public function testRejectsInvalidKey(): void
     {
-        // tracker_error() exits, so exercise the reject branch in a
-        // subprocess and assert on its output + exit code.
-        $result = $this->runErrorSubprocess(['key' => 'wrong-key']);
+        // tracker_error() exits, so exercise the reject branch in a subprocess.
+        $result = $this->runErrorSubprocess('Bearer wrong-key');
 
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('API key is invalid.', $result['stdout']);
     }
 
-    public function testRejectsMissingKey(): void
+    public function testRejectsMissingCredential(): void
     {
-        $result = $this->runErrorSubprocess([]);
+        // No Authorization header and no admin session → refused.
+        $result = $this->runErrorSubprocess(null);
 
         $this->assertSame(2, $result['exit']);
-        $this->assertStringContainsString('API key is invalid.', $result['stdout']);
+        $this->assertStringContainsString('Authorization required.', $result['stdout']);
     }
 
     public function testRejectsWhenApiDisabled(): void
     {
-        // With no configured keys the API is off — refused before the key is
-        // even read, so even a valid key gets the same exit.
-        $result = $this->runErrorSubprocess(['key' => self::API_KEY], api_enabled: false);
+        // A key is presented but no keys are configured: the key path reports
+        // the API is off.
+        $result = $this->runErrorSubprocess('Bearer '.self::API_KEY, api_enabled: false);
 
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('API is not enabled.', $result['stdout']);
     }
 
     /**
-     * Run api_authenticate_request() in a subprocess with $_GET primed
-     * (tracker_error exits, which would otherwise kill the PHPUnit worker).
-     * $api_enabled toggles whether any keys are configured so the
-     * API-disabled branch can be exercised.
+     * Run api_authenticate_request() in a subprocess (tracker_error exits,
+     * which would otherwise kill the PHPUnit worker). $authHeader is the raw
+     * Authorization header value, or null to send none.
      *
-     * @param array<string, string> $params
      * @return array{stdout: string, stderr: string, exit: int}
      */
-    private function runErrorSubprocess(array $params, bool $api_enabled = true): array
+    private function runErrorSubprocess(?string $authHeader, bool $api_enabled = true): array
     {
-        $params['json'] = '1';
         $api_keys = $api_enabled ? ['tester' => self::API_KEY] : [];
+        $server_setup = $authHeader === null
+            ? ''
+            : '$_SERVER[\'HTTP_AUTHORIZATION\'] = '.var_export($authHeader, true).';';
 
         return $this->runPhpSubprocess(
             '<?php
-            $_GET = '.var_export($params, true).';
+            $_GET = [\'json\' => \'1\'];
+            '.$server_setup.'
             require_once '.var_export(dirname(__DIR__).'/bootstrap.php', true).';
             require_once '.var_export(dirname(__DIR__, 2).'/src/functions/api.authenticate.request.php', true).';
             $settings = $GLOBALS[\'phoenix_settings\'];

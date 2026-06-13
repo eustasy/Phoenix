@@ -17,15 +17,23 @@ declare(strict_types=1);
 function api_torrents_controller(mysqli $connection, array $settings): string
 {
 
+    ////	Method
+    // Read endpoint: GET only.
+    require_once __DIR__.'/../functions/api.require.method.php';
+    api_require_method('GET');
+
     ////	Authenticate
-    // Gate on a valid key, but ignore which user it is — this endpoint returns
-    // every torrent regardless of owner.
+    // Header key or admin session (no CSRF — this is a read). The user scopes
+    // the result: the admin ('*') sees every torrent, a normal key only its own.
     require_once __DIR__.'/../functions/api.authenticate.request.php';
-    api_authenticate_request($settings);
+    $user = api_authenticate_request($settings);
+
+    require_once __DIR__.'/../functions/api.user.is_admin.php';
+    $scope = api_user_is_admin($user) ? null : $user;
 
     ////	Fetch
     require_once __DIR__.'/../model/torrents.select.all.php';
-    $torrents = torrents_select_all($connection, $settings);
+    $torrents = torrents_select_all($connection, $settings, $scope);
 
     ////	Render
     if (isset($_GET['xml'])) {

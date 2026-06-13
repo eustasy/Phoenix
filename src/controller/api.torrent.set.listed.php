@@ -13,7 +13,8 @@ declare(strict_types=1);
 // and a not-owned row both report 'Torrent not found.', so ownership never
 // discloses existence. Idempotent: re-setting the current value still succeeds.
 //
-// Driven by public/api/torrent/{list,delist}.php; parameters from POST or GET.
+// Driven by public/api/torrent/{list,delist}.php; POST only, authenticated by
+// an `Authorization: Bearer <key>` header (or an admin.php session + CSRF).
 // Returns the rendered body — JSON by default, XML when ?xml is set. Calls
 // tracker_error() on failure (which exits); the entry point pre-sets the JSON
 // flag so those errors serialise as JSON unless the caller asked for XML.
@@ -21,6 +22,11 @@ declare(strict_types=1);
 /** @param PhoenixSettings $settings */
 function api_torrent_set_listed_controller(mysqli $connection, array $settings, int $listed): string
 {
+    ////	Method
+    // Write endpoint: POST only.
+    require_once __DIR__.'/../functions/api.require.method.php';
+    api_require_method('POST');
+
     ////	Authenticate
     require_once __DIR__.'/../functions/api.authenticate.mutation.php';
     $user = api_authenticate_mutation($settings);

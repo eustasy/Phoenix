@@ -312,16 +312,16 @@ class EndpointSmokeTest extends SmokeTestCase
     {
         // Enable the API (the installer writes no keys), add a listed torrent,
         // and confirm it shows up on the public index — exercises
-        // public/api/torrent/add.php end-to-end in both serialisations.
+        // public/api/torrent/add.php end-to-end in both serialisations. Auth is
+        // the Authorization: Bearer header; the endpoint is POST only.
         $this->appendConfigOverride("\$settings['api_keys'] = ['smoke' => 'smoke-api-key'];");
 
         $hash = str_repeat('d', 40);
         $r = $this->post('/api/torrent/add.php', [
-            'key' => 'smoke-api-key',
             'info_hash' => $hash,
             'name' => 'Smoke API Torrent',
             'size' => '2048',
-        ]);
+        ], $this->bearer('smoke-api-key'));
         $this->assertSame(200, $r['status']);
         $decoded = json_decode($r['body'], true);
         $this->assertIsArray($decoded);
@@ -330,15 +330,12 @@ class EndpointSmokeTest extends SmokeTestCase
 
         // The endpoint is add-only: re-POSTing the same hash is refused,
         // and with ?xml the error serialises as XML.
-        $xml = $this->post('/api/torrent/add.php?xml=1', [
-            'key' => 'smoke-api-key',
-            'info_hash' => $hash,
-        ]);
+        $xml = $this->post('/api/torrent/add.php?xml=1', ['info_hash' => $hash], $this->bearer('smoke-api-key'));
         $this->assertSame(200, $xml['status']);
         $this->assertStringContainsString('<error>Torrent already exists.</error>', $xml['body']);
 
         // A wrong key is refused, and the error serialises as JSON by default.
-        $bad = $this->post('/api/torrent/add.php', ['key' => 'wrong-key', 'info_hash' => $hash]);
+        $bad = $this->post('/api/torrent/add.php', ['info_hash' => $hash], $this->bearer('wrong-key'));
         $this->assertSame(200, $bad['status']);
         $this->assertSame(['error' => 'API key is invalid.'], json_decode($bad['body'], true));
 
@@ -375,15 +372,14 @@ class EndpointSmokeTest extends SmokeTestCase
 
         $r = $this->postMultipart(
             '/api/torrent/add.php',
-            [
-                'key' => 'smoke-api-key',
-            ],
+            [],
             [
                 'name' => 'torrent',
                 'filename' => 'upload.torrent',
                 'content' => $raw,
                 'type' => 'application/x-bittorrent',
             ],
+            $this->bearer('smoke-api-key'),
         );
         $this->assertSame(200, $r['status'], $r['body']);
 
@@ -401,12 +397,12 @@ class EndpointSmokeTest extends SmokeTestCase
     #[Depends('testInstallSucceeds')]
     public function testApiListsAllTorrents(): void
     {
-        // The two earlier API tests added torrents under the 'smoke' key; the
-        // list endpoint must surface them with their user and listed flag.
-        // Exercises public/api/torrents.php in both serialisations.
+        // The two earlier API tests added torrents under the 'smoke' key; GET
+        // /api/torrents scopes a normal key to its OWN torrents, so the 'smoke'
+        // key surfaces them with their user and listed flag. Header-authed.
         $listHash = str_repeat('d', 40);
 
-        $r = $this->get('/api/torrents.php', ['key' => 'smoke-api-key']);
+        $r = $this->get('/api/torrents.php', [], $this->bearer('smoke-api-key'));
         $this->assertSame(200, $r['status'], $r['body']);
         $decoded = json_decode($r['body'], true);
         $this->assertIsArray($decoded);
@@ -425,16 +421,21 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertSame('Smoke API Torrent', $row['name']);
 
         // ?xml serialises the same collection as XML.
-        $xml = $this->get('/api/torrents.php', ['key' => 'smoke-api-key', 'xml' => '1']);
+        $xml = $this->get('/api/torrents.php', ['xml' => '1'], $this->bearer('smoke-api-key'));
         $this->assertSame(200, $xml['status']);
         $this->assertStringContainsString('<torrents>', $xml['body']);
         $this->assertStringContainsString('<info_hash>'.$listHash.'</info_hash>', $xml['body']);
         $this->assertStringContainsString('<user>smoke</user>', $xml['body']);
 
         // A wrong key is refused (auth shared with the add endpoint).
-        $bad = $this->get('/api/torrents.php', ['key' => 'wrong-key']);
+        $bad = $this->get('/api/torrents.php', [], $this->bearer('wrong-key'));
         $this->assertSame(200, $bad['status']);
         $this->assertSame(['error' => 'API key is invalid.'], json_decode($bad['body'], true));
+
+        // No credential at all → Authorization required.
+        $none = $this->get('/api/torrents.php');
+        $this->assertSame(200, $none['status']);
+        $this->assertSame(['error' => 'Authorization required.'], json_decode($none['body'], true));
     }
 
     #[Depends('testInstallSucceeds')]
@@ -468,16 +469,25 @@ class EndpointSmokeTest extends SmokeTestCase
         $hash = str_repeat('d', 40);
 
         // Delist it: the public index must drop it.
-        $delist = $this->post('/api/torrent/delist.php', ['key' => 'smoke-api-key', 'info_hash' => $hash]);
+        $delist = $this->post('/api/torrent/delist.php', ['info_hash' => $hash], $this->bearer('smoke-api-key'));
         $this->assertSame(200, $delist['status'], $delist['body']);
         $this->assertSame(0, json_decode($delist['body'], true)['torrent']['listed']);
         $this->assertStringNotContainsString($hash, $this->get('/index.php', ['json' => '1'])['body']);
 
         // List it again: the index carries it once more.
-        $list = $this->post('/api/torrent/list.php', ['key' => 'smoke-api-key', 'info_hash' => $hash]);
+        $list = $this->post('/api/torrent/list.php', ['info_hash' => $hash], $this->bearer('smoke-api-key'));
         $this->assertSame(200, $list['status'], $list['body']);
         $this->assertSame(1, json_decode($list['body'], true)['torrent']['listed']);
         $this->assertStringContainsString($hash, $this->get('/index.php', ['json' => '1'])['body']);
+    }
+
+    #[Depends('testApiDelistAndListTogglesPublicIndex')]
+    public function testApiMutationRejectsGet(): void
+    {
+        // The mutation endpoints are POST only; a GET is refused before auth.
+        $r = $this->get('/api/torrent/delist.php', ['info_hash' => str_repeat('d', 40)], $this->bearer('smoke-api-key'));
+        $this->assertSame(200, $r['status']);
+        $this->assertSame(['error' => 'Method not allowed.'], json_decode($r['body'], true));
     }
 
     #[Depends('testApiDelistAndListTogglesPublicIndex')]
@@ -486,10 +496,29 @@ class EndpointSmokeTest extends SmokeTestCase
         // 'd' is owned by 'smoke'; the 'other' key gets the non-disclosing
         // 'Torrent not found.' and the torrent is left untouched (still listed).
         $hash = str_repeat('d', 40);
-        $r = $this->post('/api/torrent/delist.php', ['key' => 'other-api-key', 'info_hash' => $hash]);
+        $r = $this->post('/api/torrent/delist.php', ['info_hash' => $hash], $this->bearer('other-api-key'));
         $this->assertSame(200, $r['status']);
         $this->assertSame(['error' => 'Torrent not found.'], json_decode($r['body'], true));
         $this->assertStringContainsString($hash, $this->get('/index.php', ['json' => '1'])['body']);
+    }
+
+    #[Depends('testApiDelistAndListTogglesPublicIndex')]
+    public function testApiTorrentsScopedByOwnerUnlessAdmin(): void
+    {
+        // 'd' is owned by 'smoke'. A normal owner sees only its own torrents;
+        // the '*' admin sees every torrent.
+        $hash = str_repeat('d', 40);
+
+        $smoke = $this->get('/api/torrents.php', [], $this->bearer('smoke-api-key'));
+        $this->assertStringContainsString($hash, $smoke['body']);
+
+        // 'other' owns nothing here, so 'd' must not appear in its scoped list.
+        $other = $this->get('/api/torrents.php', [], $this->bearer('other-api-key'));
+        $this->assertStringNotContainsString($hash, $other['body']);
+
+        // The admin sees it (and everything else).
+        $admin = $this->get('/api/torrents.php', [], $this->bearer('admin-api-key'));
+        $this->assertStringContainsString($hash, $admin['body']);
     }
 
     #[Depends('testApiDelistAndListTogglesPublicIndex')]
@@ -497,11 +526,11 @@ class EndpointSmokeTest extends SmokeTestCase
     {
         // The '*' admin key acts on a torrent it does not own, then restores it.
         $hash = str_repeat('d', 40);
-        $delist = $this->post('/api/torrent/delist.php', ['key' => 'admin-api-key', 'info_hash' => $hash]);
+        $delist = $this->post('/api/torrent/delist.php', ['info_hash' => $hash], $this->bearer('admin-api-key'));
         $this->assertSame(200, $delist['status'], $delist['body']);
         $this->assertSame(0, json_decode($delist['body'], true)['torrent']['listed']);
 
-        $this->post('/api/torrent/list.php', ['key' => 'admin-api-key', 'info_hash' => $hash]);
+        $this->post('/api/torrent/list.php', ['info_hash' => $hash], $this->bearer('admin-api-key'));
         $this->assertStringContainsString($hash, $this->get('/index.php', ['json' => '1'])['body']);
     }
 
@@ -546,10 +575,9 @@ class EndpointSmokeTest extends SmokeTestCase
         // directly (so the owner isn't disturbed by an announce).
         $hash = str_repeat('1', 40);
         $add = $this->post('/api/torrent/add.php', [
-            'key' => 'smoke-api-key',
             'info_hash' => $hash,
             'name' => 'Doomed Torrent',
-        ]);
+        ], $this->bearer('smoke-api-key'));
         $this->assertSame(200, $add['status'], $add['body']);
 
         $db = $this->db();
@@ -566,21 +594,32 @@ class EndpointSmokeTest extends SmokeTestCase
 
         // Deletion is off by default: 'smoke' (a non-admin) is refused and the
         // torrent survives — the gate fires before any lookup.
-        $disabled = $this->post('/api/torrent/delete.php', ['key' => 'smoke-api-key', 'info_hash' => $hash]);
+        $disabled = $this->post('/api/torrent/delete.php', ['info_hash' => $hash], $this->bearer('smoke-api-key'));
         $this->assertSame(200, $disabled['status']);
         $this->assertSame(['error' => 'Torrent deletion is disabled.'], json_decode($disabled['body'], true));
         $this->assertSame(1, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}torrents` WHERE `info_hash`='{$hash}'"));
 
         // Enable deletion, then 'smoke' can remove its own torrent.
         $this->appendConfigOverride("\$settings['api_allow_delete'] = true;");
-        $del = $this->post('/api/torrent/delete.php', ['key' => 'smoke-api-key', 'info_hash' => $hash]);
+        $del = $this->post('/api/torrent/delete.php', ['info_hash' => $hash], $this->bearer('smoke-api-key'));
         $this->assertSame(200, $del['status'], $del['body']);
         $this->assertSame($hash, json_decode($del['body'], true)['torrent']['info_hash']);
 
         // Gone from the table, from /api/torrents, and its peers are removed.
         $this->assertSame(0, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}torrents` WHERE `info_hash`='{$hash}'"));
         $this->assertSame(0, $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}peers` WHERE `info_hash`='{$hash}'"));
-        $this->assertStringNotContainsString($hash, $this->get('/api/torrents.php', ['key' => 'smoke-api-key'])['body']);
+        $this->assertStringNotContainsString($hash, $this->get('/api/torrents.php', [], $this->bearer('smoke-api-key'))['body']);
+    }
+
+    /**
+     * The Authorization header carrying an API key, as the management API now
+     * expects it (`Authorization: Bearer <key>`).
+     *
+     * @return array{Authorization: string}
+     */
+    private function bearer(string $key): array
+    {
+        return ['Authorization' => 'Bearer '.$key];
     }
 
     /**

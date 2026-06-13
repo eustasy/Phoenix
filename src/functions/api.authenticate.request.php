@@ -3,30 +3,45 @@
 declare(strict_types=1);
 
 ////	api_authenticate_request
-// Shared front door for every management-API controller: refuse when no keys
-// are configured (`API is not enabled.`), read `key` from POST or GET, validate
-// it timing-safely via api_authenticate_key(), and exit via tracker_error()
-// with `API key is invalid.` on failure. Returns the user the key belongs to so
-// the controller can attribute and scope its work. Keeping auth here (rather
-// than in the entry point) leaves it in unit-testable controller space.
+// Authenticate a caller of the READ API (/api/torrents) and return the user to
+// act as. Two paths:
 //
-// tracker_error() lives in the bootstrap, not here; entry points pre-set the
-// JSON flag so these errors serialise as JSON unless the caller asked for XML.
+//   1. Authorization header — `Authorization: Bearer <key>` (api_request_key).
+//      Validated against $settings['api_keys']; the user may be a normal owner
+//      (scoped to its own torrents) or the '*' admin (sees everything).
+//   2. admin.php session — a logged-in admin resolves to the '*' admin. No CSRF
+//      token is required on this read path: the session cookie is auto-sent,
+//      but the response can't be read cross-origin, so a forged request leaks
+//      nothing. (Mutations use api_authenticate_mutation, which DOES require a
+//      CSRF token.)
+//
+// Refuses via tracker_error() (which exits) on any failure; the entry point
+// pre-sets the JSON flag so those errors serialise as JSON unless ?xml is set.
 
 /** @param PhoenixSettings $settings */
 function api_authenticate_request(array $settings): string
 {
-    // No configured keys means the API is off — refuse before reading input.
-    if (empty($settings['api_keys'])) {
-        tracker_error('API is not enabled.');
+    ////	Authorization header (no CSRF)
+    require_once __DIR__.'/api.request.key.php';
+    $key = api_request_key();
+    if ($key !== '') {
+        if (empty($settings['api_keys'])) {
+            tracker_error('API is not enabled.');
+        }
+        require_once __DIR__.'/api.authenticate.key.php';
+        $user = api_authenticate_key($settings, $key);
+        if ($user === false) {
+            tracker_error('API key is invalid.');
+        }
+
+        return $user;
     }
 
-    require_once __DIR__.'/api.authenticate.key.php';
-    $key = $_POST['key'] ?? $_GET['key'] ?? '';
-    $user = api_authenticate_key($settings, is_string($key) ? $key : '');
-    if ($user === false) {
-        tracker_error('API key is invalid.');
+    ////	admin.php session (reads need no CSRF)
+    require_once __DIR__.'/api.admin.session.php';
+    if (api_admin_session_active()) {
+        return '*';
     }
 
-    return $user;
+    tracker_error('Authorization required.');
 }

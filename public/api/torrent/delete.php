@@ -3,11 +3,12 @@
 declare(strict_types=1);
 
 ////	api/torrent/delete.php
-// Tracker management API: delete a torrent and its peers. Authorization: an
-// owner API key (its own torrents) or the '*' admin — via the admin key, or an
-// admin.php session carrying a CSRF token. Gated by $settings['api_allow_delete']
-// for non-admins (off by default); the admin is always exempt.
-// Parameters from POST or GET. Responds with JSON by default and XML with ?xml.
+// Tracker management API: delete a torrent and its peers. POST only.
+// Authorization: an `Authorization: Bearer <key>` header — an owner key (its
+// own torrents) or the '*' admin (any torrent) — or an admin.php session
+// carrying a CSRF token. Gated by $settings['api_allow_delete'] for non-admins
+// (off by default); the admin is always exempt. Parameters come from the POST
+// body. Responds with JSON by default and XML with ?xml.
 //
 // CAVEAT: on an OPEN tracker a deleted torrent reappears on its next announce.
 // Deletion is only decisive on a CLOSED tracker, where it is also absent from

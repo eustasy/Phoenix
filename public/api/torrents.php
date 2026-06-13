@@ -3,13 +3,11 @@
 declare(strict_types=1);
 
 ////	api/torrents.php
-// Tracker management API: list every torrent (listed and unlisted, any owner)
-// with swarm stats. Authenticated by an API key from $settings['api_keys'].
+// Tracker management API: list torrents with swarm stats. GET only,
+// authenticated by an `Authorization: Bearer <key>` header (or an admin.php
+// session — no CSRF needed on a read). A normal key is scoped to its OWN
+// torrents; the '*' admin sees every torrent — listed and unlisted, any owner.
 // Responds with JSON by default and XML when ?xml is passed.
-//
-// Disclosure: any valid key sees the full list — including unlisted torrents
-// and torrents owned by other users. Keys are operator-issued and trusted;
-// per-key scopes are a deferred follow-up.
 
 // No Access-Control-Allow-Origin here — this is an authenticated endpoint,
 // not one of the public read endpoints (announce/scrape/index).

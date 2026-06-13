@@ -3,11 +3,12 @@
 declare(strict_types=1);
 
 ////	torrents_select_all
-// Returns every torrent — listed and unlisted, any owner — with peer counts
-// (seeders/leechers) for the management API and the admin list. Mirrors
-// torrents_select_listed() but drops its `WHERE t.listed = 1` clause and adds
-// the `user` and `listed` columns to the shape. Returns an empty array when no
-// torrents exist.
+// Returns torrents — listed and unlisted — with peer counts (seeders/leechers)
+// for the management API and the admin list. Mirrors torrents_select_listed()
+// but drops its `WHERE t.listed = 1` clause and adds the `user` and `listed`
+// columns to the shape. When $user is non-null the result is scoped to that
+// owner's torrents (`WHERE t.user = ?`); null returns every torrent, any owner
+// (the admin / admin-panel view). Returns an empty array when none match.
 /**
  * @param PhoenixSettings $settings
  * @return list<array{
@@ -27,7 +28,7 @@ declare(strict_types=1);
  *     webseeds: list<string>|null,
  * }>
  */
-function torrents_select_all(mysqli $connection, array $settings): array
+function torrents_select_all(mysqli $connection, array $settings, ?string $user = null): array
 {
     require_once __DIR__.'/../functions/torrent.normalize.meta.php';
 
@@ -45,11 +46,15 @@ function torrents_select_all(mysqli $connection, array $settings): array
 			`t`.`trackers` AS `trackers`,
 			`t`.`webseeds` AS `webseeds`
 		FROM `'.$settings['db_prefix'].'torrents` AS `t`
-		LEFT JOIN `'.$settings['db_prefix'].'peers` AS `p` ON `t`.`info_hash` = `p`.`info_hash`
+		LEFT JOIN `'.$settings['db_prefix'].'peers` AS `p` ON `t`.`info_hash` = `p`.`info_hash`'.
+        ($user === null ? '' : '
+		WHERE `t`.`user` = ?').'
 		GROUP BY `t`.`info_hash`
 		ORDER BY `t`.`name`;';
 
-    $result = mysqli_query($connection, $sql);
+    $result = $user === null
+        ? mysqli_query($connection, $sql)
+        : mysqli_execute_query($connection, $sql, [$user]);
     if (! $result instanceof mysqli_result) {
         tracker_error('Unable to get torrents.');
     }

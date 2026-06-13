@@ -3,9 +3,10 @@
 declare(strict_types=1);
 
 ////	api/torrent/add.php
-// Tracker management API: add a torrent. Authenticated by an API key from
-// $settings['api_keys']; parameters come from POST or GET. Responds with JSON
-// by default and XML when ?xml is passed.
+// Tracker management API: add a torrent. POST only, authenticated by an
+// `Authorization: Bearer <key>` header (or an admin.php session + CSRF token);
+// parameters come from the POST body. Responds with JSON by default and XML
+// when ?xml is passed.
 
 // No Access-Control-Allow-Origin here — this is an authenticated write
 // endpoint, not one of the public read endpoints (announce/scrape/index).

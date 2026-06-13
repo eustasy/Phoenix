@@ -34,6 +34,29 @@ allows slashes (`[^.]+`, not `[^/.]+`) so the nested API paths
 (`/api/torrent/add` → `public/api/torrent/add.php`) resolve too; the `!-f` / `!-d`
 conditions keep it from clobbering real files or directories.
 
+## Management API (`Authorization` header)
+
+The management API (`/api/...`) authenticates with an `Authorization: Bearer <key>`
+header. With **mod_php**, Apache does not expose that header to PHP by default, so
+the key would never be seen. Enable passthrough — `CGIPassAuth On` (Apache 2.4.13+),
+in the `<Directory>` or `public/.htaccess`:
+
+```apache
+<Directory "/path/to/phoenix/public">
+    CGIPassAuth On
+</Directory>
+```
+
+Older Apache (or if `CGIPassAuth` is unavailable) can copy the header into the
+environment instead:
+
+```apache
+SetEnvIf Authorization "(.+)" HTTP_AUTHORIZATION=$1
+```
+
+PHP-FPM (via `mod_proxy_fcgi`) and the built-in dev server pass `Authorization`
+through without any of this.
+
 ## Running behind a proxy (`X-Forwarded-For` / `honor_xff`)
 
 By default Phoenix uses the connection's source address (`REMOTE_ADDR`) as the peer IP. Behind a reverse proxy or load balancer that address is the proxy, not the client — the real client IP arrives in the `X-Forwarded-For` header instead.

@@ -46,14 +46,14 @@ phoenix/
 │   ├── announce.php     # BitTorrent announce endpoint (BEP 3)
 │   ├── scrape.php       # BitTorrent scrape endpoint (BEP 15)
 │   ├── index.php        # Public torrent listing (optional)
-│   ├── api/             # Management API, one file per path (key-authenticated; index is public)
-│   │   ├── index.php    # GET /api — Phoenix version (no auth)
-│   │   ├── torrents.php # GET /api/torrents — list every torrent + swarm stats
+│   ├── api/             # Management API (Authorization: Bearer <key>; index is public)
+│   │   ├── index.php    # GET  /api — Phoenix version (no auth)
+│   │   ├── torrents.php # GET  /api/torrents — your torrents + swarm stats (all, for admin)
 │   │   └── torrent/
-│   │       ├── add.php    # POST/GET /api/torrent/add — add a torrent
-│   │       ├── list.php   # POST/GET /api/torrent/list — show on the index
-│   │       ├── delist.php # POST/GET /api/torrent/delist — hide from the index
-│   │       └── delete.php # POST/GET /api/torrent/delete — delete (+ its peers)
+│   │       ├── add.php    # POST /api/torrent/add — add a torrent
+│   │       ├── list.php   # POST /api/torrent/list — show on the index
+│   │       ├── delist.php # POST /api/torrent/delist — hide from the index
+│   │       └── delete.php # POST /api/torrent/delete — delete (+ its peers)
 │   ├── admin.php        # Admin panel & installer
 │   └── magnet.php       # Client-side magnet link generator
 ├── src/

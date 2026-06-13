@@ -7,11 +7,12 @@ declare(strict_types=1);
 // insert the torrent (owned by the key's user) → render the response body.
 // Add-only: an info_hash that is already tracked is an error, so a torrent
 // can never be rewritten — or taken over — through this endpoint.
-// Driven by public/api/torrent/add.php; parameters come from POST or GET
-// interchangeably. Returns the rendered body string — JSON by default, XML
-// when ?xml is set. Calls tracker_error() on validation/auth failure (which
-// exits); the entry point pre-sets the JSON flag so those errors serialise as
-// JSON unless the caller asked for XML.
+// Driven by public/api/torrent/add.php; POST only, authenticated by an
+// `Authorization: Bearer <key>` header (or an admin.php session + CSRF token).
+// Parameters come from the POST body. Returns the rendered body string — JSON
+// by default, XML when ?xml is set. Calls tracker_error() on validation/auth
+// failure (which exits); the entry point pre-sets the JSON flag so those errors
+// serialise as JSON unless the caller asked for XML.
 //
 // Meta population has two layers. A multipart `.torrent` upload (field name
 // `torrent`) is parsed server-side and supplies the BASE for every field —
@@ -23,11 +24,16 @@ declare(strict_types=1);
 function api_torrent_add_controller(mysqli $connection, array $settings): string
 {
 
+    ////	Method
+    // Write endpoint: POST only.
+    require_once __DIR__.'/../functions/api.require.method.php';
+    api_require_method('POST');
+
     ////	Authenticate
-    // Shared across every API controller: refuses when the API is off or the
-    // key is invalid, otherwise returns the user the key belongs to.
-    require_once __DIR__.'/../functions/api.authenticate.request.php';
-    $user = api_authenticate_request($settings);
+    // Header key or admin session + CSRF; returns the user to own the torrent
+    // ('*' for the admin). Refuses when the API is off or the key is invalid.
+    require_once __DIR__.'/../functions/api.authenticate.mutation.php';
+    $user = api_authenticate_mutation($settings);
 
     ////	Optional .torrent upload
     // When a file is uploaded under `torrent`, parse it server-side and use its

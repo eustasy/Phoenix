@@ -24,20 +24,30 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
     /** @var array<string, mixed> */
     private array $filesBackup;
 
+    /** @var array<string, mixed> */
+    private array $serverBackup;
+
     /** @var list<string> temp files created to fake uploads, removed in tearDown */
     private array $tmpUploads = [];
 
     protected function setUp(): void
     {
         parent::setUp();
-        // Suppress the harmless "headers already sent" warning the
-        // controller's header() calls would emit under PHPUnit, and
-        // preserve $_GET/$_POST/$_FILES across tests.
+        // Suppress the harmless "headers already sent" warning the controller's
+        // header() calls would emit under PHPUnit, and preserve the superglobals
+        // it reads. The endpoint is POST-only and authenticated by an
+        // `Authorization: Bearer <key>` header (the valid 'tester' key here).
         $this->errorReporting = error_reporting();
         $this->getBackup = $_GET;
         $this->postBackup = $_POST;
         $this->filesBackup = $_FILES;
+        $this->serverBackup = $_SERVER;
         error_reporting(0);
+        $_GET = [];
+        $_POST = [];
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer '.self::API_KEY;
+        unset($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
     }
 
     protected function tearDown(): void
@@ -46,6 +56,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
         $_GET = $this->getBackup;
         $_POST = $this->postBackup;
         $_FILES = $this->filesBackup;
+        $_SERVER = $this->serverBackup;
         foreach ($this->tmpUploads as $path) {
             @unlink($path);
         }
@@ -102,8 +113,6 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
     /**
      * Compute the info_hash a parser would derive for a single-file fixture, so
      * tests can assert/clean up the row a .torrent upload creates.
-     *
-     * @param array<string, mixed> $extra
      */
     private function torrentInfoHash(string $name, int $length): string
     {
@@ -139,9 +148,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
 
     public function testPersistsMetaParameters(): void
     {
-        $_GET = [];
         $_POST = [
-            'key' => self::API_KEY,
             'info_hash' => self::HASH,
             'filename' => 'movie.mkv',
             'files' => '[{"path":"a/b.mkv","length":42},{"path":"c.txt","length":7}]',
@@ -172,9 +179,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
 
     public function testInvalidFilesJsonStoredAsNull(): void
     {
-        $_GET = [];
         $_POST = [
-            'key' => self::API_KEY,
             'info_hash' => self::HASH,
             'files' => 'not-json-at-all',
         ];
@@ -192,9 +197,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
     public function testFilesJsonWithNoValidEntriesStoredAsNull(): void
     {
         // Valid JSON list, but every element is malformed -> null.
-        $_GET = [];
         $_POST = [
-            'key' => self::API_KEY,
             'info_hash' => self::HASH,
             'files' => '[{"path":"x"},{"length":5},{"path":"y","length":-1}]',
         ];
@@ -210,9 +213,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
     {
         // Blank lines, a non-URL token, and a duplicate are all dropped; order
         // is preserved.
-        $_GET = [];
         $_POST = [
-            'key' => self::API_KEY,
             'info_hash' => self::HASH,
             'trackers' => "http://a/announce\n\nnot a url\n  http://b/announce  \nhttp://a/announce",
         ];
@@ -229,9 +230,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
 
     public function testTrackersAllInvalidStoredAsNull(): void
     {
-        $_GET = [];
         $_POST = [
-            'key' => self::API_KEY,
             'info_hash' => self::HASH,
             'webseeds' => "not a url\nalso-bad",
         ];
@@ -256,8 +255,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
             'announce' => 'http://tracker.example/announce',
             'url-list' => 'http://seed.example/files/',
         ]));
-        $_GET = [];
-        $_POST = ['key' => self::API_KEY];
+        $_POST = [];
 
         $json = \api_torrent_add_controller(self::$connection, $this->settingsWithKeys());
         $decoded = json_decode($json, true);
@@ -284,9 +282,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
             'announce' => 'http://parsed/announce',
             'url-list' => 'http://parsed-seed/',
         ]));
-        $_GET = [];
         $_POST = [
-            'key' => self::API_KEY,
             'info_hash' => self::HASH,
             'name' => 'Override Name',
             'trackers' => 'http://override/announce',
@@ -309,11 +305,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
     {
         // A .torrent larger than torrent_upload_max is refused before parsing.
         $raw = $this->buildTorrent('Big.iso', 1);
-        $result = $this->runErrorSubprocess(
-            ['key' => self::API_KEY],
-            upload: $raw,
-            upload_max: 10,
-        );
+        $result = $this->runErrorSubprocess([], upload: $raw, upload_max: 10);
 
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Torrent file is too large.', $result['stdout']);
@@ -322,10 +314,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
     public function testRejectsMalformedUpload(): void
     {
         // A non-bencode payload fails torrent_parse() -> invalid.
-        $result = $this->runErrorSubprocess(
-            ['key' => self::API_KEY],
-            upload: 'this is not bencode',
-        );
+        $result = $this->runErrorSubprocess([], upload: 'this is not bencode');
 
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Torrent file is invalid.', $result['stdout']);
@@ -333,9 +322,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
 
     public function testAddsTorrentAndRendersJsonByDefault(): void
     {
-        $_GET = [];
         $_POST = [
-            'key' => self::API_KEY,
             'info_hash' => self::HASH,
             'name' => 'API Torrent',
             'size' => '4096',
@@ -365,10 +352,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
     public function testRendersXmlWhenXmlFlagSet(): void
     {
         $_GET = ['xml' => '1'];
-        $_POST = [
-            'key' => self::API_KEY,
-            'info_hash' => self::HASH,
-        ];
+        $_POST = ['info_hash' => self::HASH];
 
         $xml = \api_torrent_add_controller(self::$connection, $this->settingsWithKeys());
 
@@ -378,11 +362,12 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
         $this->assertStringContainsString('<info_hash>'.self::HASH.'</info_hash>', $xml);
     }
 
-    public function testAcceptsParametersFromGet(): void
+    public function testAcceptsParametersFromQueryString(): void
     {
+        // Auth is the header; data params may still ride the query string on a
+        // POST request (the controller reads $_POST ?? $_GET).
         $_POST = [];
         $_GET = [
-            'key' => self::API_KEY,
             'info_hash' => self::HASH,
             'listed' => '0',
         ];
@@ -396,19 +381,16 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
 
     public function testRejectsDuplicateTorrent(): void
     {
-        // Add once in-process, then attempt the same hash — even with a
-        // different valid key — in a subprocess: add-only means the second
-        // attempt errors rather than updating, and the row keeps its data.
-        $_GET = [];
+        // Add once in-process, then attempt the same hash in a subprocess:
+        // add-only means the second attempt errors rather than updating, and
+        // the row keeps its data.
         $_POST = [
-            'key' => self::API_KEY,
             'info_hash' => self::HASH,
             'name' => 'First',
         ];
         \api_torrent_add_controller(self::$connection, $this->settingsWithKeys());
 
         $result = $this->runErrorSubprocess([
-            'key' => self::API_KEY,
             'info_hash' => self::HASH,
             'name' => 'Second',
         ]);
@@ -427,18 +409,27 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
 
     public function testRejectsMissingInfoHash(): void
     {
-        $result = $this->runErrorSubprocess(['key' => self::API_KEY]);
+        $result = $this->runErrorSubprocess([]);
 
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Info Hash is invalid.', $result['stdout']);
     }
 
+    public function testRejectsNonPost(): void
+    {
+        $result = $this->runErrorSubprocess(['info_hash' => self::HASH], method: 'GET');
+
+        $this->assertSame(2, $result['exit']);
+        $this->assertStringContainsString('Method not allowed.', $result['stdout']);
+    }
+
     /**
-     * Run the controller in a subprocess with $_GET primed (tracker_error
-     * exits, which would otherwise kill the PHPUnit worker). When $upload is
-     * given, the subprocess writes it to a temp file and fakes
-     * $_FILES['torrent'] so the upload path runs; $upload_max overrides the
-     * size cap so the oversize branch can be exercised cheaply.
+     * Run the controller in a subprocess (tracker_error exits, which would
+     * otherwise kill the PHPUnit worker). Authenticates with the valid 'tester'
+     * key via the Authorization header; $params carry the data fields (sent as
+     * the query string). When $upload is given, the subprocess writes it to a
+     * temp file and fakes $_FILES['torrent']; $upload_max overrides the size
+     * cap so the oversize branch can be exercised cheaply.
      *
      * @param array<string, string> $params
      * @return array{stdout: string, stderr: string, exit: int}
@@ -447,6 +438,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
         array $params,
         ?string $upload = null,
         ?int $upload_max = null,
+        string $method = 'POST',
     ): array {
         $params['json'] = '1';
         $api_keys = ['tester' => self::API_KEY];
@@ -472,6 +464,8 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
         return $this->runPhpSubprocess(
             '<?php
             $_GET = '.var_export($params, true).';
+            $_SERVER[\'REQUEST_METHOD\'] = '.var_export($method, true).';
+            $_SERVER[\'HTTP_AUTHORIZATION\'] = '.var_export('Bearer '.self::API_KEY, true).';
             '.$files_setup.'
             require_once '.var_export(dirname(__DIR__).'/bootstrap.php', true).';
             require_once '.var_export(dirname(__DIR__, 2).'/src/controller/api.torrent.add.php', true).';

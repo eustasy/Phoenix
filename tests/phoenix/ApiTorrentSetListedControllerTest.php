@@ -25,13 +25,24 @@ class ApiTorrentSetListedControllerTest extends PhoenixTestCase
     /** @var array<string, mixed> */
     private array $postBackup;
 
+    /** @var array<string, mixed> */
+    private array $serverBackup;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->errorReporting = error_reporting();
         $this->getBackup = $_GET;
         $this->postBackup = $_POST;
+        $this->serverBackup = $_SERVER;
         error_reporting(0);
+        $_GET = [];
+        $_POST = [];
+        // POST + a valid owner ('tester') key by default; individual tests
+        // override the Authorization header where they need the admin.
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer '.self::API_KEY;
+        unset($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
     }
 
     protected function tearDown(): void
@@ -39,6 +50,7 @@ class ApiTorrentSetListedControllerTest extends PhoenixTestCase
         error_reporting($this->errorReporting);
         $_GET = $this->getBackup;
         $_POST = $this->postBackup;
+        $_SERVER = $this->serverBackup;
         mysqli_query(
             self::$connection,
             'DELETE FROM `'.self::$settings['db_prefix'].'torrents` WHERE `info_hash` IN '.
@@ -80,8 +92,7 @@ class ApiTorrentSetListedControllerTest extends PhoenixTestCase
     public function testListsOwnTorrent(): void
     {
         $this->insertTorrent(self::HASH_OWN, 'tester', 0);
-        $_GET = [];
-        $_POST = ['key' => self::API_KEY, 'info_hash' => self::HASH_OWN];
+        $_POST = ['info_hash' => self::HASH_OWN];
 
         $json = \api_torrent_set_listed_controller(self::$connection, $this->settingsWithKeys(), 1);
         $decoded = json_decode($json, true);
@@ -95,8 +106,7 @@ class ApiTorrentSetListedControllerTest extends PhoenixTestCase
     public function testDelistsOwnTorrent(): void
     {
         $this->insertTorrent(self::HASH_OWN, 'tester', 1);
-        $_GET = [];
-        $_POST = ['key' => self::API_KEY, 'info_hash' => self::HASH_OWN];
+        $_POST = ['info_hash' => self::HASH_OWN];
 
         $json = \api_torrent_set_listed_controller(self::$connection, $this->settingsWithKeys(), 0);
         $decoded = json_decode($json, true);
@@ -110,8 +120,8 @@ class ApiTorrentSetListedControllerTest extends PhoenixTestCase
         // The '*' admin key flips a null-owner torrent; the response carries a
         // null user.
         $this->insertTorrent(self::HASH_UNOWNED, null, 0);
-        $_GET = [];
-        $_POST = ['key' => self::ADMIN_KEY, 'info_hash' => self::HASH_UNOWNED];
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer '.self::ADMIN_KEY;
+        $_POST = ['info_hash' => self::HASH_UNOWNED];
 
         $json = \api_torrent_set_listed_controller(self::$connection, $this->settingsWithKeys(), 1);
         $decoded = json_decode($json, true);
@@ -124,7 +134,7 @@ class ApiTorrentSetListedControllerTest extends PhoenixTestCase
     public function testRendersXmlWhenXmlFlagSet(): void
     {
         $this->insertTorrent(self::HASH_OWN, 'tester', 0);
-        $_POST = ['key' => self::API_KEY, 'info_hash' => self::HASH_OWN];
+        $_POST = ['info_hash' => self::HASH_OWN];
         $_GET = ['xml' => '1'];
 
         $xml = \api_torrent_set_listed_controller(self::$connection, $this->settingsWithKeys(), 1);
@@ -133,11 +143,13 @@ class ApiTorrentSetListedControllerTest extends PhoenixTestCase
         $this->assertStringContainsString('<listed>1</listed>', $xml);
     }
 
-    public function testAcceptsKeyFromGet(): void
+    public function testAcceptsInfoHashFromQueryString(): void
     {
+        // Auth is the header; the data params may still ride the query string on
+        // a POST request (the controller reads $_POST ?? $_GET).
         $this->insertTorrent(self::HASH_OWN, 'tester', 0);
         $_POST = [];
-        $_GET = ['key' => self::API_KEY, 'info_hash' => self::HASH_OWN];
+        $_GET = ['info_hash' => self::HASH_OWN];
 
         $json = \api_torrent_set_listed_controller(self::$connection, $this->settingsWithKeys(), 1);
         $this->assertSame(1, json_decode($json, true)['torrent']['listed']);
@@ -145,7 +157,7 @@ class ApiTorrentSetListedControllerTest extends PhoenixTestCase
 
     public function testRejectsMissingInfoHash(): void
     {
-        $result = $this->runErrorSubprocess(['key' => self::API_KEY]);
+        $result = $this->runErrorSubprocess([]);
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Info Hash is invalid.', $result['stdout']);
     }
@@ -155,11 +167,10 @@ class ApiTorrentSetListedControllerTest extends PhoenixTestCase
         // Owned by someone else: a non-admin key gets the same 'Torrent not
         // found.' a missing row would, so ownership never discloses existence.
         $this->insertTorrent(self::HASH_OTHER, 'other', 1);
-        $result = $this->runErrorSubprocess(['key' => self::API_KEY, 'info_hash' => self::HASH_OTHER]);
+        $result = $this->runErrorSubprocess(['info_hash' => self::HASH_OTHER]);
 
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Torrent not found.', $result['stdout']);
-        // The row was not touched.
         $this->assertSame(1, $this->fetchListed(self::HASH_OTHER));
     }
 
@@ -167,21 +178,29 @@ class ApiTorrentSetListedControllerTest extends PhoenixTestCase
     {
         // Null-owner rows are admin-only; a normal key can't reach them.
         $this->insertTorrent(self::HASH_UNOWNED, null, 1);
-        $result = $this->runErrorSubprocess(['key' => self::API_KEY, 'info_hash' => self::HASH_UNOWNED]);
+        $result = $this->runErrorSubprocess(['info_hash' => self::HASH_UNOWNED]);
 
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Torrent not found.', $result['stdout']);
         $this->assertSame(1, $this->fetchListed(self::HASH_UNOWNED));
     }
 
+    public function testRejectsNonPost(): void
+    {
+        $result = $this->runErrorSubprocess(['info_hash' => self::HASH_OWN], method: 'GET');
+        $this->assertSame(2, $result['exit']);
+        $this->assertStringContainsString('Method not allowed.', $result['stdout']);
+    }
+
     /**
-     * Run the controller in a subprocess (tracker_error exits, which would
-     * otherwise kill the PHPUnit worker). $listed defaults to 1 (list).
+     * Run the controller in a subprocess (tracker_error exits). Authenticates
+     * with the valid 'tester' key via the Authorization header; $params carry
+     * the data fields. $listed defaults to 1 (list); $method to POST.
      *
      * @param array<string, string> $params
      * @return array{stdout: string, stderr: string, exit: int}
      */
-    private function runErrorSubprocess(array $params, int $listed = 1): array
+    private function runErrorSubprocess(array $params, int $listed = 1, string $method = 'POST'): array
     {
         $params['json'] = '1';
         $api_keys = ['tester' => self::API_KEY, '*' => self::ADMIN_KEY];
@@ -189,6 +208,8 @@ class ApiTorrentSetListedControllerTest extends PhoenixTestCase
         return $this->runPhpSubprocess(
             '<?php
             $_GET = '.var_export($params, true).';
+            $_SERVER[\'REQUEST_METHOD\'] = '.var_export($method, true).';
+            $_SERVER[\'HTTP_AUTHORIZATION\'] = '.var_export('Bearer '.self::API_KEY, true).';
             require_once '.var_export(dirname(__DIR__).'/bootstrap.php', true).';
             require_once '.var_export(dirname(__DIR__, 2).'/src/controller/api.torrent.set.listed.php', true).';
             $settings = $GLOBALS[\'phoenix_settings\'];

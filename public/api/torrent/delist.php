@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 ////	api/torrent/delist.php
 // Tracker management API: de-list a torrent (set listed=0) so it no longer
-// appears on the public index. Authorization: an owner API key (its own
-// torrents) or the '*' admin — via the admin key, or an admin.php session
-// carrying a CSRF token. Parameters from POST or GET. Responds with JSON by
-// default and XML with ?xml.
+// appears on the public index. POST only. Authorization: an `Authorization:
+// Bearer <key>` header — an owner key (its own torrents) or the '*' admin (any
+// torrent) — or an admin.php session carrying a CSRF token. Parameters come
+// from the POST body. Responds with JSON by default and XML with ?xml.
 
 // No Access-Control-Allow-Origin here — this is an authenticated write
 // endpoint, not one of the public read endpoints (announce/scrape/index).

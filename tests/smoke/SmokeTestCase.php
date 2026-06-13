@@ -115,9 +115,10 @@ abstract class SmokeTestCase extends TestCase
      *
      * @param array<string, scalar> $fields text form fields
      * @param array{name: string, filename: string, content: string, type?: string} $file
+     * @param array<string, string> $headers extra request headers (e.g. Authorization)
      * @return array{status: int, headers: list<string>, body: string}
      */
-    protected function postMultipart(string $path, array $fields, array $file): array
+    protected function postMultipart(string $path, array $fields, array $file, array $headers = []): array
     {
         $boundary = '----PhoenixSmoke'.bin2hex(random_bytes(8));
         $eol = "\r\n";
@@ -134,10 +135,10 @@ abstract class SmokeTestCase extends TestCase
         $body .= $file['content'].$eol;
         $body .= '--'.$boundary.'--'.$eol;
 
-        return $this->http('POST', $path, [], [], [
+        return $this->http('POST', $path, [], [], array_merge([
             'Content-Type' => 'multipart/form-data; boundary='.$boundary,
             'Content-Length' => (string) strlen($body),
-        ], $body);
+        ], $headers), $body);
     }
 
     /** @param array{status: int, headers: list<string>, body: string} $response */
