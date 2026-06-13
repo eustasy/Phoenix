@@ -2,118 +2,16 @@
 
 declare(strict_types=1);
 
-// Scheduled database backup with optional rotation.
+// Scheduled database backup with optional rotation. Thin wrapper around
+// db_backup() — the engine lives in src/functions/db.backup.php so the admin
+// Backups page can run the same dump. Cron behaviour is unchanged: silent on
+// success (exit 0), prints the error and exits 1 on failure.
 require_once __DIR__.'/../src/phoenix.php';
+require_once __DIR__.'/../src/functions/db.backup.php';
 
-$backup_dir = ! empty($settings['backup_dir'])
-    ? rtrim($settings['backup_dir'], '/') . '/'
-    : __DIR__.'/../backups/';
+$result = db_backup($settings, $time);
 
-if (! is_dir($backup_dir)) {
-    echo 'BACKUP_DIR_NOT_FOUND' . PHP_EOL;
+if (! $result['ok']) {
+    echo $result['error'].PHP_EOL;
     exit(1);
-}
-
-$filename = $settings['db_name'] . '.' . date('Ymd_Hi') . '.sql';
-$filepath = $backup_dir . $filename;
-
-// Peers are ephemeral (expire after 3x announce_interval) and can be recreated
-// by running Setup in admin.php, so there is no value in backing up their rows.
-
-// Write credentials to a private temp file so the password never appears in
-// the process list. once.db.connect mutates db_host in place (prepends 'p:'
-// for persistent connections), so strip that prefix before writing.
-$db_host = (strncmp($settings['db_host'], 'p:', 2) === 0)
-    ? substr($settings['db_host'], 2)
-    : $settings['db_host'];
-$cnf_file = tempnam(sys_get_temp_dir(), 'phxbak_');
-if (! chmod($cnf_file, 0o600)) {
-    unlink($cnf_file);
-    echo 'Backup failed: could not secure credentials file.' . PHP_EOL;
-    exit(1);
-}
-file_put_contents(
-    $cnf_file,
-    '[client]' . PHP_EOL .
-    'host='     . $db_host . PHP_EOL .
-    'user='     . $settings['db_user'] . PHP_EOL .
-    'password="' . str_replace('"', '""', $settings['db_pass']) . '"' . PHP_EOL,
-);
-
-// Two passes, each via proc_open with an argument array so nothing is passed
-// through a shell. Pass 1 dumps everything except the peers rows (torrents and
-// tasks with data, plus routines and triggers); pass 2 dumps the peers table
-// structure only. Peer rows are ephemeral — they expire and are recreated on
-// announce — but keeping the schema means a restore needn't re-run Setup to
-// recreate the table. Only standard flags are used, so this works with a MySQL
-// or a MariaDB client (use the one matching your server).
-$errfile = $filepath . '.err';
-$base = [
-    'mysqldump',
-    '--defaults-extra-file=' . $cnf_file,
-    '--allow-keywords',
-    '--replace',
-    '--skip-add-drop-table',
-    '--skip-lock-tables',
-    '--single-transaction',
-    '--tz-utc',
-];
-$peers_table = $settings['db_prefix'] . 'peers';
-
-// [ stdout file mode, extra args ]. 'w' truncates for the first pass; 'a'
-// appends the peers structure onto it for the second.
-$passes = [
-    ['w', array_merge($base, ['--routines', '--triggers', '--ignore-table=' . $settings['db_name'] . '.' . $peers_table, $settings['db_name']])],
-    ['a', array_merge($base, ['--no-data', $settings['db_name'], $peers_table])],
-];
-
-$failed = false;
-foreach ($passes as [$mode, $command]) {
-    $proc = proc_open(
-        $command,
-        [
-            0 => ['pipe', 'r'],
-            1 => ['file', $filepath, $mode],
-            2 => ['file', $errfile, $mode],
-        ],
-        $pipes,
-    );
-    if ($proc === false) {
-        $failed = true;
-        break;
-    }
-    fclose($pipes[0]);
-    if (proc_close($proc) !== 0) {
-        $failed = true;
-        break;
-    }
-}
-
-if (! unlink($cnf_file)) {
-    echo 'Warning: could not remove credentials file ' . $cnf_file . PHP_EOL;
-}
-
-if ($failed) {
-    $contents = is_readable($errfile) ? file_get_contents($errfile) : '';
-    $error = is_string($contents) ? trim($contents) : '';
-    echo 'Backup failed.' . ($error ? ' ' . $error : '') . PHP_EOL;
-    exit(1);
-}
-if (! unlink($errfile)) {
-    echo 'Warning: could not remove error file ' . $errfile . PHP_EOL;
-}
-
-// Rotate: delete backups older than backup_rotate days.
-if (intval($settings['backup_rotate']) > 0) {
-    $cutoff = $time - (intval($settings['backup_rotate']) * 86400);
-    $backups = glob($backup_dir . $settings['db_name'] . '.*.sql');
-    foreach ($backups ?: [] as $old) {
-        $mtime = filemtime($old);
-        if ($mtime === false || $mtime >= $cutoff) {
-            continue;
-        }
-        if (! unlink($old)) {
-            echo 'Warning: could not remove old backup ' . basename($old) . PHP_EOL;
-        }
-    }
 }
