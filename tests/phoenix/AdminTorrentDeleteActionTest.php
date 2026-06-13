@@ -50,7 +50,7 @@ class AdminTorrentDeleteActionTest extends PhoenixTestCase
         );
     }
 
-    private function count(string $table): int
+    private function rowCount(string $table): int
     {
         $row = mysqli_fetch_assoc(mysqli_query(
             self::$connection,
@@ -67,8 +67,8 @@ class AdminTorrentDeleteActionTest extends PhoenixTestCase
 
         $message = \admin_torrent_delete_action(self::$connection, self::$settings);
 
-        $this->assertSame(0, $this->count('torrents'));
-        $this->assertSame(0, $this->count('peers'));
+        $this->assertSame(0, $this->rowCount('torrents'));
+        $this->assertSame(0, $this->rowCount('peers'));
         $this->assertStringContainsString('deleted', $message);
     }
 
