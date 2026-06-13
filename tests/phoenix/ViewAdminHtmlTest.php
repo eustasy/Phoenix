@@ -117,6 +117,37 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertSame(5, substr_count($html, 'name="csrf" value="deadbeefToken"'));
     }
 
+    public function testRendersStatsBlockWhenStatsProvided(): void
+    {
+        // When the dashboard controller supplies stats, the block renders above
+        // the diagnostics with number_format()-ed figures and last-run lines.
+        $stats = [
+            'seeders' => 3, 'leechers' => 2, 'peers' => 5,
+            'torrents' => 4, 'downloads' => 10, 'traffic' => 123456, 'registered' => 7,
+        ];
+        $tasks = ['clean' => 1700000000, 'optimize' => 1700000100];
+        $html = view_admin_html($this->settings(), true, false, stats: $stats, tasks: $tasks);
+
+        $this->assertStringContainsString('Tracker Stats', $html);
+        $this->assertStringContainsString('Seeders 3', $html);
+        $this->assertStringContainsString('Peers 5', $html);
+        $this->assertStringContainsString('Registered torrents 7', $html);
+        $this->assertStringContainsString('With active peers 4', $html);
+        $this->assertStringContainsString('Traffic 123,456 bytes', $html);
+        $this->assertStringContainsString('Last cleaned', $html);
+        $this->assertStringContainsString('Last optimized', $html);
+        // A task that never ran is omitted.
+        $this->assertStringNotContainsString('Last migrated', $html);
+    }
+
+    public function testOmitsStatsBlockByDefault(): void
+    {
+        // No stats argument (default false) → no stats block, so existing
+        // diagnostics-only renders are unchanged.
+        $html = view_admin_html($this->settings(), true, false);
+        $this->assertStringNotContainsString('Tracker Stats', $html);
+    }
+
     public function testEscapesActionMessage(): void
     {
         // The setup/clean/optimize controllers return user-visible strings

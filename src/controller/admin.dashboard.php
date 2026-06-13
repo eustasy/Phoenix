@@ -61,9 +61,29 @@ function admin_dashboard_page(mysqli $connection, array $settings, int $time): s
     }
 
     $database_size = false;
+    $stats = false;
+    $tasks = [];
     if ($tables_installed) {
         require_once __DIR__.'/../model/db.size.php';
         $database_size = db_size($connection, $settings);
+
+        // Surface the already-computed tracker stats (same aggregation the
+        // ?stats scrape uses) plus the total registered-torrent count and the
+        // maintenance task timestamps.
+        require_once __DIR__.'/../model/stats.peers.php';
+        require_once __DIR__.'/../model/stats.downloads.php';
+        require_once __DIR__.'/../functions/stats.merge.php';
+        $stats = stats_merge(
+            stats_fetch_peer_counts($connection, $settings),
+            stats_fetch_download_totals($connection, $settings),
+        );
+        if ($stats !== false) {
+            require_once __DIR__.'/../model/torrents.count.php';
+            $stats['registered'] = torrents_count($connection, $settings);
+        }
+
+        require_once __DIR__.'/../model/tasks.select.php';
+        $tasks = tasks_select($connection, $settings);
     }
 
     $csrf_token = $csrf_enabled ? auth_csrf_token() : '';
@@ -77,5 +97,7 @@ function admin_dashboard_page(mysqli $connection, array $settings, int $time): s
         $message,
         isset($_GET['installed']),
         $csrf_token,
+        stats: $stats,
+        tasks: $tasks,
     );
 }
