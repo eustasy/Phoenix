@@ -3,10 +3,11 @@
 declare(strict_types=1);
 
 ////	view_admin_html
-// Render the admin panel's dashboard page: the diagnostics and utilities
-// body, wrapped in the shared admin layout (chrome, version line, logout
-// form, navigation). The layout owns the full HTML document; this view
-// builds only the Dashboard body and hands it off.
+// Render the admin panel's dashboard page as a set of self-contained panels
+// (tracker stats, server-support diagnostics, utilities, add-a-torrent),
+// wrapped in the shared admin layout (chrome, version line, logout form,
+// navigation). The layout owns the full HTML document; this view builds only
+// the Dashboard body and hands it off.
 // Returns HTML string. Caller is responsible for echo and exit.
 //
 // Parameters:
@@ -47,6 +48,38 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
     $php_version ??= PHP_VERSION;
     $has_mysqli ??= class_exists('mysqli');
 
+    ////	Tracker stats panel
+    // Already-computed aggregates; number_format() matches the DB-size
+    // formatting below. Rendered first, and only when the controller supplies
+    // stats (i.e. tables are installed).
+    $stats_panel = '';
+    if ($stats !== false) {
+        $stats_body = '<h1>Tracker Stats</h1>
+		<p class="box background-clouds">Seeders '.number_format($stats['seeders']).' &middot; Leechers '.number_format($stats['leechers']).' &middot; Peers '.number_format($stats['peers']).'</p>
+		<p class="box background-clouds">Registered torrents '.number_format($stats['registered'] ?? 0).' &middot; With active peers '.number_format($stats['torrents']).'</p>
+		<p class="box background-clouds">Completed downloads '.number_format($stats['downloads']).' &middot; Traffic '.number_format($stats['traffic']).' bytes</p>';
+
+        // Last-run timestamp for each maintenance task that has ever run.
+        $task_labels = [
+            'install' => 'Last installed',
+            'migrate' => 'Last migrated',
+            'clean' => 'Last cleaned',
+            'optimize' => 'Last optimized',
+        ];
+        foreach ($task_labels as $task_name => $label) {
+            if (isset($tasks[$task_name])) {
+                $stats_body .= '
+		<p class="color-asbestos">'.$label.': '.date('Y-m-d H:i', $tasks[$task_name]).'</p>';
+            }
+        }
+
+        $stats_panel = '<div class="panel">'.$stats_body.'</div>';
+    }
+
+    ////	Server-support panel
+    // PHP + MySQL diagnostics. Always rendered, even when mysqli is missing
+    // (the warning lives here); the actionable panels below are gated on it.
+
     // Build installation complete message
     $installed_html = '';
     if ($show_installed) {
@@ -62,8 +95,7 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
 		<p class="color-asbestos">PHP Version: '.$php_version.'</p>';
     }
 
-    // MySQL support check
-    $mysql_html = '';
+    // MySQL support check + tables status
     if (! $has_mysqli) {
         $mysql_html = '<p class="box background-pomegranate color-clouds">Your server does not support MySQL.</p>';
     } else {
@@ -89,18 +121,29 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
         } else {
             $mysql_html .= '<p class="box background-pomegranate color-clouds">Some or all of your tables are not installed.</p>';
         }
+    }
 
-        // Utilities section
-        $mysql_html .= '<br><h1>Utilities</h1>';
+    $server_support_panel = '<div class="panel"><h1>Compatibility Check</h1>
+	'.$installed_html.'
+	'.$php_compat_html.'
+	'.$mysql_html.'</div>';
+
+    ////	Utilities panel
+    // Maintenance forms. Only meaningful when MySQL is available (every action
+    // hits the DB); the setup form also shows when tables are missing so the
+    // operator can install, while clean/optimize/migrate require live tables.
+    $utilities_panel = '';
+    if ($has_mysqli) {
+        $utilities_html = '<h1>Utilities</h1>';
 
         // Message
         if ($message) {
-            $mysql_html .= '<div class="box background-wisteria color-clouds"><h3>'.htmlspecialchars($message).'</h3></div>';
+            $utilities_html .= '<div class="box background-wisteria color-clouds"><h3>'.htmlspecialchars($message).'</h3></div>';
         }
 
         // Setup/Reset form
         if ($settings['db_reset'] || ! $tables_installed) {
-            $mysql_html .= '<form class="mysql" action="" method="POST">
+            $utilities_html .= '<form class="mysql" action="" method="POST">
 				<p class="box background-pomegranate color-clouds">You should set
 				<code>$settings[\'db_reset\']</code>
 				to false to disable resets,<br>
@@ -111,38 +154,45 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
 				<div class="clear"></div>
 			</form>';
         } else {
-            $mysql_html .= '<p class="text-left color-asbestos">Install, Upgrade, and Reset
+            $utilities_html .= '<p class="text-left color-asbestos">Install, Upgrade, and Reset
 				<span class="button background-clouds float-right">Disabled</span></p>
 				<div class="clear"></div>';
         }
 
         // Clean and Optimize forms (only if tables are installed)
         if ($tables_installed) {
-            $mysql_html .= '<form class="mysql" action="" method="POST">
+            $utilities_html .= '<form class="mysql" action="" method="POST">
 					<p class="float-left text-left">Clean out redundant peers</p>
 					<input type="hidden" name="process" value="clean">'.$csrf_field.'
 					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Clean">
 					<div class="clear"></div>
 				</form>';
-            $mysql_html .= '<form class="mysql" action="" method="POST">
+            $utilities_html .= '<form class="mysql" action="" method="POST">
 					<p class="float-left text-left">Check, Analyze, Repair, and Optimize</p>
 					<input type="hidden" name="process" value="optimize">'.$csrf_field.'
 					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Optimize">
 					<div class="clear"></div>
 				</form>';
-            $mysql_html .= '<form class="mysql" action="" method="POST">
+            $utilities_html .= '<form class="mysql" action="" method="POST">
 					<p class="float-left text-left">Apply idempotent schema migrations</p>
 					<input type="hidden" name="process" value="migrate">'.$csrf_field.'
 					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Upgrade Schema">
 					<div class="clear"></div>
 				</form>';
+        }
 
-            // Add-a-torrent form. enctype is multipart so the .torrent file
-            // input rides along; the parsed file supplies the base for every
-            // field, with any explicit field overriding it (see
-            // admin_torrent_add_action). No "mysql" class so the maintenance
-            // forms' double-submit guard never interferes with the upload.
-            $mysql_html .= '<br><h1>Add a Torrent</h1>
+        $utilities_panel = '<div class="panel">'.$utilities_html.'</div>';
+    }
+
+    ////	Add-a-torrent panel
+    // enctype is multipart so the .torrent file input rides along; the parsed
+    // file supplies the base for every field, with any explicit field
+    // overriding it (see admin_torrent_add_action). No "mysql" class so the
+    // maintenance forms' double-submit guard never interferes with the upload.
+    // Only when MySQL is available and the tables exist to insert into.
+    $add_torrent_panel = '';
+    if ($has_mysqli && $tables_installed) {
+        $add_torrent_panel = '<div class="panel"><h1>Add a Torrent</h1>
 				<form action="" method="POST" enctype="multipart/form-data">
 					<p class="text-left">Name<br><input type="text" name="name"></p>
 					<p class="text-left">Info Hash<br><input type="text" name="info_hash"></p>
@@ -182,43 +232,12 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
 					<input type="hidden" name="process" value="torrent_add">'.$csrf_field.'
 					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Add Torrent">
 					<div class="clear"></div>
-				</form>';
-        }
+				</form></div>';
     }
 
-    // Tracker stats block — rendered above the diagnostics when the caller
-    // supplies stats (tables installed). All figures are already-computed
-    // aggregates; number_format() matches the DB-size formatting below.
-    $stats_html = '';
-    if ($stats !== false) {
-        $stats_html = '<h1>Tracker Stats</h1>
-	<p class="box background-clouds">Seeders '.number_format($stats['seeders']).' &middot; Leechers '.number_format($stats['leechers']).' &middot; Peers '.number_format($stats['peers']).'</p>
-	<p class="box background-clouds">Registered torrents '.number_format($stats['registered'] ?? 0).' &middot; With active peers '.number_format($stats['torrents']).'</p>
-	<p class="box background-clouds">Completed downloads '.number_format($stats['downloads']).' &middot; Traffic '.number_format($stats['traffic']).' bytes</p>';
-
-        // Last-run timestamp for each maintenance task that has ever run.
-        $task_labels = [
-            'install' => 'Last installed',
-            'migrate' => 'Last migrated',
-            'clean' => 'Last cleaned',
-            'optimize' => 'Last optimized',
-        ];
-        foreach ($task_labels as $task_name => $label) {
-            if (isset($tasks[$task_name])) {
-                $stats_html .= '
-	<p class="color-asbestos">'.$label.': '.date('Y-m-d H:i', $tasks[$task_name]).'</p>';
-            }
-        }
-
-        $stats_html .= '<br>';
-    }
-
-    // Assemble the dashboard body; the layout supplies the surrounding page
-    // chrome (head, version line, logout form, navigation).
-    $body = $stats_html.'<h1>Compatibility Check</h1>
-	'.$installed_html.'
-	'.$php_compat_html.'
-	'.$mysql_html;
+    // Assemble the dashboard from its panels; the layout supplies the
+    // surrounding page chrome (head, version line, logout form, navigation).
+    $body = $stats_panel.$server_support_panel.$utilities_panel.$add_torrent_panel;
 
     require_once __DIR__.'/html.admin.layout.php';
 

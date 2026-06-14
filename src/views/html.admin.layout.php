@@ -140,6 +140,12 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
 		.text-right {
 			text-align: right;
 		}
+		.panel {
+			border: 1px solid #ecf0f1;
+			border-radius: .3em;
+			margin: 1em 0;
+			padding: .5em 1.5em 1.5em;
+		}
 		.admin-nav {
 			margin: 1em 0;
 		}
