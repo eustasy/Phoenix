@@ -21,6 +21,14 @@ if (is_readable($admin_autoload)) {
     require_once $admin_autoload;
 }
 
+////	Charset
+// This panel only ever emits HTML, but phoenix.php (loaded below for normal
+// mode) sets default_charset to iso-8859-1 for the binary tracker protocol. An
+// HTTP charset header overrides the layout's <meta charset>, so without this
+// the UTF-8 views — torrent names, the em-dash in flag notes — would be decoded
+// as iso-8859-1. Set before any output so both installer and panel modes match.
+header('Content-Type: text/html; charset=UTF-8');
+
 $config_path = __DIR__.'/../config/phoenix.custom.php';
 $config_exists = is_readable($config_path);
 
