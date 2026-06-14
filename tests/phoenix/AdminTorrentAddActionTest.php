@@ -53,9 +53,14 @@ class AdminTorrentAddActionTest extends PhoenixTestCase
             @unlink($path);
         }
         $this->tmpUploads = [];
-        // The explicit-field hash plus the parsed-fixture hash both land in the
-        // table across these tests; clean both up.
-        foreach ([self::HASH, $this->torrentInfoHash('Admin Upload.iso', 9000)] as $hash) {
+        // The explicit-field hash plus every parsed-fixture hash land in the
+        // table across these tests; clean them all up.
+        foreach ([
+            self::HASH,
+            $this->torrentInfoHash('Admin Upload.iso', 9000),
+            $this->torrentInfoHash('Dropped.iso', 7777),
+            $this->torrentInfoHash('FromFile.iso', 5000),
+        ] as $hash) {
             mysqli_query(
                 self::$connection,
                 'DELETE FROM `'.self::$settings['db_prefix'].'torrents` WHERE `info_hash` = \''.$hash.'\';',
@@ -177,6 +182,56 @@ class AdminTorrentAddActionTest extends PhoenixTestCase
         $this->assertNull($row['user']);
         $this->assertSame('Admin Upload.iso', $row['name']);
         $this->assertEquals(9000, $row['size']);
+    }
+
+    public function testFormBlankFieldsFallBackToUpload(): void
+    {
+        // The drag-and-drop form posts every field, blank ones as '' — those
+        // must not clobber the parsed upload. Regression: '' was treated as a
+        // real value, so the empty info_hash field failed validation even though
+        // the file carried a valid one.
+        $hash = $this->torrentInfoHash('Dropped.iso', 7777);
+        $this->fakeUpload($this->buildTorrent('Dropped.iso', 7777));
+        $_POST = [
+            'info_hash' => '',
+            'name' => '',
+            'size' => '',
+            'filename' => '',
+            'files' => '',
+            'trackers' => '',
+            'webseeds' => '',
+            'listed' => '1',
+        ];
+
+        $message = \admin_torrent_add_action(self::$connection, self::$settings);
+        $this->assertSame('Torrent added.', $message);
+
+        $row = $this->fetchRow($hash);
+        $this->assertIsArray($row);
+        $this->assertSame('Dropped.iso', $row['name']);
+        $this->assertEquals(7777, $row['size']);
+    }
+
+    public function testFilledFieldsOverrideUploadButBlanksFallBack(): void
+    {
+        // A typed-in field takes priority over the file; left-blank fields still
+        // fall back to the parsed value.
+        $hash = $this->torrentInfoHash('FromFile.iso', 5000);
+        $this->fakeUpload($this->buildTorrent('FromFile.iso', 5000));
+        $_POST = [
+            'info_hash' => '',               // blank → from file
+            'name' => 'Overridden Name',     // typed → wins
+            'size' => '',                    // blank → from file
+            'listed' => '1',
+        ];
+
+        $message = \admin_torrent_add_action(self::$connection, self::$settings);
+        $this->assertSame('Torrent added.', $message);
+
+        $row = $this->fetchRow($hash);
+        $this->assertIsArray($row);
+        $this->assertSame('Overridden Name', $row['name']);
+        $this->assertEquals(5000, $row['size']);
     }
 
     public function testRejectsMalformedUpload(): void

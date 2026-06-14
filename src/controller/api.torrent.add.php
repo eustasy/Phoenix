@@ -72,28 +72,37 @@ function api_torrent_add_controller(mysqli $connection, array $settings): string
     }
 
     ////	Sanitize & Validate Input
+    // An explicit param overrides the parsed-from-upload base only when it is
+    // actually non-empty (a form posts blank fields as '', which `??` would
+    // otherwise let clobber the upload). Checks POST then GET; an upload with no
+    // params is added entirely from the file.
+    $override = static function (string $key, mixed $base): mixed {
+        foreach ([$_POST[$key] ?? null, $_GET[$key] ?? null] as $candidate) {
+            if (is_string($candidate) && trim($candidate) !== '') {
+                return $candidate;
+            }
+        }
+
+        return $base;
+    };
+
     // info_hash: required, normalized to 40 hex chars. API callers send the
     // hex form — raw 20-byte binary survives only via maybe_binary_to_hex's
-    // best effort, since $_GET/$_POST values are already urldecoded once.
-    // An upload supplies the base info_hash (already 40-char hex); an explicit
-    // info_hash param overrides it.
+    // best effort, since $_GET/$_POST values are already urldecoded once. The
+    // upload supplies the base (already 40-char hex); a non-empty param overrides.
     require_once __DIR__.'/../functions/sanitize.maybe_binary_to_hex.php';
-    $raw_hash = $_POST['info_hash'] ?? $_GET['info_hash'] ?? ($parsed === false ? '' : $parsed['info_hash']);
+    $raw_hash = $override('info_hash', $parsed === false ? '' : $parsed['info_hash']);
     $info_hash = maybe_binary_to_hex(is_string($raw_hash) ? $raw_hash : '');
     if ($info_hash === false) {
         tracker_error('Info Hash is invalid.');
     }
 
-    // name: optional, trimmed to the varchar(255) column. Parsed name is the
-    // base; an explicit name param overrides it.
-    $base_name = $parsed === false ? null : $parsed['name'];
-    $raw_name = $_POST['name'] ?? $_GET['name'] ?? $base_name;
+    // name: optional, trimmed to the varchar(255) column.
+    $raw_name = $override('name', $parsed === false ? null : $parsed['name']);
     $name = is_string($raw_name) && $raw_name !== '' ? substr($raw_name, 0, 255) : null;
 
-    // size: optional byte count, never negative. Parsed size is the base; an
-    // explicit size param overrides it.
-    $base_size = $parsed === false ? 0 : $parsed['size'];
-    $raw_size = $_POST['size'] ?? $_GET['size'] ?? $base_size;
+    // size: optional byte count, never negative.
+    $raw_size = $override('size', $parsed === false ? 0 : $parsed['size']);
     $size = max(0, intval(is_scalar($raw_size) ? $raw_size : 0));
 
     // listed: whether the torrent appears on the public index. Defaults on —
@@ -102,16 +111,16 @@ function api_torrent_add_controller(mysqli $connection, array $settings): string
     $listed = intval(is_scalar($raw_listed) ? $raw_listed : 1) === 0 ? 0 : 1;
 
     ////	Meta fields
-    // Each field takes its parsed value as the base, overridden by an explicit
-    // param. sanitize_torrent_meta accepts both the parsed shape (decoded list)
-    // and the request shape (JSON / newline string) for each field, and yields
-    // matching normalized (for views) and storage (for the DB) forms.
+    // Each field takes its parsed value as the base, overridden by a non-empty
+    // explicit param. sanitize_torrent_meta accepts both the parsed shape
+    // (decoded list) and the request shape (JSON / newline string) for each
+    // field, and yields matching normalized (for views) and storage (DB) forms.
     require_once __DIR__.'/../functions/sanitize.torrent.meta.php';
     $meta = sanitize_torrent_meta([
-        'filename' => $_POST['filename'] ?? $_GET['filename'] ?? ($parsed === false ? null : $parsed['filename']),
-        'files' => $_POST['files'] ?? $_GET['files'] ?? ($parsed === false ? null : $parsed['files']),
-        'trackers' => $_POST['trackers'] ?? $_GET['trackers'] ?? ($parsed === false ? null : $parsed['trackers']),
-        'webseeds' => $_POST['webseeds'] ?? $_GET['webseeds'] ?? ($parsed === false ? null : $parsed['webseeds']),
+        'filename' => $override('filename', $parsed === false ? null : $parsed['filename']),
+        'files' => $override('files', $parsed === false ? null : $parsed['files']),
+        'trackers' => $override('trackers', $parsed === false ? null : $parsed['trackers']),
+        'webseeds' => $override('webseeds', $parsed === false ? null : $parsed['webseeds']),
     ]);
 
     ////	Add Torrent
