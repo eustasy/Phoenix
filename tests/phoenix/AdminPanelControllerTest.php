@@ -227,4 +227,17 @@ class AdminPanelControllerTest extends PhoenixTestCase
         $this->assertStringContainsString('<title>Phoenix Admin: Add a Torrent</title>', $html);
     }
 
+    public function testPagePeersRoutesToPeerDrillDown(): void
+    {
+        // The drill-down validates info_hash as 40-char hex; an empty swarm
+        // still renders the page.
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
+        $_GET['page'] = 'peers';
+        $_GET['info_hash'] = str_repeat('a', 40);
+
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
+        $this->assertStringContainsString('<title>Phoenix Admin: Peers</title>', $html);
+    }
+
 }

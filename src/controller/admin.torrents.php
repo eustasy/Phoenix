@@ -43,13 +43,19 @@ function admin_torrents_controller(mysqli $connection, array $settings): string
         $message = admin_torrent_delete_action($connection, $settings);
     }
 
-    // Only query the torrents table once it exists (torrents_select_all bails
-    // via tracker_error on a missing table).
+    // Only query once the tables exist (the models bail via tracker_error on a
+    // missing table).
     require_once __DIR__.'/../model/db.tables.installed.php';
     $torrents = [];
+    $swarms = [];
     if (db_tables_installed($connection, $settings)) {
         require_once __DIR__.'/../model/torrents.select.all.php';
         $torrents = torrents_select_all($connection, $settings);
+
+        // Swarms with peers but no torrents row (e.g. open-tracker hashes never
+        // registered) — counted and shown so they aren't invisible to the admin.
+        require_once __DIR__.'/../model/peers.select.unregistered.php';
+        $swarms = peers_select_unregistered($connection, $settings);
     } elseif ($message === false) {
         $message = 'Tables are not installed.';
     }
@@ -58,5 +64,5 @@ function admin_torrents_controller(mysqli $connection, array $settings): string
 
     require_once __DIR__.'/../views/html.admin.torrents.php';
 
-    return view_admin_torrents_html($settings, $torrents, $message, $csrf_token);
+    return view_admin_torrents_html($settings, $torrents, $message, $csrf_token, $swarms);
 }

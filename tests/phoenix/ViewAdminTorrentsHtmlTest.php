@@ -113,4 +113,29 @@ class ViewAdminTorrentsHtmlTest extends TestCase
         $this->assertStringContainsString('<body class="wide">', $html);
         $this->assertStringContainsString('href="?page=torrents" class="nav-link current" aria-current="page"', $html);
     }
+
+    public function testEachRowLinksToPeerDrillDown(): void
+    {
+        $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok');
+        $this->assertStringContainsString('href="?page=peers&amp;info_hash='.str_repeat('a', 40).'"', $html);
+        $this->assertStringContainsString('>Peers</a>', $html);
+    }
+
+    public function testRendersUnregisteredSwarms(): void
+    {
+        // Swarms with peers but no torrents row are counted and shown, each
+        // linking to its drill-down.
+        $swarms = [['info_hash' => str_repeat('e', 40), 'seeders' => 5, 'leechers' => 1, 'peers' => 6]];
+        $html = view_admin_torrents_html($this->settings(), [], false, 'tok', $swarms);
+
+        $this->assertStringContainsString('Unregistered swarms', $html);
+        $this->assertStringContainsString('<code>'.str_repeat('e', 40).'</code>', $html);
+        $this->assertStringContainsString('href="?page=peers&amp;info_hash='.str_repeat('e', 40).'"', $html);
+    }
+
+    public function testNoUnregisteredSectionWhenNoSwarms(): void
+    {
+        $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok', []);
+        $this->assertStringNotContainsString('Unregistered swarms', $html);
+    }
 }

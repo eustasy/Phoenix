@@ -30,8 +30,9 @@ declare(strict_types=1);
  *     trackers: list<string>|null,
  *     webseeds: list<string>|null,
  * }> $torrents
+ * @param list<array{info_hash: string, seeders: int, leechers: int, peers: int}> $swarms
  */
-function view_admin_torrents_html(array $settings, array $torrents, string|false $message, string $csrf_token): string
+function view_admin_torrents_html(array $settings, array $torrents, string|false $message, string $csrf_token, array $swarms = []): string
 {
     // Hidden field carrying the CSRF token, embedded in every action form.
     $csrf_field = '<input type="hidden" name="csrf" value="'.htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8').'">';
@@ -68,6 +69,10 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
                 '<input type="hidden" name="info_hash" value="'.$info_hash.'">'.$csrf_field.
                 '<button type="submit" class="button background-pomegranate color-clouds">Delete</button></form>';
 
+            // Drill-down to this swarm's peers (info_hash is validated 40-hex).
+            $peers_link = '<a class="button background-clouds" '.
+                'href="?page=peers&amp;info_hash='.$info_hash.'">Peers</a>';
+
             $rows .= '<tr>'.
                 '<td>'.$name.'</td>'.
                 '<td>'.$owner.'</td>'.
@@ -78,7 +83,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
                 '<td>'.number_format($torrent['downloads']).'</td>'.
                 '<td>'.number_format($torrent['traffic']).'</td>'.
                 '<td>'.($listed === 1 ? 'Listed' : 'Unlisted').'</td>'.
-                '<td>'.$toggle_form.' '.$delete_form.'</td>'.
+                '<td>'.$peers_link.' '.$toggle_form.' '.$delete_form.'</td>'.
                 '</tr>';
         }
 
@@ -88,6 +93,31 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
             '<th>Seeders</th><th>Leechers</th><th>Downloads</th><th>Traffic</th>'.
             '<th>Listed</th><th>Actions</th>'.
             '</tr></thead><tbody>'.$rows.'</tbody></table>';
+    }
+
+    ////	Unregistered swarms
+    // Hashes with active peers but no torrents row (open-tracker swarms that
+    // were never registered). Counted and shown here, each linking to its peer
+    // drill-down — they don't appear in the table above, which is FROM torrents.
+    if ($swarms !== []) {
+        $swarm_rows = '';
+        foreach ($swarms as $swarm) {
+            $hash = htmlspecialchars((string) $swarm['info_hash'], ENT_QUOTES, 'UTF-8');
+            $swarm_rows .= '<tr>'.
+                '<td><code>'.$hash.'</code></td>'.
+                '<td>'.number_format($swarm['seeders']).'</td>'.
+                '<td>'.number_format($swarm['leechers']).'</td>'.
+                '<td>'.number_format($swarm['peers']).'</td>'.
+                '<td><a class="button background-clouds" href="?page=peers&amp;info_hash='.$hash.'">Peers</a></td>'.
+                '</tr>';
+        }
+
+        $body .= '<br><h2>Unregistered swarms</h2>'.
+            '<p class="text-left color-asbestos">Hashes with active peers but no torrent entry '.
+            '(announced to an open tracker, never registered).</p>'.
+            '<table class="data-table">'.
+            '<thead><tr><th>Info Hash</th><th>Seeders</th><th>Leechers</th><th>Peers</th><th>Actions</th></tr></thead>'.
+            '<tbody>'.$swarm_rows.'</tbody></table>';
     }
 
     require_once __DIR__.'/html.admin.layout.php';
