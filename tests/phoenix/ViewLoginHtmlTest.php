@@ -48,4 +48,18 @@ class ViewLoginHtmlTest extends TestCase
         $this->assertIsString(view_login_html(true));
     }
 
+    public function testOmitsCodeFieldByDefault(): void
+    {
+        // Password-only install: no second factor enrolled, so no code box.
+        $html = view_login_html();
+        $this->assertStringNotContainsString('name="code"', $html);
+    }
+
+    public function testRendersCodeFieldWhenTotpRequired(): void
+    {
+        $html = view_login_html(false, true);
+        $this->assertStringContainsString('name="code"', $html);
+        $this->assertStringContainsString('autocomplete="one-time-code"', $html);
+    }
+
 }

@@ -12,10 +12,12 @@
 		"ext-xml": "*"
 	},
 	"require-dev": {
+		"eustasy/authenticatron": "^4.1",
 		"geoip2/geoip2": "^3.3",
 		"phpunit/phpunit": "^11.0 || ^12.0"
 	},
 	"suggest": {
+		"eustasy/authenticatron": "Enables optional TOTP two-factor auth on the admin panel (also needs ext-gd for the enrolment QR code).",
 		"geoip2/geoip2": "Enables minified geo enrichment (country/continent) of stat-tracking events; see the stats_geo settings."
 	},
 	"autoload-dev": {

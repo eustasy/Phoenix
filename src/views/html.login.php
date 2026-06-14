@@ -5,13 +5,22 @@ declare(strict_types=1);
 ////	view_login_html
 // Render the login form HTML.
 // Displays error message if $show_error is true.
+// Renders a TOTP code field when $totp_required is true.
 // Returns HTML string. Caller is responsible for echo and exit.
 
-function view_login_html(bool $show_error = false): string
+function view_login_html(bool $show_error = false, bool $totp_required = false): string
 {
     $error_html = '';
     if ($show_error) {
         $error_html = '<p class="box background-pomegranate color-clouds">Incorrect password.</p>';
+    }
+
+    ////	Optional second-factor field
+    $code_html = '';
+    if ($totp_required) {
+        $code_html = '<div class="field"><label>Authentication Code</label>
+				<input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6">
+			</div>';
     }
 
     return '<!DOCTYPE html>
@@ -24,7 +33,8 @@ function view_login_html(bool $show_error = false): string
 	<style>
 		body { margin: 0 auto; max-width: 400px; padding: 5% 10%; text-align: center; width: 80%; }
 		h1 { font-weight: normal; }
-		input[type="password"] { border: 1px solid #bdc3c7; border-radius: .2em; box-sizing: border-box; padding: .4em; width: 100%; }
+		input[type="password"],
+		input[type="text"] { border: 1px solid #bdc3c7; border-radius: .2em; box-sizing: border-box; padding: .4em; width: 100%; }
 		input[type="submit"] { border: none; }
 		.box { padding: 1em; }
 		.button { border-radius: .2em; padding: .4em .8em; }
@@ -40,6 +50,7 @@ function view_login_html(bool $show_error = false): string
 		<div class="field"><label>Password</label>
 			<input type="password" name="password" autofocus>
 		</div>
+		'.$code_html.'
 		<input class="button background-belize-hole color-clouds" type="submit" value="Log In">
 	</form>
 </body>

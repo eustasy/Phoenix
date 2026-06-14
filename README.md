@@ -97,6 +97,15 @@ To enrich events with the minified geo location (country + continent ISO codes):
 
 Geo enrichment degrades gracefully: when the library or database file is missing or unreadable, events are still logged, just with empty location codes.
 
+### Two-Factor Authentication (optional)
+
+The admin panel supports an optional TOTP second factor (the codes from authenticator apps like Google Authenticator or Aegis), on top of the admin password.
+
+1. Run `composer require eustasy/authenticatron` (the QR code needs PHP's `gd` extension; without it the installer falls back to showing the secret and `otpauth://` URL for manual entry).
+2. During install, scan the displayed QR code with your authenticator app, then enter a current code to confirm and enable 2FA. Leave the code blank to skip it — the panel stays password-only.
+
+Once enabled, the login page asks for the 6-digit code alongside the password. To recover from a lost authenticator, remove the `$settings['admin_totp_secret'] = '...';` line from `config/phoenix.custom.php`; the panel reverts to password-only and you can re-enrol.
+
 ## Server Configuration
 
 Phoenix ships with example web server configurations covering document root, `.php` extension stripping, and admin endpoint rate limiting:

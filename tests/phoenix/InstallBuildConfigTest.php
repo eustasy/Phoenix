@@ -98,4 +98,22 @@ class InstallBuildConfigTest extends PhoenixTestCase
         $this->assertStringStartsWith('<?php', $config);
     }
 
+    public function testWritesAdminTotpSecretWhenPresent(): void
+    {
+        $settings = $this->evaluateConfig($this->fixtureValues([
+            'admin_totp_secret' => 'JBSWY3DPEHPK3PXP',
+        ]));
+        $this->assertSame('JBSWY3DPEHPK3PXP', $settings['admin_totp_secret']);
+    }
+
+    public function testWritesEmptyAdminTotpSecretWhenAbsent(): void
+    {
+        // fixtureValues() does not include admin_totp_secret, so the builder's
+        // ?? '' fallback must still emit the key (empty) — the default config
+        // declares it, and code reads it with no fallback layer.
+        $settings = $this->evaluateConfig($this->fixtureValues());
+        $this->assertArrayHasKey('admin_totp_secret', $settings);
+        $this->assertSame('', $settings['admin_totp_secret']);
+    }
+
 }

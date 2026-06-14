@@ -72,7 +72,11 @@ function admin_login_controller(array $settings): ?string
 
         require_once __DIR__.'/../views/html.login.php';
 
-        return view_login_html($login_attempted);
+        // Surface the TOTP field only when a secret is enrolled, so a
+        // password-only install never shows a code box.
+        $totp_required = ! empty($settings['admin_totp_secret']);
+
+        return view_login_html($login_attempted, $totp_required);
     }
 
     // Authenticated, allow proceeding

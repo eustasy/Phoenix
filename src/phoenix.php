@@ -16,6 +16,15 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 ignore_user_abort(true);
 ini_set('default_charset', 'iso-8859-1');
 
+// Composer autoloader for optional libraries (geoip2 stat-tracking enrichment,
+// authenticatron admin 2FA). Conditional: installs that don't use Composer, or
+// that run before `composer install`, still bootstrap — the features that need
+// these classes guard with class_exists().
+$phoenix_autoload = __DIR__.'/../vendor/autoload.php';
+if (is_readable($phoenix_autoload)) {
+    require_once $phoenix_autoload;
+}
+
 $time = time();
 
 ////	Settings

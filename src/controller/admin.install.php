@@ -18,6 +18,29 @@ function admin_install_controller(string $config_path): string
     $settings_writable = is_writable(dirname($config_path));
     $install_error = null;
 
+    ////	Optional two-factor enrolment
+    // Only offered when the verification library is present. We pick a candidate
+    // secret to display: a valid round-tripped one from a previous (failed)
+    // submission so re-scanning isn't forced, otherwise a fresh one. The secret,
+    // its otpauth URL, and a base64 PNG QR (when GD is available) are handed to
+    // the view; the view shows the section only when $totp_secret is non-null.
+    require_once __DIR__.'/../functions/install.valid.totp.secret.php';
+    $totp_secret = null;
+    $totp_qr = null;
+    $totp_url = null;
+    if (class_exists(\eustasy\Authenticatron::class)) {
+        $posted_secret = $_POST['totp_secret'] ?? null;
+        $totp_secret = install_valid_totp_secret($posted_secret)
+            ? $posted_secret
+            : \eustasy\Authenticatron::makeSecret();
+
+        $account = $values['db_name'] !== '' ? $values['db_name'] : 'admin';
+        $totp_url = \eustasy\Authenticatron::getUrl($account, $totp_secret, 'Phoenix');
+        // generateQrCode() returns a base64-encoded PNG (no data: prefix) or
+        // null when GD is missing; the view wraps it as a data URI when present.
+        $totp_qr = \eustasy\Authenticatron::generateQrCode($totp_url);
+    }
+
     ////	Prepare form values (repopulate after failed attempt)
     $form = [
         'db_host' => $values['db_host'],
@@ -35,7 +58,7 @@ function admin_install_controller(string $config_path): string
     // is read from $_POST directly. Without this, install_sanitize_post() never
     // sets it and the controller could never reach the install branch.
     if (($_POST['process'] ?? '') !== 'install') {
-        return view_install_html($settings_writable, $install_error, $form);
+        return view_install_html($settings_writable, $install_error, $form, $totp_secret, $totp_qr, $totp_url);
     }
 
     // Require an admin password at setup so a fresh install is never left with an
@@ -44,13 +67,33 @@ function admin_install_controller(string $config_path): string
     if ($values['admin_password'] === '') {
         $install_error = 'Set an admin password to protect the control panel.';
 
-        return view_install_html($settings_writable, $install_error, $form);
+        return view_install_html($settings_writable, $install_error, $form, $totp_secret, $totp_qr, $totp_url);
     }
 
     if (! $settings_writable) {
         $install_error = 'The <code>config/</code> directory is not writable. Please make it writable and try again.';
 
-        return view_install_html($settings_writable, $install_error, $form);
+        return view_install_html($settings_writable, $install_error, $form, $totp_secret, $totp_qr, $totp_url);
+    }
+
+    ////	Validate the optional second factor before doing anything else
+    // The admin proves their authenticator works by entering a code; we only
+    // enrol the secret once it verifies, so they can't lock themselves out.
+    // A blank code means "skip 2FA" and leaves admin_totp_secret unset (empty).
+    $totp_code = isset($_POST['totp_code']) && is_string($_POST['totp_code']) ? trim($_POST['totp_code']) : '';
+    if ($totp_code !== '') {
+        if (
+            ! install_valid_totp_secret($totp_secret) ||
+            ! class_exists(\eustasy\Authenticatron::class) ||
+            ! \eustasy\Authenticatron::checkCode($totp_code, $totp_secret)
+        ) {
+            $install_error = 'The two-factor code was incorrect. Re-scan and try again, or leave it blank to skip.';
+
+            return view_install_html($settings_writable, $install_error, $form, $totp_secret, $totp_qr, $totp_url);
+        }
+
+        // Verified: this secret will be written to config.
+        $values['admin_totp_secret'] = $totp_secret;
     }
 
     ////	Test DB connection before writing config
@@ -65,7 +108,7 @@ function admin_install_controller(string $config_path): string
     if (! $test_conn) {
         $install_error = 'Could not connect to the database: '.mysqli_connect_error();
 
-        return view_install_html($settings_writable, $install_error, $form);
+        return view_install_html($settings_writable, $install_error, $form, $totp_secret, $totp_qr, $totp_url);
     }
 
     ////	Create tables
@@ -73,7 +116,7 @@ function admin_install_controller(string $config_path): string
     if (! db_create($test_conn, $values)) {
         $install_error = 'Connected, but could not create the tables.';
 
-        return view_install_html($settings_writable, $install_error, $form);
+        return view_install_html($settings_writable, $install_error, $form, $totp_secret, $totp_qr, $totp_url);
     }
 
     ////	Write config file
@@ -81,7 +124,7 @@ function admin_install_controller(string $config_path): string
     if (file_put_contents($config_path, install_build_config($values)) === false) {
         $install_error = 'Connected and created tables, but could not write the configuration file. Check that <code>config/</code> is writable.';
 
-        return view_install_html($settings_writable, $install_error, $form);
+        return view_install_html($settings_writable, $install_error, $form, $totp_secret, $totp_qr, $totp_url);
     }
 
     mysqli_close($test_conn);

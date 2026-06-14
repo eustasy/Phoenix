@@ -95,6 +95,10 @@ $settings['admin_password'] = '';
 $settings['admin_login_delay'] = 2;
 /* cap on the escalating per-session login delay */
 $settings['admin_login_delay_max'] = 8;
+/* base32 TOTP secret for optional admin two-factor auth; empty = no 2FA. */
+/* Set during install (needs the eustasy/authenticatron package + ext-gd for */
+/* the QR). Lost your authenticator? Remove this line to disable 2FA. */
+$settings['admin_totp_secret'] = '';
 
 ////	API Options
 /* API keys permitted to use the management API under public/api/, as */

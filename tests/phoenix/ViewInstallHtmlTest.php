@@ -93,4 +93,37 @@ class ViewInstallHtmlTest extends TestCase
         $this->assertStringContainsString('</html>', $html);
     }
 
+    public function testOmitsTwoFactorSectionWhenNoSecretPassed(): void
+    {
+        // No secret => verification library absent => password-only install,
+        // unchanged. The whole section must be gone.
+        $html = view_install_html(true, null, $this->form());
+        $this->assertStringNotContainsString('name="totp_secret"', $html);
+        $this->assertStringNotContainsString('name="totp_code"', $html);
+        $this->assertStringNotContainsString('Two-Factor Authentication', $html);
+    }
+
+    public function testRendersTwoFactorSectionWithQrWhenSecretPassed(): void
+    {
+        $html = view_install_html(true, null, $this->form(), 'JBSWY3DPEHPK3PXP', 'QUJDREVG', 'otpauth://totp/x');
+        $this->assertStringContainsString('Two-Factor Authentication', $html);
+        // Hidden field round-trips the secret.
+        $this->assertStringContainsString('name="totp_secret" value="JBSWY3DPEHPK3PXP"', $html);
+        $this->assertStringContainsString('name="totp_code"', $html);
+        // QR rendered as a base64 data URI.
+        $this->assertStringContainsString('data:image/png;base64,QUJDREVG', $html);
+    }
+
+    public function testRendersManualEntryWhenNoQrAvailable(): void
+    {
+        // GD unavailable: controller passes a secret + url but null QR. We must
+        // fall back to showing the secret and otpauth URL for manual entry.
+        $html = view_install_html(true, null, $this->form(), 'JBSWY3DPEHPK3PXP', null, 'otpauth://totp/x?secret=JBSWY3DPEHPK3PXP');
+        $this->assertStringContainsString('name="totp_secret" value="JBSWY3DPEHPK3PXP"', $html);
+        $this->assertStringContainsString('name="totp_code"', $html);
+        $this->assertStringContainsString('JBSWY3DPEHPK3PXP', $html);
+        $this->assertStringContainsString('otpauth://totp/x', $html);
+        $this->assertStringNotContainsString('data:image/png;base64', $html);
+    }
+
 }

@@ -10,15 +10,51 @@ declare(strict_types=1);
 //   $settings_writable - bool, whether config/ directory is writable
 //   $install_error - string|false, error message to display
 //   $form - array, form field values (db_host, db_user, db_name, db_prefix, db_persist, open_tracker, public_index)
+//   $totp_secret - string|null, candidate base32 secret; null hides the whole 2FA section (library absent)
+//   $totp_qr - string|null, base64-encoded PNG QR (no data: prefix), or null when GD is unavailable
+//   $totp_url - string|null, otpauth:// URL for manual entry
 
 /**
  * @param array{db_host: string, db_user: string, db_name: string, db_prefix: string, db_persist: bool, open_tracker: bool, public_index: bool} $form
  */
-function view_install_html(bool $settings_writable, string|null $install_error, array $form): string
-{
+function view_install_html(
+    bool $settings_writable,
+    string|null $install_error,
+    array $form,
+    string|null $totp_secret = null,
+    string|null $totp_qr = null,
+    string|null $totp_url = null,
+): string {
     $error_html = '';
     if ($install_error) {
         $error_html = '<p class="box background-pomegranate color-clouds">'.htmlspecialchars($install_error).'</p>';
+    }
+
+    ////	Optional two-factor section
+    // Rendered only when the controller passes a secret (i.e. the verification
+    // library is installed). Shows the QR when GD produced one, otherwise the
+    // secret + otpauth URL for manual entry. The hidden totp_secret field
+    // round-trips the displayed secret so a failed code re-renders the same one.
+    $totp_html = '';
+    if ($totp_secret !== null) {
+        if ($totp_qr !== null && $totp_qr !== '') {
+            $totp_display = '<p><img src="data:image/png;base64,'.htmlspecialchars($totp_qr).'" alt="Two-factor QR code"></p>';
+        } else {
+            $totp_display = '<p>Scan is unavailable (no image support). Add this secret manually:</p>
+				<p><code>'.htmlspecialchars($totp_secret).'</code></p>';
+            if ($totp_url !== null) {
+                $totp_display .= '<p><a href="'.htmlspecialchars($totp_url).'">'.htmlspecialchars($totp_url).'</a></p>';
+            }
+        }
+
+        $totp_html = '
+				<h2>(Optional) Two-Factor Authentication</h2>
+				<p>Scan the code with an authenticator app, then enter a code to enable &mdash; or leave it blank to skip.</p>
+				'.$totp_display.'
+				<input type="hidden" name="totp_secret" value="'.htmlspecialchars($totp_secret).'">
+				<div class="field"><label>Authentication Code</label>
+					<input type="text" name="totp_code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6">
+				</div>';
     }
 
     $writable_warning = '';
@@ -64,6 +100,7 @@ function view_install_html(bool $settings_writable, string|null $install_error, 
 			<div class="field"><label>Admin Password (required)</label>
 				<input type="password" name="admin_password" required>
 			</div>
+			'.$totp_html.'
 			<br>
 			<input class="button background-belize-hole color-clouds" type="submit" value="Install">
 		</form>';

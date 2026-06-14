@@ -13,6 +13,14 @@ declare(strict_types=1);
 // below can use it without going through phoenix.php's full DB connect.
 require_once __DIR__.'/../src/functions/tracker.error.php';
 
+// Composer autoloader for optional libraries — loaded here too because the
+// installer mode below never reaches phoenix.php, yet 2FA enrolment needs the
+// authenticatron class. Conditional, so installs without Composer still work.
+$admin_autoload = __DIR__.'/../vendor/autoload.php';
+if (is_readable($admin_autoload)) {
+    require_once $admin_autoload;
+}
+
 $config_path = __DIR__.'/../config/phoenix.custom.php';
 $config_exists = is_readable($config_path);
 
