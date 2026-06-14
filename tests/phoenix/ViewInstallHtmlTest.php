@@ -105,13 +105,17 @@ class ViewInstallHtmlTest extends TestCase
 
     public function testRendersTwoFactorSectionWithQrWhenSecretPassed(): void
     {
-        $html = view_install_html(true, null, $this->form(), 'JBSWY3DPEHPK3PXP', 'QUJDREVG', 'otpauth://totp/x');
+        // generateQrCode() returns a complete data URI, so the view uses it as
+        // the <img src> verbatim.
+        $qr = 'data:image/png;base64,QUJDREVG';
+        $html = view_install_html(true, null, $this->form(), 'JBSWY3DPEHPK3PXP', $qr, 'otpauth://totp/x');
         $this->assertStringContainsString('Two-Factor Authentication', $html);
         // Hidden field round-trips the secret.
         $this->assertStringContainsString('name="totp_secret" value="JBSWY3DPEHPK3PXP"', $html);
         $this->assertStringContainsString('name="totp_code"', $html);
-        // QR rendered as a base64 data URI.
-        $this->assertStringContainsString('data:image/png;base64,QUJDREVG', $html);
+        // QR data URI used as-is for the src, exactly once (no doubled prefix).
+        $this->assertStringContainsString('<img src="'.$qr.'"', $html);
+        $this->assertStringNotContainsString('data:image/png;base64,data:image/png;base64', $html);
     }
 
     public function testRendersManualEntryWhenNoQrAvailable(): void

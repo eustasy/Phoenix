@@ -38,7 +38,7 @@ function view_install_html(
     $totp_html = '';
     if ($totp_secret !== null) {
         if ($totp_qr !== null && $totp_qr !== '') {
-            $totp_display = '<p><img src="data:image/png;base64,'.htmlspecialchars($totp_qr).'" alt="Two-factor QR code"></p>';
+            $totp_display = '<p><img src="'.htmlspecialchars($totp_qr).'" alt="Two-factor QR code"></p>';
         } else {
             $totp_display = '<p>Scan is unavailable (no image support). Add this secret manually:</p>
 				<p><code>'.htmlspecialchars($totp_secret).'</code></p>';

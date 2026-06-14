@@ -36,8 +36,8 @@ function admin_install_controller(string $config_path): string
 
         $account = $values['db_name'] !== '' ? $values['db_name'] : 'admin';
         $totp_url = \eustasy\Authenticatron::getUrl($account, $totp_secret, 'Phoenix');
-        // generateQrCode() returns a base64-encoded PNG (no data: prefix) or
-        // null when GD is missing; the view wraps it as a data URI when present.
+        // generateQrCode() returns a complete "data:image/png;base64,..." data
+        // URI (ready for an <img src>), or null when GD is missing.
         $totp_qr = \eustasy\Authenticatron::generateQrCode($totp_url);
     }
 
