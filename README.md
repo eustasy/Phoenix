@@ -123,7 +123,7 @@ Once enabled, the login page asks for the 6-digit code alongside the password. T
 
 ## Server Configuration
 
-Phoenix ships with example web server configurations covering document root, `.php` extension stripping, and admin endpoint rate limiting:
+Phoenix ships with example web server configurations covering document root location, `.php` extension stripping, admin endpoint rate limiting, https redirection, and auth passthrough:
 
 * [APACHE.md](./APACHE.md)
 * [NGINX.md](./NGINX.md)
