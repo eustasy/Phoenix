@@ -158,11 +158,17 @@ class EndpointSmokeTest extends SmokeTestCase
 
         $panel = $this->get('/admin.php', [], ['Cookie' => $cookie]);
         $this->assertSame(200, $panel['status']);
-        // 'Compatibility Check' is the dashboard's heading (post-#54 the page
-        // <title> is "Phoenix Admin: Dashboard"); it appears only on the authed
-        // panel, never the login form.
-        $this->assertStringContainsString('Compatibility Check', $panel['body']);
+        // The authenticated dashboard renders the admin nav and its Dashboard
+        // title — neither appears on the login form.
+        $this->assertStringContainsString('<nav class="admin-nav">', $panel['body']);
+        $this->assertStringContainsString('<title>Phoenix Admin: Dashboard</title>', $panel['body']);
         $this->assertStringNotContainsString('name="password"', $panel['body']);
+
+        // The server diagnostics moved to their own Server Support page.
+        $support = $this->get('/admin.php', ['page' => 'support'], ['Cookie' => $cookie]);
+        $this->assertSame(200, $support['status']);
+        $this->assertStringContainsString('<title>Phoenix Admin: Server Support</title>', $support['body']);
+        $this->assertStringContainsString('PHP Version:', $support['body']);
     }
 
     #[Depends('testInstallSucceeds')]
@@ -190,11 +196,12 @@ class EndpointSmokeTest extends SmokeTestCase
         $logout = $this->post('/admin.php', ['logout' => '1', 'csrf' => $token], ['Cookie' => $cookie]);
         $this->assertSame(302, $logout['status']);
 
-        // The session is gone: the same cookie now falls back to the login form.
+        // The session is gone: the same cookie now falls back to the login form
+        // (no authenticated admin nav).
         $after = $this->get('/admin.php', [], ['Cookie' => $cookie]);
         $this->assertSame(200, $after['status']);
         $this->assertStringContainsString('name="password"', $after['body']);
-        $this->assertStringNotContainsString('Compatibility Check', $after['body']);
+        $this->assertStringNotContainsString('<nav class="admin-nav">', $after['body']);
     }
 
     #[Depends('testInstallSucceeds')]
@@ -202,8 +209,9 @@ class EndpointSmokeTest extends SmokeTestCase
     {
         // Drive the admin add-torrent form end-to-end: log in for a session +
         // CSRF token, build a single-file .torrent, and POST it multipart to
-        // admin.php with process=torrent_add. The panel re-renders with the
-        // action's message. Uses a DISTINCT info_hash from the API smoke tests.
+        // the Add Torrent page (admin.php?page=add) with process=torrent_add.
+        // The page re-renders with the action's message. Uses a DISTINCT
+        // info_hash from the API smoke tests.
         require_once dirname(__DIR__, 2).'/src/functions/bencode.encode.php';
 
         $session = $this->adminSession();
@@ -219,7 +227,7 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertNotSame(str_repeat('d', 40), $hash);
 
         $r = $this->postMultipart(
-            '/admin.php',
+            '/admin.php?page=add',
             [
                 'process' => 'torrent_add',
                 'csrf' => $session['csrf'],
