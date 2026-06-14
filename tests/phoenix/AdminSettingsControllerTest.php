@@ -130,4 +130,109 @@ class AdminSettingsControllerTest extends TestCase
         $this->assertStringContainsString('is not writable', $html);
         $this->assertStringNotContainsString('name="process" value="password"', $html);
     }
+
+    private function skipWithoutAuthenticatron(): void
+    {
+        if (! class_exists(\eustasy\Authenticatron::class)) {
+            $this->markTestSkipped('eustasy/authenticatron not installed.');
+        }
+    }
+
+    // A 6-digit code guaranteed to be outside the verifier's acceptance window.
+    private function wrongCode(string $secret): string
+    {
+        $window = \eustasy\Authenticatron::getCodesInRange($secret);
+        do {
+            $wrong = sprintf('%06d', random_int(0, 999999));
+        } while (in_array($wrong, $window, true));
+
+        return $wrong;
+    }
+
+    public function testEnablesTwoFactorWithValidCode(): void
+    {
+        $this->skipWithoutAuthenticatron();
+        $secret = \eustasy\Authenticatron::makeSecret();
+        $_SESSION['phoenix_csrf'] = 'tok';
+        $_POST = [
+            'process' => 'totp_enable',
+            'totp_secret' => $secret,
+            'totp_code' => \eustasy\Authenticatron::getCode($secret),
+            'csrf' => 'tok',
+        ];
+
+        $html = \admin_settings_controller($this->settings(), $this->path);
+
+        $this->assertStringContainsString('Two-factor authentication enabled', $html);
+        $stored = $this->readBack();
+        $this->assertSame($secret, $stored['admin_totp_secret']);
+        // Other custom keys preserved.
+        $this->assertSame('filepass', $stored['db_pass']);
+    }
+
+    public function testRejectsTwoFactorEnableWithWrongCode(): void
+    {
+        $this->skipWithoutAuthenticatron();
+        $secret = \eustasy\Authenticatron::makeSecret();
+        $_SESSION['phoenix_csrf'] = 'tok';
+        $_POST = [
+            'process' => 'totp_enable',
+            'totp_secret' => $secret,
+            'totp_code' => $this->wrongCode($secret),
+            'csrf' => 'tok',
+        ];
+
+        $html = \admin_settings_controller($this->settings(), $this->path);
+
+        $this->assertStringContainsString('code was incorrect', $html);
+        // Nothing persisted: the starter config never had the key.
+        $this->assertArrayNotHasKey('admin_totp_secret', $this->readBack());
+    }
+
+    public function testDisablesTwoFactorWithValidCode(): void
+    {
+        $this->skipWithoutAuthenticatron();
+        $secret = \eustasy\Authenticatron::makeSecret();
+        // Pre-enrol in both the config file and the in-memory settings.
+        file_put_contents(
+            $this->path,
+            "<?php\n\$settings['db_pass'] = 'filepass';\n".
+            "\$settings['admin_totp_secret'] = '{$secret}';\n",
+        );
+        $settings = $this->settings();
+        $settings['admin_totp_secret'] = $secret;
+
+        $_SESSION['phoenix_csrf'] = 'tok';
+        $_POST = [
+            'process' => 'totp_disable',
+            'totp_code' => \eustasy\Authenticatron::getCode($secret),
+            'csrf' => 'tok',
+        ];
+
+        $html = \admin_settings_controller($settings, $this->path);
+
+        $this->assertStringContainsString('Two-factor authentication disabled', $html);
+        $this->assertSame('', $this->readBack()['admin_totp_secret']);
+    }
+
+    public function testRejectsTwoFactorDisableWithWrongCode(): void
+    {
+        $this->skipWithoutAuthenticatron();
+        $secret = \eustasy\Authenticatron::makeSecret();
+        $settings = $this->settings();
+        $settings['admin_totp_secret'] = $secret;
+
+        $_SESSION['phoenix_csrf'] = 'tok';
+        $_POST = [
+            'process' => 'totp_disable',
+            'totp_code' => $this->wrongCode($secret),
+            'csrf' => 'tok',
+        ];
+
+        $html = \admin_settings_controller($settings, $this->path);
+
+        $this->assertStringContainsString('code was incorrect', $html);
+        // The starter config is untouched — the secret was never cleared.
+        $this->assertSame('STARTER', $this->readBack()['admin_password']);
+    }
 }

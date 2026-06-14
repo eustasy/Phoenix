@@ -69,6 +69,47 @@ class ViewAdminSettingsHtmlTest extends TestCase
         $this->assertStringContainsString('exposes every', $html);
     }
 
+    public function testRendersTwoFactorEnableFormWhenDisabledAndAvailable(): void
+    {
+        $html = view_admin_settings_html(
+            $this->settings(['admin_totp_secret' => '']),
+            true,
+            false,
+            'tok',
+            true,
+            'JBSWY3DPEHPK3PXP',
+            'data:image/png;base64,QQ==',
+            'otpauth://totp/x',
+        );
+        $this->assertStringContainsString('Two-Factor Authentication', $html);
+        $this->assertStringContainsString('name="process" value="totp_enable"', $html);
+        $this->assertStringContainsString('JBSWY3DPEHPK3PXP', $html);
+        $this->assertStringContainsString('src="data:image/png;base64,QQ=="', $html);
+        $this->assertStringNotContainsString('name="process" value="totp_disable"', $html);
+    }
+
+    public function testRendersTwoFactorDisableFormWhenEnabled(): void
+    {
+        $html = view_admin_settings_html(
+            $this->settings(['admin_totp_secret' => 'JBSWY3DPEHPK3PXP']),
+            true,
+            false,
+            'tok',
+            true,
+        );
+        $this->assertStringContainsString('name="process" value="totp_disable"', $html);
+        $this->assertStringContainsString('is enabled', $html);
+        $this->assertStringNotContainsString('name="process" value="totp_enable"', $html);
+        // The enrolled secret is masked, never echoed back into the panel.
+        $this->assertStringNotContainsString('JBSWY3DPEHPK3PXP', $html);
+    }
+
+    public function testOmitsTwoFactorSectionWhenLibraryUnavailable(): void
+    {
+        $html = view_admin_settings_html($this->settings(['admin_totp_secret' => '']), true, false, 'tok', false);
+        $this->assertStringNotContainsString('Two-Factor Authentication', $html);
+    }
+
     public function testReadOnlyWhenNotWritable(): void
     {
         $html = view_admin_settings_html($this->settings(), false, false, 'tok');

@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 ////	view_admin_settings_html
 // Render the admin Settings page: a read-only table of the effective settings
-// (with db_pass, admin_password, and api_keys values masked — never leak
-// secrets into the panel), plus, when config/ is writable, a password-change
-// form and the flag toggles. When not writable, the forms are replaced by a
-// note explaining that config/ is intentionally often not web-writable.
-// Wrapped in the shared admin layout (wide variant). Returns HTML string.
+// (with db_pass, admin_password, admin_totp_secret, and api_keys values masked
+// — never leak secrets into the panel), plus, when config/ is writable, a
+// password-change form, a two-factor enable/disable form (when the verification
+// library is present), and the flag toggles. When not writable, the forms are
+// replaced by a note explaining that config/ is intentionally often not
+// web-writable. Wrapped in the shared admin layout (wide variant). Returns HTML
+// string. $totp_secret/$totp_qr/$totp_url carry the enrolment QR for the enable
+// form and are unused once a secret is enrolled.
 
-/** @param PhoenixSettings $settings */
-function view_admin_settings_html(array $settings, bool $writable, string|false $message, string $csrf_token): string
+/**
+ * @param PhoenixSettings $settings
+ */
+function view_admin_settings_html(array $settings, bool $writable, string|false $message, string $csrf_token, bool $totp_available = false, ?string $totp_secret = null, ?string $totp_qr = null, ?string $totp_url = null): string
 {
     $csrf_field = '<input type="hidden" name="csrf" value="'.htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8').'">';
 
@@ -24,7 +29,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
     ////	Effective settings (read-only, secrets masked)
     $rows = '';
     foreach ($settings as $key => $value) {
-        if ($key === 'db_pass' || $key === 'admin_password') {
+        if ($key === 'db_pass' || $key === 'admin_password' || $key === 'admin_totp_secret') {
             $display = empty($value) ? '<em>(not set)</em>' : '********';
         } elseif ($key === 'api_keys') {
             $count = count($value);
@@ -60,6 +65,39 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
 			<input type="password" name="new_password" placeholder="New password" autocomplete="new-password">
 			<input class="button background-belize-hole color-clouds" type="submit" name="submit" value="Change Password">
 		</form>';
+
+    ////	Two-factor authentication
+    // Only when the verification library is installed. When a secret is
+    // enrolled, offer to turn it off (a current code is required, so a hijacked
+    // session can't silently disable it). Otherwise offer enrolment: scan the
+    // QR (or enter the secret), then prove a code to enable.
+    if ($totp_available) {
+        $body .= '<br><h2>Two-Factor Authentication</h2>';
+
+        if (! empty($settings['admin_totp_secret'])) {
+            $body .= '<p class="box background-green-sea color-clouds">Two-factor authentication is enabled.</p>
+		<form class="mysql" method="POST">
+			<input type="hidden" name="process" value="totp_disable">'.$csrf_field.'
+			<p class="text-left">Enter a current authenticator code to turn it off.</p>
+			<input type="text" name="totp_code" inputmode="numeric" autocomplete="off" placeholder="Authenticator code">
+			<input class="button background-pomegranate color-clouds" type="submit" name="submit" value="Disable 2FA">
+		</form>';
+        } else {
+            $qr_html = '';
+            if ($totp_qr !== null && $totp_qr !== '') {
+                $qr_html = '<p><img src="'.htmlspecialchars($totp_qr).'" alt="Two-factor QR code"></p>';
+            }
+            $body .= '<p class="text-left">Scan this with an authenticator app (or enter the secret manually), then enter a code to enable it.</p>
+		'.$qr_html.'
+		<p class="text-left">Secret: <code>'.htmlspecialchars((string) $totp_secret).'</code></p>
+		<form class="mysql" method="POST">
+			<input type="hidden" name="process" value="totp_enable">
+			<input type="hidden" name="totp_secret" value="'.htmlspecialchars((string) $totp_secret).'">'.$csrf_field.'
+			<input type="text" name="totp_code" inputmode="numeric" autocomplete="off" placeholder="Authenticator code">
+			<input class="button background-belize-hole color-clouds" type="submit" name="submit" value="Enable 2FA">
+		</form>';
+        }
+    }
 
     ////	Toggle flags
     $checkbox = static function (array $settings, string $flag, string $label, string $note = ''): string {

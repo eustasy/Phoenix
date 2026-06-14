@@ -37,8 +37,10 @@ function admin_install_controller(string $config_path): string
         $account = $values['db_name'] !== '' ? $values['db_name'] : 'admin';
         $totp_url = \eustasy\Authenticatron::getUrl($account, $totp_secret, 'Phoenix');
         // generateQrCode() returns a complete "data:image/png;base64,..." data
-        // URI (ready for an <img src>), or null when GD is missing.
-        $totp_qr = \eustasy\Authenticatron::generateQrCode($totp_url);
+        // URI ready for an <img src>. It needs ext-gd; without it the library
+        // fatals (its catch misses the Error), so guard and fall back to the
+        // manual-entry secret + otpauth link the view already shows.
+        $totp_qr = extension_loaded('gd') ? \eustasy\Authenticatron::generateQrCode($totp_url) : null;
     }
 
     ////	Prepare form values (repopulate after failed attempt)
