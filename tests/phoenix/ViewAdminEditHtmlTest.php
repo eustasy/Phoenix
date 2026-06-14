@@ -50,8 +50,10 @@ class ViewAdminEditHtmlTest extends TestCase
         $this->assertStringContainsString('name="size" value="4096"', $html);
         $this->assertStringContainsString('name="listed" value="1" checked', $html);
         $this->assertStringContainsString('name="filename" value="file.iso"', $html);
-        // Meta round-trips into the request shape the form posts back.
-        $this->assertStringContainsString('[{"path":"a/b.iso","length":4096}]', $html);
+        // Meta round-trips into the request shape the form posts back. The JSON
+        // is htmlspecialchars()-escaped inside the textarea, so its quotes are
+        // entities (it decodes back cleanly on submit).
+        $this->assertStringContainsString('[{&quot;path&quot;:&quot;a/b.iso&quot;,&quot;length&quot;:4096}]', $html);
         $this->assertStringContainsString("http://t1/announce\nhttp://t2/announce", $html);
         $this->assertStringContainsString('name="csrf" value="tok"', $html);
         $this->assertStringContainsString('action="?page=edit&amp;info_hash='.str_repeat('c', 40).'"', $html);
