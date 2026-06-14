@@ -121,6 +121,18 @@ The admin panel supports an optional TOTP second factor (the codes from authenti
 
 Once enabled, the login page asks for the 6-digit code alongside the password. To recover from a lost authenticator, remove the `$settings['admin_totp_secret'] = '...';` line from `config/phoenix.custom.php`; the panel reverts to password-only and you can re-enrol.
 
+### Recovering admin access
+
+The admin password is stored as a bcrypt hash (`$settings['admin_password']`) in `config/phoenix.custom.php`, and you normally change it from the panel's **Settings** page. If you lose it, edit that file directly. Generate a fresh hash:
+
+```bash
+php -r "echo password_hash('your-new-password', PASSWORD_DEFAULT), PHP_EOL;"
+```
+
+Set `$settings['admin_password']` to the printed value. Alternatively, remove the `$settings['admin_password']` line (or set it to `''`): with no password set the panel skips authentication entirely, so you can open it and set a new password from **Settings** straight away — only do this when `public/admin.php` is not publicly reachable.
+
+If you relocated `public/admin.php` out of the web root after setup, restore it first. Lost your two-factor device as well? Removing `$settings['admin_totp_secret']` reverts the panel to password-only (see [Two-Factor Authentication](#two-factor-authentication-optional)).
+
 ## Server Configuration
 
 Phoenix ships with example web server configurations covering document root location, `.php` extension stripping, admin endpoint rate limiting, https redirection, and auth passthrough:
