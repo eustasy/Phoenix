@@ -38,11 +38,14 @@ class ViewAdminLayoutHtmlTest extends TestCase
         $this->assertStringContainsString('<p>BODY-MARKER</p>', $html);
     }
 
-    public function testRendersAllFourNavLinks(): void
+    public function testRendersAllNavLinks(): void
     {
         $html = view_admin_layout_html($this->settings(), 'Dashboard', '', 'dashboard');
         $this->assertStringContainsString('?page=dashboard', $html);
         $this->assertStringContainsString('?page=torrents', $html);
+        $this->assertStringContainsString('?page=add', $html);
+        $this->assertStringContainsString('?page=support', $html);
+        $this->assertStringContainsString('?page=utilities', $html);
         $this->assertStringContainsString('?page=backups', $html);
         $this->assertStringContainsString('?page=settings', $html);
     }

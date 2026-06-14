@@ -64,9 +64,11 @@ class AdminPanelControllerTest extends PhoenixTestCase
 
     public function testProcessCleanRendersCleanMessage(): void
     {
-        // No admin_password → CSRF disabled, so this exercises pure dispatch.
+        // The maintenance actions live on the Utilities page now. No
+        // admin_password → CSRF disabled, so this exercises pure dispatch.
         $settings = self::$settings;
         $settings['admin_password'] = '';
+        $_GET['page'] = 'utilities';
         $_POST['process'] = 'clean';
         $html = \admin_panel_controller(self::$connection, $settings, self::$time);
 
@@ -77,6 +79,7 @@ class AdminPanelControllerTest extends PhoenixTestCase
     {
         $settings = self::$settings;
         $settings['admin_password'] = '';
+        $_GET['page'] = 'utilities';
         $_POST['process'] = 'optimize';
         $html = \admin_panel_controller(self::$connection, $settings, self::$time);
 
@@ -92,6 +95,7 @@ class AdminPanelControllerTest extends PhoenixTestCase
         $settings['db_prefix'] = 'phoenix_panel_setup_test_';
 
         $settings['admin_password'] = '';
+        $_GET['page'] = 'utilities';
         $_POST['process'] = 'setup';
         try {
             $html = \admin_panel_controller(self::$connection, $settings, self::$time);
@@ -126,6 +130,7 @@ class AdminPanelControllerTest extends PhoenixTestCase
         // does not run.
         $settings = self::$settings;
         $settings['admin_password'] = 'hash';
+        $_GET['page'] = 'utilities';
         $_POST['process'] = 'clean';
         // No csrf token in $_SESSION or $_POST.
 
@@ -140,6 +145,7 @@ class AdminPanelControllerTest extends PhoenixTestCase
         // Matching session + POST token lets the action through.
         $settings = self::$settings;
         $settings['admin_password'] = 'hash';
+        $_GET['page'] = 'utilities';
         $_SESSION['phoenix_csrf'] = 'tok';
         $_POST['csrf'] = 'tok';
         $_POST['process'] = 'clean';
@@ -189,6 +195,36 @@ class AdminPanelControllerTest extends PhoenixTestCase
         $html = \admin_panel_controller(self::$connection, $settings, self::$time);
         $this->assertIsString($html);
         $this->assertStringContainsString('Phoenix', $html);
+    }
+
+    public function testPageSupportRoutesToServerSupport(): void
+    {
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
+        $_GET['page'] = 'support';
+
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
+        $this->assertStringContainsString('<title>Phoenix Admin: Server Support</title>', $html);
+    }
+
+    public function testPageUtilitiesRoutesToUtilities(): void
+    {
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
+        $_GET['page'] = 'utilities';
+
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
+        $this->assertStringContainsString('<title>Phoenix Admin: Utilities</title>', $html);
+    }
+
+    public function testPageAddRoutesToAddTorrent(): void
+    {
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
+        $_GET['page'] = 'add';
+
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
+        $this->assertStringContainsString('<title>Phoenix Admin: Add a Torrent</title>', $html);
     }
 
 }

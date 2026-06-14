@@ -23,6 +23,21 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
 
             return admin_torrents_controller($connection, $settings);
 
+        case 'add':
+            require_once __DIR__.'/admin.add.php';
+
+            return admin_add_controller($connection, $settings);
+
+        case 'support':
+            require_once __DIR__.'/admin.support.php';
+
+            return admin_support_controller($connection, $settings);
+
+        case 'utilities':
+            require_once __DIR__.'/admin.utilities.php';
+
+            return admin_utilities_controller($connection, $settings, $time);
+
         case 'backups':
             require_once __DIR__.'/admin.backups.php';
 
@@ -37,6 +52,6 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
         default:
             require_once __DIR__.'/admin.dashboard.php';
 
-            return admin_dashboard_page($connection, $settings, $time);
+            return admin_dashboard_page($connection, $settings);
     }
 }

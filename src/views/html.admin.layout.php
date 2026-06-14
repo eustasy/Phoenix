@@ -44,11 +44,14 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
     }
 
     ////	Navigation
-    // Four top-level admin pages. The link whose key matches $active is
-    // marked current so the user (and tests) can tell where they are.
+    // Top-level admin pages. The link whose key matches $active is marked
+    // current so the user (and tests) can tell where they are.
     $nav_items = [
         'dashboard' => 'Dashboard',
         'torrents' => 'Torrents',
+        'add' => 'Add Torrent',
+        'support' => 'Server Support',
+        'utilities' => 'Utilities',
         'backups' => 'Backups',
         'settings' => 'Settings',
     ];
@@ -139,12 +142,6 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
 		}
 		.text-right {
 			text-align: right;
-		}
-		.panel {
-			border: 1px solid #ecf0f1;
-			border-radius: .3em;
-			margin: 1em 0;
-			padding: .5em 1.5em 1.5em;
 		}
 		.admin-nav {
 			margin: 1em 0;
