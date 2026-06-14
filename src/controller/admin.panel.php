@@ -28,6 +28,11 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
 
             return admin_torrent_peers_controller($connection, $settings);
 
+        case 'edit':
+            require_once __DIR__.'/admin.edit.php';
+
+            return admin_edit_controller($connection, $settings);
+
         case 'add':
             require_once __DIR__.'/admin.add.php';
 

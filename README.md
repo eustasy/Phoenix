@@ -51,6 +51,7 @@ phoenix/
 │   │   ├── torrents.php # GET  /api/torrents — your torrents + swarm stats (all, for admin)
 │   │   └── torrent/
 │   │       ├── add.php    # POST /api/torrent/add — add a torrent
+│   │       ├── update.php # POST /api/torrent/update — edit a torrent's fields
 │   │       ├── list.php   # POST /api/torrent/list — show on the index
 │   │       ├── delist.php # POST /api/torrent/delist — hide from the index
 │   │       └── delete.php # POST /api/torrent/delete — delete (+ its peers)

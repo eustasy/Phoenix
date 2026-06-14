@@ -121,6 +121,13 @@ class ViewAdminTorrentsHtmlTest extends TestCase
         $this->assertStringContainsString('>Peers</a>', $html);
     }
 
+    public function testEachRowLinksToEdit(): void
+    {
+        $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok');
+        $this->assertStringContainsString('href="?page=edit&amp;info_hash='.str_repeat('a', 40).'"', $html);
+        $this->assertStringContainsString('>Edit</a>', $html);
+    }
+
     public function testRendersUnregisteredSwarms(): void
     {
         // Swarms with peers but no torrents row are counted and shown, each

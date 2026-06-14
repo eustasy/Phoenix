@@ -240,4 +240,17 @@ class AdminPanelControllerTest extends PhoenixTestCase
         $this->assertStringContainsString('<title>Phoenix Admin: Peers</title>', $html);
     }
 
+    public function testPageEditRoutesToEditTorrent(): void
+    {
+        // A 40-char-hex info_hash with no matching row still renders the Edit
+        // page (showing the not-found notice).
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
+        $_GET['page'] = 'edit';
+        $_GET['info_hash'] = str_repeat('a', 40);
+
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
+        $this->assertStringContainsString('<title>Phoenix Admin: Edit Torrent</title>', $html);
+    }
+
 }

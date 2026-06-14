@@ -69,7 +69,9 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
                 '<input type="hidden" name="info_hash" value="'.$info_hash.'">'.$csrf_field.
                 '<button type="submit" class="button background-pomegranate color-clouds">Delete</button></form>';
 
-            // Drill-down to this swarm's peers (info_hash is validated 40-hex).
+            // Edit + peer drill-down links (info_hash is validated 40-hex).
+            $edit_link = '<a class="button background-belize-hole color-clouds" '.
+                'href="?page=edit&amp;info_hash='.$info_hash.'">Edit</a>';
             $peers_link = '<a class="button background-clouds" '.
                 'href="?page=peers&amp;info_hash='.$info_hash.'">Peers</a>';
 
@@ -83,7 +85,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
                 '<td>'.number_format($torrent['downloads']).'</td>'.
                 '<td>'.number_format($torrent['traffic']).'</td>'.
                 '<td>'.($listed === 1 ? 'Listed' : 'Unlisted').'</td>'.
-                '<td>'.$peers_link.' '.$toggle_form.' '.$delete_form.'</td>'.
+                '<td>'.$edit_link.' '.$peers_link.' '.$toggle_form.' '.$delete_form.'</td>'.
                 '</tr>';
         }
 
