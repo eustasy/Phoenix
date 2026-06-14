@@ -16,7 +16,7 @@ declare(strict_types=1);
 /**
  * @param PhoenixSettings $settings
  * @param array{
- *     user: string,
+ *     user: string|null,
  *     info_hash: string,
  *     name: string|null,
  *     size: int,

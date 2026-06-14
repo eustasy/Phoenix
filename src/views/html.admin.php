@@ -136,6 +136,53 @@ function view_admin_html(array $settings, bool $tables_installed, array|false $d
 					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Upgrade Schema">
 					<div class="clear"></div>
 				</form>';
+
+            // Add-a-torrent form. enctype is multipart so the .torrent file
+            // input rides along; the parsed file supplies the base for every
+            // field, with any explicit field overriding it (see
+            // admin_torrent_add_action). No "mysql" class so the maintenance
+            // forms' double-submit guard never interferes with the upload.
+            $mysql_html .= '<br><h1>Add a Torrent</h1>
+				<form action="" method="POST" enctype="multipart/form-data">
+					<p class="text-left">Name<br><input type="text" name="name"></p>
+					<p class="text-left">Info Hash<br><input type="text" name="info_hash"></p>
+					<p class="text-left">Size (bytes)<br><input type="number" name="size"></p>
+					<p class="text-left"><input type="checkbox" name="listed" value="1" checked> Listed on the public index</p>
+					<p class="text-left">Filename<br><input type="text" name="filename"></p>
+					<p class="text-left">Files (JSON)<br><textarea name="files"></textarea></p>
+					<p class="text-left">Trackers (one per line)<br><textarea name="trackers"></textarea></p>
+					<p class="text-left">Web Seeds (one per line)<br><textarea name="webseeds"></textarea></p>
+					<p class="text-left">Or drag &amp; drop / choose a .torrent file<br>
+						<span id="torrent-drop" style="display:inline-block;border:2px dashed #bdc3c7;border-radius:.3em;padding:1em;cursor:pointer"><input type="file" name="torrent" id="torrent-file" accept=".torrent,application/x-bittorrent"><span id="torrent-drop-hint"></span></span>
+					</p>
+					<script>
+					(function () {
+						var zone = document.getElementById("torrent-drop");
+						var input = document.getElementById("torrent-file");
+						var hint = document.getElementById("torrent-drop-hint");
+						if (!zone || !input) { return; }
+						var paint = function (c) { zone.style.borderColor = c; };
+						["dragenter", "dragover"].forEach(function (ev) {
+							zone.addEventListener(ev, function (e) { e.preventDefault(); paint("#3498db"); });
+						});
+						["dragleave", "drop"].forEach(function (ev) {
+							zone.addEventListener(ev, function (e) { e.preventDefault(); paint("#bdc3c7"); });
+						});
+						zone.addEventListener("drop", function (e) {
+							if (e.dataTransfer && e.dataTransfer.files.length) {
+								input.files = e.dataTransfer.files;
+								if (hint) { hint.textContent = " " + input.files[0].name; }
+							}
+						});
+						input.addEventListener("change", function () {
+							if (hint) { hint.textContent = input.files.length ? " " + input.files[0].name : ""; }
+						});
+					})();
+					</script>
+					<input type="hidden" name="process" value="torrent_add">'.$csrf_field.'
+					<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Add Torrent">
+					<div class="clear"></div>
+				</form>';
         }
     }
 

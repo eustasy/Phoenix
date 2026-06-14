@@ -197,6 +197,53 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertStringNotContainsString('Compatibility Check', $after['body']);
     }
 
+    #[Depends('testInstallSucceeds')]
+    public function testAdminPanelAddsTorrentFromUpload(): void
+    {
+        // Drive the admin add-torrent form end-to-end: log in for a session +
+        // CSRF token, build a single-file .torrent, and POST it multipart to
+        // admin.php with process=torrent_add. The panel re-renders with the
+        // action's message. Uses a DISTINCT info_hash from the API smoke tests.
+        require_once dirname(__DIR__, 2).'/src/functions/bencode.encode.php';
+
+        $session = $this->adminSession();
+
+        $info = [
+            'name' => 'Admin Panel Upload.iso',
+            'length' => 5150,
+            'piece length' => 16384,
+            'pieces' => str_repeat("\x00", 20),
+        ];
+        $raw = \bencode_encode(['info' => $info]);
+        $hash = sha1(\bencode_encode($info));
+        $this->assertNotSame(str_repeat('d', 40), $hash);
+
+        $r = $this->postMultipart(
+            '/admin.php',
+            [
+                'process' => 'torrent_add',
+                'csrf' => $session['csrf'],
+            ],
+            [
+                'name' => 'torrent',
+                'filename' => 'admin-upload.torrent',
+                'content' => $raw,
+                'type' => 'application/x-bittorrent',
+            ],
+            ['Cookie' => $session['cookie']],
+        );
+        $this->assertSame(200, $r['status'], $r['body']);
+        $this->assertStringContainsString('Torrent added.', $r['body']);
+
+        // The admin-added torrent records a NULL owner.
+        $db = $this->db();
+        $prefix = $this->dbCreds()['db_prefix'];
+        $this->assertSame(
+            1,
+            $this->scalar($db, "SELECT COUNT(*) FROM `{$prefix}torrents` WHERE `info_hash`='{$hash}' AND `user` IS NULL"),
+        );
+    }
+
     //// bin/ cron entry points (CLI, not HTTP)
 
     #[Depends('testInstallSucceeds')]

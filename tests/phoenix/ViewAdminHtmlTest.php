@@ -113,8 +113,26 @@ class ViewAdminHtmlTest extends TestCase
             false,
             'deadbeefToken',
         );
-        // One csrf field per form: logout, setup, clean, optimize, migrate.
-        $this->assertSame(5, substr_count($html, 'name="csrf" value="deadbeefToken"'));
+        // One csrf field per form: logout, setup, clean, optimize, migrate,
+        // and the add-torrent form (which renders when tables are installed).
+        $this->assertSame(6, substr_count($html, 'name="csrf" value="deadbeefToken"'));
+    }
+
+    public function testRendersAddTorrentFormWhenInstalled(): void
+    {
+        // The add-torrent form (process=torrent_add) only renders when tables
+        // are installed, and needs multipart encoding for its .torrent upload.
+        $installed = view_admin_html($this->settings(), true, false);
+        $this->assertStringContainsString('name="process" value="torrent_add"', $installed);
+        $this->assertStringContainsString('enctype="multipart/form-data"', $installed);
+        $this->assertStringContainsString('type="file" name="torrent"', $installed);
+        // The file input sits in a drag-and-drop zone (the script assigns
+        // dropped files to it) and accepts .torrent.
+        $this->assertStringContainsString('id="torrent-drop"', $installed);
+        $this->assertStringContainsString('accept=".torrent', $installed);
+
+        $notInstalled = view_admin_html($this->settings(), false, false);
+        $this->assertStringNotContainsString('name="process" value="torrent_add"', $notInstalled);
     }
 
     public function testRendersStatsBlockWhenStatsProvided(): void
@@ -194,6 +212,7 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertStringNotContainsString('name="process" value="clean"', $html);
         $this->assertStringNotContainsString('name="process" value="optimize"', $html);
         $this->assertStringNotContainsString('name="process" value="migrate"', $html);
+        $this->assertStringNotContainsString('name="process" value="torrent_add"', $html);
     }
 
 }

@@ -58,6 +58,9 @@ function admin_dashboard_page(mysqli $connection, array $settings, int $time): s
     } elseif ($process === 'migrate') {
         require_once __DIR__.'/admin.migrate.php';
         $message = admin_migrate_action($connection, $settings, $time);
+    } elseif ($process === 'torrent_add') {
+        require_once __DIR__.'/admin.torrent.add.php';
+        $message = admin_torrent_add_action($connection, $settings);
     }
 
     $database_size = false;
