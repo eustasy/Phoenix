@@ -1,0 +1,40 @@
+# Disposable local environment for testing Phoenix setup + config end to end.
+# Mirrors the smoke-test CI (MariaDB + PHP with mysqli/gd + a mariadb-dump
+# shim) and starts with NO config, so the first hit on /admin.php is the
+# installer. The working tree is mounted read-only and copied into the
+# container, so nothing the installer writes (config, tables, vendor) touches
+# your host checkout — the environment is throwaway by design.
+#
+# Quick start (run from the repo root):
+#   docker compose -f docker-compose.dev.yml up --build
+#   open http://localhost:8000/admin.php
+#   docker compose -f docker-compose.dev.yml down -v   # stop + wipe the DB
+#
+# Installer DB settings:  host db, name phoenix, user phoenix, pass phoenix_pass
+---
+services:
+  db:
+    image: mariadb:lts
+    environment:
+      MARIADB_ROOT_PASSWORD: phoenix_root
+      MARIADB_DATABASE: phoenix
+      MARIADB_USER: phoenix
+      MARIADB_PASSWORD: phoenix_pass
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ".:/repo:ro"
+    command: ["bash", "/repo/docker/entrypoint.sh"]

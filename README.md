@@ -106,6 +106,24 @@ The admin panel supports an optional TOTP second factor (the codes from authenti
 
 Once enabled, the login page asks for the 6-digit code alongside the password. To recover from a lost authenticator, remove the `$settings['admin_totp_secret'] = '...';` line from `config/phoenix.custom.php`; the panel reverts to password-only and you can re-enrol.
 
+## Local Testing (Docker)
+
+To exercise installation and configuration end to end without touching your machine, the repo ships a disposable Docker environment: MariaDB plus PHP (with `mysqli` and `gd`), Composer, and a MariaDB-compatible `mysqldump` — mirroring the smoke-test CI. It starts with no configuration, so it lands in the installer.
+
+```bash
+# From the repo root:
+docker compose -f docker-compose.dev.yml up --build
+```
+
+Then open <http://localhost:8000/admin.php> and run **Setup**, entering database host `db`, name `phoenix`, user `phoenix`, password `phoenix_pass`. After install you can log in and exercise every admin page (dashboard, torrents, backups, settings), enrol 2FA from the installer's QR, and run an on-demand backup.
+
+```bash
+# Stop and wipe the database (next start is a fresh installer again):
+docker compose -f docker-compose.dev.yml down -v
+```
+
+The working tree is mounted read-only and copied into the container by `docker/entrypoint.sh`, so nothing the installer writes — config, tables, `vendor/` — touches your checkout; the environment is throwaway. The first build compiles the PHP extensions; later starts reuse the cached image. (To iterate on code live instead, mount `.:/app:rw` directly and skip the copy in `docker/entrypoint.sh`.)
+
 ## Server Configuration
 
 Phoenix ships with example web server configurations covering document root, `.php` extension stripping, and admin endpoint rate limiting:
