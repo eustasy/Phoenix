@@ -1,4 +1,4 @@
-# Phoenix v4.0beta3
+# Phoenix v4.1beta4
 
 [![Normal (PHP)](https://github.com/eustasy/Phoenix/actions/workflows/php.yml/badge.svg)](https://github.com/eustasy/Phoenix/actions/workflows/php.yml)
 [![Test (PHP)](https://github.com/eustasy/Phoenix/actions/workflows/test-php.yml/badge.svg)](https://github.com/eustasy/Phoenix/actions/workflows/test-php.yml)
@@ -9,32 +9,46 @@
 
 A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people that just want to host a tracker, not the torrent listing site.
 
+## Table of Contents
+
+* [Installation](#installation)
+* [Project Structure](#project-structure)
+* [Configuration](#configuration)
+* [Server Configuration](#server-configuration)
+* [Cron](#cron-automating-maintenance)
+* [Documentation](#documentation)
+
 ## Installation
 
 > **Upgrading from 3.x?** The document root, configuration, and cron paths have all moved in 4.0. Follow the [3.x → 4.0 Migration Guide](./MIGRATING.md) before deploying. See [CHANGELOG.md](./CHANGELOG.md) for the full list of changes.
 
-### What Do You Need?
+### Requirements
 
-#### Required
+* PHP 8.2+ (the latest supported release recommended) with the `mysqli` extension. The bundled `filter`, `json`, `session`, `xml`, `pcre`, and `date` extensions are also used and enabled by default.
+* A MySQL-compatible database — MariaDB recommended.
+* Apache 2.4 or Nginx 1.18+.
 
-* PHP >= 8.2 with the `mysqli` and `xml` extensions. The bundled `date`, `filter`, `json`, `pcre`, and `session` extensions are also used (these ship enabled by default).
-* A PHP-compatible web server (Apache or Nginx).
-* A MySQL-compatible database.
+### With server access
 
-#### Recommended
+Use this path when you control the web server configuration (VPS, dedicated server, etc.).
 
-* [The latest supported version of PHP](https://www.php.net/supported-versions.php)
-* The latest version of Nginx (>= 1.18 with HTTP/2) or Apache 2.4.
-* The latest version of MariaDB.
+1. Upload Phoenix to your server.
+2. Point your web server's document root at the `public/` directory. Only `public/` should be web-reachable; `src/`, `bin/`, `config/`, and `tests/` must remain outside the document root so configuration (including database credentials) is never served. See [APACHE.md](./APACHE.md) or [NGINX.md](./NGINX.md) for vhost examples and `.php` extension-stripping rules.
+3. Load `public/admin.php` in your browser and run **Setup** (this creates the database tables and writes `config/phoenix.custom.php`).
+4. After setup, secure `admin.php` — the simplest approach is to remove it from `public/` (`mv public/admin.php src/admin.php`). Move it back temporarily if you ever need to re-run setup. Alternatively, rate-limit the endpoint; see [APACHE.md](./APACHE.md) or [NGINX.md](./NGINX.md).
 
-### Install Guide
+### Managed LAMP / shared hosting
 
-1. Copy `config/phoenix.default.php` to `config/phoenix.custom.php`
-2. Edit the variables in `config/phoenix.custom.php`
-3. Upload Phoenix to your server.
-4. Point your web server's document root at the `public/` directory. Only `public/` should be web-reachable; `src/`, `bin/`, `config/`, and `tests/` must remain outside the document root so configuration (including database credentials) is never served. See [APACHE.md](./APACHE.md) or [NGINX.md](./NGINX.md) for example configurations.
-5. Load `admin.php` in your browser and run the `Setup` option.
-6. After setup, move `public/admin.php` into `src/` (`mv public/admin.php src/admin.php`) so it stops being web-reachable. Move it back temporarily if you ever need to re-run setup.
+Use this path when you use a cPanel-style host with no direct web server configuration access.
+
+1. Upload Phoenix to your server.
+2. Set the site's document root to `public/` via your hosting control panel where possible. If the panel does not allow changing the document root, put the contents of `public/` in the web root and keep `src/`, `config/`, `bin/`, and `tests/` outside (above) it.
+3. Apache hosts: add the `.php`-stripping rewrite rules from [APACHE.md](./APACHE.md) to `public/.htaccess` so clients can reach `/announce` without the `.php` suffix.
+4. Create the database in your hosting control panel.
+5. Set up the tracker — choose one:
+    * Load `public/admin.php` in your browser and run **Setup**. It will create the tables and write `config/phoenix.custom.php` with your database credentials.
+    * Or import the schema files manually (`sql/peers.sql`, `sql/torrents.sql`, `sql/tasks.sql`, `sql/events.sql`), copy `config/phoenix.default.php` to `config/phoenix.custom.php`, and fill in your database credentials.
+6. After setup, secure `admin.php` as described above.
 
 ## Project Structure
 
@@ -107,24 +121,6 @@ The admin panel supports an optional TOTP second factor (the codes from authenti
 
 Once enabled, the login page asks for the 6-digit code alongside the password. To recover from a lost authenticator, remove the `$settings['admin_totp_secret'] = '...';` line from `config/phoenix.custom.php`; the panel reverts to password-only and you can re-enrol.
 
-## Local Testing (Docker)
-
-To exercise installation and configuration end to end without touching your machine, the repo ships a disposable Docker environment: MariaDB plus PHP (with `mysqli` and `gd`), Composer, and a MariaDB-compatible `mysqldump` — mirroring the smoke-test CI. It starts with no configuration, so it lands in the installer.
-
-```bash
-# From the repo root:
-docker compose -f docker-compose.dev.yml up --build
-```
-
-Then open <http://localhost:8000/admin.php> and run **Setup**, entering database host `db`, name `phoenix`, user `phoenix`, password `phoenix_pass`. After install you can log in and exercise every admin page (dashboard, torrents, backups, settings), enrol 2FA from the installer's QR, and run an on-demand backup.
-
-```bash
-# Stop and wipe the database (next start is a fresh installer again):
-docker compose -f docker-compose.dev.yml down -v
-```
-
-The working tree is mounted read-only and copied into the container by `docker/entrypoint.sh`, so nothing the installer writes — config, tables, `vendor/` — touches your checkout; the environment is throwaway. The first build compiles the PHP extensions; later starts reuse the cached image. (To iterate on code live instead, mount `.:/app:rw` directly and skip the copy in `docker/entrypoint.sh`.)
-
 ## Server Configuration
 
 Phoenix ships with example web server configurations covering document root, `.php` extension stripping, and admin endpoint rate limiting:
@@ -132,14 +128,24 @@ Phoenix ships with example web server configurations covering document root, `.p
 * [APACHE.md](./APACHE.md)
 * [NGINX.md](./NGINX.md)
 
-### Cron (Automating Maintenance)
+## Cron (Automating Maintenance)
 
 1. Edit `config/phoenix.custom.php` and set:
-     * `$settings['backup_dir']` to change the backup directory. Defaults to `backups`.
-     * `$settings['clean_with_cron']` to `true` to enable the script and disable occaisional cleanup on announce.
-2. Edit your crontab with `crontab -e`, and add a crontab like the following. You can edit the times, and should make sure the paths are correct by running the commands after the asterisks.
+    * `$settings['backup_dir']` to change the backup directory. Defaults to `backups/` in the project root.
+    * `$settings['clean_with_cron']` to `true` to enable the script and disable occasional cleanup on announce.
+2. Edit your crontab with `crontab -e`, and add entries like the following. Adjust the times and verify the paths are correct.
 
 ```cron
 15 * * * * php ~/phoenix/bin/clean-and-optimize.php
 30 * * * * php ~/phoenix/bin/backup-database.php
 ```
+
+## Documentation
+
+* [MIGRATING.md](./MIGRATING.md) — upgrading from 3.x to 4.0.
+* [APACHE.md](./APACHE.md) — web server configuration for Apache 2.4.
+* [NGINX.md](./NGINX.md) — web server configuration for Nginx.
+* [.github/CONTRIBUTING.md](./.github/CONTRIBUTING.md) — development environment, tests, and contribution conventions.
+* [ALTERNATIVES.md](./ALTERNATIVES.md) — other BitTorrent tracker projects.
+* [CHANGELOG.md](./CHANGELOG.md) — release history.
+* [LICENSE.md](./LICENSE.md) — MIT licence.

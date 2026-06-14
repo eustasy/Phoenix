@@ -5,6 +5,47 @@ single-purpose files glued together by `require_once`. These conventions keep
 that layout navigable; CI enforces most of them (qlty runs phpstan and
 php-cs-fixer, `ConventionsTest` checks the structural rules).
 
+## Local development environment
+
+### Docker (recommended)
+
+The repo ships a disposable Docker environment: MariaDB plus PHP (with `mysqli`
+and `gd`), Composer, and a MariaDB-compatible `mysqldump` — mirroring the
+smoke-test CI. It starts with no configuration, so it lands in the installer.
+
+```bash
+# From the repo root:
+docker compose -f docker-compose.dev.yml up --build
+```
+
+Then open <http://localhost:8000/admin.php> and run **Setup**, entering database
+host `db`, name `phoenix`, user `phoenix`, password `phoenix_pass`. After
+install you can log in and exercise every admin page (dashboard, torrents,
+backups, settings), enrol 2FA from the installer's QR, and run an on-demand
+backup.
+
+```bash
+# Stop and wipe the database (next start is a fresh installer again):
+docker compose -f docker-compose.dev.yml down -v
+```
+
+The working tree is mounted read-only and copied into the container by
+`docker/entrypoint.sh`, so nothing the installer writes — config, tables,
+`vendor/` — touches your checkout; the environment is throwaway. The first
+build compiles the PHP extensions; later starts reuse the cached image.
+
+### Without Docker
+
+Install Composer dependencies, then run the test suite against a reachable
+MariaDB instance (see the test runner notes in CLAUDE.md for bootstrap details):
+
+```bash
+composer install
+vendor/bin/phpunit
+```
+
+See the **Tests** section below for conventions.
+
 ## One function per file
 
 **Every file in `src/functions/`, `src/model/`, `src/views/`, and
