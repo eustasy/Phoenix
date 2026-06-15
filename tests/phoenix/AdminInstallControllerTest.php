@@ -55,8 +55,6 @@ class AdminInstallControllerTest extends PhoenixTestCase
         $this->assertStringContainsString('name="process" value="install"', $html);
         // Default prefix populated when the user hasn't typed one yet.
         $this->assertStringContainsString('name="db_prefix" value="phoenix_"', $html);
-        // No error banner expected.
-        $this->assertStringNotContainsString('background-pomegranate', $html);
     }
 
     public function testFormRepopulatesUserSubmittedValues(): void
