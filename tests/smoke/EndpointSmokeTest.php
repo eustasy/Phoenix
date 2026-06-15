@@ -506,7 +506,7 @@ class EndpointSmokeTest extends SmokeTestCase
         $decoded = json_decode($r['body'], true);
         $this->assertIsArray($decoded);
         $this->assertArrayHasKey('phoenix', $decoded);
-        $this->assertStringContainsString('Phoenix', (string) $decoded['phoenix']['version']);
+        $this->assertStringContainsString('v4.', (string) $decoded['phoenix']['version']);
 
         $xml = $this->get('/api/index.php', ['xml' => '1']);
         $this->assertSame(200, $xml['status']);
