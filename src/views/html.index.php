@@ -111,7 +111,7 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
 		</div>
 	</div>
 
-	<p class="dim" style="font-size:var(--font-size-sm);margin-top:var(--space-4)">Health is the seeder share of each swarm. Click a hash to copy it.</p>';
+	<p class="dim" style="font-size:var(--font-size-sm);margin-top:var(--space-4)">Health is the seeder share of each swarm.</p>';
 
     return view_public_layout_html('Torrent Index — Phoenix', $body, 'index', $version, false, '', 'phMakeSortable(\'#tbl-index\');');
 }
