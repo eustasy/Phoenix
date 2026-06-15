@@ -10,6 +10,11 @@ body { background-color: var(--color-bg); color: var(--color-text); }
 
 ::selection { background-color: var(--color-selection); }
 
+/* The hidden attribute must beat an inline display (e.g. display:flex on a
+   JS-toggled alert), so a placeholder banner stays hidden until JS reveals it
+   by clearing the attribute. */
+[hidden] { display: none !important; }
+
 /* Phoenix flame mark — disc themes with --color-action; warm flame on top. */
 .ph-mark { display: block; }
 .ph-mark-disc { fill: var(--color-action); }
