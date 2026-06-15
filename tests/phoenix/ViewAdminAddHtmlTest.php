@@ -28,7 +28,7 @@ class ViewAdminAddHtmlTest extends TestCase
         $html = view_admin_add_html($this->settings(), true, false, '');
         $this->assertStringStartsWith('<!DOCTYPE html>', $html);
         $this->assertStringContainsString('<title>Phoenix Admin: Add a Torrent</title>', $html);
-        $this->assertStringContainsString('<a href="?page=add" class="nav-link current" aria-current="page">Add Torrent</a>', $html);
+        $this->assertStringContainsString('<a href="?page=add" class="is-active" aria-current="page">', $html);
     }
 
     public function testRendersFormWhenInstalled(): void

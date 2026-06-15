@@ -114,17 +114,16 @@ class ViewAdminSettingsHtmlTest extends TestCase
     {
         $html = view_admin_settings_html($this->settings(), false, false, 'tok');
         // The settings table still renders...
-        $this->assertStringContainsString('<table class="data-table">', $html);
+        $this->assertStringContainsString('ph-card-table', $html);
         // ...but no edit forms, and the not-writable note shows.
         $this->assertStringNotContainsString('name="process" value="password"', $html);
         $this->assertStringNotContainsString('name="process" value="settings"', $html);
         $this->assertStringContainsString('is not writable', $html);
     }
 
-    public function testUsesWideLayoutAndMarksSettingsNavActive(): void
+    public function testMarksSettingsNavActive(): void
     {
         $html = view_admin_settings_html($this->settings(), true, false, 'tok');
-        $this->assertStringContainsString('<body class="wide">', $html);
-        $this->assertStringContainsString('href="?page=settings" class="nav-link current" aria-current="page"', $html);
+        $this->assertStringContainsString('href="?page=settings" class="is-active" aria-current="page"', $html);
     }
 }

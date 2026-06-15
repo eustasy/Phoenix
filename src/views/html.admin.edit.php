@@ -11,7 +11,7 @@ declare(strict_types=1);
 // sanitize_torrent_meta on submit. Every value is htmlspecialchars()-escaped.
 // When the torrent is missing, a notice replaces the form. Marks the Torrents
 // nav active (this is a drill-down beneath it). Wrapped in the shared admin
-// layout (wide variant). Returns HTML string.
+// layout (narrow). Returns HTML string.
 
 /**
  * @param PhoenixSettings $settings
@@ -30,22 +30,21 @@ declare(strict_types=1);
  */
 function view_admin_edit_html(array $settings, string $info_hash, array|false $torrent, string|false $message, string $csrf_token): string
 {
+    require_once __DIR__.'/html.admin.layout.php';
+    require_once __DIR__.'/html.hash.php';
+
     $csrf_field = '<input type="hidden" name="csrf" value="'.htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8').'">';
     $hash = htmlspecialchars($info_hash, ENT_QUOTES, 'UTF-8');
+    $back = '<a class="btn btn-secondary btn-sm" href="?page=torrents"><span class="ph-ico" data-lucide="arrow-left"></span>Back</a>';
 
-    $body = '<h1>Edit Torrent</h1>
-		<p class="text-left"><a href="?page=torrents">&larr; Back to Torrents</a></p>';
-
-    if ($message) {
-        $body .= '<div class="box background-wisteria color-clouds"><h3>'.htmlspecialchars($message).'</h3></div>';
-    }
+    $message_html = $message
+        ? '<div class="alert alert-info"><h3 class="mt-0 mb-0">'.htmlspecialchars($message).'</h3></div>'
+        : '';
 
     if ($torrent === false) {
-        $body .= '<p class="box background-pomegranate color-clouds">Torrent not found.</p>';
+        $body = $message_html.'<div class="alert alert-danger" style="display:flex;gap:var(--space-2);align-items:center"><span class="ph-ico" data-lucide="circle-alert"></span>Torrent not found.</div>';
 
-        require_once __DIR__.'/html.admin.layout.php';
-
-        return view_admin_layout_html($settings, 'Edit Torrent', $body, 'torrents', $csrf_token, true);
+        return view_admin_layout_html($settings, 'Edit Torrent', $body, 'torrents', $csrf_token, 'Tracker', $back, true);
     }
 
     // Render the stored meta back into the request shape the form submits.
@@ -68,22 +67,31 @@ function view_admin_edit_html(array $settings, string $info_hash, array|false $t
         : htmlspecialchars(implode("\n", $torrent['webseeds']), ENT_QUOTES, 'UTF-8');
     $checked = $torrent['listed'] === 1 ? ' checked' : '';
 
-    $body .= '<form class="mysql" action="?page=edit&amp;info_hash='.$hash.'" method="POST">
-			<input type="hidden" name="process" value="torrent_edit">
-			<input type="hidden" name="info_hash" value="'.$hash.'">'.$csrf_field.'
-			<p class="text-left">Info Hash<br><code>'.$hash.'</code></p>
-			<p class="text-left">Name<br><input type="text" name="name" value="'.$name.'"></p>
-			<p class="text-left">Size (bytes)<br><input type="number" name="size" value="'.intval($torrent['size']).'"></p>
-			<p class="text-left"><input type="checkbox" name="listed" value="1"'.$checked.'> Listed on the public index</p>
-			<p class="text-left">Filename<br><input type="text" name="filename" value="'.$filename.'"></p>
-			<p class="text-left">Files (JSON)<br><textarea name="files">'.$files.'</textarea></p>
-			<p class="text-left">Trackers (one per line)<br><textarea name="trackers">'.$trackers.'</textarea></p>
-			<p class="text-left">Web Seeds (one per line)<br><textarea name="webseeds">'.$webseeds.'</textarea></p>
-			<input class="button background-belize-hole color-clouds float-right p-like" type="submit" name="submit" value="Save Changes">
-			<div class="clear"></div>
-		</form>';
+    $body = $message_html.'
+		<div class="ph-form-card">
+			<div class="ph-field"><label>Info hash <span class="dim">(read-only)</span></label>
+				<div class="hash" style="background:var(--color-code-bg);border:1px solid var(--color-code-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);width:100%"><span class="hash-text" style="max-width:none;font-size:var(--font-size-sm)">'.$hash.'</span></div>
+			</div>
+			<form class="mysql" action="?page=edit&amp;info_hash='.$hash.'" method="POST">
+				<input type="hidden" name="process" value="torrent_edit">
+				<input type="hidden" name="info_hash" value="'.$hash.'">'.$csrf_field.'
+				<div class="ph-field-row">
+					<div class="ph-field"><label>Name</label><input type="text" name="name" value="'.$name.'"></div>
+					<div class="ph-field"><label>Size (bytes)</label><input type="number" name="size" value="'.intval($torrent['size']).'"></div>
+				</div>
+				<div class="ph-field"><label>Filename</label><input type="text" name="filename" value="'.$filename.'"></div>
+				<div class="ph-field"><label>Files (JSON)</label><textarea name="files" class="code" rows="3">'.$files.'</textarea></div>
+				<div class="ph-field-row">
+					<div class="ph-field"><label>Trackers (one per line)</label><textarea name="trackers" class="code" rows="3">'.$trackers.'</textarea></div>
+					<div class="ph-field"><label>Web seeds (one per line)</label><textarea name="webseeds" class="code" rows="3">'.$webseeds.'</textarea></div>
+				</div>
+				<label class="checkbox" style="margin-block:var(--space-2)"><input type="checkbox" name="listed" value="1"'.$checked.'><span class="checkbox-label">Listed on the public index</span></label>
+				<div class="ph-form-actions">
+					<button type="submit" name="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="save"></span>Save Changes</button>
+					<a class="btn btn-ghost" href="?page=torrents">Cancel</a>
+				</div>
+			</form>
+		</div>';
 
-    require_once __DIR__.'/html.admin.layout.php';
-
-    return view_admin_layout_html($settings, 'Edit Torrent', $body, 'torrents', $csrf_token, true);
+    return view_admin_layout_html($settings, 'Edit Torrent', $body, 'torrents', $csrf_token, 'Tracker', $back, true);
 }

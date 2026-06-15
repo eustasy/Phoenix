@@ -3,181 +3,127 @@
 declare(strict_types=1);
 
 ////	view_admin_layout_html
-// Render the admin panel page chrome around a page-specific body.
-// Owns the full HTML document: <head> (title, meta, double-submit guard,
-// stylesheets, base styles), the version line, the logout form, and the
-// admin navigation bar. The per-page controller assembles $body (trusted
-// HTML) and passes it in, so this view stays pure: no auth, no session, no
-// side effects. The CSRF token is passed in for the logout form rather than
-// read here, keeping the view free of request state.
-// Returns HTML string. Caller is responsible for echo and exit.
+// Render the admin panel chrome around a page-specific body: the sticky flame-
+// marked sidebar (Tracker + Server nav groups, theme toggle, logout) and the
+// main column's top bar (crumb + title + optional actions). The per-page
+// controller assembles $body (trusted HTML) and passes it in, so this view
+// stays pure — no auth, no session, no side effects. The CSRF token rides in
+// for the logout form. Composed from the shared head/mark/theme-toggle/scripts
+// partials. Returns the full HTML document; caller echoes and exits.
 //
 // Parameters:
 //   $settings    - settings array (uses phoenix_version, admin_password)
-//   $title       - page title, rendered as "Phoenix Admin: <title>"
-//   $body        - trusted HTML body for the active page (not escaped)
-//   $active      - page key of the current page; the matching nav link is
-//                  marked current (aria-current + .current class)
+//   $title       - page title; topbar <h1> and "Phoenix Admin: <title>"
+//   $body        - trusted HTML body for the active page (.ph-body content)
+//   $active      - nav key of the current page; that link is marked current
 //   $csrf_token  - per-session token for the logout form (empty when no
 //                  admin_password is set, since CSRF is not enforced then)
-//   $wide        - when true, widen the page column. Data pages (Torrents,
-//                  Backups) opt in for tables; the diagnostics dashboard stays
-//                  in the default narrow column.
+//   $crumb       - small label above the title (e.g. "Tracker" / "Server")
+//   $actions     - trusted HTML for the topbar action area (buttons), or ''
+//   $narrow      - narrow the body column (forms/diagnostics opt in)
+//   $extra_head  - per-page <style>/<link> injected into <head>
+//   $inline_js   - per-page inline JS appended after assets/app.js
+//   $extra_srcs  - per-page <script src> URLs (e.g. the map library)
 
 /**
  * @param PhoenixSettings $settings
+ * @param list<string> $extra_srcs
  */
-function view_admin_layout_html(array $settings, string $title, string $body, string $active, string $csrf_token = '', bool $wide = false): string
+function view_admin_layout_html(array $settings, string $title, string $body, string $active, string $csrf_token = '', string $crumb = 'Tracker', string $actions = '', bool $narrow = false, string $extra_head = '', string $inline_js = '', array $extra_srcs = []): string
 {
-    // Hidden field carrying the CSRF token for the logout form. Escaped
-    // defensively even though the token is always hex.
-    $csrf_field = '<input type="hidden" name="csrf" value="'.htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8').'">';
+    require_once __DIR__.'/html.head.php';
+    require_once __DIR__.'/html.mark.php';
+    require_once __DIR__.'/html.theme.toggle.php';
+    require_once __DIR__.'/html.scripts.php';
 
-    // Build logout form. POST-only so a cross-site GET (e.g. an <img> tag)
-    // cannot end an admin session. Only shown when auth is configured.
+    ////	Navigation
+    // Two groups, matching the Tracker / Server split. The link whose key is
+    // $active is marked current (is-active + aria-current) so users and tests
+    // can tell where they are.
+    $groups = [
+        'Tracker' => [
+            'dashboard' => ['layout-dashboard', 'Dashboard'],
+            'torrents' => ['database', 'Torrents'],
+            'peers' => ['users', 'Peers'],
+            'geography' => ['globe-2', 'Geography'],
+            'add' => ['plus', 'Add Torrent'],
+        ],
+        'Server' => [
+            'support' => ['server', 'Server Support'],
+            'utilities' => ['wrench', 'Utilities'],
+            'backups' => ['archive', 'Backups'],
+            'settings' => ['settings', 'Settings'],
+        ],
+    ];
+    $nav_html = '';
+    foreach ($groups as $label => $items) {
+        $links = '';
+        foreach ($items as $key => [$icon, $text]) {
+            $attrs = $key === $active ? ' class="is-active" aria-current="page"' : '';
+            $links .= '<a href="?page='.$key.'"'.$attrs.'><span class="ph-ico" data-lucide="'.$icon.'"></span>'.$text.'</a>';
+        }
+        $nav_html .= '<div class="ph-navlabel">'.$label.'</div><nav class="ph-nav">'.$links.'</nav>';
+    }
+
+    ////	Logout — POST only (a cross-site GET cannot end the session) and only
+    // when auth is configured.
     $logout_html = '';
     if (! empty($settings['admin_password'])) {
-        $logout_html = '<form method="POST" class="text-right" style="display:inline">'.
-            '<input type="hidden" name="logout" value="1">'.$csrf_field.
-            '<button type="submit" class="link-button" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline">Log out</button>'.
+        $logout_html = '<form method="POST" style="display:inline">'.
+            '<input type="hidden" name="logout" value="1">'.
+            '<input type="hidden" name="csrf" value="'.htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8').'">'.
+            '<button type="submit" class="btn btn-ghost btn-sm"><span class="ph-ico" data-lucide="log-out"></span>Log out</button>'.
             '</form>';
     }
 
-    ////	Navigation
-    // Top-level admin pages. The link whose key matches $active is marked
-    // current so the user (and tests) can tell where they are.
-    $nav_items = [
-        'dashboard' => 'Dashboard',
-        'torrents' => 'Torrents',
-        'add' => 'Add Torrent',
-        'support' => 'Server Support',
-        'utilities' => 'Utilities',
-        'backups' => 'Backups',
-        'settings' => 'Settings',
-    ];
-    $nav_links = '';
-    foreach ($nav_items as $key => $label) {
-        if ($key === $active) {
-            $nav_links .= '<a href="?page='.$key.'" class="nav-link current" aria-current="page">'.$label.'</a>';
-        } else {
-            $nav_links .= '<a href="?page='.$key.'" class="nav-link">'.$label.'</a>';
-        }
-    }
-    $nav_html = '<nav class="admin-nav">'.$nav_links.'</nav>';
+    $crumb_html = $crumb !== '' ? '<p class="ph-crumb">'.htmlspecialchars($crumb, ENT_QUOTES, 'UTF-8').'</p>' : '';
+    $actions_html = $actions !== '' ? '<div class="ph-topbar-actions">'.$actions.'</div>' : '';
+    $body_class = 'ph-body'.($narrow ? ' narrow' : '');
 
-    return '<!DOCTYPE html>
-<html lang="en">
-<head>
-	<title>Phoenix Admin: '.$title.'</title>
-	<meta charset="UTF-8">
-	<script>
-		// Disable every submit button on the page when any .mysql form is
-		// submitted, to prevent double-submission across the mutually
-		// exclusive setup/clean/optimize forms.
-		document.addEventListener(\'DOMContentLoaded\', function () {
-			document.querySelectorAll(\'form.mysql\').forEach(function (form) {
-				form.addEventListener(\'submit\', function () {
-					document.querySelectorAll(\'input[type="submit"]\').forEach(function (btn) {
-						btn.disabled = true;
-					});
-				});
-			});
-		});
-	</script>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css" integrity="sha256-WAgYcAck1C1/zEl5sBl5cfyhxtLgKGdpI3oKyJffVRI=" crossorigin="anonymous">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/eustasy/colors.css@2.0.9/flatui.min.css" integrity="sha256-88LCIpF5risV+CCY/1CbWvHUJ7Rxg5KIj1tTg4ZUZLQ=" crossorigin="anonymous">
-	<style>
-		body {
-			margin: 0 auto;
-			max-width: 600px;
-			padding: 1% 10%;
-			text-align: center;
-			width: 80%;
-		}
-		h1,
-		h2,
-		h3,
-		h4,
-		h5,
-		h6 {
-			font-weight: normal;
-		}
-		a {
-			text-decoration: none;
-		}
-		input {
-			border: none;
-		}
-		input:disabled {
-			background: #ecf0f1;
-			color: #7f8c8d;
-		}
-		.box {
-			padding: 1em;
-		}
-		.button {
-			border-radius: .2em;
-			padding: .3em;
-		}
-		p .button {
-			margin-top: -.3em;
-		}
-		.button.p-like {
-			margin: 0.7em 0;
-		}
-		.clear {
-			clear: both;
-		}
-		.float-left {
-			float: left;
-		}
-		.float-right {
-			float: right;
-		}
-		.text-center {
-			text-align: center;
-		}
-		.text-left {
-			text-align: left;
-		}
-		.text-right {
-			text-align: right;
-		}
-		.admin-nav {
-			margin: 1em 0;
-		}
-		.admin-nav .nav-link {
-			margin: 0 .5em;
-		}
-		.admin-nav .nav-link.current {
-			font-weight: bold;
-			text-decoration: underline;
-		}
-		body.wide {
-			max-width: 1100px;
-		}
-		table.data-table {
-			border-collapse: collapse;
-			margin: 1em auto;
-			text-align: left;
-			width: 100%;
-		}
-		table.data-table th,
-		table.data-table td {
-			border-bottom: 1px solid #ecf0f1;
-			padding: .4em .6em;
-			vertical-align: top;
-		}
-		table.data-table code {
-			word-break: break-all;
-		}
-	</style>
-</head>
-<body'.($wide ? ' class="wide"' : '').'>
-	<p class="text-center color-9">'.$settings['phoenix_version'].'</p>
-	'.$logout_html.'
-	'.$nav_html.'
-	'.$body.'
+    // Disable submit controls once any .mysql form is submitted, to prevent
+    // double-submission across the mutually exclusive setup/clean/optimize forms.
+    $guard_js = 'document.querySelectorAll("form.mysql").forEach(function(f){f.addEventListener("submit",function(){document.querySelectorAll(\'button[type="submit"],input[type="submit"]\').forEach(function(b){b.disabled=true;});});});';
+
+    return view_head_html('Phoenix Admin: '.$title, $extra_head).'
+<body>
+<div class="app">
+
+	<aside class="ph-sidebar">
+		<a class="ph-brand" href="admin.php">
+			'.view_mark_html().'
+			<div>
+				<div class="ph-wordmark">Phoenix</div>
+				<div class="ph-ver">'.htmlspecialchars($settings['phoenix_version'], ENT_QUOTES, 'UTF-8').'</div>
+			</div>
+		</a>
+
+		'.$nav_html.'
+
+		<div class="ph-sidebar-foot">
+			'.view_theme_toggle_html('Light mode', 'Dark mode').'
+			<hr class="ph-sidebar-sep">
+			<div class="flex items-center" style="justify-content:space-between;gap:var(--space-2)">
+				<span class="dim" style="font-size:var(--font-size-xs);font-family:var(--font-mono)">eustasy</span>
+				'.$logout_html.'
+			</div>
+		</div>
+	</aside>
+
+	<main class="ph-main">
+		<header class="ph-topbar">
+			<div>
+				'.$crumb_html.'
+				<h1>'.htmlspecialchars($title, ENT_QUOTES, 'UTF-8').'</h1>
+			</div>
+			'.$actions_html.'
+		</header>
+		<div class="'.$body_class.'">
+			'.$body.'
+		</div>
+	</main>
+
+</div>
+'.view_scripts_html($guard_js."\n".$inline_js, $extra_srcs).'
 </body>
 </html>';
 }

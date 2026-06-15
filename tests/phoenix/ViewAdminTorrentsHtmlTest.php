@@ -48,12 +48,14 @@ class ViewAdminTorrentsHtmlTest extends TestCase
     {
         $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok');
 
-        $this->assertStringContainsString('<table class="data-table">', $html);
-        $this->assertStringContainsString('<th>Name</th>', $html);
+        $this->assertStringContainsString('ph-card-table', $html);
+        $this->assertStringContainsString('>Name ', $html);
         $this->assertStringContainsString('Test Torrent', $html);
-        $this->assertStringContainsString('<code>'.str_repeat('a', 40).'</code>', $html);
+        // The hash cell carries the full info hash for click-to-copy.
+        $this->assertStringContainsString('data-hash="'.str_repeat('a', 40).'"', $html);
         $this->assertStringContainsString('alice', $html);
-        $this->assertStringContainsString('123,456', $html);
+        // Size renders human-readable (1024 bytes -> 1.0 KB).
+        $this->assertStringContainsString('1.0 KB', $html);
     }
 
     public function testListedTorrentOffersUnlist(): void
@@ -98,6 +100,7 @@ class ViewAdminTorrentsHtmlTest extends TestCase
     {
         $html = view_admin_torrents_html($this->settings(), [], false, 'tok');
         $this->assertStringContainsString('No torrents are registered.', $html);
+        // With no torrents and no unregistered swarms, no data table renders.
         $this->assertStringNotContainsString('<table', $html);
     }
 
@@ -107,11 +110,10 @@ class ViewAdminTorrentsHtmlTest extends TestCase
         $this->assertStringContainsString('&lt;b&gt;hi&lt;/b&gt;', $html);
     }
 
-    public function testUsesWideLayoutAndMarksTorrentsNavActive(): void
+    public function testMarksTorrentsNavActive(): void
     {
         $html = view_admin_torrents_html($this->settings(), [], false, 'tok');
-        $this->assertStringContainsString('<body class="wide">', $html);
-        $this->assertStringContainsString('href="?page=torrents" class="nav-link current" aria-current="page"', $html);
+        $this->assertStringContainsString('href="?page=torrents" class="is-active" aria-current="page"', $html);
     }
 
     public function testEachRowLinksToPeerDrillDown(): void
@@ -136,7 +138,7 @@ class ViewAdminTorrentsHtmlTest extends TestCase
         $html = view_admin_torrents_html($this->settings(), [], false, 'tok', $swarms);
 
         $this->assertStringContainsString('Unregistered swarms', $html);
-        $this->assertStringContainsString('<code>'.str_repeat('e', 40).'</code>', $html);
+        $this->assertStringContainsString('data-hash="'.str_repeat('e', 40).'"', $html);
         $this->assertStringContainsString('href="?page=peers&amp;info_hash='.str_repeat('e', 40).'"', $html);
     }
 

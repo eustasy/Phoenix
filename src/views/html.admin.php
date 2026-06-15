@@ -3,12 +3,11 @@
 declare(strict_types=1);
 
 ////	view_admin_html
-// Render the admin panel's Dashboard page: the tracker-statistics overview
-// (peer/torrent/download aggregates plus the last-run maintenance timestamps)
-// and the post-install confirmation banner. The diagnostics, maintenance
-// actions, and add-a-torrent form live on their own pages (Server Support,
-// Utilities, Add Torrent). Wrapped in the shared admin layout; the layout owns
-// the full HTML document and this view builds only the Dashboard body.
+// Render the admin panel's Dashboard page: the tracker-statistics overview as a
+// grid of stat cards plus the last-run maintenance table, and the post-install
+// confirmation banner. The diagnostics, maintenance actions, and add-a-torrent
+// form live on their own pages. Wrapped in the shared admin layout, which owns
+// the document and the top bar; this view builds only the Dashboard body.
 // Returns HTML string. Caller is responsible for echo and exit.
 //
 // Parameters:
@@ -16,13 +15,11 @@ declare(strict_types=1);
 //   $tables_installed - bool, whether all tables are installed (drives the
 //                       empty-state message when there are no stats yet)
 //   $show_installed - bool, whether to show the "Installation complete" banner
-//   $csrf_token - string, per-session token for the layout's logout form (empty
-//                 when no admin_password is set, since CSRF is not enforced then)
+//   $csrf_token - string, per-session token for the layout's logout form
 //   $stats - array<string,int>|false, merged tracker stats (seeders, leechers,
 //            peers, torrents, downloads, traffic) plus 'registered' (total
 //            torrents). False hides the stats block (e.g. tables not installed).
-//   $tasks - array<string,int>, maintenance task name => last-run Unix
-//            timestamp, for the "Last cleaned/optimized/…" lines.
+//   $tasks - array<string,int>, maintenance task name => last-run Unix timestamp.
 
 /**
  * @param PhoenixSettings $settings
@@ -31,43 +28,74 @@ declare(strict_types=1);
  */
 function view_admin_html(array $settings, bool $tables_installed, bool $show_installed = false, string $csrf_token = '', array|false $stats = false, array $tasks = []): string
 {
-    $body = '<h1>Dashboard</h1>';
+    require_once __DIR__.'/html.admin.layout.php';
+    require_once __DIR__.'/../functions/format.bytes.php';
 
-    // Build installation complete banner
+    $body = '';
+
     if ($show_installed) {
-        $body .= '<p class="box background-green-sea color-clouds">Installation complete.</p>';
+        $body .= '<div class="alert alert-success" style="display:flex;align-items:center;gap:var(--space-2)"><span class="ph-ico" data-lucide="check-circle-2"></span><strong>Installation complete.</strong>&nbsp;Your tracker is live and accepting announces.</div>';
     }
 
     if ($stats !== false) {
-        // Tracker stats — already-computed aggregates; number_format() matches
-        // the figure formatting used elsewhere in the panel.
-        $body .= '<h2>Tracker Stats</h2>
-	<p class="box background-clouds">Seeders '.number_format($stats['seeders']).' &middot; Leechers '.number_format($stats['leechers']).' &middot; Peers '.number_format($stats['peers']).'</p>
-	<p class="box background-clouds">Registered torrents '.number_format($stats['registered'] ?? 0).' &middot; With active peers '.number_format($stats['torrents']).'</p>
-	<p class="box background-clouds">Completed downloads '.number_format($stats['downloads']).' &middot; Traffic '.number_format($stats['traffic']).' bytes</p>';
+        $registered = $stats['registered'] ?? 0;
+        $top_margin = $show_installed ? ' style="margin-top:var(--space-5)"' : '';
+
+        $body .= '<div class="ph-stat-grid"'.$top_margin.'>
+			<div class="ph-stat" style="--stat-bg:var(--color-info-bg);--stat-fg:var(--color-blue)">
+				<div class="ph-stat-top"><div class="ph-stat-value">'.number_format($stats['peers']).'</div><div class="ph-stat-ico"><span class="ph-ico" data-lucide="share-2"></span></div></div>
+				<div class="ph-stat-label">Active peers</div>
+				<div class="ph-stat-sub"><b>'.number_format($stats['seeders']).'</b> seeders &middot; <b>'.number_format($stats['leechers']).'</b> leechers</div>
+			</div>
+			<div class="ph-stat" style="--stat-bg:var(--color-info-bg);--stat-fg:var(--color-purple)">
+				<div class="ph-stat-top"><div class="ph-stat-value">'.number_format($registered).'</div><div class="ph-stat-ico tint-purple"><span class="ph-ico" data-lucide="database"></span></div></div>
+				<div class="ph-stat-label">Registered torrents</div>
+				<div class="ph-stat-sub"><b>'.number_format($stats['torrents']).'</b> with active peers</div>
+			</div>
+			<div class="ph-stat" style="--stat-bg:var(--color-success-bg);--stat-fg:var(--color-green)">
+				<div class="ph-stat-top"><div class="ph-stat-value">'.number_format($stats['downloads']).'</div><div class="ph-stat-ico"><span class="ph-ico" data-lucide="circle-check-big"></span></div></div>
+				<div class="ph-stat-label">Completed downloads</div>
+				<div class="ph-stat-sub">All-time</div>
+			</div>
+			<div class="ph-stat" style="--stat-bg:var(--color-warning-bg);--stat-fg:var(--color-orange)">
+				<div class="ph-stat-top"><div class="ph-stat-value">'.format_bytes($stats['traffic']).'</div><div class="ph-stat-ico"><span class="ph-ico" data-lucide="arrow-up-down"></span></div></div>
+				<div class="ph-stat-label">Traffic served</div>
+				<div class="ph-stat-sub mono">'.number_format($stats['traffic']).' bytes</div>
+			</div>
+		</div>';
 
         // Last-run timestamp for each maintenance task that has ever run.
         $task_labels = [
-            'install' => 'Last installed',
-            'migrate' => 'Last migrated',
-            'clean' => 'Last cleaned',
-            'optimize' => 'Last optimized',
+            'install' => ['wand-2', 'Installed'],
+            'migrate' => ['git-merge', 'Migrated'],
+            'clean' => ['brush-cleaning', 'Cleaned'],
+            'optimize' => ['gauge', 'Optimized'],
         ];
-        foreach ($task_labels as $task_name => $label) {
+        $rows = '';
+        foreach ($task_labels as $task_name => [$icon, $label]) {
             if (isset($tasks[$task_name])) {
-                $body .= '
-	<p class="color-asbestos">'.$label.': '.date('Y-m-d H:i', $tasks[$task_name]).'</p>';
+                $rows .= '<tr><td><span class="flex items-center gap-2"><span class="ph-ico" data-lucide="'.$icon.'" style="width:15px;color:var(--color-text-tertiary)"></span>'.$label.'</span></td>'.
+                    '<td class="mono muted">'.date('Y-m-d H:i', $tasks[$task_name]).'</td>'.
+                    '<td class="table-col-numeric"><span class="badge badge-green">done</span></td></tr>';
             }
         }
+        if ($rows !== '') {
+            $body .= '<div class="ph-section-head"><h3>Maintenance</h3><a class="btn btn-ghost btn-sm" href="?page=utilities">Run tasks<span class="ph-ico" data-lucide="arrow-right"></span></a></div>
+		<div class="ph-card-table">
+			<table>
+				<thead><tr><th>Task</th><th>Last run</th><th class="table-col-numeric">Status</th></tr></thead>
+				<tbody>'.$rows.'</tbody>
+			</table>
+		</div>';
+        }
     } elseif (! $tables_installed) {
-        $body .= '<p class="box background-pomegranate color-clouds">The database is not installed yet. '.
-            'Install it from <a href="?page=utilities">Utilities</a>, and check '.
-            '<a href="?page=support">Server Support</a> for diagnostics.</p>';
+        $body .= '<div class="alert alert-danger" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="triangle-alert" style="flex-shrink:0"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a>, and check <a href="?page=support">Server Support</a> for diagnostics.</div></div>';
     } else {
-        $body .= '<p class="box background-clouds">No tracker statistics yet.</p>';
+        $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="bar-chart-3"></span><p>No tracker statistics yet.</p></div>';
     }
 
-    require_once __DIR__.'/html.admin.layout.php';
+    $actions = '<a class="btn btn-secondary btn-sm" href="?page=support"><span class="ph-ico" data-lucide="stethoscope"></span>Diagnostics</a>'.
+        '<a class="btn btn-primary btn-sm" href="?page=add"><span class="ph-ico" data-lucide="plus"></span>Add Torrent</a>';
 
-    return view_admin_layout_html($settings, 'Dashboard', $body, 'dashboard', $csrf_token);
+    return view_admin_layout_html($settings, 'Dashboard', $body, 'dashboard', $csrf_token, 'Tracker', $actions);
 }

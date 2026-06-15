@@ -29,7 +29,7 @@ class ViewAdminUtilitiesHtmlTest extends TestCase
         $html = view_admin_utilities_html($this->settings(), true, false, '');
         $this->assertStringStartsWith('<!DOCTYPE html>', $html);
         $this->assertStringContainsString('<title>Phoenix Admin: Utilities</title>', $html);
-        $this->assertStringContainsString('<a href="?page=utilities" class="nav-link current" aria-current="page">Utilities</a>', $html);
+        $this->assertStringContainsString('<a href="?page=utilities" class="is-active" aria-current="page">', $html);
     }
 
     public function testShowsSetupFormWhenResetEnabled(): void

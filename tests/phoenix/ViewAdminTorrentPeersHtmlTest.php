@@ -83,7 +83,7 @@ class ViewAdminTorrentPeersHtmlTest extends TestCase
     {
         // The drill-down lives beneath Torrents, so that nav link stays current.
         $html = view_admin_torrent_peers_html($this->settings(), str_repeat('a', 40), 'X', [], 'tok');
-        $this->assertStringContainsString('href="?page=torrents" class="nav-link current" aria-current="page"', $html);
+        $this->assertStringContainsString('href="?page=torrents" class="is-active" aria-current="page"', $html);
     }
 
     public function testEscapesClientLabel(): void

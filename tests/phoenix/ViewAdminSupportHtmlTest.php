@@ -29,7 +29,7 @@ class ViewAdminSupportHtmlTest extends TestCase
         $this->assertStringStartsWith('<!DOCTYPE html>', $html);
         $this->assertStringContainsString('<title>Phoenix Admin: Server Support</title>', $html);
         // The Server Support nav link is marked current on this page.
-        $this->assertStringContainsString('<a href="?page=support" class="nav-link current" aria-current="page">Server Support</a>', $html);
+        $this->assertStringContainsString('<a href="?page=support" class="is-active" aria-current="page">', $html);
     }
 
     public function testReportsCurrentPhpVersion(): void

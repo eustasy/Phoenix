@@ -160,7 +160,7 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertSame(200, $panel['status']);
         // The authenticated dashboard renders the admin nav and its Dashboard
         // title — neither appears on the login form.
-        $this->assertStringContainsString('<nav class="admin-nav">', $panel['body']);
+        $this->assertStringContainsString('class="ph-sidebar"', $panel['body']);
         $this->assertStringContainsString('<title>Phoenix Admin: Dashboard</title>', $panel['body']);
         $this->assertStringNotContainsString('name="password"', $panel['body']);
 
@@ -201,7 +201,7 @@ class EndpointSmokeTest extends SmokeTestCase
         $after = $this->get('/admin.php', [], ['Cookie' => $cookie]);
         $this->assertSame(200, $after['status']);
         $this->assertStringContainsString('name="password"', $after['body']);
-        $this->assertStringNotContainsString('<nav class="admin-nav">', $after['body']);
+        $this->assertStringNotContainsString('class="ph-sidebar"', $after['body']);
     }
 
     #[Depends('testInstallSucceeds')]

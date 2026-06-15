@@ -7,7 +7,7 @@ declare(strict_types=1);
 // POST) and a table of the existing dumps (file name, size, created time). The
 // environment note flags the mysqldump / writable-directory requirement, and
 // any action message (a success line or the engine's error) is shown above.
-// Wrapped in the shared admin layout (wide variant). Returns HTML string.
+// Wrapped in the shared admin layout. Returns HTML string.
 
 /**
  * @param PhoenixSettings $settings
@@ -15,43 +15,42 @@ declare(strict_types=1);
  */
 function view_admin_backups_html(array $settings, array $backups, string|false $message, string $csrf_token): string
 {
+    require_once __DIR__.'/html.admin.layout.php';
+
     $csrf_field = '<input type="hidden" name="csrf" value="'.htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8').'">';
 
-    $body = '<h1>Backups</h1>';
+    // Run-now button lives in the topbar. class="mysql" so the layout's
+    // double-submit guard disables it on submit (a dump can take a while).
+    $actions = '<form class="mysql" method="POST" style="margin:0">'.
+        '<input type="hidden" name="process" value="backup">'.$csrf_field.
+        '<button type="submit" name="submit" class="btn btn-primary btn-sm"><span class="ph-ico" data-lucide="play"></span>Run backup now</button>'.
+        '</form>';
+
+    $body = '';
 
     if ($message) {
-        $body .= '<div class="box background-wisteria color-clouds"><h3>'.htmlspecialchars($message).'</h3></div>';
+        $body .= '<div class="alert alert-info"><h3 class="mt-0 mb-0">'.htmlspecialchars($message).'</h3></div>';
     }
 
     // Environment caveat (the run fails with a clear message when unmet).
-    $body .= '<p class="color-asbestos">Backups require the <code>mysqldump</code> binary, '.
-        '<code>proc_open</code>, and a writable backup directory available to the web-server user.</p>';
-
-    // Run-now button. class="mysql" so the layout's double-submit guard disables
-    // it on submit (a dump can take a while).
-    $body .= '<form class="mysql" method="POST">'.
-        '<input type="hidden" name="process" value="backup">'.$csrf_field.
-        '<input class="button background-belize-hole color-clouds" type="submit" name="submit" value="Run backup now">'.
-        '</form>';
+    $body .= '<p class="muted" style="margin-top:0;font-size:var(--font-size-sm)">Backups require the <code>mysqldump</code> binary, <code>proc_open</code>, and a writable backup directory available to the web-server user.</p>';
 
     if ($backups === []) {
-        $body .= '<p class="box background-clouds">No backups yet.</p>';
+        $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="archive"></span><p>No backups yet.</p></div>';
     } else {
         $rows = '';
         foreach ($backups as $backup) {
             $rows .= '<tr>'.
-                '<td><code>'.htmlspecialchars($backup['name']).'</code></td>'.
-                '<td>'.number_format($backup['size']).' bytes</td>'.
-                '<td>'.date('Y-m-d H:i', $backup['mtime']).'</td>'.
-                '<td><a href="?page=backups&amp;download='.urlencode($backup['name']).'">Download</a></td>'.
+                '<td class="mono" style="font-size:var(--font-size-xs)">'.htmlspecialchars($backup['name']).'</td>'.
+                '<td class="table-col-numeric mono">'.number_format($backup['size']).' bytes</td>'.
+                '<td class="mono muted">'.date('Y-m-d H:i', $backup['mtime']).'</td>'.
+                '<td><div class="row-actions"><a class="btn btn-ghost btn-xs" href="?page=backups&amp;download='.urlencode($backup['name']).'"><span class="ph-ico" data-lucide="download"></span>Download</a></div></td>'.
                 '</tr>';
         }
-        $body .= '<table class="data-table">'.
-            '<thead><tr><th>File</th><th>Size</th><th>Created</th><th>Actions</th></tr></thead>'.
-            '<tbody>'.$rows.'</tbody></table>';
+        $body .= '<div class="ph-card-table">'.
+            '<table><thead><tr><th>File</th><th class="table-col-numeric">Size</th><th>Created</th><th class="tar">Actions</th></tr></thead>'.
+            '<tbody>'.$rows.'</tbody></table></div>';
     }
 
-    require_once __DIR__.'/html.admin.layout.php';
-
-    return view_admin_layout_html($settings, 'Backups', $body, 'backups', $csrf_token, true);
+    return view_admin_layout_html($settings, 'Backups', $body, 'backups', $csrf_token, 'Server', $actions, true);
 }

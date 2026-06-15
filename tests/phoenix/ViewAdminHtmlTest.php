@@ -67,16 +67,18 @@ class ViewAdminHtmlTest extends TestCase
         $tasks = ['clean' => 1700000000, 'optimize' => 1700000100];
         $html = view_admin_html($this->settings(), true, false, '', $this->stats(), $tasks);
 
-        $this->assertStringContainsString('Tracker Stats', $html);
-        $this->assertStringContainsString('Seeders 3', $html);
-        $this->assertStringContainsString('Peers 5', $html);
-        $this->assertStringContainsString('Registered torrents 7', $html);
-        $this->assertStringContainsString('With active peers 4', $html);
-        $this->assertStringContainsString('Traffic 123,456 bytes', $html);
-        $this->assertStringContainsString('Last cleaned', $html);
-        $this->assertStringContainsString('Last optimized', $html);
-        // A task that never ran is omitted.
-        $this->assertStringNotContainsString('Last migrated', $html);
+        // Stat cards carry the headline figures.
+        $this->assertStringContainsString('Active peers', $html);
+        $this->assertStringContainsString('<div class="ph-stat-value">5</div>', $html);
+        $this->assertStringContainsString('Registered torrents', $html);
+        $this->assertStringContainsString('<div class="ph-stat-value">7</div>', $html);
+        $this->assertStringContainsString('with active peers', $html);
+        $this->assertStringContainsString('Traffic served', $html);
+        $this->assertStringContainsString('123,456 bytes', $html);
+        // Maintenance rows render only for tasks that have run.
+        $this->assertStringContainsString('Cleaned', $html);
+        $this->assertStringContainsString('Optimized', $html);
+        $this->assertStringNotContainsString('Migrated', $html);
     }
 
     public function testShowsNotInstalledNoticeWhenTablesMissing(): void

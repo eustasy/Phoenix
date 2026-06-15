@@ -42,7 +42,7 @@ class ViewAdminBackupsHtmlTest extends TestCase
         ];
         $html = view_admin_backups_html($this->settings(), $backups, false, 'tok');
 
-        $this->assertStringContainsString('<table class="data-table">', $html);
+        $this->assertStringContainsString('ph-card-table', $html);
         $this->assertStringContainsString('phoenix.20240102_0000.sql', $html);
         $this->assertStringContainsString('2,048 bytes', $html);
     }
@@ -60,10 +60,9 @@ class ViewAdminBackupsHtmlTest extends TestCase
         $this->assertStringContainsString('Backup failed: &lt;x&gt;', $html);
     }
 
-    public function testUsesWideLayoutAndMarksBackupsNavActive(): void
+    public function testMarksBackupsNavActive(): void
     {
         $html = view_admin_backups_html($this->settings(), [], false, 'tok');
-        $this->assertStringContainsString('<body class="wide">', $html);
-        $this->assertStringContainsString('href="?page=backups" class="nav-link current" aria-current="page"', $html);
+        $this->assertStringContainsString('href="?page=backups" class="is-active" aria-current="page"', $html);
     }
 }

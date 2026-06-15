@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 ////	view_admin_torrent_peers_html
 // Render the admin peer drill-down: one torrent's swarm as a table of client,
-// address, state, transfer totals, and last-seen time. The title shows the
+// address, state, transfer totals, and last-seen time. The subtitle shows the
 // registry name when known, otherwise the raw info_hash (an unregistered
 // swarm). All untrusted strings (client, IPs) are htmlspecialchars()-escaped.
 // Marks the Torrents nav active since this is a drill-down beneath it. Wrapped
-// in the shared admin layout (wide variant). Returns HTML string.
-
+// in the shared admin layout. Returns HTML string.
+//
 /**
  * @param PhoenixSettings $settings
  * @param list<array{
@@ -28,16 +28,19 @@ declare(strict_types=1);
  */
 function view_admin_torrent_peers_html(array $settings, string $info_hash, ?string $name, array $peers, string $csrf_token): string
 {
-    $title = $name !== null && $name !== ''
+    require_once __DIR__.'/html.admin.layout.php';
+    require_once __DIR__.'/../functions/format.bytes.php';
+
+    $subtitle = $name !== null && $name !== ''
         ? htmlspecialchars($name, ENT_QUOTES, 'UTF-8')
         : '<code>'.htmlspecialchars($info_hash, ENT_QUOTES, 'UTF-8').'</code>';
 
-    $body = '<h1>Peers</h1>
-		<p class="text-left">'.$title.'</p>
-		<p class="text-left"><a href="?page=torrents">&larr; Back to Torrents</a></p>';
+    $back = '<a class="btn btn-secondary btn-sm" href="?page=torrents"><span class="ph-ico" data-lucide="arrow-left"></span>Back</a>';
+
+    $body = '<p class="muted" style="margin-top:0">'.$subtitle.'</p>';
 
     if ($peers === []) {
-        $body .= '<p class="box background-clouds">No active peers.</p>';
+        $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="users"></span><p>No active peers.</p></div>';
     } else {
         $rows = '';
         foreach ($peers as $peer) {
@@ -49,27 +52,27 @@ function view_admin_torrent_peers_html(array $settings, string $info_hash, ?stri
             if ($peer['ipv6'] !== '') {
                 $addrs[] = htmlspecialchars('['.$peer['ipv6'].']:'.$peer['portv6'], ENT_QUOTES, 'UTF-8');
             }
-            $address = $addrs === [] ? '&mdash;' : implode('<br>', $addrs);
+            $address = $addrs === [] ? '<span class="dim">&mdash;</span>' : implode('<br>', $addrs);
+
+            $state = $peer['state'] === 1
+                ? '<span class="listed">Seeding</span>'
+                : '<span class="listed is-no" style="color:var(--color-orange)">Leeching</span>';
 
             $rows .= '<tr>'.
                 '<td>'.htmlspecialchars($peer['client'], ENT_QUOTES, 'UTF-8').'</td>'.
-                '<td>'.$address.'</td>'.
-                '<td>'.($peer['state'] === 1 ? 'Seeding' : 'Leeching').'</td>'.
-                '<td>'.number_format($peer['uploaded']).'</td>'.
-                '<td>'.number_format($peer['downloaded']).'</td>'.
-                '<td>'.number_format($peer['left']).'</td>'.
-                '<td>'.date('Y-m-d H:i', $peer['updated']).'</td>'.
+                '<td class="mono">'.$address.'</td>'.
+                '<td>'.$state.'</td>'.
+                '<td class="table-col-numeric mono">'.format_bytes($peer['uploaded']).'</td>'.
+                '<td class="table-col-numeric mono">'.format_bytes($peer['downloaded']).'</td>'.
+                '<td class="table-col-numeric mono">'.format_bytes($peer['left']).'</td>'.
+                '<td class="mono muted">'.date('Y-m-d H:i', $peer['updated']).'</td>'.
                 '</tr>';
         }
 
-        $body .= '<table class="data-table">'.
-            '<thead><tr>'.
-            '<th>Client</th><th>Address</th><th>State</th>'.
-            '<th>Up</th><th>Down</th><th>Left</th><th>Last seen</th>'.
-            '</tr></thead><tbody>'.$rows.'</tbody></table>';
+        $body .= '<div class="ph-card-table wide"><table>'.
+            '<thead><tr><th>Client</th><th>Address</th><th>State</th><th class="table-col-numeric">Up</th><th class="table-col-numeric">Down</th><th class="table-col-numeric">Left</th><th>Last seen</th></tr></thead>'.
+            '<tbody>'.$rows.'</tbody></table></div>';
     }
 
-    require_once __DIR__.'/html.admin.layout.php';
-
-    return view_admin_layout_html($settings, 'Peers', $body, 'torrents', $csrf_token, true);
+    return view_admin_layout_html($settings, 'Peers', $body, 'torrents', $csrf_token, 'Tracker', $back, false);
 }

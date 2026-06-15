@@ -74,7 +74,7 @@ class ViewAdminEditHtmlTest extends TestCase
             false,
             'tok',
         );
-        $this->assertStringContainsString('<textarea name="files"></textarea>', $html);
+        $this->assertStringContainsString('<textarea name="files" class="code" rows="3"></textarea>', $html);
         $this->assertStringContainsString('name="name" value=""', $html);
     }
 
@@ -95,6 +95,6 @@ class ViewAdminEditHtmlTest extends TestCase
     public function testMarksTorrentsNavActive(): void
     {
         $html = view_admin_edit_html($this->settings(), str_repeat('c', 40), $this->torrent(), false, 'tok');
-        $this->assertStringContainsString('href="?page=torrents" class="nav-link current" aria-current="page"', $html);
+        $this->assertStringContainsString('href="?page=torrents" class="is-active" aria-current="page"', $html);
     }
 }

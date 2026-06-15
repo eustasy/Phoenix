@@ -55,14 +55,15 @@ class ViewAdminLayoutHtmlTest extends TestCase
         // The active page's link carries aria-current="page" so users and
         // assistive tech (and tests) can tell which page is showing.
         $html = view_admin_layout_html($this->settings(), 'Backups', '', 'backups');
-        $this->assertStringContainsString('<a href="?page=backups" class="nav-link current" aria-current="page">Backups</a>', $html);
+        $this->assertStringContainsString('<a href="?page=backups" class="is-active" aria-current="page">', $html);
     }
 
     public function testDoesNotHighlightInactiveNavLink(): void
     {
         $html = view_admin_layout_html($this->settings(), 'Backups', '', 'backups');
-        // A non-active link is a plain nav-link with no current marker.
-        $this->assertStringContainsString('<a href="?page=dashboard" class="nav-link">Dashboard</a>', $html);
+        // A non-active link has no current marker.
+        $this->assertStringContainsString('<a href="?page=dashboard"><span class="ph-ico"', $html);
+        $this->assertStringNotContainsString('<a href="?page=dashboard" class="is-active"', $html);
     }
 
     public function testShowsLogoutFormWithCsrfWhenAdminPasswordSet(): void
