@@ -33,7 +33,7 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
             }
             require_once __DIR__.'/admin.peers.php';
 
-            return admin_peers_controller($settings);
+            return admin_peers_controller($connection, $settings);
 
         case 'geography':
             require_once __DIR__.'/admin.geography.php';
