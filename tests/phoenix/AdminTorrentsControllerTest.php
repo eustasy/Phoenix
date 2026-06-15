@@ -77,7 +77,7 @@ class AdminTorrentsControllerTest extends PhoenixTestCase
 
         $this->assertStringContainsString('Torrents', $html);
         $this->assertStringContainsString('__TEST_listed_name__', $html);
-        $this->assertStringContainsString('<table class="data-table">', $html);
+        $this->assertStringContainsString('ph-card-table', $html);
     }
 
     public function testRejectsDeleteWithoutCsrf(): void

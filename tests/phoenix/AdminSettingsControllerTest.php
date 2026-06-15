@@ -72,7 +72,7 @@ class AdminSettingsControllerTest extends TestCase
     {
         $html = \admin_settings_controller($this->settings(), $this->path);
         $this->assertStringContainsString('Settings', $html);
-        $this->assertStringContainsString('<table class="data-table">', $html);
+        $this->assertStringContainsString('ph-card-table', $html);
     }
 
     public function testRejectsPasswordChangeWithoutCsrf(): void
