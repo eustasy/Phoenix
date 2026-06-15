@@ -38,7 +38,7 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
         case 'geography':
             require_once __DIR__.'/admin.geography.php';
 
-            return admin_geography_controller($settings);
+            return admin_geography_controller($connection, $settings);
 
         case 'edit':
             require_once __DIR__.'/admin.edit.php';
