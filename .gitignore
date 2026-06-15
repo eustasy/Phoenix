@@ -1,7 +1,7 @@
 *~
 *.custom.*
 *.local.*
-/backups/
+/backups/*.sql
 /vendor/
 /composer.lock
 /.phpunit.cache/
