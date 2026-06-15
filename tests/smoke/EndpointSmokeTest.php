@@ -511,7 +511,7 @@ class EndpointSmokeTest extends SmokeTestCase
         $xml = $this->get('/api/index.php', ['xml' => '1']);
         $this->assertSame(200, $xml['status']);
         $this->assertStringContainsString('<version>', $xml['body']);
-        $this->assertStringContainsString('Phoenix', $xml['body']);
+        $this->assertStringContainsString('v4.', $xml['body']);
     }
 
     #[Depends('testInstallSucceeds')]
