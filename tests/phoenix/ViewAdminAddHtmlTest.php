@@ -33,16 +33,19 @@ class ViewAdminAddHtmlTest extends TestCase
 
     public function testRendersFormWhenInstalled(): void
     {
-        // The add-torrent form needs multipart encoding for its .torrent upload
-        // and posts back to ?page=add.
+        // The form posts plain fields back to ?page=add; the dropped .torrent is
+        // parsed in the browser (PhoenixTorrent) to fill those fields, never
+        // uploaded from here.
         $html = view_admin_add_html($this->settings(), true, false, '');
         $this->assertStringContainsString('name="process" value="torrent_add"', $html);
-        $this->assertStringContainsString('enctype="multipart/form-data"', $html);
-        $this->assertStringContainsString('type="file" name="torrent"', $html);
         $this->assertStringContainsString('action="?page=add"', $html);
-        // The file input sits in a drag-and-drop zone and accepts .torrent.
+        $this->assertStringContainsString('/assets/torrent-parse.js', $html);
+        // The file input sits in a drag-and-drop zone and accepts .torrent; it
+        // carries no name, so it is not submitted with the form.
         $this->assertStringContainsString('id="torrent-drop"', $html);
+        $this->assertStringContainsString('type="file" id="torrent-file"', $html);
         $this->assertStringContainsString('accept=".torrent', $html);
+        $this->assertStringNotContainsString('enctype="multipart/form-data"', $html);
     }
 
     public function testShowsNoticeWhenTablesMissing(): void

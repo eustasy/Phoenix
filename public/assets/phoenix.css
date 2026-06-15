@@ -372,6 +372,7 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
   border: var(--border-width-2) dashed var(--color-border-active);
   border-radius: var(--radius-xl);
   padding: var(--space-10) var(--space-6);
+  margin-block-end: var(--space-6);
   text-align: center;
   cursor: pointer;
   color: var(--color-text-secondary);
