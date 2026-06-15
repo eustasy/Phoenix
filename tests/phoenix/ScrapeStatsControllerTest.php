@@ -37,11 +37,12 @@ class ScrapeStatsControllerTest extends PhoenixTestCase
         $html = \scrape_stats_controller(self::$connection, self::$settings);
 
         $this->assertIsString($html);
-        $this->assertStringContainsString('<!DocType html>', $html);
-        $this->assertStringContainsString('peers', $html);
-        $this->assertStringContainsString('seeders', $html);
-        $this->assertStringContainsString('leechers', $html);
-        $this->assertStringContainsString('torrents', $html);
+        $this->assertStringContainsString('<!DOCTYPE html>', $html);
+        $this->assertStringContainsString('Tracker Stats', $html);
+        $this->assertStringContainsString('active peers', $html);
+        $this->assertStringContainsString('Seeders', $html);
+        $this->assertStringContainsString('Leechers', $html);
+        $this->assertStringContainsString('Torrents with peers', $html);
     }
 
     public function testRendersXmlWhenXmlFlagSet(): void

@@ -42,5 +42,5 @@ if (isset($_GET['xml'])) {
 } else {
     require_once __DIR__.'/../src/views/html.index.php';
     header('Content-Type: text/html; charset=UTF-8');
-    echo view_index_html($index, $show_meta);
+    echo view_index_html($index, $show_meta, $settings['phoenix_version']);
 }

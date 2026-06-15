@@ -1,0 +1,4741 @@
+/* Eustasy Design System — bundled for Phoenix */
+
+/* ===== ds/themes/flexoki.css ===== */
+/* ==========================================================================
+   Flexoki 2.0 Theme for eustasy/.ui
+   Based on https://stephango.com/flexoki — MIT License
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Raw Palette — Flexoki 2.0 complete values
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* Base tones */
+  --flexoki-black: #100f0f;
+  --flexoki-paper: #fffcf0;
+
+  --flexoki-950: #1c1b1a;
+  --flexoki-900: #282726;
+  --flexoki-850: #343331;
+  --flexoki-800: #403e3c;
+  --flexoki-700: #575653;
+  --flexoki-600: #6f6e69;
+  --flexoki-500: #878580;
+  --flexoki-400: #9f9d96;
+  --flexoki-300: #b7b5ac;
+  --flexoki-200: #cecdc3;
+  --flexoki-150: #dad8ce;
+  --flexoki-100: #e6e4d9;
+  --flexoki-50: #f2f0e5;
+
+  /* Red */
+  --flexoki-red-50: #ffe1d5;
+  --flexoki-red-100: #ffcabb;
+  --flexoki-red-150: #fdb2a2;
+  --flexoki-red-200: #f89a8a;
+  --flexoki-red-300: #e8705f;
+  --flexoki-red-400: #d14d41;
+  --flexoki-red-500: #c03e35;
+  --flexoki-red-600: #af3029;
+  --flexoki-red-700: #942822;
+  --flexoki-red-800: #6c201c;
+  --flexoki-red-850: #551b18;
+  --flexoki-red-900: #3e1715;
+  --flexoki-red-950: #261312;
+
+  /* Orange */
+  --flexoki-orange-50: #ffe7ce;
+  --flexoki-orange-100: #fed3af;
+  --flexoki-orange-150: #fcc192;
+  --flexoki-orange-200: #f9ae77;
+  --flexoki-orange-300: #ec8b49;
+  --flexoki-orange-400: #da702c;
+  --flexoki-orange-500: #cb6120;
+  --flexoki-orange-600: #bc5215;
+  --flexoki-orange-700: #9d4310;
+  --flexoki-orange-800: #71320d;
+  --flexoki-orange-850: #59290d;
+  --flexoki-orange-900: #40200d;
+  --flexoki-orange-950: #27180e;
+
+  /* Yellow */
+  --flexoki-yellow-50: #faeec6;
+  --flexoki-yellow-100: #f6e2a0;
+  --flexoki-yellow-150: #f1d67e;
+  --flexoki-yellow-200: #eccb60;
+  --flexoki-yellow-300: #dfb431;
+  --flexoki-yellow-400: #d0a215;
+  --flexoki-yellow-500: #be9207;
+  --flexoki-yellow-600: #ad8301;
+  --flexoki-yellow-700: #8e6b01;
+  --flexoki-yellow-800: #664d01;
+  --flexoki-yellow-850: #503d02;
+  --flexoki-yellow-900: #3a2d04;
+  --flexoki-yellow-950: #241e08;
+
+  /* Green */
+  --flexoki-green-50: #edeecf;
+  --flexoki-green-100: #dde2b2;
+  --flexoki-green-150: #cdd597;
+  --flexoki-green-200: #bec97e;
+  --flexoki-green-300: #a0af54;
+  --flexoki-green-400: #879a39;
+  --flexoki-green-500: #768d21;
+  --flexoki-green-600: #66800b;
+  --flexoki-green-700: #536907;
+  --flexoki-green-800: #3d4c07;
+  --flexoki-green-850: #313d07;
+  --flexoki-green-900: #252d09;
+  --flexoki-green-950: #1a1e0c;
+
+  /* Cyan */
+  --flexoki-cyan-50: #ddf1e4;
+  --flexoki-cyan-100: #bfe8d9;
+  --flexoki-cyan-150: #a2dece;
+  --flexoki-cyan-200: #87d3c3;
+  --flexoki-cyan-300: #5abdac;
+  --flexoki-cyan-400: #3aa99f;
+  --flexoki-cyan-500: #2f968d;
+  --flexoki-cyan-600: #24837b;
+  --flexoki-cyan-700: #1c6c66;
+  --flexoki-cyan-800: #164f4a;
+  --flexoki-cyan-850: #143f3c;
+  --flexoki-cyan-900: #122f2c;
+  --flexoki-cyan-950: #101f1d;
+
+  /* Blue */
+  --flexoki-blue-50: #e1eceb;
+  --flexoki-blue-100: #c6dde8;
+  --flexoki-blue-150: #abcfe2;
+  --flexoki-blue-200: #92bfdb;
+  --flexoki-blue-300: #66a0c8;
+  --flexoki-blue-400: #4385be;
+  --flexoki-blue-500: #3171b2;
+  --flexoki-blue-600: #205ea6;
+  --flexoki-blue-700: #1a4f8c;
+  --flexoki-blue-800: #163b66;
+  --flexoki-blue-850: #133051;
+  --flexoki-blue-900: #12253b;
+  --flexoki-blue-950: #101a24;
+
+  /* Purple */
+  --flexoki-purple-50: #f0eaec;
+  --flexoki-purple-100: #e2d9e9;
+  --flexoki-purple-150: #d3cae6;
+  --flexoki-purple-200: #c4b9e0;
+  --flexoki-purple-300: #a699d0;
+  --flexoki-purple-400: #8b7ec8;
+  --flexoki-purple-500: #735eb5;
+  --flexoki-purple-600: #5e409d;
+  --flexoki-purple-700: #4f3685;
+  --flexoki-purple-800: #3c2a62;
+  --flexoki-purple-850: #31234e;
+  --flexoki-purple-900: #261c39;
+  --flexoki-purple-950: #1a1623;
+
+  /* Magenta */
+  --flexoki-magenta-50: #fee4e5;
+  --flexoki-magenta-100: #fccfda;
+  --flexoki-magenta-150: #f9b9cf;
+  --flexoki-magenta-200: #f4a4c2;
+  --flexoki-magenta-300: #e47da8;
+  --flexoki-magenta-400: #ce5d97;
+  --flexoki-magenta-500: #b74583;
+  --flexoki-magenta-600: #a02f6f;
+  --flexoki-magenta-700: #87285e;
+  --flexoki-magenta-800: #641f46;
+  --flexoki-magenta-850: #4f1b39;
+  --flexoki-magenta-900: #39172b;
+  --flexoki-magenta-950: #24131d;
+}
+
+/* --------------------------------------------------------------------------
+   2. Design Tokens — Spacing, Typography, Borders
+   These can be overridden by any theme.
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* Typography */
+  --font-body:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+    sans-serif;
+  --font-heading: var(--font-body);
+  --font-mono:
+    "Berkeley Mono", "MonoLisa", "IBM Plex Mono", "Source Code Pro", Menlo,
+    SFMono-Regular, Consolas, monospace;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-loose: 1.75;
+
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+
+  /* Spacing scale */
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 0.125rem;
+  --space-1: 0.25rem;
+  --space-1-5: 0.375rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Border radius */
+  --radius-none: 0;
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Border width */
+  --border-width: 1px;
+  --border-width-2: 2px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(16, 15, 15, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(16, 15, 15, 0.07), 0 2px 4px -2px rgba(16, 15, 15, 0.07);
+  --shadow-lg:
+    0 10px 15px -3px rgba(16, 15, 15, 0.08),
+    0 4px 6px -4px rgba(16, 15, 15, 0.08);
+
+  /* Layout */
+  --width-prose: 80ch;
+  --width-wide: 1000px;
+  --width-input: 20em;
+
+  /* Transitions */
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Focus ring */
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+}
+
+@media (max-width: 860px) {
+  :root {
+    --width-prose: 88vw;
+    --width-wide: 100vw;
+    --width-input: 100%;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Semantic Color Tokens — Light Mode (default)
+   Components reference ONLY these variables, never raw palette values.
+   -------------------------------------------------------------------------- */
+
+:root,
+.theme-light {
+  color-scheme: light;
+
+  /* Backgrounds */
+  --color-bg: var(--flexoki-paper);
+  --color-bg-secondary: var(--flexoki-50);
+  --color-bg-tertiary: var(--flexoki-100);
+
+  /* Text */
+  --color-text: var(--flexoki-black);
+  --color-text-secondary: var(--flexoki-600);
+  --color-text-tertiary: var(--flexoki-500);
+  --color-text-disabled: var(--flexoki-300);
+
+  /* Borders / UI chrome */
+  --color-border: var(--flexoki-200);
+  --color-border-hover: var(--flexoki-300);
+  --color-border-active: var(--flexoki-400);
+
+  /* Surfaces (cards, inputs, etc.) */
+  --color-surface: var(--flexoki-paper);
+  --color-surface-raised: var(--flexoki-50);
+  --color-surface-overlay: var(--flexoki-100);
+
+  /* Interactive */
+  --color-action: var(--flexoki-blue-600);
+  --color-action-hover: var(--flexoki-blue-700);
+  --color-action-text: var(--flexoki-paper);
+  --color-link: var(--flexoki-cyan-700);
+  --color-link-hover: var(--flexoki-cyan-800);
+
+  /* Selection & highlight */
+  --color-selection: rgba(187, 220, 206, 0.3);
+  --color-highlight: var(--flexoki-yellow-100);
+
+  /* Focus ring */
+  --color-focus-ring: var(--flexoki-blue-600);
+
+  /* Semantic status */
+  --color-danger: var(--flexoki-red-600);
+  --color-danger-bg: var(--flexoki-red-50);
+  --color-danger-hover: var(--flexoki-red-700);
+  --color-warning: var(--flexoki-orange-700);
+  --color-warning-bg: var(--flexoki-orange-50);
+  --color-warning-hover: var(--flexoki-orange-800);
+  --color-success: var(--flexoki-green-700);
+  --color-success-bg: var(--flexoki-green-50);
+  --color-success-hover: var(--flexoki-green-800);
+  --color-info: var(--flexoki-blue-600);
+  --color-info-bg: var(--flexoki-blue-50);
+  --color-info-hover: var(--flexoki-blue-700);
+
+  /* Accent colors */
+  --color-red: var(--flexoki-red-600);
+  --color-orange: var(--flexoki-orange-600);
+  --color-yellow: var(--flexoki-yellow-600);
+  --color-green: var(--flexoki-green-600);
+  --color-cyan: var(--flexoki-cyan-600);
+  --color-blue: var(--flexoki-blue-600);
+  --color-purple: var(--flexoki-purple-600);
+  --color-magenta: var(--flexoki-magenta-600);
+
+  /* Code */
+  --color-code-bg: var(--flexoki-50);
+  --color-code-border: var(--flexoki-100);
+}
+
+/* --------------------------------------------------------------------------
+   4. Dark Mode
+   -------------------------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.theme-light) {
+    color-scheme: dark;
+
+    --color-bg: var(--flexoki-black);
+    --color-bg-secondary: var(--flexoki-950);
+    --color-bg-tertiary: var(--flexoki-900);
+
+    --color-text: var(--flexoki-200);
+    --color-text-secondary: var(--flexoki-400);
+    --color-text-tertiary: var(--flexoki-500);
+    --color-text-disabled: var(--flexoki-700);
+
+    --color-border: var(--flexoki-800);
+    --color-border-hover: var(--flexoki-700);
+    --color-border-active: var(--flexoki-600);
+
+    --color-surface: var(--flexoki-950);
+    --color-surface-raised: var(--flexoki-900);
+    --color-surface-overlay: var(--flexoki-850);
+
+    --color-action: var(--flexoki-blue-400);
+    --color-action-hover: var(--flexoki-blue-300);
+    --color-action-text: var(--flexoki-black);
+    --color-link: var(--flexoki-cyan-400);
+    --color-link-hover: var(--flexoki-cyan-300);
+
+    --color-selection: rgba(30, 95, 91, 0.3);
+    --color-highlight: var(--flexoki-yellow-900);
+
+    --color-focus-ring: var(--flexoki-cyan-400);
+
+    --color-danger: var(--flexoki-red-300);
+    --color-danger-bg: var(--flexoki-red-950);
+    --color-danger-hover: var(--flexoki-red-200);
+    --color-warning: var(--flexoki-orange-400);
+    --color-warning-bg: var(--flexoki-orange-950);
+    --color-warning-hover: var(--flexoki-orange-300);
+    --color-success: var(--flexoki-green-400);
+    --color-success-bg: var(--flexoki-green-950);
+    --color-success-hover: var(--flexoki-green-300);
+    --color-info: var(--flexoki-blue-400);
+    --color-info-bg: var(--flexoki-blue-950);
+    --color-info-hover: var(--flexoki-blue-300);
+
+    --color-red: var(--flexoki-red-400);
+    --color-orange: var(--flexoki-orange-400);
+    --color-yellow: var(--flexoki-yellow-400);
+    --color-green: var(--flexoki-green-400);
+    --color-cyan: var(--flexoki-cyan-400);
+    --color-blue: var(--flexoki-blue-400);
+    --color-purple: var(--flexoki-purple-400);
+    --color-magenta: var(--flexoki-magenta-400);
+
+    --color-code-bg: var(--flexoki-900);
+    --color-code-border: var(--flexoki-800);
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-md:
+      0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+    --shadow-lg:
+      0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.theme-dark {
+  color-scheme: dark;
+
+  --color-bg: var(--flexoki-black);
+  --color-bg-secondary: var(--flexoki-950);
+  --color-bg-tertiary: var(--flexoki-900);
+
+  --color-text: var(--flexoki-200);
+  --color-text-secondary: var(--flexoki-400);
+  --color-text-tertiary: var(--flexoki-500);
+  --color-text-disabled: var(--flexoki-700);
+
+  --color-border: var(--flexoki-800);
+  --color-border-hover: var(--flexoki-700);
+  --color-border-active: var(--flexoki-600);
+
+  --color-surface: var(--flexoki-950);
+  --color-surface-raised: var(--flexoki-900);
+  --color-surface-overlay: var(--flexoki-850);
+
+  --color-action: var(--flexoki-blue-400);
+  --color-action-hover: var(--flexoki-blue-300);
+  --color-action-text: var(--flexoki-black);
+  --color-link: var(--flexoki-cyan-400);
+  --color-link-hover: var(--flexoki-cyan-300);
+
+  --color-selection: rgba(30, 95, 91, 0.3);
+  --color-highlight: var(--flexoki-yellow-900);
+
+  --color-focus-ring: var(--flexoki-cyan-400);
+
+  --color-danger: var(--flexoki-red-300);
+  --color-danger-bg: var(--flexoki-red-950);
+  --color-danger-hover: var(--flexoki-red-200);
+  --color-warning: var(--flexoki-orange-400);
+  --color-warning-bg: var(--flexoki-orange-950);
+  --color-warning-hover: var(--flexoki-orange-300);
+  --color-success: var(--flexoki-green-400);
+  --color-success-bg: var(--flexoki-green-950);
+  --color-success-hover: var(--flexoki-green-300);
+  --color-info: var(--flexoki-blue-400);
+  --color-info-bg: var(--flexoki-blue-950);
+  --color-info-hover: var(--flexoki-blue-300);
+
+  --color-red: var(--flexoki-red-400);
+  --color-orange: var(--flexoki-orange-400);
+  --color-yellow: var(--flexoki-yellow-400);
+  --color-green: var(--flexoki-green-400);
+  --color-cyan: var(--flexoki-cyan-400);
+  --color-blue: var(--flexoki-blue-400);
+  --color-purple: var(--flexoki-purple-400);
+  --color-magenta: var(--flexoki-magenta-400);
+
+  --color-code-bg: var(--flexoki-900);
+  --color-code-border: var(--flexoki-800);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+}
+
+
+/* ===== ds/base/reset.css ===== */
+/* ==========================================================================
+   Reset — Modern CSS reset
+   Adapted from Josh Comeau's CSS Reset + Andy Bell's Modern Reset
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+  tab-size: 4;
+}
+
+body {
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* Reduced motion: disable transitions/animations for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Remove list styles on ul, ol elements with a list role */
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+  padding: 0;
+}
+
+/* Anchor defaults */
+a:not([class]) {
+  text-decoration-skip-ink: auto;
+  color: currentColor;
+}
+
+/* Consistent textarea behavior */
+textarea {
+  resize: vertical;
+  resize: block; /* logical property, fallback above */
+}
+
+/* Focus visible only for keyboard navigation */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Target smooth scrolling only when safe */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(:target) {
+    scroll-behavior: smooth;
+  }
+}
+
+
+/* ===== ds/base/typography.css ===== */
+/* ==========================================================================
+   Typography — Headings, prose, lists, code, links
+   ========================================================================== */
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-selection);
+}
+
+/* --------------------------------------------------------------------------
+   Headings
+   -------------------------------------------------------------------------- */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+}
+
+h1 {
+  font-size: var(--font-size-4xl);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-block: var(--space-8) var(--space-4);
+}
+
+h2 {
+  font-size: var(--font-size-3xl);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-block: var(--space-8) var(--space-3);
+}
+
+h3 {
+  font-size: var(--font-size-2xl);
+  margin-block: var(--space-6) var(--space-3);
+}
+
+h4 {
+  font-size: var(--font-size-xl);
+  margin-block: var(--space-6) var(--space-2);
+}
+
+h5 {
+  font-size: var(--font-size-lg);
+  margin-block: var(--space-4) var(--space-2);
+}
+
+h6 {
+  font-size: var(--font-size-base);
+  margin-block: var(--space-4) var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   Prose / body text
+   -------------------------------------------------------------------------- */
+
+p {
+  margin-block: var(--space-4);
+  max-width: var(--width-prose);
+}
+
+/* Adjacent headings + paragraphs: reduce gap */
+h1 + p,
+h2 + p,
+h3 + p,
+h4 + p,
+h5 + p,
+h6 + p {
+  margin-block-start: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   Links
+   -------------------------------------------------------------------------- */
+
+a {
+  color: var(--color-link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+  transition: color var(--duration-fast) var(--easing);
+}
+
+a:hover {
+  color: var(--color-link-hover);
+}
+
+a:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Lists
+   -------------------------------------------------------------------------- */
+
+ul,
+ol {
+  padding-inline-start: var(--space-6);
+  margin-block: var(--space-4);
+  max-width: var(--width-prose);
+}
+
+li {
+  margin-block: var(--space-1);
+}
+
+li::marker {
+  color: var(--color-text-tertiary);
+}
+
+/* Nested lists */
+li > ul,
+li > ol {
+  margin-block: var(--space-1);
+}
+
+/* Description lists */
+dl {
+  margin-block: var(--space-4);
+  max-width: var(--width-prose);
+}
+
+dt {
+  font-weight: var(--font-weight-bold);
+  margin-block-start: var(--space-3);
+}
+
+dd {
+  margin-inline-start: var(--space-6);
+  margin-block-start: var(--space-1);
+  color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   Blockquotes
+   -------------------------------------------------------------------------- */
+
+blockquote {
+  border-inline-start: var(--border-width-2) solid var(--color-border-active);
+  padding-inline-start: var(--space-4);
+  margin-block: var(--space-4);
+  margin-inline: 0;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  max-width: var(--width-prose);
+}
+
+blockquote cite {
+  display: block;
+  margin-block-start: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   Code & Preformatted
+   -------------------------------------------------------------------------- */
+
+code,
+kbd,
+samp {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+:not(pre) > code {
+  background-color: var(--color-code-bg);
+  border: var(--border-width) solid var(--color-code-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-0-5) var(--space-1);
+}
+
+pre {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+  background-color: var(--color-code-bg);
+  border: var(--border-width) solid var(--color-code-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-block: var(--space-4);
+  overflow-x: auto;
+  tab-size: 2;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+kbd {
+  background-color: var(--color-surface-raised);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-0-5) var(--space-1-5);
+  box-shadow: 0 1px 0 var(--color-border);
+}
+
+/* --------------------------------------------------------------------------
+   Horizontal rule
+   -------------------------------------------------------------------------- */
+
+hr {
+  border: none;
+  border-block-start: var(--border-width) solid var(--color-border);
+  margin-block: var(--space-8);
+}
+
+/* --------------------------------------------------------------------------
+   Inline semantics
+   -------------------------------------------------------------------------- */
+
+strong,
+b {
+  font-weight: var(--font-weight-bold);
+}
+
+small {
+  font-size: var(--font-size-sm);
+}
+
+sub,
+sup {
+  font-size: var(--font-size-xs);
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+sub {
+  bottom: -0.25em;
+}
+
+abbr[title] {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.15em;
+  cursor: help;
+}
+
+mark {
+  background-color: var(--color-highlight);
+  padding-inline: var(--space-0-5);
+  border-radius: var(--radius-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Figure & caption
+   -------------------------------------------------------------------------- */
+
+figure {
+  margin-block: var(--space-6);
+  margin-inline: 0;
+}
+
+figcaption {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-block-start: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   Address
+   -------------------------------------------------------------------------- */
+
+address {
+  font-style: normal;
+  line-height: var(--line-height-normal);
+}
+
+/* --------------------------------------------------------------------------
+   Time, data, var
+   -------------------------------------------------------------------------- */
+
+time {
+  font-variant-numeric: tabular-nums;
+}
+
+var {
+  font-style: italic;
+  font-family: var(--font-mono);
+}
+
+
+/* ===== ds/base/forms.css ===== */
+/* ==========================================================================
+   Forms — Inputs, textareas, selects, checkboxes, radios, buttons
+   WCAG 2.2 AA: visible focus, sufficient contrast, labels
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Shared input styles
+   -------------------------------------------------------------------------- */
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+    [type="file"]
+  ):not([type="color"]):not([type="submit"]):not([type="reset"]):not(
+    [type="button"]
+  ),
+textarea,
+select {
+  display: block;
+  width: 100%;
+  max-width: var(--width-input);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition:
+    border-color var(--duration-fast) var(--easing),
+    box-shadow var(--duration-fast) var(--easing);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+    [type="file"]
+  ):not([type="color"]):not([type="submit"]):not([type="reset"]):not(
+    [type="button"]
+  ):hover,
+textarea:hover,
+select:hover {
+  border-color: var(--color-border-hover);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+    [type="file"]
+  ):not([type="color"]):not([type="submit"]):not([type="reset"]):not(
+    [type="button"]
+  ):focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  border-color: var(--color-action);
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+/* Placeholder */
+::placeholder {
+  color: var(--color-text-disabled);
+  opacity: 1;
+}
+
+/* Disabled */
+input:disabled,
+textarea:disabled,
+select:disabled,
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   Labels
+   -------------------------------------------------------------------------- */
+
+label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin-block-end: var(--space-1);
+}
+
+label + input,
+label + textarea,
+label + select {
+  margin-block-end: var(--space-4);
+}
+
+/* --------------------------------------------------------------------------
+   Select
+   -------------------------------------------------------------------------- */
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%236F6E69' d='M4.5 6l3.5 4 3.5-4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-2) center;
+  padding-inline-end: var(--space-8);
+}
+
+/* --------------------------------------------------------------------------
+   Checkbox & Radio
+   -------------------------------------------------------------------------- */
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: var(--space-4);
+  height: var(--space-4);
+  accent-color: var(--color-action);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+input[type="radio"] {
+  border-radius: var(--radius-full);
+}
+
+/* Inline label pattern */
+label:has(> input[type="checkbox"]),
+label:has(> input[type="radio"]) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text);
+  cursor: pointer;
+  margin-block-end: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   Range
+   -------------------------------------------------------------------------- */
+
+input[type="range"] {
+  width: 100%;
+  max-width: var(--width-input);
+  accent-color: var(--color-action);
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   File input
+   -------------------------------------------------------------------------- */
+
+input[type="file"] {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-1-5) var(--space-3);
+  color: var(--color-text);
+  background-color: var(--color-surface-raised);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  margin-inline-end: var(--space-3);
+  transition:
+    background-color var(--duration-fast) var(--easing),
+    border-color var(--duration-fast) var(--easing);
+}
+
+input[type="file"]::file-selector-button:hover {
+  background-color: var(--color-surface-overlay);
+  border-color: var(--color-border-hover);
+}
+
+/* --------------------------------------------------------------------------
+   Color input
+   -------------------------------------------------------------------------- */
+
+input[type="color"] {
+  width: var(--space-10);
+  height: var(--space-8);
+  padding: var(--space-0-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  background-color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   Textarea
+   -------------------------------------------------------------------------- */
+
+textarea {
+  min-height: 6em;
+}
+
+/* --------------------------------------------------------------------------
+   Fieldset & Legend
+   -------------------------------------------------------------------------- */
+
+fieldset {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-block: var(--space-4);
+}
+
+legend {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  padding-inline: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   Validation states
+   -------------------------------------------------------------------------- */
+
+input[aria-invalid="true"],
+textarea[aria-invalid="true"],
+select[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+input[aria-invalid="true"]:focus-visible,
+textarea[aria-invalid="true"]:focus-visible,
+select[aria-invalid="true"]:focus-visible {
+  outline-color: var(--color-danger);
+}
+
+/* Error message */
+.form-error {
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+  margin-block-start: var(--space-1);
+}
+
+/* --------------------------------------------------------------------------
+   Submit / Reset / Button inputs — defer to button styles
+   -------------------------------------------------------------------------- */
+
+input[type="submit"],
+input[type="reset"],
+input[type="button"] {
+  cursor: pointer;
+}
+
+
+/* ===== ds/base/grid.css ===== */
+/* ==========================================================================
+   Grid utilities
+   ========================================================================== */
+
+/* Fixed-column grids
+   All collapse to a single column below 600 px.
+   .cols-3 and .cols-4 also pass through a two-column step below 900 px. */
+.cols-2,
+.cols-3,
+.cols-4 {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 900px) {
+  .cols-3,
+  .cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .cols-2,
+  .cols-3,
+  .cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Auto-fill responsive grid
+   Override custom properties inline to tune per-instance:
+     --grid-min   minimum column width  (default: 280px)
+     --grid-gap   gap between items     (default: var(--space-4))
+
+   Examples:
+     <div class="grid-auto">                                  280 px min, space-4 gap
+     <div class="grid-auto" style="--grid-min: 120px">        120 px min
+     <div class="grid-auto" style="--grid-gap: var(--space-2)">  tighter gap */
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--grid-min, 280px), 1fr));
+  gap: var(--grid-gap, var(--space-4));
+  margin-block: var(--space-4);
+}
+
+
+/* ===== ds/base/media.css ===== */
+/* ==========================================================================
+   Media — Images, video, audio, figure defaults
+   ========================================================================== */
+
+img,
+video {
+  height: auto;
+  border-radius: var(--radius-lg);
+}
+
+/* Prevent image overflow */
+img {
+  max-width: 100%;
+}
+
+/* Audio */
+audio {
+  width: 100%;
+  max-width: var(--width-input);
+}
+
+/* Embedded content */
+iframe {
+  border: none;
+  border-radius: var(--radius-lg);
+}
+
+/* --------------------------------------------------------------------------
+   Interactive elements
+   -------------------------------------------------------------------------- */
+
+details {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  margin-block: var(--space-3);
+}
+
+details[open] {
+  padding-block-end: var(--space-4);
+}
+
+summary {
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
+  border-radius: var(--radius-md);
+  transition: background-color var(--duration-fast) var(--easing);
+}
+
+summary:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+details[open] > summary {
+  margin-block-end: var(--space-3);
+}
+
+/* --------------------------------------------------------------------------
+   Progress & Meter
+   -------------------------------------------------------------------------- */
+
+progress {
+  width: 100%;
+  max-width: var(--width-input);
+  height: var(--space-2);
+  border: none;
+  border-radius: var(--radius-full);
+  appearance: none;
+}
+
+progress::-webkit-progress-bar {
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+}
+
+progress::-webkit-progress-value {
+  background-color: var(--color-action);
+  border-radius: var(--radius-full);
+}
+
+progress::-moz-progress-bar {
+  background-color: var(--color-action);
+  border-radius: var(--radius-full);
+}
+
+meter {
+  width: 100%;
+  max-width: var(--width-input);
+  height: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   Dialog (native)
+   -------------------------------------------------------------------------- */
+
+dialog {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-lg);
+  max-width: min(90vw, 32rem);
+}
+
+dialog::backdrop {
+  background-color: rgba(16, 15, 15, 0.5);
+}
+
+
+/* ===== components/alert.css ===== */
+/* ==========================================================================
+   Alert / Banner
+   ========================================================================== */
+
+.alert {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  margin-block: var(--space-3);
+  position: relative;
+}
+
+.alert > *:first-child {
+  margin-block-start: 0;
+}
+
+.alert > *:last-child {
+  margin-block-end: 0;
+}
+
+/* Variants */
+.alert-info {
+  background-color: var(--color-info-bg);
+  border-color: var(--color-info);
+  color: var(--color-info);
+}
+
+.alert-success {
+  background-color: var(--color-success-bg);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.alert-warning {
+  background-color: var(--color-warning-bg);
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+
+.alert-danger {
+  background-color: var(--color-danger-bg);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+/* Dismissible */
+.alert-dismiss {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-end: var(--space-2);
+  background: none;
+  border: none;
+  font-size: var(--font-size-lg);
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: opacity var(--duration-fast) var(--easing);
+}
+
+.alert-dismiss:hover {
+  opacity: 1;
+}
+
+/* Hidden state for JS dismiss */
+.alert[hidden] {
+  display: none;
+}
+
+
+/* ===== components/avatar.css ===== */
+/* ==========================================================================
+   Avatar
+   WCAG: <img> inside must have descriptive alt text. Initials text nodes
+         are aria-hidden implicitly via context; add aria-label to .avatar
+         when used without an <img> to convey identity to screen readers.
+   ========================================================================== */
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  user-select: none;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Sizes */
+.avatar-xs {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: var(--font-size-xs);
+}
+.avatar-sm {
+  width: 2rem;
+  height: 2rem;
+  font-size: var(--font-size-xs);
+}
+.avatar-lg {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: var(--font-size-lg);
+}
+.avatar-xl {
+  width: 5rem;
+  height: 5rem;
+  font-size: var(--font-size-2xl);
+}
+
+/* Status indicator — wrap .avatar in .avatar-wrapper to show a status dot */
+.avatar-wrapper {
+  display: inline-grid;
+  position: relative;
+}
+
+.avatar-status {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--radius-full);
+  border: var(--border-width-2) solid var(--color-bg);
+  background-color: var(--color-text-disabled);
+}
+
+.avatar-status-online {
+  background-color: var(--color-success);
+}
+.avatar-status-away {
+  background-color: var(--color-warning);
+}
+.avatar-status-busy {
+  background-color: var(--color-danger);
+}
+.avatar-status-offline {
+  background-color: var(--color-text-disabled);
+}
+
+/* Avatar group — overlapping stack */
+.avatar-group {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.avatar-group .avatar {
+  margin-inline-start: -0.5rem;
+  border: var(--border-width-2) solid var(--color-bg);
+}
+
+.avatar-group .avatar:last-child {
+  margin-inline-start: 0;
+}
+
+
+/* ===== components/badge.css ===== */
+/* ==========================================================================
+   Badge / Tag
+   ========================================================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+}
+
+/* Color variants */
+.badge-red {
+  background-color: var(--flexoki-red-50);
+  color: var(--color-red);
+  border-color: var(--color-red);
+}
+.badge-orange {
+  background-color: var(--flexoki-orange-50);
+  color: var(--color-orange);
+  border-color: var(--color-orange);
+}
+.badge-yellow {
+  background-color: var(--flexoki-yellow-50);
+  color: var(--color-yellow);
+  border-color: var(--color-yellow);
+}
+.badge-green {
+  background-color: var(--flexoki-green-50);
+  color: var(--color-green);
+  border-color: var(--color-green);
+}
+.badge-cyan {
+  background-color: var(--flexoki-cyan-50);
+  color: var(--color-cyan);
+  border-color: var(--color-cyan);
+}
+.badge-blue {
+  background-color: var(--flexoki-blue-50);
+  color: var(--color-blue);
+  border-color: var(--color-blue);
+}
+.badge-purple {
+  background-color: var(--flexoki-purple-50);
+  color: var(--color-purple);
+  border-color: var(--color-purple);
+}
+.badge-magenta {
+  background-color: var(--flexoki-magenta-50);
+  color: var(--color-magenta);
+  border-color: var(--color-magenta);
+}
+
+/* Dark mode badge backgrounds */
+.theme-dark .badge-red {
+  background-color: var(--flexoki-red-950);
+}
+.theme-dark .badge-orange {
+  background-color: var(--flexoki-orange-950);
+}
+.theme-dark .badge-yellow {
+  background-color: var(--flexoki-yellow-950);
+}
+.theme-dark .badge-green {
+  background-color: var(--flexoki-green-950);
+}
+.theme-dark .badge-cyan {
+  background-color: var(--flexoki-cyan-950);
+}
+.theme-dark .badge-blue {
+  background-color: var(--flexoki-blue-950);
+}
+.theme-dark .badge-purple {
+  background-color: var(--flexoki-purple-950);
+}
+.theme-dark .badge-magenta {
+  background-color: var(--flexoki-magenta-950);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.theme-light) {
+    .badge-red {
+      background-color: var(--flexoki-red-950);
+    }
+    .badge-orange {
+      background-color: var(--flexoki-orange-950);
+    }
+    .badge-yellow {
+      background-color: var(--flexoki-yellow-950);
+    }
+    .badge-green {
+      background-color: var(--flexoki-green-950);
+    }
+    .badge-cyan {
+      background-color: var(--flexoki-cyan-950);
+    }
+    .badge-blue {
+      background-color: var(--flexoki-blue-950);
+    }
+    .badge-purple {
+      background-color: var(--flexoki-purple-950);
+    }
+    .badge-magenta {
+      background-color: var(--flexoki-magenta-950);
+    }
+  }
+}
+
+
+/* ===== components/button.css ===== */
+/* ==========================================================================
+   Button
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  text-decoration: none;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--easing),
+    border-color var(--duration-fast) var(--easing),
+    color var(--duration-fast) var(--easing),
+    box-shadow var(--duration-fast) var(--easing);
+}
+
+.btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Primary */
+.btn-primary {
+  background-color: var(--color-action);
+  color: var(--color-action-text);
+  border-color: var(--color-action);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-action-hover);
+  border-color: var(--color-action-hover);
+}
+
+/* Secondary */
+.btn-secondary {
+  background-color: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-surface-overlay);
+}
+
+/* Outline / Ghost */
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-action);
+  border-color: var(--color-action);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-action);
+  color: var(--color-action-text);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border-color: transparent;
+}
+
+.btn-ghost:hover {
+  background-color: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+/* Danger */
+.btn-danger {
+  background-color: var(--color-danger);
+  color: var(--color-action-text);
+  border-color: var(--color-danger);
+}
+
+.btn-danger:hover {
+  background-color: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
+}
+
+/* Sizes */
+.btn-sm {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+}
+
+.btn-lg {
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--font-size-base);
+}
+
+/* Full width */
+.btn-block {
+  display: flex;
+  width: 100%;
+}
+
+/* Loading state — add .btn-loading and a spinner span */
+.btn-loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: var(--radius-full);
+  animation: btn-spin 0.6s linear infinite;
+  color: var(--color-action-text);
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ===== components/card.css ===== */
+/* ==========================================================================
+   Card
+   ========================================================================== */
+
+.card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--duration-normal) var(--easing);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card-header {
+  padding: var(--space-4) var(--space-5);
+  border-block-end: var(--border-width) solid var(--color-border);
+}
+
+.card-header h3,
+.card-header h4 {
+  margin: 0;
+}
+
+.card-body {
+  padding: var(--space-4) var(--space-5);
+}
+
+.card-body > *:first-child {
+  margin-block-start: 0;
+}
+
+.card-body > *:last-child {
+  margin-block-end: 0;
+}
+
+.card-footer {
+  padding: var(--space-3) var(--space-5);
+  border-block-start: var(--border-width) solid var(--color-border);
+  background-color: var(--color-bg-secondary);
+}
+
+/* Card with image */
+.card-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+/* Compact variant */
+.card-compact .card-header,
+.card-compact .card-body,
+.card-compact .card-footer {
+  padding: var(--space-3) var(--space-4);
+}
+
+
+/* ===== components/checkbox.css ===== */
+/* ==========================================================================
+   Checkbox
+   WCAG: Each checkbox input must have an associated <label> via for/id or
+         by wrapping. The .checkbox class is a layout wrapper only.
+         Custom styling relies on accent-color; native focus is preserved.
+   ========================================================================== */
+
+/* Single checkbox with label */
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.checkbox input[type="checkbox"] {
+  flex-shrink: 0;
+  margin: 0;
+  margin-block-start: 0.15em; /* optical alignment with first line of label */
+  cursor: pointer;
+}
+
+.checkbox-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text);
+  line-height: var(--line-height-normal);
+}
+
+.checkbox-description {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-block-start: var(--space-0-5);
+}
+
+/* Disabled */
+.checkbox:has(input[type="checkbox"]:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.checkbox:has(input[type="checkbox"]:disabled) * {
+  cursor: not-allowed;
+}
+
+/* Group of checkboxes */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.checkbox-group-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin-block-end: var(--space-2);
+}
+
+
+/* ===== components/combobox.css ===== */
+/* ==========================================================================
+   Combobox
+   Extends the listbox component with a search input. Option markup uses
+   .listbox-option (and related classes) from listbox.css. The popup uses
+   .listbox-popup for positioning. Combobox adds only the wrapper, filtering
+   empty-state, and selection-style overrides.
+
+   WCAG: The input must have role="combobox", aria-expanded, aria-controls
+         pointing to the listbox id, and aria-haspopup="listbox".
+         The listbox popup must have role="listbox"; each option role="option"
+         with aria-selected. Use aria-activedescendant on the input to track
+         the highlighted option.
+
+   Example markup:
+     <div class="combobox">
+       <input type="text" role="combobox" aria-expanded="false"
+              aria-haspopup="listbox" aria-controls="cb-list"
+              aria-autocomplete="list" autocomplete="off" />
+       <ul class="listbox listbox-popup" id="cb-list" role="listbox" hidden>
+         <li class="listbox-option" role="option" aria-selected="false">…</li>
+       </ul>
+     </div>
+   ========================================================================== */
+
+.combobox {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: var(--width-input);
+}
+
+/* Hide popup when input indicates collapsed */
+[aria-expanded="false"] ~ .listbox-popup {
+  display: none;
+}
+
+/* --- Overrides for listbox-option inside a combobox popup --- */
+
+/* In combobox, selected just gets a subtle highlight (input shows value) */
+.combobox .listbox-option[aria-selected="true"] {
+  background-color: var(--color-surface-raised);
+  color: var(--color-text);
+  font-weight: var(--font-weight-normal);
+}
+
+/* Keyboard focus lives on the input, so suppress option outline */
+.combobox .listbox-option[data-active],
+.combobox .listbox-option:focus {
+  background-color: var(--color-surface-overlay);
+  outline: none;
+}
+
+/* Empty state */
+.combobox-empty {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+/* Hint / error message below the combobox */
+.combobox-message {
+  font-size: var(--font-size-sm);
+  margin: 0;
+  margin-block-start: var(--space-1);
+}
+
+/* Error state */
+[role="combobox"][aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+[role="combobox"][aria-invalid="true"]:focus-visible {
+  border-color: var(--color-danger);
+  outline-color: var(--color-danger);
+}
+
+.combobox-error .input-label {
+  color: var(--color-danger);
+}
+
+.combobox-error .combobox-message {
+  color: var(--color-danger);
+}
+
+
+/* ===== components/contents.css ===== */
+/* ==========================================================================
+   Contents — Floating table of contents
+
+   A sticky sidebar navigation that lists page headings (h2 + h3).
+   Designed to sit alongside main content in a flex layout.
+
+   Markup:
+     <div class="contents-layout">
+       <nav class="contents" aria-label="Table of contents">
+         <p class="contents-title">Contents</p>
+         <ol class="contents-list">
+           <li class="contents-item">
+             <a class="contents-link" href="#section">Section</a>
+             <ol class="contents-sublist">
+               <li class="contents-item">
+                 <a class="contents-link" href="#sub">Sub-section</a>
+               </li>
+             </ol>
+           </li>
+         </ol>
+       </nav>
+       <main>…</main>
+     </div>
+
+   ARIA: Use aria-label="Table of contents" on the <nav>.
+   The .is-active class is applied by contents-ext-bookmark.js.
+   ========================================================================== */
+
+/* Layout helper — flex wrapper for contents + main content */
+.contents-layout {
+  display: flex;
+  gap: var(--space-8);
+  align-items: flex-start;
+}
+
+.contents-layout > :not(.contents) {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+/* Sticky sidebar container */
+.contents {
+  position: sticky;
+  inset-block-start: var(--space-6);
+  flex-shrink: 0;
+  inline-size: 14rem;
+  max-block-size: calc(100vh - var(--space-12));
+  overflow-y: auto;
+  font-size: var(--font-size-sm);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+/* Title label */
+.contents-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin: 0;
+  margin-block-end: var(--space-2);
+  padding-inline: var(--space-3);
+}
+
+/* Lists */
+.contents-list,
+.contents-sublist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.contents-sublist {
+  padding-inline-start: var(--space-3);
+  border-inline-start: var(--border-width-2) solid var(--color-action);
+}
+
+/* Links */
+.contents-link {
+  display: block;
+  padding-block: var(--space-1);
+  padding-inline: var(--space-3);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-inline-start: var(--border-width-2) solid transparent;
+  line-height: var(--line-height-normal);
+}
+
+/* Sublist links don't need their own border — the sublist has one */
+.contents-sublist .contents-link {
+  border-inline-start: none;
+}
+
+.contents-link:hover {
+  color: var(--color-text);
+}
+
+.contents-link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* Active state — set by contents-ext-bookmark.js */
+.contents-link.is-active {
+  color: var(--color-text);
+  border-inline-start-color: var(--color-action);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Collapsed sublists — set by contents-ext-bookmark.js */
+.contents-sublist.is-collapsed {
+  display: none;
+}
+
+/* Transitions */
+@media (prefers-reduced-motion: no-preference) {
+  .contents-link {
+    transition:
+      color var(--duration-fast) var(--easing),
+      border-color var(--duration-fast) var(--easing);
+  }
+}
+
+/* Hide on small screens where there's no room for a sidebar */
+@media (max-width: 860px) {
+  .contents {
+    display: none;
+  }
+
+  .contents-layout {
+    display: block;
+  }
+}
+
+
+/* ===== components/description-list.css ===== */
+/* ==========================================================================
+   Description List
+   WCAG: Use semantic <dl>, <dt>, <dd> elements. A <dl> group that describes
+         one item should use <div> wrappers only to aid styling — this is
+         permitted in HTML spec.
+
+   Example markup:
+     <dl class="dl">
+       <div class="dl-row">
+         <dt class="dl-term">Label</dt>
+         <dd class="dl-description">Value</dd>
+       </div>
+     </dl>
+   ========================================================================== */
+
+.dl {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.dl-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 30%) 1fr;
+  gap: 0;
+  border-block-end: var(--border-width) solid var(--color-border);
+}
+
+.dl-row:last-child {
+  border-block-end: none;
+}
+
+.dl-term {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-secondary);
+  border-inline-end: var(--border-width) solid var(--color-border);
+  margin-block-start: 0;
+}
+
+.dl-description {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  margin: 0;
+  word-break: break-word;
+}
+
+/* Stacked layout (single column) */
+.dl-stacked .dl-row {
+  grid-template-columns: 1fr;
+}
+
+.dl-stacked .dl-term {
+  border-inline-end: none;
+  border-block-end: var(--border-width) solid var(--color-border);
+  padding-block-end: var(--space-1);
+}
+
+.dl-stacked .dl-description {
+  padding-block-start: var(--space-1);
+}
+
+/* Flush (no border) variant */
+.dl-flush {
+  border: none;
+  border-radius: 0;
+}
+
+.dl-flush .dl-row {
+  border-block-end-color: transparent;
+}
+
+.dl-flush .dl-term {
+  background-color: transparent;
+  border-inline-end: none;
+  padding-inline-start: 0;
+}
+
+.dl-flush .dl-description {
+  padding-inline-start: 0;
+}
+
+
+/* ===== components/dialog.css ===== */
+/* ==========================================================================
+   Dialog / Modal
+   Targets the native <dialog> element (supported in all modern browsers).
+   WCAG: <dialog> must have an accessible name via aria-labelledby or
+         aria-label. Use aria-describedby for the body content.
+         Focus is trapped inside an open dialog. Provide a visible close
+         button and support Escape key (handled natively by <dialog>).
+
+   Example markup:
+     <dialog class="dialog" aria-labelledby="dialog-title" aria-describedby="dialog-desc">
+       <div class="dialog-panel">
+         <header class="dialog-header">
+           <h2 class="dialog-title" id="dialog-title">Title</h2>
+           <button class="dialog-close btn btn-ghost" aria-label="Close dialog">✕</button>
+         </header>
+         <div class="dialog-body" id="dialog-desc">…</div>
+         <footer class="dialog-footer">…</footer>
+       </div>
+     </dialog>
+
+   Open via: dialogEl.showModal()
+   ========================================================================== */
+
+/* Backdrop — native ::backdrop for <dialog> */
+dialog::backdrop {
+  background-color: rgba(16, 15, 15, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+/* Base dialog */
+dialog.dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-xl);
+  background: transparent;
+  box-shadow: var(--shadow-lg);
+  max-height: calc(100dvh - var(--space-8));
+  max-width: calc(100vw - var(--space-8));
+  width: 32rem;
+  overflow: visible;
+  animation: dialog-enter var(--duration-normal) var(--easing);
+}
+
+@keyframes dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Inner panel */
+.dialog-panel {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  max-height: calc(100dvh - var(--space-8));
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-block-end: var(--border-width) solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  line-height: var(--line-height-tight);
+}
+
+.dialog-close {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  border: none;
+  background: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  line-height: 1;
+  transition:
+    background-color var(--duration-fast) var(--easing),
+    color var(--duration-fast) var(--easing);
+}
+
+.dialog-close:hover {
+  background-color: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.dialog-close:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.dialog-body {
+  padding: var(--space-5);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1 1 auto;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.dialog-body > *:first-child {
+  margin-block-start: 0;
+}
+.dialog-body > *:last-child {
+  margin-block-end: 0;
+}
+
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  border-block-start: var(--border-width) solid var(--color-border);
+  background-color: var(--color-bg-secondary);
+  flex-shrink: 0;
+}
+
+/* Size variants */
+.dialog-sm {
+  width: 22rem;
+}
+.dialog-lg {
+  width: 46rem;
+}
+.dialog-xl {
+  width: 60rem;
+}
+
+/* Full-screen on narrow viewports */
+@media (max-width: 600px) {
+  dialog.dialog {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .dialog-panel {
+    border-radius: 0;
+    max-height: 100dvh;
+  }
+}
+
+
+/* ===== components/divider.css ===== */
+/* ==========================================================================
+   Divider / Separator
+   WCAG: Decorative dividers use aria-hidden="true". If the divider
+         conveys a section boundary meaningful to screen readers, use
+         role="separator" with an aria-label.
+
+   Example markup — decorative:
+     <hr class="divider" aria-hidden="true" />
+
+   Example markup — labelled:
+     <div class="divider divider-label" role="separator" aria-label="Or">
+       <span>Or</span>
+     </div>
+   ========================================================================== */
+
+/* Base — replaces browser default <hr> */
+.divider {
+  border: none;
+  border-block-start: var(--border-width) solid var(--color-border);
+  margin-block: var(--space-6);
+}
+
+/* Labelled divider — text centred on the line */
+.divider-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border: none;
+  margin-block: var(--space-6);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.divider-label::before,
+.divider-label::after {
+  content: "";
+  flex: 1;
+  border-block-start: var(--border-width) solid var(--color-border);
+}
+
+/* Orientation */
+.divider-vertical {
+  border: none;
+  border-inline-start: var(--border-width) solid var(--color-border);
+  margin-inline: var(--space-4);
+  align-self: stretch;
+  height: auto;
+  display: inline-block;
+}
+
+/* Weight variants */
+.divider-thick {
+  border-block-start-width: var(--border-width-2);
+}
+
+
+/* ===== components/dropdown.css ===== */
+/* ==========================================================================
+   Dropdown Menu
+   WCAG: The trigger button must have aria-haspopup="menu" and aria-expanded.
+         The menu must have role="menu"; items role="menuitem".
+         Keyboard: Arrow keys navigate items; Escape closes; Enter/Space activate.
+         Focus returns to the trigger on close.
+
+   Example markup:
+     <div class="dropdown">
+       <button class="btn btn-secondary" aria-haspopup="menu"
+               aria-expanded="false" aria-controls="menu-id">
+         Options
+       </button>
+       <ul class="dropdown-menu" id="menu-id" role="menu" hidden>
+         <li role="none">
+           <a class="dropdown-item" href="#" role="menuitem">Edit</a>
+         </li>
+         <li class="dropdown-divider" role="none" aria-hidden="true"></li>
+         <li role="none">
+           <button class="dropdown-item dropdown-item-danger"
+                   role="menuitem">Delete</button>
+         </li>
+       </ul>
+     </div>
+   ========================================================================== */
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Menu panel */
+.dropdown-menu {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-1));
+  inset-inline-start: 0;
+  z-index: 200;
+  min-width: 10rem;
+  margin: 0;
+  padding: var(--space-1) 0;
+  list-style: none;
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  animation: dropdown-enter var(--duration-fast) var(--easing);
+}
+
+@keyframes dropdown-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hide when closed */
+.dropdown-menu[hidden],
+[aria-expanded="false"] + .dropdown-menu {
+  display: none;
+}
+
+/* Align to end (right-side menus) */
+.dropdown-menu-end {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+/* Open upward — place above the trigger */
+.dropdown-menu-up {
+  inset-block-start: auto;
+  inset-block-end: calc(100% + var(--space-1));
+  animation-name: dropdown-enter-up;
+}
+
+@keyframes dropdown-enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Menu item — works for <a> and <button> */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  text-decoration: none;
+  background: none;
+  border: none;
+  text-align: start;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--duration-fast) var(--easing);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus-visible {
+  background-color: var(--color-surface-raised);
+  outline: none;
+}
+
+.dropdown-item:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+.dropdown-item[aria-disabled="true"],
+.dropdown-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Danger variant */
+.dropdown-item-danger {
+  color: var(--color-danger);
+}
+
+.dropdown-item-danger:hover {
+  background-color: var(--color-danger-bg);
+}
+
+/* Section label */
+.dropdown-label {
+  display: block;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  pointer-events: none;
+}
+
+/* Divider within menu */
+.dropdown-divider {
+  height: var(--border-width);
+  background-color: var(--color-border);
+  margin-block: var(--space-1);
+}
+
+
+/* ===== components/fieldset.css ===== */
+/* ==========================================================================
+   Fieldset
+   WCAG: Use the native <fieldset> + <legend> elements to group related
+         inputs. The legend is announced by screen readers as the group name.
+         Do not nest fieldsets with conflicting purposes.
+
+   Example markup:
+     <fieldset class="fieldset">
+       <legend class="fieldset-legend">Shipping address</legend>
+       <p class="fieldset-hint">All fields are required.</p>
+       <!-- form fields -->
+     </fieldset>
+   ========================================================================== */
+
+.fieldset {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  margin: 0;
+  margin-block: var(--space-4);
+}
+
+.fieldset-legend {
+  padding-inline: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  line-height: var(--line-height-normal);
+}
+
+.fieldset-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-block: 0 var(--space-4);
+}
+
+/* Flush variant — no visible border box */
+.fieldset-flush {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.fieldset-flush .fieldset-legend {
+  padding-inline: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  margin-block-end: var(--space-3);
+}
+
+/* Inline variant — label sits to the left of each field.
+   WCAG: label association is by for/id so position does not affect SR output. */
+.fieldset-inline .input-group {
+  display: grid;
+  grid-template-columns: minmax(8rem, 14rem) 1fr;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
+
+/* Let hint/message span both columns */
+.fieldset-inline .input-group .input-hint,
+.fieldset-inline .input-group .input-message {
+  grid-column: 2;
+}
+
+.fieldset-inline .input-label {
+  margin-block-end: 0;
+  padding-block-start: var(--space-2); /* optically align with input padding */
+}
+
+/* Grid variant — multi-column responsive grid of fields.
+   Children are .input-group elements; use .col-span-2 to span full width. */
+.fieldset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-4);
+  /* Reset block padding so the legend sits above the grid naturally */
+  padding-block-start: var(--space-3);
+}
+
+/* Reserve the full first row for the legend + hint */
+.fieldset-grid .fieldset-legend {
+  grid-column: 1 / -1;
+}
+
+.fieldset-grid .fieldset-hint {
+  grid-column: 1 / -1;
+  margin-block: 0;
+}
+
+/* Utility: force an input-group to span all grid columns */
+.col-span-2 {
+  grid-column: 1 / -1;
+}
+
+/* Disabled fieldset */
+.fieldset:disabled,
+fieldset:disabled .fieldset-legend {
+  opacity: 0.5;
+}
+
+
+/* ===== components/heading.css ===== */
+/* ==========================================================================
+   Heading
+   Utility classes that apply heading styles to any element, independent of
+   the HTML heading level. Use when visual hierarchy must differ from
+   document outline (e.g. a visually-small <h1> or a large <span>).
+
+   WCAG: Always use the correct semantic heading level (h1–h6) for document
+         structure. These classes only change visual appearance.
+
+   Example:
+     <h2 class="h1">Page title (visually h1, semantically h2)</h2>
+     <p class="heading-display">Hero text</p>
+   ========================================================================== */
+
+/* Mirror typography.css heading sizes as classes */
+.h1 {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text);
+}
+
+.h2 {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text);
+}
+
+.h3 {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+}
+
+.h4 {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+}
+
+.h5 {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+}
+
+.h6 {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+}
+
+/* Display — extra-large hero text above h1 */
+.heading-display {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text);
+}
+
+/* Subtitle — supporting text below a heading */
+.heading-subtitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  margin-block-start: var(--space-2);
+}
+
+/* Eyebrow — small label above a heading */
+.heading-eyebrow {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin-block-end: var(--space-2);
+}
+
+
+/* ===== components/input.css ===== */
+/* ==========================================================================
+   Input
+   Component-level wrapper pattern for text inputs. Base element styles
+   (border, focus ring, etc.) are in base/forms.css; these classes add
+   grouped layout with labels, hints, and validation messages.
+
+   WCAG: <label> must be programmatically associated with its input via
+         for/id. Hint and error text must be linked via aria-describedby.
+         Error inputs must also have aria-invalid="true".
+
+   Example markup:
+     <div class="input-group">
+       <label class="input-label" for="email">Email address</label>
+       <input class="input-field" type="email" id="email"
+              aria-describedby="email-hint" />
+       <p class="input-hint" id="email-hint">
+         We'll never share your email.
+       </p>
+     </div>
+
+   Error state:
+     <div class="input-group input-error">
+       <label class="input-label" for="email">Email address</label>
+       <input class="input-field" type="email" id="email"
+              aria-describedby="email-err" aria-invalid="true" />
+       <p class="input-message" id="email-err" role="alert">
+         Enter a valid email address.
+       </p>
+     </div>
+   ========================================================================== */
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-block-end: var(--space-4);
+}
+
+.input-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.input-label-required::after {
+  content: " *";
+  color: var(--color-danger);
+  aria-hidden: "true";
+}
+
+/* Override base margin on the input element */
+.input-field {
+  margin-block-end: 0 !important;
+}
+
+.input-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.input-message {
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+/* Error state */
+.input-error .input-label {
+  color: var(--color-danger);
+}
+
+.input-error .input-field {
+  border-color: var(--color-danger);
+}
+
+.input-error .input-field:focus-visible {
+  border-color: var(--color-danger);
+  outline-color: var(--color-danger);
+}
+
+.input-error .input-message {
+  color: var(--color-danger);
+}
+
+/* Success state */
+.input-success .input-field {
+  border-color: var(--color-success);
+}
+
+.input-success .input-message {
+  color: var(--color-success);
+}
+
+/* Inline input with prefix/suffix */
+.input-addon-group {
+  display: flex;
+  align-items: stretch;
+}
+
+.input-addon-group .input-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.input-addon-group .input-field:not(:first-child) {
+  border-start-start-radius: 0 !important;
+  border-end-start-radius: 0 !important;
+  border-inline-start: none !important;
+}
+
+.input-addon-group .input-field:not(:last-child) {
+  border-start-end-radius: 0 !important;
+  border-end-end-radius: 0 !important;
+}
+
+.input-addon {
+  display: inline-flex;
+  align-items: center;
+  padding-inline: var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border);
+  white-space: nowrap;
+}
+
+.input-addon:first-child {
+  border-start-start-radius: var(--radius-md);
+  border-end-start-radius: var(--radius-md);
+  border-inline-end: none;
+}
+
+.input-addon:last-child {
+  border-start-end-radius: var(--radius-md);
+  border-end-end-radius: var(--radius-md);
+  border-inline-start: none;
+}
+
+/* ==========================================================================
+   Search input
+   WCAG: No visible <label> — use aria-label="Search" on the input.
+         The shortcut badge is aria-hidden; announce the shortcut via
+         a visible hint or the input's aria-describedby instead.
+   ========================================================================== */
+
+.input-search {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.input-search-icon {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.input-search-shortcut {
+  position: absolute;
+  inset-inline-end: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  background-color: var(--color-surface-raised);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding-inline: var(--space-1-5);
+  line-height: 1.5rem;
+  pointer-events: none;
+  user-select: none;
+}
+
+.input-search-field {
+  /* base/forms.css uses a high-specificity :not() chain — !important needed */
+  max-width: none !important;
+  width: 14rem !important;
+  /* Icon padding on the leading side */
+  padding-inline-start: calc(var(--space-3) + 1rem + var(--space-2)) !important;
+  /* Shortcut badge padding on the trailing side */
+  padding-inline-end: calc(var(--space-2) + 1.5rem + var(--space-2)) !important;
+}
+
+/* Remove browser-native clear/cancel button */
+.input-search-field::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+/* Expanded state — triggered by focus or .is-open (set by JS) */
+.input-search-field:focus,
+.input-search.is-open .input-search-field {
+  width: var(--width-input) !important;
+}
+
+/* Hide shortcut badge when open */
+.input-search-field:focus ~ .input-search-shortcut,
+.input-search.is-open .input-search-shortcut {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* base/forms.css sets transition: border-color, box-shadow with specificity
+     (0,8,1). We must use !important here to also animate width. All three
+     properties are listed so border/shadow transitions are not lost. */
+  .input-search-field {
+    transition:
+      width var(--duration-normal) var(--easing),
+      border-color var(--duration-fast) var(--easing),
+      box-shadow var(--duration-fast) var(--easing) !important;
+  }
+
+  .input-search-shortcut {
+    transition: opacity var(--duration-fast) var(--easing);
+  }
+}
+
+
+/* ===== components/listbox.css ===== */
+/* ==========================================================================
+   Listbox
+   A scrollable list of selectable options. Use inline for settings panels
+   and transfer lists, or as a dropdown for single/multi-select pickers.
+
+   WCAG: The container must have role="listbox" and aria-label or
+         aria-labelledby. Each option must have role="option" and
+         aria-selected. For multi-select add aria-multiselectable="true".
+         Keyboard: Arrow keys move focus; Space/Enter select; Home/End jump.
+         Communicate selection changes via aria-live="polite" on a status region.
+
+   Inline example:
+     <ul class="listbox" role="listbox" aria-label="Choose a timezone"
+         tabindex="0">
+       <li class="listbox-option" role="option" aria-selected="false">UTC</li>
+       <li class="listbox-option" role="option" aria-selected="true">
+         Europe/London
+       </li>
+     </ul>
+
+   Dropdown example:
+     <div class="listbox-dropdown">
+       <button class="listbox-trigger" aria-haspopup="listbox"
+               aria-expanded="false" aria-controls="lb-popup">
+         Europe/London
+       </button>
+       <ul class="listbox listbox-popup" id="lb-popup" role="listbox"
+           aria-label="Choose a timezone" tabindex="0" hidden>
+         <li class="listbox-option" role="option" aria-selected="true">
+           Europe/London
+         </li>
+       </ul>
+     </div>
+   ========================================================================== */
+
+.listbox {
+  display: block;
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1) 0;
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  max-height: 16rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Option */
+.listbox-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--duration-fast) var(--easing);
+}
+
+.listbox-option:hover {
+  background-color: var(--color-surface-raised);
+}
+
+.listbox-option[aria-selected="true"] {
+  background-color: var(--color-info-bg);
+  color: var(--color-action);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Keyboard focus via tabindex / :focus-visible on the listbox itself */
+.listbox:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Active descendant highlight (managed by JS via data attribute) */
+.listbox-option[data-active] {
+  background-color: var(--color-surface-overlay);
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+/* Hidden option (filtered out by combobox search, etc.) */
+.listbox-option[hidden] {
+  display: none;
+}
+
+/* Disabled option */
+.listbox-option[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Group heading within listbox */
+.listbox-group-label {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  pointer-events: none;
+}
+
+/* Separator */
+.listbox-divider {
+  height: var(--border-width);
+  background-color: var(--color-border);
+  margin-block: var(--space-1);
+}
+
+/* Multi-select — checkbox indicator via ::before */
+[aria-multiselectable="true"] .listbox-option::before {
+  content: "";
+  display: block;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--radius-sm);
+  border: var(--border-width) solid var(--color-border);
+  background-color: var(--color-surface);
+  transition:
+    background-color var(--duration-fast) var(--easing),
+    border-color var(--duration-fast) var(--easing);
+}
+
+[aria-multiselectable="true"] .listbox-option[aria-selected="true"] {
+  background-color: var(--color-surface-raised);
+  color: var(--color-text);
+  font-weight: var(--font-weight-normal);
+}
+
+[aria-multiselectable="true"] .listbox-option[aria-selected="true"]::before {
+  background-color: var(--color-action);
+  border-color: var(--color-action);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8'%3E%3Cpath d='M1 4l3 3 5-5' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-size: 0.625rem 0.5rem;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Rich option layout — icon/avatar/flag + text stack */
+.listbox-option-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.listbox-option-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.listbox-option-meta {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* Live region status */
+.listbox-status {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-block-start: var(--space-1);
+}
+
+/* ==========================================================================
+   Listbox dropdown — collapsible trigger + popup
+   ========================================================================== */
+
+/* Wrapper — positions the popup relative to the trigger */
+.listbox-dropdown {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: var(--width-input);
+}
+
+/* Trigger button — styled like a native select */
+.listbox-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  user-select: none;
+  text-align: start;
+}
+
+.listbox-trigger:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Chevron indicator */
+.listbox-trigger::after {
+  content: "";
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-inline-end: 2px solid var(--color-text-secondary);
+  border-block-end: 2px solid var(--color-text-secondary);
+  transform: rotate(45deg);
+  margin-block-start: -0.125rem;
+}
+
+/* Popup modifier — floats the listbox below its trigger/input */
+.listbox-popup {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-1));
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+}
+
+/* Hide when collapsed */
+.listbox-popup[hidden] {
+  display: none;
+}
+
+
+/* ===== components/navbar.css ===== */
+/* ==========================================================================
+   Navbar — Responsive navigation bar (horizontal or vertical).
+   Add data-nav-indicator="horizontal|vertical" to .navbar-nav for animated
+   active-state indicators (requires nav-indicator.js).
+
+   ARIA: Use <nav aria-label="…"> as the root element, or add aria-label to
+         .navbar when it is not the root. Active link uses aria-current="page".
+         Mobile toggle needs aria-expanded and aria-controls pointing to the
+         .navbar-nav id.
+
+   Example markup (horizontal):
+     <nav class="navbar" aria-label="Main navigation">
+       <a class="navbar-brand" href="/">
+         <svg class="navbar-brand-mark" aria-hidden="true">…</svg>
+         Brand
+       </a>
+       <button class="navbar-toggle" aria-expanded="false"
+               aria-controls="main-nav" aria-label="Toggle menu">
+         <svg …>…</svg>
+       </button>
+       <ul class="navbar-nav" id="main-nav" data-nav-indicator="horizontal">
+         <li><a href="/" aria-current="page">
+           <svg class="navbar-nav-icon" aria-hidden="true">…</svg> Home
+         </a></li>
+       </ul>
+       <div class="navbar-actions">
+         <button class="navbar-action-btn" aria-label="Notifications">…</button>
+       </div>
+     </nav>
+
+   Vertical — add .navbar-vertical:
+     <nav class="navbar navbar-vertical" aria-label="Sidebar">…</nav>
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Container
+   -------------------------------------------------------------------------- */
+
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface);
+  border-block-end: var(--border-width) solid var(--color-border);
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   Brand / Logo
+   -------------------------------------------------------------------------- */
+
+.navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  text-decoration: none;
+  color: var(--color-text);
+  flex-shrink: 0;
+  margin-inline-end: var(--space-2);
+}
+
+.navbar-brand:hover {
+  color: var(--color-text);
+}
+
+.navbar-brand-mark {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Navigation links
+   -------------------------------------------------------------------------- */
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative; /* anchor for .nav-indicator */
+}
+
+.navbar-nav a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1-5) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  position: relative;
+  transition:
+    background-color var(--duration-fast) var(--easing),
+    color var(--duration-fast) var(--easing);
+}
+
+.navbar-nav a:hover {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text);
+}
+
+.navbar-nav a[aria-current="page"],
+.navbar-nav a.is-active {
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+  background-color: transparent;
+}
+
+/* Icon inside nav links */
+.navbar-nav-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.navbar-nav a:hover .navbar-nav-icon,
+.navbar-nav a[aria-current="page"] .navbar-nav-icon,
+.navbar-nav a.is-active .navbar-nav-icon {
+  opacity: 1;
+}
+
+/* Trailing badge count (e.g. notifications) */
+.navbar-nav-badge {
+  margin-inline-start: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  padding: 0 var(--space-1-5);
+  min-width: 1.25rem;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Active indicator — static fallback (bottom bar on active link)
+   -------------------------------------------------------------------------- */
+
+.navbar-nav a[aria-current="page"]::after,
+.navbar-nav a.is-active::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: var(--space-3);
+  height: 2px;
+  background-color: var(--color-action);
+}
+
+/* nav-indicator.js active — hide static pseudo-element */
+.navbar-nav.has-nav-indicator a[aria-current="page"]::after,
+.navbar-nav.has-nav-indicator a.is-active::after {
+  display: none;
+}
+
+/* Animated indicator span (created by nav-indicator.js) */
+.navbar-nav .nav-indicator {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  height: 2px;
+  background-color: var(--color-action);
+  pointer-events: none;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .navbar-nav .nav-indicator {
+    transition:
+      transform var(--duration-normal) cubic-bezier(0.34, 1.56, 0.64, 1),
+      width var(--duration-normal) cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity var(--duration-fast) var(--easing);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Spacer — flexible gap to push subsequent items to the end
+   -------------------------------------------------------------------------- */
+
+.navbar-spacer {
+  flex: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Divider — vertical separator between groups
+   -------------------------------------------------------------------------- */
+
+.navbar-divider {
+  width: var(--border-width);
+  align-self: stretch;
+  background-color: var(--color-border);
+  margin-inline: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Actions — right-side slot for buttons, search, avatar
+   -------------------------------------------------------------------------- */
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  margin-inline-start: auto;
+}
+
+/* Icon-only action button (notifications, theme toggle, etc.) */
+.navbar-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-lg);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition:
+    background-color var(--duration-fast) var(--easing),
+    color var(--duration-fast) var(--easing);
+}
+
+.navbar-action-btn:hover {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text);
+}
+
+.navbar-action-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Action button wrapping an avatar image */
+.navbar-action-btn-avatar {
+  padding: 0;
+  border-radius: var(--radius-full);
+}
+
+/* Avatar — use inside a .dropdown or standalone */
+.navbar-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-tertiary);
+  border: var(--border-width) solid var(--color-border);
+  cursor: pointer;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile toggle — hidden on desktop
+   -------------------------------------------------------------------------- */
+
+.navbar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: var(--space-1);
+  cursor: pointer;
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+.navbar-toggle svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Overlay — backdrop for drawer-style navbars (e.g. sidebar)
+   -------------------------------------------------------------------------- */
+
+.navbar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.35);
+  z-index: 40;
+  cursor: pointer;
+}
+
+.navbar-overlay.is-open {
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile breakpoint
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-wrap: wrap;
+  }
+
+  .navbar-toggle {
+    display: block;
+  }
+
+  .navbar-nav {
+    flex-direction: column;
+    gap: var(--space-0-5);
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 16rem;
+    background-color: var(--color-bg);
+    z-index: 50;
+    padding: var(--space-6) var(--space-4);
+    overflow-y: auto;
+    transform: translateX(-100%);
+  }
+
+  [dir="rtl"] .navbar-nav {
+    transform: translateX(100%);
+  }
+
+  .navbar-nav.is-open {
+    transform: translateX(0);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .navbar-nav {
+      transition: transform var(--duration-normal) var(--easing);
+    }
+  }
+
+  .navbar-nav a {
+    width: 100%;
+  }
+
+  /* Hide horizontal indicator in mobile column layout */
+  .navbar-nav a[aria-current="page"]::after,
+  .navbar-nav a.is-active::after {
+    display: none;
+  }
+
+  .navbar-hide-mobile {
+    display: none !important;
+  }
+
+  .navbar-divider {
+    width: 100%;
+    height: var(--border-width);
+    margin-block: var(--space-2);
+    margin-inline: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Drawer — off-canvas mobile navigation panel with header, sections & user
+   Hidden on desktop; slides in from the inline-start edge on mobile.
+
+   HTML skeleton:
+     <div class="navbar-drawer" id="drawer-id">
+       <a class="navbar-brand" href="/">Brand</a>
+       <nav class="navbar-drawer-body">
+         <ul class="navbar-nav" data-nav-indicator="vertical">…</ul>
+         <div class="navbar-drawer-section">
+           <p class="navbar-section-label">Section</p>
+           <ul class="navbar-nav" data-nav-indicator="vertical">…</ul>
+         </div>
+       </nav>
+       <div class="navbar-drawer-footer">
+         <button class="navbar-drawer-user">…</button>
+       </div>
+     </div>
+   -------------------------------------------------------------------------- */
+
+.navbar-drawer {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .navbar-drawer {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 16rem;
+    background-color: var(--color-bg);
+    z-index: 50;
+    overflow-y: auto;
+    transform: translateX(-100%);
+  }
+
+  [dir="rtl"] .navbar-drawer {
+    transform: translateX(100%);
+  }
+
+  .navbar-drawer.is-open {
+    transform: translateX(0);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .navbar-drawer {
+      transition: transform var(--duration-normal) var(--easing);
+    }
+  }
+}
+
+/* Brand inside drawer */
+.navbar-drawer .navbar-brand {
+  padding: var(--space-4) var(--space-5);
+  margin-inline-end: 0;
+}
+
+.navbar-drawer .navbar-brand .navbar-brand-mark {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+/* Scrollable body — fills remaining space between brand and footer */
+.navbar-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Nav inside drawer — always vertical, no fixed positioning */
+.navbar-drawer .navbar-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-0-5);
+  padding: var(--space-3);
+  border-block-end: var(--border-width) solid var(--color-border);
+  position: relative;
+  transform: none;
+  width: auto;
+  inset: auto;
+  z-index: auto;
+  background-color: transparent;
+  overflow-y: visible;
+}
+
+.navbar-drawer .navbar-nav a {
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-3);
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.navbar-drawer .navbar-nav a:hover {
+  background-color: var(--color-bg-tertiary);
+}
+
+/* Vertical active indicator — left bar (static fallback) */
+.navbar-drawer .navbar-nav a[aria-current="page"]::after,
+.navbar-drawer .navbar-nav a.is-active::after {
+  display: block;
+  inset-block-start: 20%;
+  inset-block-end: 20%;
+  inset-inline-start: 0;
+  inset-inline-end: auto;
+  height: auto;
+  width: 2px;
+}
+
+/* Hide static fallback when JS indicator is active */
+.navbar-drawer .navbar-nav.has-nav-indicator a[aria-current="page"]::after,
+.navbar-drawer .navbar-nav.has-nav-indicator a.is-active::after {
+  display: none;
+}
+
+/* Animated sliding indicator (vertical) */
+.navbar-drawer .navbar-nav .nav-indicator {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: 2px;
+  height: auto;
+  background-color: var(--color-action);
+  border-radius: var(--radius-full);
+  pointer-events: none;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .navbar-drawer .navbar-nav .nav-indicator {
+    transition:
+      transform var(--duration-normal) cubic-bezier(0.34, 1.56, 0.64, 1),
+      height var(--duration-normal) cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity var(--duration-fast) var(--easing);
+  }
+}
+
+/* Icons and badges in drawer nav */
+.navbar-drawer .navbar-nav-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.navbar-drawer .navbar-nav-badge {
+  margin-inline-start: auto;
+}
+
+/* Grouped section with a label */
+.navbar-drawer-section {
+  margin-block-start: var(--space-4);
+}
+
+.navbar-drawer-section .navbar-nav {
+  padding-block-start: 0;
+}
+
+/* Footer — user account area, pushed to bottom */
+.navbar-drawer-footer {
+  margin-block-start: auto;
+  padding: var(--space-3);
+  flex-shrink: 0;
+}
+
+.navbar-drawer-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  text-align: start;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .navbar-drawer-user {
+    transition: background-color var(--duration-fast) var(--easing);
+  }
+}
+
+.navbar-drawer-user:hover {
+  background-color: var(--color-bg-tertiary);
+}
+
+.navbar-drawer-user-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-tertiary);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.navbar-drawer-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.navbar-drawer-user-name {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navbar-drawer-user-meta {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Vertical orientation — sidebar-style stacked navigation
+   -------------------------------------------------------------------------- */
+
+.navbar-vertical {
+  flex-direction: column;
+  align-items: stretch;
+  padding: var(--space-4) var(--space-3);
+  border-block-end: none;
+  border-inline-end: var(--border-width) solid var(--color-border);
+  height: 100%;
+}
+
+.navbar-vertical .navbar-brand {
+  padding: var(--space-1) var(--space-3);
+  margin-block-end: var(--space-3);
+  margin-inline-end: 0;
+}
+
+.navbar-vertical .navbar-nav {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-0-5);
+}
+
+.navbar-vertical .navbar-nav a {
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-3);
+  gap: var(--space-3);
+}
+
+/* Vertical active indicator — left bar instead of bottom bar */
+.navbar-vertical .navbar-nav a[aria-current="page"]::after,
+.navbar-vertical .navbar-nav a.is-active::after {
+  inset-block-end: auto;
+  inset-inline: auto;
+  inset-inline-start: 0;
+  inset-block-start: 20%;
+  inset-block-end: 20%;
+  height: auto;
+  width: 2px;
+}
+
+/* nav-indicator.js active — still hide static fallback */
+.navbar-vertical .navbar-nav.has-nav-indicator a[aria-current="page"]::after,
+.navbar-vertical .navbar-nav.has-nav-indicator a.is-active::after {
+  display: none;
+}
+
+/* Animated indicator for vertical axis */
+.navbar-vertical .navbar-nav .nav-indicator {
+  inset-block-start: 0;
+  inset-block-end: auto;
+  inset-inline-start: 0;
+  width: 2px;
+  height: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .navbar-vertical .navbar-nav .nav-indicator {
+    transition:
+      transform var(--duration-normal) cubic-bezier(0.34, 1.56, 0.64, 1),
+      height var(--duration-normal) cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity var(--duration-fast) var(--easing);
+  }
+}
+
+.navbar-vertical .navbar-nav-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.navbar-vertical .navbar-divider {
+  width: auto;
+  height: var(--border-width);
+  align-self: auto;
+  margin-block: var(--space-2);
+  margin-inline: var(--space-2);
+}
+
+.navbar-vertical .navbar-actions {
+  margin-inline-start: 0;
+  flex-direction: column;
+  align-items: stretch;
+  padding-block-start: var(--space-3);
+}
+
+/* Section label — vertical nav group heading */
+.navbar-section-label {
+  padding: var(--space-3) var(--space-3) var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+
+/* ===== components/pagination.css ===== */
+/* ==========================================================================
+   Pagination
+   WCAG: The <nav> must have aria-label="Pagination". The current page link
+         must have aria-current="page". Previous/Next must be keyboard
+         accessible; label them with aria-label when using icon-only buttons.
+
+   Example markup:
+     <nav class="pagination" aria-label="Pagination">
+       <a class="pagination-item" href="/page/1" aria-label="Previous page">‹</a>
+       <a class="pagination-item" href="/page/1">1</a>
+       <a class="pagination-item" href="/page/2" aria-current="page">2</a>
+       <a class="pagination-item" href="/page/3">3</a>
+       <span class="pagination-ellipsis" aria-hidden="true">…</span>
+       <a class="pagination-item" href="/page/10">10</a>
+       <a class="pagination-item" href="/page/3" aria-label="Next page">›</a>
+     </nav>
+   ========================================================================== */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.pagination-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding-inline: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  background-color: transparent;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color var(--duration-fast) var(--easing),
+    border-color var(--duration-fast) var(--easing),
+    color var(--duration-fast) var(--easing);
+}
+
+.pagination-item:hover {
+  background-color: var(--color-surface-raised);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.pagination-item:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Current page */
+.pagination-item[aria-current="page"] {
+  background-color: var(--color-action);
+  border-color: var(--color-action);
+  color: var(--color-action-text);
+  cursor: default;
+}
+
+.pagination-item[aria-current="page"]:hover {
+  background-color: var(--color-action-hover);
+  border-color: var(--color-action-hover);
+}
+
+/* Disabled (prev on first page, next on last page) */
+.pagination-item[aria-disabled="true"],
+.pagination-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Ellipsis */
+.pagination-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Compact: smaller gaps on mobile */
+@media (max-width: 480px) {
+  .pagination {
+    gap: 0;
+  }
+
+  .pagination-item {
+    min-width: 2rem;
+    height: 2rem;
+    font-size: var(--font-size-xs);
+  }
+}
+
+
+/* ===== components/radio.css ===== */
+/* ==========================================================================
+   Radio Button
+   WCAG: Radio buttons must be grouped in a <fieldset> with a <legend>
+         (or role="group" with aria-labelledby). Each <input type="radio">
+         must have an associated <label>. Only one radio per group should
+         be in the tab order at a time (roving tabindex or native behaviour).
+
+   Example markup:
+     <fieldset class="radio-group">
+       <legend class="radio-group-legend">Delivery method</legend>
+       <div class="radio">
+         <input type="radio" name="delivery" id="standard" value="standard" />
+         <label class="radio-label" for="standard">
+           Standard (3–5 days)
+           <span class="radio-description">Free shipping</span>
+         </label>
+       </div>
+       <div class="radio">
+         <input type="radio" name="delivery" id="express" value="express" />
+         <label class="radio-label" for="express">Express (next day)</label>
+       </div>
+     </fieldset>
+   ========================================================================== */
+
+/* Group container */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.radio-group-legend {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin-block-end: var(--space-2);
+  padding: 0;
+}
+
+/* Horizontal layout variant */
+.radio-group-inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+/* Single radio + label pair */
+.radio {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.radio input[type="radio"] {
+  flex-shrink: 0;
+  margin: 0;
+  margin-block-start: 0.15em; /* optical alignment */
+  cursor: pointer;
+  background-color: var(--color-bg);
+}
+
+.radio-label {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text);
+  line-height: var(--line-height-normal);
+  cursor: pointer;
+  margin: 0;
+}
+
+.radio-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-block-start: var(--space-0-5);
+}
+
+/* Disabled */
+.radio:has(input[type="radio"]:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.radio:has(input[type="radio"]:disabled) * {
+  cursor: not-allowed;
+}
+
+
+/* ===== components/select.css ===== */
+/* ==========================================================================
+   Select
+   Component wrapper for <select> elements. Base element styles are in
+   base/forms.css. This file adds grouping patterns with labels and
+   validation messages, mirroring the input component conventions.
+
+   WCAG: <select> must have an associated <label>. Hint and error text
+         must be linked via aria-describedby. Set aria-invalid="true" on
+         the <select> when in an error state.
+
+   Example markup:
+     <div class="select-group">
+       <label class="select-label" for="country">Country</label>
+       <select class="select-field" id="country">
+         <option value="">Choose…</option>
+         <option value="gb">United Kingdom</option>
+       </select>
+       <p class="select-hint" id="country-hint">
+         Select your billing country.
+       </p>
+     </div>
+   ========================================================================== */
+
+.select-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-block-end: var(--space-4);
+}
+
+.select-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.select-label-required::after {
+  content: " *";
+  color: var(--color-danger);
+}
+
+/* Override base margin */
+.select-field {
+  margin-block-end: 0 !important;
+}
+
+.select-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.select-message {
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+/* Error state */
+.select-error .select-label {
+  color: var(--color-danger);
+}
+
+.select-error .select-field {
+  border-color: var(--color-danger);
+}
+
+.select-error .select-field:focus-visible {
+  border-color: var(--color-danger);
+  outline-color: var(--color-danger);
+}
+
+.select-error .select-message {
+  color: var(--color-danger);
+}
+
+
+/* ===== components/switch.css ===== */
+/* ==========================================================================
+   Switch (Toggle)
+   Implemented as a styled <input type="checkbox"> with a custom track/thumb.
+   The hidden native checkbox preserves keyboard access and form participation.
+
+   WCAG: Use role="switch" on the <input> and ensure it has an accessible
+         name via <label> or aria-label. aria-checked is communicated
+         natively by the checkbox checked state. Do NOT suppress focus.
+
+   Example markup:
+     <label class="switch">
+       <input type="checkbox" role="switch" />
+       <span class="switch-track" aria-hidden="true">
+         <span class="switch-thumb"></span>
+       </span>
+       <span class="switch-label">Enable notifications</span>
+     </label>
+   ========================================================================== */
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Visually hide the native checkbox while keeping it in the tab order */
+.switch input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Track */
+.switch-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 2.75rem;
+  height: 1.5rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-border-active);
+  border: var(--border-width) solid transparent;
+  flex-shrink: 0;
+  transition: background-color var(--duration-fast) var(--easing);
+}
+
+/* Thumb */
+.switch-thumb {
+  position: absolute;
+  inset-inline-start: 0.2rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-fast) var(--easing);
+}
+
+/* Checked state */
+.switch input[type="checkbox"]:checked ~ .switch-track,
+.switch input[type="checkbox"]:checked + .switch-track {
+  background-color: var(--color-action);
+}
+
+.switch input[type="checkbox"]:checked ~ .switch-track .switch-thumb,
+.switch input[type="checkbox"]:checked + .switch-track .switch-thumb {
+  transform: translateX(1.25rem);
+}
+
+/* Focus ring on the visual track when the hidden input is focused */
+.switch input[type="checkbox"]:focus-visible ~ .switch-track,
+.switch input[type="checkbox"]:focus-visible + .switch-track {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Label text */
+.switch-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  line-height: var(--line-height-normal);
+}
+
+/* Disabled */
+.switch:has(input[type="checkbox"]:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.switch:has(input[type="checkbox"]:disabled) .switch-track {
+  cursor: not-allowed;
+}
+
+
+/* ===== components/table.css ===== */
+/* ==========================================================================
+   Table
+   Base element styles + utility modifier classes.
+
+   Width
+     .table-wrap        — Responsive scroll container; tables fill their
+                          container width (width: 100%) regardless.
+
+   Spacing modifiers (on <table>)
+     Default            — var(--space-2) block / var(--space-3) inline padding.
+     .table-condensed   — Tighter: var(--space-1) / var(--space-2).
+     .table-wide        — Roomier: var(--space-4) / var(--space-5).
+
+   Style modifiers (on <table>)
+     Default            — Horizontal row-separator lines only (no stripes).
+     .table-striped     — Alternating row backgrounds; no row borders in tbody.
+     .table-grid        — Full grid: horizontal + vertical borders on all cells.
+
+   Column helpers (on <th> or <td>)
+     .table-col-numeric  — Right-align + tabular nums.
+     .table-col-center   — Centre-align.
+
+   Other
+     .table-sticky-head  — Sticky column headers.
+
+   WCAG: Use <caption> to describe the table. Use <th scope="col"> for
+         column headers and <th scope="row"> for row headers.
+         For complex tables, use id/headers attributes.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Base element styles
+   -------------------------------------------------------------------------- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  margin-block: var(--space-4);
+}
+
+/* Responsive wrapper — wrap <table> in <div class="table-wrap"> */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-block: var(--space-4);
+}
+
+.table-wrap table {
+  margin-block: 0;
+}
+
+th,
+td {
+  padding: var(--space-2) var(--space-3);
+  text-align: start;
+  border-block-end: var(--border-width) solid var(--color-border);
+}
+
+th {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+td {
+  color: var(--color-text-secondary);
+}
+
+tbody tr:hover {
+  background-color: var(--color-surface-raised);
+}
+
+/* Caption */
+caption {
+  caption-side: bottom;
+  padding-block: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: start;
+}
+
+/* --------------------------------------------------------------------------
+   Spacing modifiers
+   -------------------------------------------------------------------------- */
+
+/* Condensed — tighter cell padding */
+.table-condensed th,
+.table-condensed td {
+  padding: var(--space-1) var(--space-2);
+}
+
+/* Wide — roomier cell padding */
+.table-wide th,
+.table-wide td {
+  padding: var(--space-4) var(--space-5);
+}
+
+/* --------------------------------------------------------------------------
+   Style modifiers
+   -------------------------------------------------------------------------- */
+
+/* Striped — alternating row backgrounds; remove row borders from body rows */
+.table-striped tbody tr:nth-child(even) {
+  background-color: var(--color-bg-secondary);
+}
+
+.table-striped tbody td {
+  border-block-end: none;
+}
+
+/* Grid — full column + row borders on every cell */
+.table-grid th,
+.table-grid td {
+  border: var(--border-width) solid var(--color-border);
+}
+
+.table-grid thead th {
+  border-block-end-width: var(--border-width-2);
+}
+
+/* --------------------------------------------------------------------------
+   Column alignment helpers
+   -------------------------------------------------------------------------- */
+
+.table-col-numeric {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-col-center {
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Sticky header
+   -------------------------------------------------------------------------- */
+
+.table-sticky-head thead th {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+}
+
+
+/* ===== components/text.css ===== */
+/* ==========================================================================
+   Text
+   Utility classes for controlling text appearance. Complements base/
+   typography.css which styles elements directly.
+
+   These classes can be applied to any element.
+   ========================================================================== */
+
+/* Size */
+.text-xs {
+  font-size: var(--font-size-xs) !important;
+}
+.text-sm {
+  font-size: var(--font-size-sm) !important;
+}
+.text-base {
+  font-size: var(--font-size-base) !important;
+}
+.text-lg {
+  font-size: var(--font-size-lg) !important;
+}
+.text-xl {
+  font-size: var(--font-size-xl) !important;
+}
+
+/* Weight */
+.text-normal {
+  font-weight: var(--font-weight-normal) !important;
+}
+.text-medium {
+  font-weight: var(--font-weight-medium) !important;
+}
+.text-bold {
+  font-weight: var(--font-weight-bold) !important;
+}
+
+/* Color */
+.text-default {
+  color: var(--color-text) !important;
+}
+.text-muted {
+  color: var(--color-text-secondary) !important;
+}
+.text-subtle {
+  color: var(--color-text-tertiary) !important;
+}
+.text-disabled {
+  color: var(--color-text-disabled) !important;
+}
+.text-danger {
+  color: var(--color-danger) !important;
+}
+.text-success {
+  color: var(--color-success) !important;
+}
+.text-warning {
+  color: var(--color-warning) !important;
+}
+.text-info {
+  color: var(--color-info) !important;
+}
+
+/* Alignment */
+.text-start {
+  text-align: start !important;
+}
+.text-center {
+  text-align: center !important;
+}
+.text-end {
+  text-align: end !important;
+}
+
+/* Transform */
+.text-uppercase {
+  text-transform: uppercase !important;
+}
+.text-lowercase {
+  text-transform: lowercase !important;
+}
+.text-capitalize {
+  text-transform: capitalize !important;
+}
+
+/* Wrapping / overflow */
+.text-nowrap {
+  white-space: nowrap !important;
+}
+.text-truncate {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.text-wrap {
+  white-space: normal !important;
+}
+.text-break {
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+}
+
+/* Decoration */
+.text-underline {
+  text-decoration: underline !important;
+}
+.text-no-underline {
+  text-decoration: none !important;
+}
+.text-strikethrough {
+  text-decoration: line-through !important;
+}
+
+/* Leading */
+.text-leading-tight {
+  line-height: var(--line-height-tight) !important;
+}
+.text-leading-normal {
+  line-height: var(--line-height-normal) !important;
+}
+.text-leading-loose {
+  line-height: var(--line-height-loose) !important;
+}
+
+/* Mono */
+.text-mono {
+  font-family: var(--font-mono) !important;
+}
+
+/* Visually hidden (screen-reader only) — does not truncate */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
+/* ===== components/textarea.css ===== */
+/* ==========================================================================
+   Textarea
+   Component wrapper for <textarea> elements. Base element styles are in
+   base/forms.css. This file adds grouping patterns with labels, hints,
+   character counts, and validation messages.
+
+   WCAG: <textarea> must have an associated <label>. Hint and character
+         count must be linked via aria-describedby. Set aria-invalid="true"
+         when in an error state. Provide rows or a min-height so the control
+         is not a zero-height collapsed box.
+
+   Example markup:
+     <div class="textarea-group">
+       <label class="textarea-label" for="bio">Bio</label>
+       <textarea class="textarea-field" id="bio" rows="4"
+                 aria-describedby="bio-hint bio-count"
+                 maxlength="200"></textarea>
+       <div class="textarea-footer">
+         <p class="textarea-hint" id="bio-hint">Keep it under 200 characters.</p>
+         <span class="textarea-count" id="bio-count" aria-live="polite">0 / 200</span>
+       </div>
+     </div>
+   ========================================================================== */
+
+.textarea-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-block-end: var(--space-4);
+}
+
+.textarea-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.textarea-label-required::after {
+  content: " *";
+  color: var(--color-danger);
+}
+
+/* Override base margin */
+.textarea-field {
+  resize: vertical;
+  min-height: 6rem;
+  margin-block-end: 0 !important;
+}
+
+.textarea-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.textarea-message {
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+/* Footer row: hint on the left, character count on the right */
+.textarea-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.textarea-count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Near-limit warning */
+.textarea-count-warning {
+  color: var(--color-warning);
+}
+
+/* At-limit error */
+.textarea-count-error {
+  color: var(--color-danger);
+}
+
+/* Error state */
+.textarea-error .textarea-label {
+  color: var(--color-danger);
+}
+
+.textarea-error .textarea-field {
+  border-color: var(--color-danger);
+}
+
+.textarea-error .textarea-field:focus-visible {
+  border-color: var(--color-danger);
+  outline-color: var(--color-danger);
+}
+
+.textarea-error .textarea-message {
+  color: var(--color-danger);
+}
+
+
+/* ===== components/user-menu.css ===== */
+/* User menu popover */
+.user-menu-wrap {
+  position: relative;
+  width: 100%;
+}
+.user-menu {
+  position: absolute;
+  inset-block-end: calc(100% + var(--space-2));
+  inset-inline-start: var(--space-2);
+  inset-inline-end: var(--space-2);
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 100;
+  display: none;
+}
+.user-menu.is-open {
+  display: block;
+}
+.user-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1-5);
+}
+.user-menu li + li {
+  margin-block-start: var(--space-px);
+}
+.user-menu a,
+.user-menu button.user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: var(--radius-lg);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: start;
+  transition: background-color var(--duration-fast) var(--easing);
+}
+.user-menu a:hover,
+.user-menu button.user-menu-item:hover {
+  background-color: var(--color-bg-secondary);
+}
+.user-menu-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.user-menu-sep {
+  border: none;
+  border-block-start: var(--border-width) solid var(--color-border);
+  margin: var(--space-1-5) 0;
+}
+.user-menu-signout {
+  color: var(--color-danger) !important;
+}
+.user-menu-signout .user-menu-icon {
+  opacity: 1;
+  color: var(--color-danger);
+}
+.sidebar-user[aria-expanded="true"] {
+  background-color: var(--color-bg-tertiary);
+}
+
+.navbar-drawer-user[aria-expanded="true"] {
+  background-color: var(--color-bg-tertiary);
+}
+
+/* Chevron rotation when menu is open */
+.user-menu-chevron {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  opacity: 0.5;
+  transition: transform var(--duration-fast) var(--easing);
+}
+
+[aria-expanded="true"] .user-menu-chevron {
+  transform: rotate(180deg);
+}
+

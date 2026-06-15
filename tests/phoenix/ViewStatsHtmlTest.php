@@ -24,14 +24,19 @@ class ViewStatsHtmlTest extends TestCase
 
         $output = view_stats_html($stats, $settings);
 
-        $this->assertStringContainsString('<!DocType html>', $output);
-        $this->assertStringContainsString('<title>Phoenix: $Id: 1.0.0 $</title>', $output);
-        $this->assertStringContainsString('15 peers', $output);
-        $this->assertStringContainsString('10 seeders', $output);
-        $this->assertStringContainsString('5 leechers', $output);
-        $this->assertStringContainsString('3 torrents', $output);
-        $this->assertStringContainsString('100 downloads', $output);
+        $this->assertStringStartsWith('<!DOCTYPE html>', $output);
+        $this->assertStringContainsString('<h1>Tracker Stats</h1>', $output);
+        // Hero peer count + seeder/leecher breakdown.
+        $this->assertStringContainsString('<div class="stats-hero-num">15</div>', $output);
+        $this->assertStringContainsString('<div class="b-num seed">10</div>', $output);
+        $this->assertStringContainsString('<div class="b-num leech">5</div>', $output);
+        // Cards: torrents-with-peers, completed downloads, traffic.
+        $this->assertStringContainsString('<div class="ph-stat-value">3</div>', $output);
+        $this->assertStringContainsString('<div class="ph-stat-value">100</div>', $output);
+        $this->assertStringContainsString('4.8 MB', $output);
         $this->assertStringContainsString('5,000,000 bytes', $output);
+        // Version flows into the footer.
+        $this->assertStringContainsString('1.0.0', $output);
     }
 
     public function testRenderHtmlWithZeroStats()
@@ -50,12 +55,11 @@ class ViewStatsHtmlTest extends TestCase
 
         $output = view_stats_html($stats, $settings);
 
-        $this->assertStringContainsString('0 peers', $output);
-        $this->assertStringContainsString('0 seeders', $output);
-        $this->assertStringContainsString('0 leechers', $output);
-        $this->assertStringContainsString('0 torrents', $output);
-        $this->assertStringContainsString('0 downloads', $output);
+        $this->assertStringContainsString('<div class="stats-hero-num">0</div>', $output);
+        $this->assertStringContainsString('0 B', $output);
         $this->assertStringContainsString('0 bytes', $output);
+        // An empty swarm collapses the split bar to zero width.
+        $this->assertStringContainsString('width:0%', $output);
     }
 
     public function testRenderHtmlFormatsLargeNumbers()
@@ -74,13 +78,14 @@ class ViewStatsHtmlTest extends TestCase
 
         $output = view_stats_html($stats, $settings);
 
-        // Check that number_format() is working (US English thousands separator)
-        $this->assertStringContainsString('1,234,567 peers', $output);
-        $this->assertStringContainsString('654,321 seeders', $output);
-        $this->assertStringContainsString('580,246 leechers', $output);
-        $this->assertStringContainsString('9,876 torrents', $output);
-        $this->assertStringContainsString('543,210 downloads', $output);
+        // number_format() thousands separators throughout.
+        $this->assertStringContainsString('<div class="stats-hero-num">1,234,567</div>', $output);
+        $this->assertStringContainsString('<div class="b-num seed">654,321</div>', $output);
+        $this->assertStringContainsString('<div class="b-num leech">580,246</div>', $output);
+        $this->assertStringContainsString('<div class="ph-stat-value">9,876</div>', $output);
+        $this->assertStringContainsString('<div class="ph-stat-value">543,210</div>', $output);
+        // Traffic: human-readable headline + exact bytes.
+        $this->assertStringContainsString('9.2 GB', $output);
         $this->assertStringContainsString('9,876,543,210 bytes', $output);
     }
-
 }
