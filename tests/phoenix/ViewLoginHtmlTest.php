@@ -29,16 +29,22 @@ class ViewLoginHtmlTest extends TestCase
         // render tells the user their password was wrong.
         $html = view_login_html(true);
         $this->assertStringContainsString('Incorrect password.', $html);
-        $this->assertStringContainsString('background-pomegranate', $html);
+        $this->assertStringContainsString('alert-danger', $html);
     }
 
     public function testEmitsValidHtmlDocument(): void
     {
         $html = view_login_html();
         $this->assertStringStartsWith('<!DOCTYPE html>', $html);
-        $this->assertStringContainsString('<html lang="en">', $html);
+        $this->assertStringContainsString('<html lang="en"', $html);
         $this->assertStringContainsString('</html>', $html);
-        $this->assertStringContainsString('<title>Phoenix &mdash; Login</title>', $html);
+        $this->assertStringContainsString('<title>Phoenix — Log in</title>', $html);
+    }
+
+    public function testVersionFlowsIntoFooter(): void
+    {
+        $html = view_login_html(false, false, 'v4.2beta5');
+        $this->assertStringContainsString('v4.2beta5', $html);
     }
 
     public function testReturnsString(): void

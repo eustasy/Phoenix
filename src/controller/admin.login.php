@@ -76,7 +76,7 @@ function admin_login_controller(array $settings): ?string
         // password-only install never shows a code box.
         $totp_required = ! empty($settings['admin_totp_secret']);
 
-        return view_login_html($login_attempted, $totp_required);
+        return view_login_html($login_attempted, $totp_required, $settings['phoenix_version']);
     }
 
     // Authenticated, allow proceeding

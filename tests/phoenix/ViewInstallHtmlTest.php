@@ -54,7 +54,7 @@ class ViewInstallHtmlTest extends TestCase
         // or "could not write config" branch in admin_install_controller.
         $html = view_install_html(true, 'Could not connect to the database', $this->form());
         $this->assertStringContainsString('Could not connect to the database', $html);
-        $this->assertStringContainsString('background-pomegranate', $html);
+        $this->assertStringContainsString('alert-danger', $html);
     }
 
     public function testEscapesErrorAndFormValues(): void
