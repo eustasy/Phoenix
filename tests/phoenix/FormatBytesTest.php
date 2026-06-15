@@ -13,12 +13,9 @@ class FormatBytesTest extends TestCase
         require_once __DIR__.'/../../src/functions/format.bytes.php';
     }
 
-    /**
-     * @return list<array{int, string}>
-     */
-    public static function cases(): array
+    public function testFormatsBinaryUnits(): void
     {
-        return [
+        $cases = [
             [0, '0 B'],
             [512, '512 B'],
             [1023, '1023 B'],
@@ -30,14 +27,10 @@ class FormatBytesTest extends TestCase
             [6442450944, '6.0 GB'],
             [9876543210, '9.2 GB'],
         ];
-    }
 
-    /**
-     * @dataProvider cases
-     */
-    public function testFormatsBinaryUnits(int $bytes, string $expected): void
-    {
-        $this->assertSame($expected, format_bytes($bytes));
+        foreach ($cases as [$bytes, $expected]) {
+            $this->assertSame($expected, format_bytes($bytes), $bytes.' bytes');
+        }
     }
 
     public function testNegativeClampsToZero(): void
