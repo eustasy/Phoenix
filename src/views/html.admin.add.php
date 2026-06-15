@@ -28,7 +28,7 @@ function view_admin_add_html(array $settings, bool $tables_installed, string|fal
     $body = '';
 
     if ($message) {
-        $body .= '<div class="alert alert-info"><h3 class="mt-0 mb-0">'.htmlspecialchars($message).'</h3></div>';
+        $body .= '<div class="alert alert-info" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="info" style="flex-shrink:0"></span><div>'.htmlspecialchars($message).'</div></div>';
     }
 
     if (! $tables_installed) {

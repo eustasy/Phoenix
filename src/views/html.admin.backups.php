@@ -29,7 +29,7 @@ function view_admin_backups_html(array $settings, array $backups, string|false $
     $body = '';
 
     if ($message) {
-        $body .= '<div class="alert alert-info"><h3 class="mt-0 mb-0">'.htmlspecialchars($message).'</h3></div>';
+        $body .= '<div class="alert alert-info" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="info" style="flex-shrink:0"></span><div>'.htmlspecialchars($message).'</div></div>';
     }
 
     // Environment caveat (the run fails with a clear message when unmet).

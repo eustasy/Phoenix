@@ -38,7 +38,7 @@ function view_admin_edit_html(array $settings, string $info_hash, array|false $t
     $back = '<a class="btn btn-secondary btn-sm" href="?page=torrents"><span class="ph-ico" data-lucide="arrow-left"></span>Back</a>';
 
     $message_html = $message
-        ? '<div class="alert alert-info"><h3 class="mt-0 mb-0">'.htmlspecialchars($message).'</h3></div>'
+        ? '<div class="alert alert-info" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="info" style="flex-shrink:0"></span><div>'.htmlspecialchars($message).'</div></div>'
         : '';
 
     if ($torrent === false) {
