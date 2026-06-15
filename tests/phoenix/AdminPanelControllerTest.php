@@ -240,6 +240,29 @@ class AdminPanelControllerTest extends PhoenixTestCase
         $this->assertStringContainsString('<title>Phoenix Admin: Peers</title>', $html);
     }
 
+    public function testPagePeersWithoutHashRoutesToGlobalListing(): void
+    {
+        // No info_hash → the swarm-wide (UI-only) Peers listing, not the
+        // per-torrent drill-down.
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
+        $_GET['page'] = 'peers';
+
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
+        $this->assertStringContainsString('<title>Phoenix Admin: Peers</title>', $html);
+        $this->assertStringContainsString('id="tbl-peers"', $html);
+    }
+
+    public function testPageGeographyRoutesToGeography(): void
+    {
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
+        $_GET['page'] = 'geography';
+
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
+        $this->assertStringContainsString('<title>Phoenix Admin: Geography</title>', $html);
+    }
+
     public function testPageEditRoutesToEditTorrent(): void
     {
         // A 40-char-hex info_hash with no matching row still renders the Edit

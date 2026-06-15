@@ -24,9 +24,21 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
             return admin_torrents_controller($connection, $settings);
 
         case 'peers':
-            require_once __DIR__.'/admin.torrent.peers.php';
+            // With an info_hash, drill into one swarm (live). Without one, show
+            // the swarm-wide listing (UI-only preview for now).
+            if (isset($_GET['info_hash']) && $_GET['info_hash'] !== '') {
+                require_once __DIR__.'/admin.torrent.peers.php';
 
-            return admin_torrent_peers_controller($connection, $settings);
+                return admin_torrent_peers_controller($connection, $settings);
+            }
+            require_once __DIR__.'/admin.peers.php';
+
+            return admin_peers_controller($settings);
+
+        case 'geography':
+            require_once __DIR__.'/admin.geography.php';
+
+            return admin_geography_controller($settings);
 
         case 'edit':
             require_once __DIR__.'/admin.edit.php';
