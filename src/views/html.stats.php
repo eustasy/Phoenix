@@ -77,9 +77,7 @@ function view_stats_html(array $stats, array $settings): string
 			<div class="ph-stat-label">Traffic served</div>
 			<div class="ph-stat-sub mono">'.number_format($stats['traffic']).' bytes</div>
 		</div>
-	</div>
-
-	<p class="dim" style="font-size:var(--font-size-sm);margin-top:var(--space-5)">Served by <code>scrape.php?stats</code>. Figures match the operator dashboard &mdash; one aggregation, shown twice.</p>';
+	</div>';
 
     return view_public_layout_html('Tracker Stats — Phoenix', $body, 'stats', $settings['phoenix_version'], true, $extra_head);
 }
