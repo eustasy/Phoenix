@@ -78,6 +78,8 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
           var counts = { added: 0, exists: 0, failed: 0, total: 0 };
           var queue = [];
           var busy = false;
+          var stopped = false;
+          var netFails = 0;
 
           document.getElementById('bulk-files').addEventListener('click', function () { fileInput.click(); });
           document.getElementById('bulk-folder').addEventListener('click', function () { folderInput.click(); });
@@ -152,9 +154,17 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
 
           async function pump() {
             busy = true;
-            while (queue.length) {
+            while (queue.length && !stopped) {
               var job = queue.shift();
               await upload(job.file, job.status);
+            }
+            // Server gave up (repeated connection failures): don't keep firing
+            // at a dead server — mark the rest and tell the operator.
+            if (stopped) {
+              queue.forEach(function (job) { job.status.innerHTML = '<span class="dim">Not attempted</span>'; });
+              queue.length = 0;
+              summaryBox.className = 'alert alert-warning';
+              summary.textContent = 'Stopped: the server stopped responding after ' + (counts.added + counts.exists + counts.failed) + ' of ' + counts.total + '. Reload and try a smaller batch.';
             }
             busy = false;
           }
@@ -168,6 +178,7 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
             try {
               var res = await fetch('/api/torrent/add.php', { method: 'POST', body: fd, credentials: 'same-origin' });
               var data = await res.json();
+              netFails = 0; // reached the server and got a JSON reply
               if (data && data.torrent) {
                 counts.added++;
                 status.innerHTML = '<span class="badge badge-green">Added</span>';
@@ -176,18 +187,32 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
                 status.innerHTML = '<span class="badge">Already present</span>';
               } else {
                 counts.failed++;
-                status.innerHTML = '<span class="badge" style="color:var(--color-danger)">' + ((data && data.error) || 'Failed') + '</span>';
+                fail(status, (data && data.error) || 'Failed');
               }
             } catch (e) {
+              // Network reset or non-JSON reply — the server is in trouble.
               counts.failed++;
-              status.innerHTML = '<span class="badge" style="color:var(--color-danger)">Network error</span>';
+              netFails++;
+              fail(status, 'Server error');
+              if (netFails >= 3) stopped = true;
             }
             updateSummary();
           }
 
           function updateSummary() {
+            if (stopped) return; // pump() owns the final message once stopped
             var done = counts.added + counts.exists + counts.failed;
             summary.textContent = counts.added + ' added · ' + counts.exists + ' already present · ' + counts.failed + ' failed — ' + done + '/' + counts.total;
+          }
+
+          // Set a danger badge with an untrusted message via textContent.
+          function fail(cell, msg) {
+            cell.innerHTML = '';
+            var b = document.createElement('span');
+            b.className = 'badge';
+            b.style.color = 'var(--color-danger)';
+            b.textContent = msg;
+            cell.appendChild(b);
           }
         })();
         JS;
