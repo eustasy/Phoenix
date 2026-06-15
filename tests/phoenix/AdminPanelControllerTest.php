@@ -253,6 +253,16 @@ class AdminPanelControllerTest extends PhoenixTestCase
         $this->assertStringContainsString('id="tbl-peers"', $html);
     }
 
+    public function testPageUploadRoutesToBulkUpload(): void
+    {
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
+        $_GET['page'] = 'upload';
+
+        $html = \admin_panel_controller(self::$connection, $settings, self::$time);
+        $this->assertStringContainsString('<title>Phoenix Admin: Bulk Upload</title>', $html);
+    }
+
     public function testPageGeographyRoutesToGeography(): void
     {
         $settings = self::$settings;

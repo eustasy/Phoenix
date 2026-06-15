@@ -50,6 +50,11 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
 
             return admin_add_controller($connection, $settings);
 
+        case 'upload':
+            require_once __DIR__.'/admin.upload.php';
+
+            return admin_upload_controller($connection, $settings);
+
         case 'support':
             require_once __DIR__.'/admin.support.php';
 

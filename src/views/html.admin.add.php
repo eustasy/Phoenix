@@ -108,5 +108,7 @@ function view_admin_add_html(array $settings, bool $tables_installed, string|fal
         })();
         JS;
 
-    return view_admin_layout_html($settings, 'Add a Torrent', $body, 'add', $csrf_token, 'Tracker', '', true, '', $inline_js, ['/assets/torrent-parse.js']);
+    $actions = '<a class="btn btn-secondary btn-sm" href="?page=upload"><span class="ph-ico" data-lucide="upload"></span>Bulk upload</a>';
+
+    return view_admin_layout_html($settings, 'Add a Torrent', $body, 'add', $csrf_token, 'Tracker', $actions, true, '', $inline_js, ['/assets/torrent-parse.js']);
 }
