@@ -59,6 +59,15 @@ class ViewAdminGeographyHtmlTest extends TestCase
         $this->assertStringContainsString('GEO_DEFAULT = "peers"', $html);
     }
 
+    public function testRendersMetricWithNoDataYet(): void
+    {
+        // A configured-but-empty metric (e.g. geo on, no completions geo-tagged
+        // yet) still gets its toggle and an empty-state hint, not omission.
+        $html = view_admin_geography_html($this->settings(), ['peers' => ['US' => 5], 'downloads' => []], 'tok');
+        $this->assertStringContainsString('data-metric="downloads"', $html);
+        $this->assertStringContainsString('No data for this metric yet', $html);
+    }
+
     public function testDownloadsOnlyWhenPeersUnavailable(): void
     {
         // geoip2 missing but the ledger has geo data → only the downloads metric.

@@ -14,8 +14,9 @@ declare(strict_types=1);
 //                 geoip2 present, readable .mmdb). Included whenever geo is
 //                 configured, even with zero current peers.
 //   * downloads — Completed downloads by country: from the events ledger's
-//                 stored coarse codes. Included only when the ledger actually
-//                 carries geo-tagged completions.
+//                 stored coarse codes. Shown whenever geo is configured (so it
+//                 sits alongside peers and fills in as completions are logged),
+//                 or whenever the ledger already carries geo-tagged completions.
 
 /** @param PhoenixSettings $settings */
 function admin_geography_controller(mysqli $connection, array $settings): string
@@ -34,10 +35,13 @@ function admin_geography_controller(mysqli $connection, array $settings): string
         $metrics['peers'] = peers_geo_counts($connection, $settings);
     }
 
-    // Completed downloads by country — only when the ledger has geo data.
+    // Completed downloads by country. Shown when geo is configured (so it
+    // appears next to peers and fills in as completions are geo-tagged), or
+    // when the ledger already holds geo-tagged completions even if geo was
+    // since turned off.
     require_once __DIR__.'/../model/events.geo.counts.php';
     $downloads = events_geo_counts($connection, $settings);
-    if ($downloads !== []) {
+    if ($geo_ready || $downloads !== []) {
         $metrics['downloads'] = $downloads;
     }
 
