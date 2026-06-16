@@ -40,6 +40,38 @@ The working tree is mounted read-only and copied into the container by
 `vendor/` — touches your checkout; the environment is throwaway. The first
 build compiles the PHP extensions; later starts reuse the cached image.
 
+#### Reloading code without wiping the database
+
+The web container copies the tree in at startup, so host changes are picked up
+by recreating it — not by `down -v`, which also drops the database volume. To
+reload code while keeping the data:
+
+```bash
+# Re-run the entrypoint (re-copies the tree, re-installs deps); DB volume kept.
+docker compose -f docker-compose.dev.yml restart web
+
+# Or rebuild the image too, for Dockerfile / PHP-extension changes:
+docker compose -f docker-compose.dev.yml up -d --build web
+```
+
+#### Keeping your config across reloads
+
+The entrypoint deletes `config/phoenix.custom.php` on every start, so a reload
+drops you back into the installer — though the database itself is untouched, so
+you can just re-run Setup against the existing tables. To skip that, copy the
+config out once and back in after a reload (the server reads it per request, so
+no extra restart is needed):
+
+```bash
+# Save the generated config (after the first install):
+docker compose -f docker-compose.dev.yml cp web:/app/config/phoenix.custom.php ./phoenix.custom.php
+
+# Restore it after a reload (the entrypoint cleared it at startup):
+docker compose -f docker-compose.dev.yml cp ./phoenix.custom.php web:/app/config/phoenix.custom.php
+```
+
+`*.custom.*` is gitignored, so the saved copy is never committed.
+
 ### Without Docker
 
 Install Composer dependencies, then run the test suite against a reachable
