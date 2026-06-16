@@ -24,6 +24,12 @@ install you can log in and exercise every admin page (dashboard, torrents,
 backups, settings), enrol 2FA from the installer's QR, and run an on-demand
 backup.
 
+Leave **Persistent connections** unchecked here. The container serves with PHP's
+built-in `php -S` — a single long-lived process — and a persistent (`p:`)
+mysqli connection reused across requests in it can segfault the server
+(`free(): invalid pointer`) under a burst of requests, such as a bulk upload.
+The pooled workers of a production Apache/PHP-FPM setup don't have this problem.
+
 ```bash
 # Stop and wipe the database (next start is a fresh installer again):
 docker compose -f docker-compose.dev.yml down -v
