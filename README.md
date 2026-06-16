@@ -157,7 +157,7 @@ Phoenix ships with example web server configurations covering document root loca
 * [MIGRATING.md](./MIGRATING.md) — upgrading from 3.x to 4.0.
 * [APACHE.md](./APACHE.md) — web server configuration for Apache 2.4.
 * [NGINX.md](./NGINX.md) — web server configuration for Nginx.
-* [.github/CONTRIBUTING.md](./.github/CONTRIBUTING.md) — development environment, tests, and contribution conventions.
+* [CONTRIBUTING.md](./CONTRIBUTING.md) — development environment, tests, and contribution conventions.
 * [ALTERNATIVES.md](./ALTERNATIVES.md) — other BitTorrent tracker projects.
 * [CHANGELOG.md](./CHANGELOG.md) — release history.
 * [LICENSE.md](./LICENSE.md) — MIT licence.

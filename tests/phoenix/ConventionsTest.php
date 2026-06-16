@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Phoenix\Tests;
 
 ////	ConventionsTest
-// Enforces the structural conventions from .github/CONTRIBUTING.md so they
+// Enforces the structural conventions from CONTRIBUTING.md so they
 // can't silently regress: every file in the four one-function-per-file
 // directories defines exactly one top-level function, and hook files (which
 // execute inside phoenix_hook()'s scope on every event) define none.
@@ -42,7 +42,7 @@ class ConventionsTest extends PhoenixTestCase
                     $count,
                     $dir.'/'.basename($file).' defines '.$count.' top-level functions; '.
                     'the convention is exactly one per file (helpers get their own '.
-                    '<category>.<verb>.php file — see .github/CONTRIBUTING.md).',
+                    '<category>.<verb>.php file — see CONTRIBUTING.md).',
                 );
                 $checked++;
             }

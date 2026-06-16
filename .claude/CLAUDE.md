@@ -109,7 +109,7 @@ To test functions that call `exit()` (notably `tracker_error()`), spawn a subpro
 
 ## Conventions
 
-These come from `.github/CONTRIBUTING.md` and consistent practice in the codebase:
+These come from `CONTRIBUTING.md` and consistent practice in the codebase:
 
 * **Tabs for indentation**, spaces for alignment.
 * **"Four stroke" section headers**: `////  Name`, followed by a short `//` description. Used both at file top-level and inside functions to mark logical sections.
