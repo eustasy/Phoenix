@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Phoenix is a lightweight BitTorrent tracker written in procedural PHP with a MySQL/MariaDB backend. It implements the announce/scrape protocols (BEP 3, BEP 7, BEP 15, BEP 23). It does not host a torrent listing site — though `public/index.php` provides a minimal public listing of explicitly-listed torrents and `public/magnet.php` is a client-side magnet generator.
+Phoenix is a lightweight BitTorrent tracker written in procedural PHP with a MySQL/MariaDB backend. It implements the announce/scrape protocols (BEP 3, BEP 7, BEP 15, BEP 23). It is a tracker first, not a full torrent listing site — but it does ship an optional public index of explicitly-listed torrents (`public/index.php`), a public stats page (`public/scrape.php?stats`), a client-side magnet generator (`public/magnet.php`), and an admin panel (`public/admin.php`).
 
 ## Common commands
 

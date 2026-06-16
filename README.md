@@ -7,7 +7,7 @@
 [![Maintainability](https://qlty.sh/gh/eustasy/projects/Phoenix/maintainability.svg)](https://qlty.sh/gh/eustasy/projects/Phoenix)
 [![Code Coverage](https://qlty.sh/gh/eustasy/projects/Phoenix/coverage.svg)](https://qlty.sh/gh/eustasy/projects/Phoenix)
 
-A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people that just want to host a tracker, not the torrent listing site.
+A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people that just want to host a tracker — with an optional public index, stats, and admin panel, but not a full torrent listing site.
 
 ## Table of Contents
 
