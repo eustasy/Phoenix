@@ -105,8 +105,8 @@ class AdminSettingsControllerTest extends TestCase
     public function testSavesFlagsWithValidCsrf(): void
     {
         $_SESSION['phoenix_csrf'] = 'tok';
-        // open_tracker + full_scrape checked; public_index + db_reset absent (off).
-        $_POST = ['process' => 'settings', 'open_tracker' => '1', 'full_scrape' => '1', 'csrf' => 'tok'];
+        // open_tracker + full_scrape + stats_enabled checked; the rest absent (off).
+        $_POST = ['process' => 'settings', 'open_tracker' => '1', 'full_scrape' => '1', 'stats_enabled' => '1', 'csrf' => 'tok'];
 
         $html = \admin_settings_controller($this->settings(), $this->path);
 
@@ -114,7 +114,9 @@ class AdminSettingsControllerTest extends TestCase
         $stored = $this->readBack();
         $this->assertTrue($stored['open_tracker']);
         $this->assertTrue($stored['full_scrape']);
+        $this->assertTrue($stored['stats_enabled']);
         $this->assertFalse($stored['public_index']);
+        $this->assertFalse($stored['stats_geo']);
         $this->assertFalse($stored['db_reset']);
         // Preserved.
         $this->assertSame('filepass', $stored['db_pass']);

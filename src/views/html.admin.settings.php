@@ -15,7 +15,7 @@ declare(strict_types=1);
 /**
  * @param PhoenixSettings $settings
  */
-function view_admin_settings_html(array $settings, bool $writable, string|false $message, string $csrf_token, bool $totp_available = false, ?string $totp_secret = null, ?string $totp_qr = null, ?string $totp_url = null): string
+function view_admin_settings_html(array $settings, bool $writable, string|false $message, string $csrf_token, bool $totp_available = false, ?string $totp_secret = null, ?string $totp_qr = null, ?string $totp_url = null, bool $geo_available = false): string
 {
     require_once __DIR__.'/html.admin.layout.php';
 
@@ -101,13 +101,18 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
     }
 
     ////	Toggle flags
-    $switch = static function (array $settings, string $flag, string $label, string $note = ''): string {
+    $switch = static function (array $settings, string $flag, string $label, string $note = '', bool $disabled = false): string {
         $checked = ! empty($settings[$flag]) ? ' checked' : '';
+        $attrs = $disabled ? ' disabled' : '';
+        $label_style = $disabled ? ' style="opacity:.55"' : '';
 
-        return '<label class="switch"><input type="checkbox" name="'.$flag.'" value="1" role="switch"'.$checked.'><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label">'.htmlspecialchars($label).$note.'</span></label>';
+        return '<label class="switch"'.$label_style.'><input type="checkbox" name="'.$flag.'" value="1" role="switch"'.$checked.$attrs.'><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label">'.htmlspecialchars($label).$note.'</span></label>';
     };
 
     $full_scrape_note = ' <span style="color:var(--color-warning)">&mdash; warning: on a closed tracker this exposes every tracked info_hash to anyone who scrapes.</span>';
+    $geo_note = $geo_available
+        ? ' <span class="dim">&mdash; tag events &amp; map peers by country (coarse; the IP is never stored)</span>'
+        : ' <span class="dim">&mdash; needs the geoip2 library and a GeoLite2 database</span>';
 
     $body .= '<div class="ph-section-head"><h3>Flags</h3></div>
 		<div class="ph-form-card">
@@ -117,6 +122,8 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
                     $switch($settings, 'open_tracker', 'open_tracker', ' <span class="dim">&mdash; accept announces for any info hash</span>').
                     $switch($settings, 'public_index', 'public_index', ' <span class="dim">&mdash; expose the public torrent listing</span>').
                     $switch($settings, 'full_scrape', 'full_scrape', $full_scrape_note).
+                    $switch($settings, 'stats_enabled', 'stats_enabled', ' <span class="dim">&mdash; log torrent events to the events ledger</span>').
+                    $switch($settings, 'stats_geo', 'stats_geo', $geo_note, ! $geo_available).
                     $switch($settings, 'db_reset', 'db_reset', ' <span class="dim">&mdash; permit setup/reset from Utilities</span>').
                 '</div>
 				<div class="ph-form-actions"><button type="submit" name="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="save"></span>Save Flags</button></div>

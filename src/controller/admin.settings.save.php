@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 ////	admin_settings_save_action
-// Handles the Settings page flag toggles (process=settings). Reads the four
+// Handles the Settings page flag toggles (process=settings). Reads the
 // boolean flags from the submitted checkboxes (an unchecked box sends nothing,
 // so isset() is the on/off signal) and persists them via config_write, which
 // preserves every other custom setting. Returns a message for the panel. The
@@ -17,6 +17,8 @@ function admin_settings_save_action(string $config_path): string
         'open_tracker' => isset($_POST['open_tracker']),
         'public_index' => isset($_POST['public_index']),
         'full_scrape' => isset($_POST['full_scrape']),
+        'stats_enabled' => isset($_POST['stats_enabled']),
+        'stats_geo' => isset($_POST['stats_geo']),
         'db_reset' => isset($_POST['db_reset']),
     ];
 

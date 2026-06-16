@@ -63,6 +63,25 @@ class ViewAdminSettingsHtmlTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/name="public_index"[^>]*checked/', $html);
     }
 
+    public function testRendersStatsFlags(): void
+    {
+        // With geo available, both stats toggles render and stats_geo is enabled.
+        $html = view_admin_settings_html($this->settings(), true, false, 'tok', false, null, null, null, true);
+        $this->assertStringContainsString('name="stats_enabled"', $html);
+        $this->assertStringContainsString('name="stats_geo"', $html);
+        $this->assertDoesNotMatchRegularExpression('/name="stats_geo"[^>]*disabled/', $html);
+    }
+
+    public function testGreysStatsGeoWhenUnavailable(): void
+    {
+        // Default geo_available=false → stats_geo is disabled with guidance,
+        // while stats_enabled stays toggleable.
+        $html = view_admin_settings_html($this->settings(), true, false, 'tok');
+        $this->assertMatchesRegularExpression('/name="stats_geo"[^>]*disabled/', $html);
+        $this->assertStringContainsString('needs the geoip2 library', $html);
+        $this->assertDoesNotMatchRegularExpression('/name="stats_enabled"[^>]*disabled/', $html);
+    }
+
     public function testFullScrapeWarning(): void
     {
         $html = view_admin_settings_html($this->settings(), true, false, 'tok');

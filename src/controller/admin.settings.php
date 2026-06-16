@@ -52,7 +52,7 @@ function admin_settings_controller(array $settings, ?string $config_path = null)
         $message = admin_settings_save_action($config_path);
         // The in-memory $settings is otherwise stale until the next request;
         // reflect the submitted flags so the checkboxes match what was saved.
-        foreach (['open_tracker', 'public_index', 'full_scrape', 'db_reset'] as $flag) {
+        foreach (['open_tracker', 'public_index', 'full_scrape', 'stats_enabled', 'stats_geo', 'db_reset'] as $flag) {
             $settings[$flag] = isset($_POST[$flag]);
         }
     } elseif ($process === 'totp_enable') {
@@ -91,7 +91,13 @@ function admin_settings_controller(array $settings, ?string $config_path = null)
 
     $csrf_token = $csrf_enabled ? auth_csrf_token() : '';
 
+    // Geo enrichment is available only with both the geoip2 library and a
+    // readable GeoLite2 database; the view greys out the stats_geo toggle when
+    // it isn't, so the operator can't enable a no-op.
+    require_once __DIR__.'/../functions/stats.geo.database.php';
+    $geo_available = class_exists(\GeoIp2\Database\Reader::class) && stats_geo_database($settings) !== '';
+
     require_once __DIR__.'/../views/html.admin.settings.php';
 
-    return view_admin_settings_html($settings, $writable, $message, $csrf_token, $totp_available, $totp_secret, $totp_qr, $totp_url);
+    return view_admin_settings_html($settings, $writable, $message, $csrf_token, $totp_available, $totp_secret, $totp_qr, $totp_url, $geo_available);
 }
