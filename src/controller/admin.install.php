@@ -43,6 +43,13 @@ function admin_install_controller(string $config_path): string
         $totp_qr = extension_loaded('gd') ? \eustasy\Authenticatron::generateQrCode($totp_url) : null;
     }
 
+    ////	Geo availability
+    // stats_geo is only selectable with both the geoip2 library and a
+    // discoverable GeoLite2 database; the view greys the checkbox out otherwise.
+    // No $settings exists yet, so probe discovery with an empty configured path.
+    require_once __DIR__.'/../functions/stats.geo.database.php';
+    $geo_available = class_exists(\GeoIp2\Database\Reader::class) && stats_geo_database(['stats_geo_database' => '']) !== '';
+
     ////	Prepare form values (repopulate after failed attempt)
     $form = [
         'db_host' => $values['db_host'],
@@ -52,6 +59,9 @@ function admin_install_controller(string $config_path): string
         'db_persist' => ! empty($_POST) ? $values['db_persist'] : true,
         'open_tracker' => $values['open_tracker'],
         'public_index' => $values['public_index'],
+        'stats_enabled' => $values['stats_enabled'],
+        'stats_geo' => $values['stats_geo'],
+        'geo_available' => $geo_available,
     ];
 
 

@@ -22,6 +22,8 @@ function install_build_config(array $values): string
         'db_persist',
         'open_tracker',
         'public_index',
+        'stats_enabled',
+        'stats_geo',
         'admin_password',
     ];
 

@@ -11,7 +11,9 @@ declare(strict_types=1);
 // database is available (callers treat '' as geo-off). MaxMind's licence
 // forbids redistributing the database, so it is never shipped.
 
-/** @param PhoenixSettings $settings */
+// Typed to just the key it reads, so the installer (which has no full
+// $settings yet) can pass ['stats_geo_database' => ''] to probe availability.
+/** @param array{stats_geo_database: string} $settings */
 function stats_geo_database(array $settings): string
 {
     $candidates = [];

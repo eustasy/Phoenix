@@ -25,6 +25,9 @@ class ViewInstallHtmlTest extends TestCase
             'db_persist' => true,
             'open_tracker' => true,
             'public_index' => false,
+            'stats_enabled' => false,
+            'stats_geo' => false,
+            'geo_available' => false,
         ];
     }
 
@@ -91,6 +94,29 @@ class ViewInstallHtmlTest extends TestCase
         $this->assertStringStartsWith('<!DOCTYPE html>', $html);
         $this->assertStringContainsString('<title>Phoenix Setup</title>', $html);
         $this->assertStringContainsString('</html>', $html);
+    }
+
+    public function testRendersStatsFieldset(): void
+    {
+        $html = view_install_html(true, null, $this->form());
+        $this->assertStringContainsString('name="stats_enabled"', $html);
+        $this->assertStringContainsString('name="stats_geo"', $html);
+    }
+
+    public function testGreysStatsGeoWhenGeoUnavailable(): void
+    {
+        // form() defaults geo_available=false → the checkbox is disabled.
+        $html = view_install_html(true, null, $this->form());
+        $this->assertMatchesRegularExpression('/name="stats_geo"[^>]*disabled/', $html);
+        $this->assertStringContainsString('needs the geoip2 library', $html);
+    }
+
+    public function testStatsGeoEnabledWhenGeoAvailable(): void
+    {
+        $form = $this->form();
+        $form['geo_available'] = true;
+        $html = view_install_html(true, null, $form);
+        $this->assertDoesNotMatchRegularExpression('/name="stats_geo"[^>]*disabled/', $html);
     }
 
     public function testOmitsTwoFactorSectionWhenNoSecretPassed(): void

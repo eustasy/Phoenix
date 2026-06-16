@@ -18,7 +18,7 @@ declare(strict_types=1);
 //   $totp_url - string|null, otpauth:// URL for manual entry
 
 /**
- * @param array{db_host: string, db_user: string, db_name: string, db_prefix: string, db_persist: bool, open_tracker: bool, public_index: bool} $form
+ * @param array{db_host: string, db_user: string, db_name: string, db_prefix: string, db_persist: bool, open_tracker: bool, public_index: bool, stats_enabled: bool, stats_geo: bool, geo_available: bool} $form
  */
 function view_install_html(
     bool $settings_writable,
@@ -84,6 +84,14 @@ function view_install_html(
 
     $checked = static fn (bool $on): string => $on ? ' checked' : '';
 
+    // Geo enrichment is selectable only with both the geoip2 library and a
+    // discoverable GeoLite2 database (the controller decides); otherwise the
+    // checkbox is greyed out so the operator can't enable a no-op.
+    $geo_available = $form['geo_available'];
+    $geo_note = $geo_available
+        ? '<span class="dim">&mdash; coarse country per event/peer; the IP is never stored</span>'
+        : '<span class="dim">&mdash; needs the geoip2 library and a GeoLite2 database</span>';
+
     $body = $error_html.'
 		<form method="POST" action="" class="ph-form-card">
 			<input type="hidden" name="process" value="install">
@@ -111,6 +119,14 @@ function view_install_html(
 				<div style="display:flex;flex-direction:column;gap:var(--space-3)">
 					<label class="checkbox"><input type="checkbox" name="open_tracker" value="1"'.$checked($form['open_tracker']).'><span class="checkbox-label">Open tracker <span class="dim">&mdash; accept announces for any info hash</span></span></label>
 					<label class="checkbox"><input type="checkbox" name="public_index" value="1"'.$checked($form['public_index']).'><span class="checkbox-label">Public index <span class="dim">&mdash; expose the public torrent listing</span></span></label>
+				</div>
+			</fieldset>
+
+			<fieldset class="setup-fieldset">
+				<div class="setup-legend"><span class="ph-ico" data-lucide="bar-chart-3"></span>Statistics <span class="dim" style="text-transform:none;letter-spacing:0;font-weight:400">&mdash; optional</span></div>
+				<div style="display:flex;flex-direction:column;gap:var(--space-3)">
+					<label class="checkbox"><input type="checkbox" name="stats_enabled" value="1"'.$checked($form['stats_enabled']).'><span class="checkbox-label">Event logging <span class="dim">&mdash; record completions to the events ledger</span></span></label>
+					<label class="checkbox"'.($geo_available ? '' : ' style="opacity:.55"').'><input type="checkbox" name="stats_geo" value="1"'.$checked($form['stats_geo']).($geo_available ? '' : ' disabled').'><span class="checkbox-label">Geo enrichment '.$geo_note.'</span></label>
 				</div>
 			</fieldset>
 

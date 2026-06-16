@@ -24,6 +24,8 @@ class InstallBuildConfigTest extends PhoenixTestCase
             'db_persist' => true,
             'open_tracker' => false,
             'public_index' => true,
+            'stats_enabled' => true,
+            'stats_geo' => false,
             'admin_password' => 'pw_hash',
         ], $overrides);
     }
@@ -68,6 +70,8 @@ class InstallBuildConfigTest extends PhoenixTestCase
         $this->assertTrue($settings['db_persist']);
         $this->assertFalse($settings['open_tracker']);
         $this->assertTrue($settings['public_index']);
+        $this->assertTrue($settings['stats_enabled']);
+        $this->assertFalse($settings['stats_geo']);
     }
 
     public function testDbResetIsAlwaysFalse(): void

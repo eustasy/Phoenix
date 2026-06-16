@@ -10,7 +10,7 @@ declare(strict_types=1);
 // phoenix.custom.php.
 /**
  * @param array<string, mixed> $post
- * @return array{db_host: string, db_user: string, db_pass: string, db_name: string, db_prefix: string, db_persist: bool, open_tracker: bool, public_index: bool, admin_password: string}
+ * @return array{db_host: string, db_user: string, db_pass: string, db_name: string, db_prefix: string, db_persist: bool, open_tracker: bool, public_index: bool, stats_enabled: bool, stats_geo: bool, admin_password: string}
  */
 function install_sanitize_post(array $post): array
 {
@@ -30,6 +30,8 @@ function install_sanitize_post(array $post): array
         'db_persist' => ! empty($post['db_persist']),
         'open_tracker' => ! empty($post['open_tracker']),
         'public_index' => ! empty($post['public_index']),
+        'stats_enabled' => ! empty($post['stats_enabled']),
+        'stats_geo' => ! empty($post['stats_geo']),
         'admin_password' => is_string($admin_password) && $admin_password !== ''
             ? password_hash($admin_password, PASSWORD_DEFAULT)
             : '',
