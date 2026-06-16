@@ -31,11 +31,7 @@ function view_install_html(
     require_once __DIR__.'/html.auth.layout.php';
 
     $extra_head = '
-	<style>
-		.setup-fieldset { border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); margin-bottom: var(--space-4); }
-		.setup-legend { font-size: var(--font-size-xs); text-transform: uppercase; letter-spacing: 0.07em; color: var(--color-text-tertiary); font-weight: 600; margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-2); }
-		.setup-legend .ph-ico { width: 15px; height: 15px; }
-	</style>';
+	<link rel="stylesheet" href="/assets/install.css">';
 
     $foot = 'Phoenix &middot; writes <code>config/phoenix.custom.php</code>';
 

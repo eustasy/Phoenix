@@ -20,11 +20,7 @@ $announce_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'http
 require_once __DIR__.'/../src/views/html.public.layout.php';
 
 $extra_head = '
-	<style>
-		#magnet-out { font-family: var(--font-mono); font-size: var(--font-size-sm); word-break: break-all; min-height: 5em; background: var(--color-code-bg); }
-		.magnet-output-wrap { position: relative; }
-		.magnet-output-wrap .copy-float { position: absolute; top: var(--space-2); right: var(--space-2); }
-	</style>';
+	<link rel="stylesheet" href="/assets/magnet.css">';
 
 $body = '<div class="ph-page-title">
 		<div>
@@ -62,7 +58,7 @@ $body = '<div class="ph-page-title">
 			<div class="ph-field" style="margin-bottom:0">
 				<label>Magnet Link</label>
 				<div class="magnet-output-wrap">
-					<textarea id="magnet-out" readonly rows="4"></textarea>
+					<textarea id="magnet-out" class="magnet-out" readonly rows="4"></textarea>
 					<button class="btn btn-primary btn-sm copy-float" id="copy-btn"><span class="ph-ico" data-lucide="copy"></span>Copy</button>
 				</div>
 			</div>

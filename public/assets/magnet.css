@@ -1,0 +1,20 @@
+/* ==========================================================================
+   Magnet — client-side magnet generator (magnet.php).
+   Loaded only on that page via the page's $extra_head. References DS tokens.
+   ========================================================================== */
+
+.magnet-out {
+  min-height: 5em;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  word-break: break-all;
+  background: var(--color-code-bg);
+}
+.magnet-output-wrap {
+  position: relative;
+}
+.magnet-output-wrap .copy-float {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}

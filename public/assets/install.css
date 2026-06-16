@@ -1,0 +1,26 @@
+/* ==========================================================================
+   Install — first-run setup form (admin.php installer mode).
+   Loaded only on that page via the view's $extra_head. References DS tokens.
+   ========================================================================== */
+
+.setup-fieldset {
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.setup-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-tertiary);
+}
+.setup-legend .ph-ico {
+  width: 15px;
+  height: 15px;
+}

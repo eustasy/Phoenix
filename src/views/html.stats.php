@@ -24,20 +24,7 @@ function view_stats_html(array $stats, array $settings): string
     $leech_pct = $swarm > 0 ? 100 - $seed_pct : 0;
 
     $extra_head = '
-	<style>
-		.stats-hero { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-2xl); box-shadow: var(--shadow-sm); padding: var(--space-8); display: grid; grid-template-columns: auto 1fr; gap: var(--space-8); align-items: center; }
-		.stats-hero-num { font-size: 4rem; line-height: 1; font-weight: 700; letter-spacing: var(--letter-spacing-tight); font-variant-numeric: tabular-nums; }
-		.stats-hero-label { color: var(--color-text-secondary); margin-top: var(--space-2); }
-		.breakdown { display: flex; gap: var(--space-6); }
-		.breakdown .b-num { font-size: var(--font-size-2xl); font-weight: 700; font-variant-numeric: tabular-nums; }
-		.breakdown .b-num.seed { color: var(--color-green); }
-		.breakdown .b-num.leech { color: var(--color-orange); }
-		.breakdown .b-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
-		.swarm-bar { height: 10px; border-radius: var(--radius-full); overflow: hidden; display: flex; background: var(--color-bg-tertiary); margin-top: var(--space-4); }
-		.swarm-bar .seg-seed { background: var(--color-green); }
-		.swarm-bar .seg-leech { background: var(--color-orange); }
-		@media (max-width: 640px){ .stats-hero { grid-template-columns: 1fr; gap: var(--space-5); } }
-	</style>';
+	<link rel="stylesheet" href="/assets/stats.css">';
 
     $body = '<div class="ph-page-title">
 		<div>
