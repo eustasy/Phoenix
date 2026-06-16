@@ -128,11 +128,13 @@ $settings['stats_enabled'] = false;
 /* intentionally unsupported — they fire on every keepalive */
 /* announce and would flood the table */
 $settings['stats_events'] = ['completed'];
-/* enrich events with a minified geo location (country + continent */
-/* only). requires the suggested geoip2/geoip2 composer library */
+/* enrich events (and the admin Geography map) with a minified geo */
+/* location (country + continent only). requires the suggested */
+/* geoip2/geoip2 composer library and a GeoLite2-Country database */
 $settings['stats_geo'] = false;
-/* absolute path to a MaxMind GeoLite2-Country.mmdb; empty = geo */
-/* disabled. not shipped — MaxMind's license forbids redistribution */
+/* path to a MaxMind GeoLite2-Country.mmdb. empty = auto-discover */
+/* /usr/share/GeoIP, /var/lib/GeoIP, then config/. not shipped — */
+/* MaxMind's license forbids redistribution */
 $settings['stats_geo_database'] = '';
 /* days to keep logged events; 0 = keep forever. pruned during the */
 /* regular cleanup (announce-time or cron), even if stats_enabled */

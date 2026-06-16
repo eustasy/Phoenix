@@ -102,15 +102,17 @@ Configuration should take place in `config/phoenix.custom.php`, NOT `config/phoe
 
 ### Stat-Tracking
 
-Phoenix can log torrent events (completions by default; optionally started/stopped via `stats_events`) to an `events` table — see the `stats_*` settings in `config/phoenix.default.php`. The table exists from install, so enabling it is a pure config flip: `$settings['stats_enabled'] = true;`. The ledger is privacy-preserving by design — a coarse client label and minified location are derived from the peer_id and IP, which are never themselves stored.
+Phoenix can log torrent events (completions by default; optionally started/stopped via `stats_events`) to an `events` table. Enable it with `$settings['stats_enabled'] = true;`, or from the **Statistics** section of the installer or the admin **Settings** flags — the table exists from install, so it's just a flag. The ledger is privacy-preserving by design — a coarse client label and minified location are derived from the peer_id and IP, which are never themselves stored. See the `stats_*` settings (including `stats_retention`, which prunes old rows) in `config/phoenix.default.php`.
 
-To enrich events with the minified geo location (country + continent ISO codes):
+#### Geo enrichment
+
+With a GeoLite2 database, events are tagged with a coarse country/continent, and the admin **Geography** page maps active peers and completed downloads by country.
 
 1. Run `composer require geoip2/geoip2`.
-2. Download a free [GeoLite2-Country database](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) from MaxMind (their license forbids Phoenix bundling it).
-3. Set `$settings['stats_geo'] = true;` and point `$settings['stats_geo_database']` at the `.mmdb` file.
+2. Get a free [GeoLite2-Country database](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) from MaxMind (their licence forbids Phoenix bundling it). Drop it where Phoenix finds it automatically — `/usr/share/GeoIP/GeoLite2-Country.mmdb` (kept current by MaxMind's `geoipupdate`), `/var/lib/GeoIP/`, or the project's `config/` directory — or set `$settings['stats_geo_database']` to a custom path.
+3. Enable it with `$settings['stats_geo'] = true;`, or tick it in the installer / admin Settings — the toggle is greyed out there until both the library and a database are present.
 
-Geo enrichment degrades gracefully: when the library or database file is missing or unreadable, events are still logged, just with empty location codes.
+The "active peers by country" map works as soon as geo is configured; "completed downloads by country" fills in from the events ledger as completions are logged, so it also needs `stats_enabled`. Geo degrades gracefully: with the library or database missing or unreadable, events are still logged (just with empty location codes) and the Geography page shows a "not configured" state.
 
 ### Two-Factor Authentication (optional)
 
