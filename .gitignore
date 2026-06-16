@@ -1,6 +1,7 @@
 *~
 *.custom.*
 *.local.*
+*.mmdb
 /backups/*.sql
 /vendor/
 /composer.lock

@@ -35,6 +35,15 @@ $settings = settings_load(
 );
 $settings['phoenix_version'] = 'v4.2beta5';
 
+////	Resolve the GeoLite2 database
+// When geo enrichment is on, resolve the database from standard locations
+// (/usr/share/GeoIP, /var/lib/GeoIP, config/) so an explicit path is optional.
+// Only when stats_geo is set, to keep the announce hot path free of file stats.
+if ($settings['stats_geo']) {
+    require_once __DIR__.'/functions/stats.geo.database.php';
+    $settings['stats_geo_database'] = stats_geo_database($settings);
+}
+
 ////	Apply operator error settings (debug / error_log)
 require_once __DIR__.'/functions/error.configure.php';
 error_configure($settings);
