@@ -56,6 +56,8 @@ class AdminSettingsControllerTest extends TestCase
             'public_index' => false,
             'full_scrape' => false,
             'db_reset' => false,
+            // The controller probes geo availability for the stats_geo toggle.
+            'stats_geo_database' => '',
         ];
     }
 
