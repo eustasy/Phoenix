@@ -49,7 +49,7 @@ class ViewIndexHtmlTest extends PhoenixTestCase
         $this->assertStringContainsString('<h1>Torrent Index</h1>', $html);
         // Public chrome + bundled assets.
         $this->assertStringContainsString('class="ph-public"', $html);
-        $this->assertStringContainsString('/assets/ds/all.css', $html);
+        $this->assertStringContainsString('/assets/ds.css', $html);
         $this->assertStringContainsString('/assets/phoenix.css', $html);
     }
 
