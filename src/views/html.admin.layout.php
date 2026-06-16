@@ -55,12 +55,32 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
             'settings' => ['settings', 'Settings'],
         ],
     ];
+    // Nav badge counts are injected into $settings by admin_panel_controller()
+    // (optional — absent on the installer and in isolated view tests), so a
+    // page without them simply shows no badge.
+    $nav_counts = $settings['nav_counts'] ?? [];
+
+    // Abbreviate large counts for the narrow sidebar (2841 -> "2.8k").
+    $abbrev = static function (int $n): string {
+        if ($n >= 1000000) {
+            return rtrim(rtrim(number_format($n / 1000000, 1, '.', ''), '0'), '.').'M';
+        }
+        if ($n >= 1000) {
+            return rtrim(rtrim(number_format($n / 1000, 1, '.', ''), '0'), '.').'k';
+        }
+
+        return (string) $n;
+    };
+
     $nav_html = '';
     foreach ($groups as $label => $items) {
         $links = '';
         foreach ($items as $key => [$icon, $text]) {
             $attrs = $key === $active ? ' class="is-active" aria-current="page"' : '';
-            $links .= '<a href="?page='.$key.'"'.$attrs.'><span class="ph-ico" data-lucide="'.$icon.'"></span>'.$text.'</a>';
+            $badge = isset($nav_counts[$key])
+                ? '<span class="ph-nav-badge">'.$abbrev((int) $nav_counts[$key]).'</span>'
+                : '';
+            $links .= '<a href="?page='.$key.'"'.$attrs.'><span class="ph-ico" data-lucide="'.$icon.'"></span>'.$text.$badge.'</a>';
         }
         $nav_html .= '<div class="ph-navlabel">'.$label.'</div><nav class="ph-nav">'.$links.'</nav>';
     }

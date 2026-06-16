@@ -12,6 +12,22 @@ declare(strict_types=1);
 /** @param PhoenixSettings $settings */
 function admin_panel_controller(mysqli $connection, array $settings, int $time): string
 {
+    ////	Sidebar nav counts
+    // Computed once here (every page routes through this controller) and handed
+    // to the shared layout via $settings — like the bootstrap injects
+    // phoenix_version — so the layout stays a pure view, no signature churn
+    // across every page. Gated on installed tables: COUNT against a missing
+    // table throws under mysqli's default report mode.
+    require_once __DIR__.'/../model/db.tables.installed.php';
+    if (db_tables_installed($connection, $settings)) {
+        require_once __DIR__.'/../model/torrents.count.php';
+        require_once __DIR__.'/../model/peers.count.php';
+        $settings['nav_counts'] = [
+            'torrents' => torrents_count($connection, $settings),
+            'peers' => peers_count($connection, $settings),
+        ];
+    }
+
     ////	Page selection
     // Normalise the requested page up front. Unknown pages fall through to
     // the dashboard (lenient — never error on a bogus ?page=).

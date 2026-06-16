@@ -88,6 +88,27 @@ class ViewAdminLayoutHtmlTest extends TestCase
         $this->assertStringNotContainsString('name="logout"', $html);
     }
 
+    public function testRendersNavCountBadges(): void
+    {
+        // The panel controller injects counts into $settings; the sidebar shows
+        // them as badges (large counts abbreviated).
+        $html = view_admin_layout_html(
+            $this->settings(['nav_counts' => ['torrents' => 318, 'peers' => 2841]]),
+            'Torrents',
+            '',
+            'torrents',
+        );
+        $this->assertStringContainsString('Torrents<span class="ph-nav-badge">318</span>', $html);
+        $this->assertStringContainsString('Peers<span class="ph-nav-badge">2.8k</span>', $html);
+    }
+
+    public function testOmitsNavCountBadgesWhenAbsent(): void
+    {
+        // No counts injected (installer, isolated view) → no badges.
+        $html = view_admin_layout_html($this->settings(), 'Dashboard', '', 'dashboard');
+        $this->assertStringNotContainsString('ph-nav-badge', $html);
+    }
+
     public function testIncludesVersionLine(): void
     {
         $html = view_admin_layout_html($this->settings(), 'Dashboard', '', 'dashboard');
