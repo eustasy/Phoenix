@@ -148,14 +148,12 @@
   --flexoki-magenta-850: #4f1b39;
   --flexoki-magenta-900: #39172b;
   --flexoki-magenta-950: #24131d;
-}
 
-/* --------------------------------------------------------------------------
-   2. Design Tokens — Spacing, Typography, Borders
-   These can be overridden by any theme.
-   -------------------------------------------------------------------------- */
+  /* --------------------------------------------------------------------------
+     2. Design Tokens — Spacing, Typography, Borders
+     These can be overridden by any theme.
+     -------------------------------------------------------------------------- */
 
-:root {
   /* Typography */
   --font-body:
     "Inter", -apple-system, "BlinkMacSystemFont", "Segoe UI", "Helvetica", "Arial",
@@ -166,12 +164,12 @@
     "SFMono-Regular", "Consolas", "Monaco", monospace;
 
   --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
+  --font-size-sm: 0.88rem;
   --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
+  --font-size-lg: 1.13rem;
   --font-size-xl: 1.25rem;
   --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.875rem;
+  --font-size-3xl: 1.88rem;
   --font-size-4xl: 2.25rem;
 
   --font-weight-normal: 400;
@@ -184,14 +182,14 @@
 
   --letter-spacing-tight: -0.02em;
   --letter-spacing-normal: 0;
-  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wide: 0.03em;
 
   /* Spacing scale */
   --space-0: 0;
   --space-px: 1px;
-  --space-0-5: 0.125rem;
+  --space-0-5: 0.13rem;
   --space-1: 0.25rem;
-  --space-1-5: 0.375rem;
+  --space-1-5: 0.38rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
@@ -206,7 +204,7 @@
 
   /* Border radius */
   --radius-none: 0;
-  --radius-sm: 0.125rem;
+  --radius-sm: 0.13rem;
   --radius-md: 0.25rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
@@ -461,6 +459,7 @@
    Adapted from Josh Comeau's CSS Reset + Andy Bell's Modern Reset
    ========================================================================== */
 
+/* stylelint-disable selector-max-universal -- global reset legitimately targets every element */
 *,
 *::before,
 *::after {
@@ -470,16 +469,11 @@
 * {
   margin: 0;
 }
+/* stylelint-enable selector-max-universal */
 
 html {
   text-size-adjust: none;
-  text-size-adjust: none;
   tab-size: 4;
-}
-
-body {
-  line-height: var(--line-height-normal);
-  -webkit-font-smoothing: antialiased;
 }
 
 img,
@@ -511,6 +505,7 @@ h6 {
 
 /* Reduced motion: disable transitions/animations for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
+  /* stylelint-disable selector-max-universal, time-min-milliseconds -- near-instant reset across all elements is intentional */
   *,
   *::before,
   *::after {
@@ -519,6 +514,7 @@ h6 {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  /* stylelint-enable selector-max-universal, time-min-milliseconds */
 }
 
 /* Remove list styles on ul, ol elements with a list role */
@@ -532,12 +528,6 @@ ol[role="list"] {
 a:not([class]) {
   text-decoration-skip-ink: auto;
   color: currentcolor;
-}
-
-/* Consistent textarea behavior */
-textarea {
-  resize: vertical;
-  resize: block; /* logical property, fallback above */
 }
 
 /* Focus visible only for keyboard navigation */
@@ -569,6 +559,7 @@ body {
   line-height: var(--line-height-normal);
   color: var(--color-text);
   background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Selection */
@@ -1054,6 +1045,8 @@ input[type="color"] {
 
 textarea {
   min-height: 6em;
+  resize: vertical;
+  resize: block; /* logical property, fallback above */
 }
 
 /* --------------------------------------------------------------------------
@@ -1272,10 +1265,6 @@ dialog {
   max-width: min(90vw, 32rem);
 }
 
-dialog::backdrop {
-  background-color: rgba(16, 15, 15, 0.5);
-}
-
 
 /* ===== components/alert.css ===== */
 /* ==========================================================================
@@ -1291,11 +1280,11 @@ dialog::backdrop {
   position: relative;
 }
 
-.alert > *:first-child {
+.alert > :first-child {
   margin-block-start: 0;
 }
 
-.alert > *:last-child {
+.alert > :last-child {
   margin-block-end: 0;
 }
 
@@ -1414,8 +1403,8 @@ dialog::backdrop {
   position: absolute;
   inset-block-end: 0;
   inset-inline-end: 0;
-  width: 0.625rem;
-  height: 0.625rem;
+  width: 0.63rem;
+  height: 0.63rem;
   border-radius: var(--radius-full);
   border: var(--border-width-2) solid var(--color-bg);
   background-color: var(--color-text-disabled);
@@ -1736,11 +1725,11 @@ dialog::backdrop {
   padding: var(--space-4) var(--space-5);
 }
 
-.card-body > *:first-child {
+.card-body > :first-child {
   margin-block-start: 0;
 }
 
-.card-body > *:last-child {
+.card-body > :last-child {
   margin-block-end: 0;
 }
 
@@ -1809,6 +1798,7 @@ dialog::backdrop {
   cursor: not-allowed;
 }
 
+/* stylelint-disable-next-line selector-max-universal -- disabled state must cascade to every descendant */
 .checkbox:has(input[type="checkbox"]:disabled) * {
   cursor: not-allowed;
 }
@@ -2271,10 +2261,10 @@ dialog.dialog {
   line-height: var(--line-height-normal);
 }
 
-.dialog-body > *:first-child {
+.dialog-body > :first-child {
   margin-block-start: 0;
 }
-.dialog-body > *:last-child {
+.dialog-body > :last-child {
   margin-block-end: 0;
 }
 
@@ -2776,7 +2766,6 @@ fieldset:disabled .fieldset-legend {
 .input-label-required::after {
   content: " *";
   color: var(--color-danger);
-  aria-hidden: "true";
 }
 
 /* Override base margin on the input element */
@@ -2911,7 +2900,7 @@ fieldset:disabled .fieldset-legend {
   max-width: none !important;
   width: 14rem !important;
   /* Icon padding on the leading side */
-  padding-inline-start: calc(var(--space-3) + 1rem + var(--space-2)) !important;
+  padding-inline: calc(var(--space-3) + 1rem + var(--space-2)) calc(var(--space-2) + 1.5rem + var(--space-2)) !important;
   /* Shortcut badge padding on the trailing side */
 }
 
@@ -3088,7 +3077,7 @@ fieldset:disabled .fieldset-legend {
   background-color: var(--color-action);
   border-color: var(--color-action);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8'%3E%3Cpath d='M1 4l3 3 5-5' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
-  background-size: 0.625rem 0.5rem;
+  background-size: 0.63rem 0.5rem;
   background-repeat: no-repeat;
   background-position: center;
 }
@@ -3163,7 +3152,7 @@ fieldset:disabled .fieldset-legend {
   border-inline-end: 2px solid var(--color-text-secondary);
   border-block-end: 2px solid var(--color-text-secondary);
   transform: rotate(45deg);
-  margin-block-start: -0.125rem;
+  margin-block-start: -0.13rem;
 }
 
 /* Popup modifier — floats the listbox below its trigger/input */
@@ -3681,8 +3670,8 @@ fieldset:disabled .fieldset-legend {
 
 /* Icons and badges in drawer nav */
 .navbar-drawer .navbar-nav-icon {
-  width: 1.125rem;
-  height: 1.125rem;
+  width: 1.13rem;
+  height: 1.13rem;
 }
 
 .navbar-drawer .navbar-nav-badge {
@@ -3826,8 +3815,8 @@ fieldset:disabled .fieldset-legend {
 }
 
 .navbar-vertical .navbar-nav-icon {
-  width: 1.125rem;
-  height: 1.125rem;
+  width: 1.13rem;
+  height: 1.13rem;
 }
 
 .navbar-vertical .navbar-divider {
@@ -4056,6 +4045,7 @@ fieldset:disabled .fieldset-legend {
   cursor: not-allowed;
 }
 
+/* stylelint-disable-next-line selector-max-universal -- disabled state must cascade to every descendant */
 .radio:has(input[type="radio"]:disabled) * {
   cursor: not-allowed;
 }
