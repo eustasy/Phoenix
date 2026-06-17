@@ -19,6 +19,8 @@ function announce_check_rate_limit(mysqli $connection, array $settings, array $p
     $count = peers_count_rate($connection, $settings, $peer, $ip_threshold);
 
     if ($count > 0) {
-        tracker_error('Announce rate limit exceeded.');
+        // BEP 31: the limit clears once the rate window (min_interval / 5)
+        // passes, so tell the client to retry after it.
+        tracker_error('Announce rate limit exceeded.', intval($settings['min_interval'] / 5));
     }
 }

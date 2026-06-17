@@ -48,4 +48,30 @@ class ViewErrorXmlTest extends TestCase
         }
     }
 
+    public function testNestsRetryInChild(): void
+    {
+        $out = view_error_xml('nope', 'never');
+        $this->assertSame(
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><error>nope<retry_in>never</retry_in></error>',
+            $out,
+        );
+        // Single root preserved; message is the element text, retry_in a child.
+        $doc = simplexml_load_string($out);
+        $this->assertNotFalse($doc);
+        $this->assertSame('nope', (string) $doc);
+        $this->assertSame('never', (string) $doc->retry_in);
+    }
+
+    public function testNumericRetryInChild(): void
+    {
+        $doc = simplexml_load_string(view_error_xml('nope', 90));
+        $this->assertNotFalse($doc);
+        $this->assertSame('90', (string) $doc->retry_in);
+    }
+
+    public function testOmitsRetryInByDefault(): void
+    {
+        $this->assertStringNotContainsString('retry_in', view_error_xml('nope'));
+    }
+
 }

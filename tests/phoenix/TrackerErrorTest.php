@@ -15,12 +15,18 @@ class TrackerErrorTest extends PhoenixTestCase
      * @param array<string, string> $get
      * @return array{stdout: string, stderr: string, exit: int}
      */
-    private function runTrackerError(string $message, array $get = []): array
+    private function runTrackerError(string $message, array $get = [], int|string|null $retry_in = null): array
     {
+        $call = 'tracker_error('.var_export($message, true);
+        if ($retry_in !== null) {
+            $call .= ', '.var_export($retry_in, true);
+        }
+        $call .= ');';
+
         $script = '<?php '.
             'parse_str('.var_export(http_build_query($get), true).', $_GET); '.
             'require '.var_export(self::FUNCTION_PATH, true).'; '.
-            'tracker_error('.var_export($message, true).');';
+            $call;
 
         return $this->runPhpSubprocess($script);
     }
@@ -133,6 +139,41 @@ class TrackerErrorTest extends PhoenixTestCase
         $result = $this->runTrackerError('test', ['json' => '']);
         $this->assertSame(2, $result['exit']);
         $this->assertStringStartsWith('{', $result['stdout']);
+    }
+
+    ////	Retry-in (BEP 31)
+
+    public function testBencodeNeverRetryIn(): void
+    {
+        $msg = 'Torrent is not allowed.';
+        $result = $this->runTrackerError($msg, [], 'never');
+        $this->assertSame(2, $result['exit']);
+        $this->assertSame('d14:failure reason'.strlen($msg).':'.$msg.'8:retry in5:nevere', $result['stdout']);
+    }
+
+    public function testBencodeNumericRetryIn(): void
+    {
+        $msg = 'Announce rate limit exceeded.';
+        $result = $this->runTrackerError($msg, [], 120);
+        $this->assertSame(2, $result['exit']);
+        $this->assertSame('d14:failure reason'.strlen($msg).':'.$msg.'8:retry ini120ee', $result['stdout']);
+    }
+
+    public function testJsonRetryIn(): void
+    {
+        $result = $this->runTrackerError('Torrent is not allowed.', ['json' => '1'], 'never');
+        $this->assertSame(2, $result['exit']);
+        $decoded = json_decode($result['stdout'], true);
+        $this->assertSame('never', $decoded['retry_in']);
+    }
+
+    public function testXmlRetryIn(): void
+    {
+        $result = $this->runTrackerError('Announce rate limit exceeded.', ['xml' => '1'], 120);
+        $this->assertSame(2, $result['exit']);
+        $doc = simplexml_load_string($result['stdout']);
+        $this->assertNotFalse($doc);
+        $this->assertSame('120', (string) $doc->retry_in);
     }
 
 }

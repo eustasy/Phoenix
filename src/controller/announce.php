@@ -25,7 +25,7 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
     // when the value is missing or fails validation — under strict_types the
     // strlen() call below would raise a TypeError on false, so check first.
     if ($peer['info_hash'] === false || strlen($peer['info_hash']) !== 40) {
-        tracker_error('Info Hash is invalid.');
+        tracker_error('Info Hash is invalid.', 'never');
     }
 
     // Torrent allowed? Closed-tracker check (BEP 27 private torrents): reject
@@ -34,12 +34,12 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
         ! $settings['open_tracker'] &&
         ! in_array($peer['info_hash'], $allowed_torrents)
     ) {
-        tracker_error('Torrent is not allowed.');
+        tracker_error('Torrent is not allowed.', 'never');
     }
 
     // peer_id: required, 40 hex chars (see info_hash note above).
     if ($peer['peer_id'] === false || strlen($peer['peer_id']) !== 40) {
-        tracker_error('Peer ID is invalid.');
+        tracker_error('Peer ID is invalid.', 'never');
     }
 
     ////	Resolve IP Addresses & Ports

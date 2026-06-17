@@ -3,6 +3,7 @@
 ## Unreleased
 
 - FEATURE: Return the client's own public IP in the announce response under the BEP 24 `external ip` key, so a NATed peer can learn how the tracker sees it — packed to raw bytes in the bencode response, and mirrored as a human-readable string in the `?xml`/`?json` debug views. It prefers the address family the request arrived on, and is gated by the new `announce_external_ip` setting (default on) ([#68](https://github.com/eustasy/phoenix/issues/68)).
+- FEATURE: Annotate tracker failure responses with BEP 31's `retry in` key, so a client knows whether and when to retry — `"never"` for permanent rejections (invalid info_hash/peer_id, a disallowed torrent, scraping disabled) and the rate-limit window in seconds for a throttled announce. Threaded through `tracker_error()` into the bencode, `?xml`, and `?json` error formats ([#69](https://github.com/eustasy/phoenix/issues/69)).
 
 ## v4.2beta5 - 14/06/2026
 

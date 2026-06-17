@@ -61,4 +61,20 @@ class ViewErrorBencodeTest extends PhoenixTestCase
         $this->assertStringStartsWith('d14:failure reason', $result);
     }
 
+    public function testOmitsRetryInByDefault(): void
+    {
+        $this->assertStringNotContainsString('retry in', view_error_bencode('nope'));
+    }
+
+    public function testEmitsNumericRetryInAsBencodeInteger(): void
+    {
+        // BEP 31: seconds encode as a bencode integer, sorted after the reason.
+        $this->assertSame('d14:failure reason4:nope8:retry ini90ee', view_error_bencode('nope', 90));
+    }
+
+    public function testEmitsNeverRetryInAsByteString(): void
+    {
+        $this->assertSame('d14:failure reason4:nope8:retry in5:nevere', view_error_bencode('nope', 'never'));
+    }
+
 }

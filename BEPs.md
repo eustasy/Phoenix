@@ -20,15 +20,14 @@ and is marked accordingly as we work through it.
 
 ## Summary
 
-All 54 indexed BEPs reviewed: **7 implemented**, **3 applicable but missing**,
+All 54 indexed BEPs reviewed: **8 implemented**, **2 applicable but missing**,
 **44 not applicable** (client / DHT / peer-wire / metainfo / feed concerns).
 
 - **Implemented (tracker scope):** BEP 3 (announce), 7 (IPv6 peers), 20 (peer-id
   → client label), 23 (compact peers), 24 (return client external IP), 27
-  (private/closed tracker), 48 (HTTP scrape).
+  (private/closed tracker), 31 (`retry in` on failures), 48 (HTTP scrape).
 - **Applicable but not implemented:** BEP 15 (UDP tracker — excluded by the
-  HTTP/PHP architecture), 31 (`retry in` on failures — optional), 8 (peer
-  obfuscation — deferred/niche).
+  HTTP/PHP architecture), 8 (peer obfuscation — deferred/niche).
 - **Documentation fix applied:** the scrape endpoint and several comments/docs
   labelled HTTP scrape as "BEP 15", but BEP 15 is the *UDP* protocol; the HTTP
   scrape convention is **BEP 48**. All such references were re-pointed to BEP 48
@@ -78,7 +77,7 @@ Final and active process BEPs (the protocol's governance and core specs).
 | 21 | Extension for Partial Seeds | ➖ N/A | Peer-protocol extension; the tracker only ever sees `left`, from which it derives seed/leech. |
 | 24 | Tracker Returns External IP | ✅ Implemented | Announce echoes the client's own public address under `external ip` (gated by `announce_external_ip`). See [BEP 24](#bep-24--tracker-returns-external-ip). |
 | 30 | Merkle tree torrent extension | ➖ N/A | `.torrent` metainfo / hashing; client + file format. |
-| 31 | Tracker Failure Retry Extension | ❌ Missing | Failure responses carry only `failure reason`, no `retry in`. See [BEP 31](#bep-31--tracker-failure-retry-extension). |
+| 31 | Tracker Failure Retry Extension | ✅ Implemented | Failure responses carry `retry in` (`"never"` for permanent rejections, seconds for rate-limits). See [BEP 31](#bep-31--tracker-failure-retry-extension). |
 | 32 | IPv6 extension for DHT | ➖ N/A | DHT. |
 | 33 | DHT scrape | ➖ N/A | DHT. |
 | 34 | DNS Tracker Preferences | ➖ N/A | DNS TXT records resolved by clients; no tracker code. |
@@ -259,13 +258,23 @@ an input candidate.
 
 ### BEP 31 — Tracker Failure Retry Extension
 
-**Verdict: ❌ Missing.**
+**Verdict: ✅ Implemented.**
 
-BEP 31 adds a `retry in` key to a `failure reason` response — either a seconds
-value or the string `"never"` — so a client knows whether/when to retry a
-rejected announce. Phoenix's `view_error_bencode()` returns only
-`{'failure reason': ...}`. Optional; would be a one-key addition to the error
-view if desired (e.g. `"never"` for closed-tracker rejections).
+Failure responses can now carry BEP 31's `retry in` key — an integer number of
+seconds, or the string `"never"`. `tracker_error()`
+(`src/functions/tracker.error.php`) takes an optional `$retry_in` and threads it
+into all three error views; `view_error_bencode()` emits it as a bencode integer
+or byte string (sorted after `failure reason`), with the `?xml`/`?json` debug
+views mirroring it. Call sites are classified:
+
+- **`"never"`** — permanent rejections that a retry can't fix: `Info Hash is
+  invalid.`, `Peer ID is invalid.`, `Torrent is not allowed.` (announce and
+  scrape), `Tracker scraping is not allowed.`.
+- **Seconds** — the rate-limit rejection (`announce.check.rate.limit.php`) hints
+  `min_interval / 5`, the window after which the limit clears.
+
+Ambiguous failures (scrape/DB errors) deliberately omit the key. Implemented
+in #69.
 
 ### BEP 48 — Tracker Protocol Extension: Scrape
 

@@ -40,4 +40,19 @@ class ViewErrorJsonTest extends TestCase
         }
     }
 
+    public function testOmitsRetryInByDefault(): void
+    {
+        $this->assertSame('{"error":"nope"}', view_error_json('nope'));
+    }
+
+    public function testIncludesNumericRetryIn(): void
+    {
+        $this->assertSame('{"error":"nope","retry_in":90}', view_error_json('nope', 90));
+    }
+
+    public function testIncludesNeverRetryIn(): void
+    {
+        $this->assertSame('{"error":"nope","retry_in":"never"}', view_error_json('nope', 'never'));
+    }
+
 }

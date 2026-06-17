@@ -37,7 +37,7 @@ if (! empty($valid_info_hashes)) {
         require_once __DIR__.'/../src/functions/tracker.filter.info.hashes.php';
         $valid_info_hashes = tracker_filter_info_hashes($valid_info_hashes, $allowed_torrents);
         if (empty($valid_info_hashes)) {
-            tracker_error('Torrent is not allowed.');
+            tracker_error('Torrent is not allowed.', 'never');
         }
     }
     require_once __DIR__.'/../src/controller/scrape.specific.php';
@@ -56,4 +56,4 @@ if ($settings['full_scrape']) {
 // Reached only when the request supplied no valid info_hashes and
 // full_scrape is disabled. The "Torrent is not allowed." case is now
 // handled inline in the specific-scrape block above.
-tracker_error('Tracker scraping is not allowed.');
+tracker_error('Tracker scraping is not allowed.', 'never');
