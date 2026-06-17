@@ -11,12 +11,12 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 
 ## Table of Contents
 
-* [Installation](#installation)
-* [Project Structure](#project-structure)
-* [Configuration](#configuration)
-* [Server Configuration](#server-configuration)
-* [Cron](#cron-automating-maintenance)
-* [Documentation](#documentation)
+- [Installation](#installation)
+- [Project Structure](#project-structure)
+- [Configuration](#configuration)
+- [Server Configuration](#server-configuration)
+- [Cron](#cron-automating-maintenance)
+- [Documentation](#documentation)
 
 ## Installation
 
@@ -24,9 +24,9 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 
 ### Requirements
 
-* PHP 8.2+ (the latest supported release recommended) with the `mysqli` extension. The bundled `filter`, `json`, `session`, `xml`, `pcre`, and `date` extensions are also used and enabled by default.
-* A MySQL-compatible database — MariaDB recommended.
-* Apache 2.4 or Nginx 1.18+.
+- PHP 8.2+ (the latest supported release recommended) with the `mysqli` extension. The bundled `filter`, `json`, `session`, `xml`, `pcre`, and `date` extensions are also used and enabled by default.
+- A MySQL-compatible database — MariaDB recommended.
+- Apache 2.4 or Nginx 1.18+.
 
 ### With server access
 
@@ -46,8 +46,8 @@ Use this path when you use a cPanel-style host with no direct web server configu
 3. Apache hosts: add the `.php`-stripping rewrite rules from [APACHE.md](./APACHE.md) to `public/.htaccess` so clients can reach `/announce` without the `.php` suffix.
 4. Create the database in your hosting control panel.
 5. Set up the tracker — choose one:
-    * Load `public/admin.php` in your browser and run **Setup**. It will create the tables and write `config/phoenix.custom.php` with your database credentials.
-    * Or import the schema files manually (`sql/peers.sql`, `sql/torrents.sql`, `sql/tasks.sql`, `sql/events.sql`), copy `config/phoenix.default.php` to `config/phoenix.custom.php`, and fill in your database credentials.
+    - Load `public/admin.php` in your browser and run **Setup**. It will create the tables and write `config/phoenix.custom.php` with your database credentials.
+    - Or import the schema files manually (`sql/peers.sql`, `sql/torrents.sql`, `sql/tasks.sql`, `sql/events.sql`), copy `config/phoenix.default.php` to `config/phoenix.custom.php`, and fill in your database credentials.
 6. After setup, secure `admin.php` as described above.
 
 ## Project Structure
@@ -89,12 +89,12 @@ phoenix/
 
 ### Architecture Notes
 
-* **Entry points** (`public/*.php`) are thin: they bootstrap, then delegate to a controller.
-* **Controllers** (`src/controller/*.php`) orchestrate each request: sanitize input → call model → call view. (`public/index.php` is small enough to skip the controller and call its model and view directly.)
-* **Models** (`src/model/*.php`) handle all database operations. Each file exports one function that accepts `$connection`, `$settings`, and domain parameters.
-* **Views** (`src/views/*.php`) handle presentation. Bencode for BitTorrent protocol, HTML for humans, XML/JSON for debugging. The bencode views build a plain PHP structure and serialise it through a single emitter, `bencode_encode()`, which guarantees correct length prefixes and BEP-3 dict key ordering.
-* **Functions** (`src/functions/*.php`) contain business logic helpers that don't fit cleanly into model or view (sanitization, validation, address parsing, etc.).
-* **Hooks** (`src/hooks/*.php`) are optional operator-defined scripts called at lifecycle points (peer.new, peer.stopped, download.complete, etc.). Keep them empty in this repo.
+- **Entry points** (`public/*.php`) are thin: they bootstrap, then delegate to a controller.
+- **Controllers** (`src/controller/*.php`) orchestrate each request: sanitize input → call model → call view. (`public/index.php` is small enough to skip the controller and call its model and view directly.)
+- **Models** (`src/model/*.php`) handle all database operations. Each file exports one function that accepts `$connection`, `$settings`, and domain parameters.
+- **Views** (`src/views/*.php`) handle presentation. Bencode for BitTorrent protocol, HTML for humans, XML/JSON for debugging. The bencode views build a plain PHP structure and serialise it through a single emitter, `bencode_encode()`, which guarantees correct length prefixes and BEP-3 dict key ordering.
+- **Functions** (`src/functions/*.php`) contain business logic helpers that don't fit cleanly into model or view (sanitization, validation, address parsing, etc.).
+- **Hooks** (`src/hooks/*.php`) are optional operator-defined scripts called at lifecycle points (peer.new, peer.stopped, download.complete, etc.). Keep them empty in this repo.
 
 ## Configuration
 
@@ -139,14 +139,14 @@ If you relocated `public/admin.php` out of the web root after setup, restore it 
 
 Phoenix ships with example web server configurations covering document root location, `.php` extension stripping, admin endpoint rate limiting, https redirection, and auth passthrough:
 
-* [APACHE.md](./APACHE.md)
-* [NGINX.md](./NGINX.md)
+- [APACHE.md](./APACHE.md)
+- [NGINX.md](./NGINX.md)
 
 ## Cron (Automating Maintenance)
 
 1. Edit `config/phoenix.custom.php` and set:
-    * `$settings['backup_dir']` to change the backup directory. Defaults to `backups/` in the project root.
-    * `$settings['clean_with_cron']` to `true` to enable the script and disable occasional cleanup on announce.
+    - `$settings['backup_dir']` to change the backup directory. Defaults to `backups/` in the project root.
+    - `$settings['clean_with_cron']` to `true` to enable the script and disable occasional cleanup on announce.
 2. Edit your crontab with `crontab -e`, and add entries like the following. Adjust the times and verify the paths are correct.
 
 ```cron
@@ -156,10 +156,10 @@ Phoenix ships with example web server configurations covering document root loca
 
 ## Documentation
 
-* [MIGRATING.md](./MIGRATING.md) — upgrading from 3.x to 4.0.
-* [APACHE.md](./APACHE.md) — web server configuration for Apache 2.4.
-* [NGINX.md](./NGINX.md) — web server configuration for Nginx.
-* [CONTRIBUTING.md](./CONTRIBUTING.md) — development environment, tests, and contribution conventions.
-* [ALTERNATIVES.md](./ALTERNATIVES.md) — other BitTorrent tracker projects.
-* [CHANGELOG.md](./CHANGELOG.md) — release history.
-* [LICENSE.md](./LICENSE.md) — MIT licence.
+- [MIGRATING.md](./MIGRATING.md) — upgrading from 3.x to 4.0.
+- [APACHE.md](./APACHE.md) — web server configuration for Apache 2.4.
+- [NGINX.md](./NGINX.md) — web server configuration for Nginx.
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — development environment, tests, and contribution conventions.
+- [ALTERNATIVES.md](./ALTERNATIVES.md) — other BitTorrent tracker projects.
+- [CHANGELOG.md](./CHANGELOG.md) — release history.
+- [LICENSE.md](./LICENSE.md) — MIT licence.

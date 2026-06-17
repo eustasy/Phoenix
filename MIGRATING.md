@@ -60,8 +60,8 @@ HTTP.
 
 Re-point your server's document root at the `public/` directory:
 
-* Apache: see [APACHE.md](APACHE.md)
-* Nginx: see [NGINX.md](NGINX.md)
+- Apache: see [APACHE.md](APACHE.md)
+- Nginx: see [NGINX.md](NGINX.md)
 
 Both files also cover stripping the `.php` extension from URLs and rate-limiting
 the admin endpoint.
@@ -94,10 +94,10 @@ Phoenix, and confirm each command runs by hand first):
 30 * * * * php ~/phoenix/bin/backup-database.php
 ```
 
-* `bin/clean-and-optimize.php` replaces `_cron/hourly/clean-and-optimize.php`.
+- `bin/clean-and-optimize.php` replaces `_cron/hourly/clean-and-optimize.php`.
   Set `$settings['clean_with_cron'] = true;` in your config to run cleanup from
   cron and disable the occasional cleanup-on-announce.
-* `bin/backup-database.php` replaces `_cron/hourly/backup-database.php`. The
+- `bin/backup-database.php` replaces `_cron/hourly/backup-database.php`. The
   default backup directory is `backups` (was `_backups`); override it with
   `$settings['backup_dir']`.
 
@@ -138,9 +138,9 @@ New installs created with 4.1 or later get the current schema directly from
 
 ## Checklist
 
-* [ ] Runtime is PHP >= 8.2 with `mysqli` and `xml`.
-* [ ] (3.1 or earlier only) 3.2 SQL migration applied; otherwise no DB change.
-* [ ] Document root re-pointed at `public/`; `src/`, `bin/`, `config/`, `tests/` are above the web root and not reachable over HTTP.
-* [ ] Config copied to `config/phoenix.custom.php`.
-* [ ] Cron jobs updated to `bin/clean-and-optimize.php` and `bin/backup-database.php`.
-* [ ] `public/admin.php` moved back to `src/` after setup.
+- [ ] Runtime is PHP >= 8.2 with `mysqli` and `xml`.
+- [ ] (3.1 or earlier only) 3.2 SQL migration applied; otherwise no DB change.
+- [ ] Document root re-pointed at `public/`; `src/`, `bin/`, `config/`, `tests/` are above the web root and not reachable over HTTP.
+- [ ] Config copied to `config/phoenix.custom.php`.
+- [ ] Cron jobs updated to `bin/clean-and-optimize.php` and `bin/backup-database.php`.
+- [ ] `public/admin.php` moved back to `src/` after setup.
