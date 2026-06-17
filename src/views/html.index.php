@@ -94,7 +94,7 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
 	<div class="ph-toolbar">
 		<span class="ph-search">
 			<span class="ph-ico" data-lucide="search"></span>
-			<input type="search" aria-label="Filter torrents" placeholder="Filter by title or hash&hellip;" oninput="phFilterTable(this, \'#tbl-index\', \'#idx-count\')">
+			<input type="search" aria-label="Filter torrents" placeholder="Filter by title or hash&hellip;" data-filter-table="#tbl-index" data-filter-count="#idx-count">
 		</span>
 		<span class="ph-spacer"></span>
 		<span class="ph-count"><b id="idx-count">'.$count_label.'</b></span>
@@ -116,5 +116,5 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
     $extra_head = '
 	<link rel="stylesheet" href="/assets/index.css">';
 
-    return view_public_layout_html('Torrent Index — Phoenix', $body, 'index', $version, false, $extra_head, 'phMakeSortable(\'#tbl-index\');');
+    return view_public_layout_html('Torrent Index — Phoenix', $body, 'index', $version, false, $extra_head, '', ['/assets/hash.js', '/assets/tables.js']);
 }

@@ -18,9 +18,14 @@ declare(strict_types=1);
 //   $version    - phoenix_version for the footer, or '' to hide it
 //   $prose      - narrow the main column for reading (Stats, Magnet)
 //   $extra_head - per-page <style>/<link> injected into <head>
-//   $inline_js  - per-page inline JS appended after assets/app.js
+//   $inline_js  - inline JS for the rare page that must receive PHP data
+//                 (emitted in a <script> only when non-empty)
+//   $extra_srcs - per-page <script src> URLs (feature/page .js + libraries)
 
-function view_public_layout_html(string $title, string $body, string $active, string $version = '', bool $prose = false, string $extra_head = '', string $inline_js = ''): string
+/**
+ * @param list<string> $extra_srcs
+ */
+function view_public_layout_html(string $title, string $body, string $active, string $version = '', bool $prose = false, string $extra_head = '', string $inline_js = '', array $extra_srcs = []): string
 {
     require_once __DIR__.'/html.head.php';
     require_once __DIR__.'/html.mark.php';
@@ -76,7 +81,7 @@ function view_public_layout_html(string $title, string $body, string $active, st
 	</footer>
 
 </div>
-'.view_scripts_html($inline_js).'
+'.view_scripts_html($inline_js, $extra_srcs).'
 </body>
 </html>';
 }

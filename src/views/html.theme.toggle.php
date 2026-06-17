@@ -13,7 +13,7 @@ function view_theme_toggle_html(string $light = 'Light', string $dark = 'Dark', 
 {
     $class = 'ph-theme-toggle'.($extra_class !== '' ? ' '.$extra_class : '');
 
-    return '<button class="'.$class.'" type="button" onclick="phToggleTheme()">
+    return '<button class="'.$class.'" type="button">
 		<span class="ph-moon ph-ico" data-lucide="moon"></span>
 		<span class="ph-sun ph-ico" data-lucide="sun"></span>
 		<span class="ph-theme-light-label">'.htmlspecialchars($light, ENT_QUOTES, 'UTF-8').'</span>

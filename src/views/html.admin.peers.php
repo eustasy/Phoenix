@@ -101,7 +101,7 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
     }
 
     $body = '<div class="ph-toolbar">
-			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search peers" placeholder="Search client, address, torrent&hellip;" oninput="phFilterTable(this, \'#tbl-peers\')"></span>
+			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search peers" placeholder="Search client, address, torrent&hellip;" data-filter-table="#tbl-peers"></span>
 			<span class="ph-spacer"></span>
 			<span class="dim text-sm">'.$window.'</span>
 		</div>
@@ -118,5 +118,5 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
 		</div>
 		'.$pager;
 
-    return view_admin_layout_html($settings, 'Peers', $body, 'peers', $csrf_token, 'Tracker', $actions, false);
+    return view_admin_layout_html($settings, 'Peers', $body, 'peers', $csrf_token, 'Tracker', $actions, false, '', '', ['/assets/tables.js']);
 }

@@ -22,8 +22,10 @@ declare(strict_types=1);
 //   $actions     - trusted HTML for the topbar action area (buttons), or ''
 //   $narrow      - narrow the body column (forms/diagnostics opt in)
 //   $extra_head  - per-page <style>/<link> injected into <head>
-//   $inline_js   - per-page inline JS appended after assets/app.js
-//   $extra_srcs  - per-page <script src> URLs (e.g. the map library)
+//   $inline_js   - inline JS for the rare page that must receive PHP data
+//                  (emitted in a <script> only when non-empty)
+//   $extra_srcs  - per-page <script src> URLs (feature/page .js + libraries);
+//                  assets/admin.js is always prepended
 
 /**
  * @param PhoenixSettings $settings
@@ -100,9 +102,9 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
     $actions_html = $actions !== '' ? '<div class="ph-topbar-actions">'.$actions.'</div>' : '';
     $body_class = 'ph-body'.($narrow ? ' narrow' : '');
 
-    // Disable submit controls once any .mysql form is submitted, to prevent
-    // double-submission across the mutually exclusive setup/clean/optimize forms.
-    $guard_js = 'document.querySelectorAll("form.mysql").forEach(function(f){f.addEventListener("submit",function(){document.querySelectorAll(\'button[type="submit"],input[type="submit"]\').forEach(function(b){b.disabled=true;});});});';
+    // assets/admin.js (the form double-submit guard) loads on every admin page,
+    // ahead of any page-specific sources.
+    $admin_srcs = array_merge(['/assets/admin.js'], $extra_srcs);
 
     return view_head_html('Phoenix Admin: '.$title, $extra_head).'
 <body>
@@ -143,7 +145,7 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
 	</main>
 
 </div>
-'.view_scripts_html($guard_js."\n".$inline_js, $extra_srcs).'
+'.view_scripts_html($inline_js, $admin_srcs).'
 </body>
 </html>';
 }

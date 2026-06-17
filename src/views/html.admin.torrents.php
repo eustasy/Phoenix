@@ -70,7 +70,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
                 '<input type="hidden" name="listed" value="'.($listed === 1 ? 0 : 1).'">'.$csrf_field.
                 '<button type="submit" class="btn btn-ghost btn-xs">'.($listed === 1 ? 'Unlist' : 'List').'</button></form>';
 
-            $delete_form = '<form method="POST" class="d-inline" onsubmit="return confirm(\'Delete this torrent and its peers?\')">'.
+            $delete_form = '<form method="POST" class="d-inline" data-confirm="Delete this torrent and its peers?">'.
                 '<input type="hidden" name="process" value="torrent_delete">'.
                 '<input type="hidden" name="info_hash" value="'.$info_hash.'">'.$csrf_field.
                 '<button type="submit" class="btn btn-ghost btn-xs is-danger">Delete</button></form>';
@@ -97,7 +97,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
 
         $count = count($torrents);
         $body .= '<div class="ph-toolbar">
-			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search torrents" placeholder="Search name, owner, hash&hellip;" oninput="phFilterTable(this, \'#tbl-torrents\', \'#torrents-count\')"></span>
+			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search torrents" placeholder="Search name, owner, hash&hellip;" data-filter-table="#tbl-torrents" data-filter-count="#torrents-count"></span>
 			<span class="ph-spacer"></span>
 			<span class="ph-count" id="torrents-count">'.$count.' '.($count === 1 ? 'torrent' : 'torrents').'</span>
 		</div>
@@ -141,5 +141,5 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
 
     $actions = '<a class="btn btn-primary btn-sm" href="?page=add"><span class="ph-ico" data-lucide="plus"></span>Add Torrent</a>';
 
-    return view_admin_layout_html($settings, 'Torrents', $body, 'torrents', $csrf_token, 'Tracker', $actions, false, '', 'phMakeSortable(\'#tbl-torrents\');');
+    return view_admin_layout_html($settings, 'Torrents', $body, 'torrents', $csrf_token, 'Tracker', $actions, false, '', '', ['/assets/hash.js', '/assets/tables.js']);
 }

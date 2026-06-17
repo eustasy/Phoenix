@@ -70,45 +70,9 @@ function view_admin_add_html(array $settings, bool $tables_installed, string|fal
 			</div>
 		</form>';
 
-    // Parse the dropped/picked .torrent client-side (PhoenixTorrent) and fill
-    // the form fields; the operator can then amend any of them before adding.
-    $inline_js = <<<'JS'
-        (function () {
-          var zone = document.getElementById('torrent-drop');
-          var input = document.getElementById('torrent-file');
-          var form = document.getElementById('add-form');
-          var hint = document.getElementById('torrent-drop-hint');
-          var errorEl = document.getElementById('add-error');
-          var errorText = document.getElementById('add-error-text');
-          if (!zone || !input || !form || typeof PhoenixTorrent === 'undefined') return;
-
-          function setField(name, value) { var el = form.elements[name]; if (el) el.value = value; }
-          function showError(msg) { if (errorText) errorText.textContent = msg; if (errorEl) errorEl.hidden = false; }
-
-          async function handleFile(file) {
-            if (errorEl) errorEl.hidden = true;
-            if (!file || !file.name.endsWith('.torrent')) { showError('Please drop a .torrent file.'); return; }
-            if (hint) hint.textContent = ' — ' + file.name;
-            try {
-              var info = await PhoenixTorrent.torrentInfo(await file.arrayBuffer());
-              setField('info_hash', info.infoHash);
-              setField('name', info.name);
-              setField('size', info.size || '');
-              setField('filename', info.filename);
-              setField('files', info.files.length ? JSON.stringify(info.files) : '');
-              setField('trackers', info.trackers.join('\n'));
-              setField('webseeds', info.webseeds.join('\n'));
-            } catch (e) { showError(e.message); }
-          }
-
-          ['dragenter', 'dragover'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('is-over'); }); });
-          ['dragleave', 'drop'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.remove('is-over'); }); });
-          zone.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
-          input.addEventListener('change', function () { if (input.files.length) handleFile(input.files[0]); });
-        })();
-        JS;
-
+    // Drag/drop parsing + form-fill lives in assets/add.js, which uses
+    // PhoenixTorrent (assets/torrent-parse.js); both load as page sources.
     $actions = '<a class="btn btn-secondary btn-sm" href="?page=upload"><span class="ph-ico" data-lucide="upload"></span>Bulk upload</a>';
 
-    return view_admin_layout_html($settings, 'Add a Torrent', $body, 'add', $csrf_token, 'Tracker', $actions, true, '', $inline_js, ['/assets/torrent-parse.js']);
+    return view_admin_layout_html($settings, 'Add a Torrent', $body, 'add', $csrf_token, 'Tracker', $actions, true, '', '', ['/assets/torrent-parse.js', '/assets/add.js']);
 }
