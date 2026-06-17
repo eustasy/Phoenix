@@ -48,7 +48,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # v2.37.1
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
         with:
           php-version: ${{ matrix.php-version }}
           extensions: mysqli, gd
@@ -108,7 +108,7 @@ jobs:
 
       - name: Upload coverage to Qlty
         if: matrix.php-version == '8.6'
-        uses: qltysh/qlty-action/coverage@a19242102d17e497f437d7466aa01b528537e899 # v2.2.0
+        uses: qltysh/qlty-action/coverage@fd52dc852530a708d68c3b7342f8d33d1df4cd55 # v2.2.1
         with:
           coverage-token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
           files: coverage/smoke-clover.xml
