@@ -28,7 +28,8 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
         tracker_error('Info Hash is invalid.');
     }
 
-    // Torrent allowed? (closed tracker check)
+    // Torrent allowed? Closed-tracker check (BEP 27 private torrents): reject
+    // announces for any info_hash not registered on this tracker.
     if (
         ! $settings['open_tracker'] &&
         ! in_array($peer['info_hash'], $allowed_torrents)

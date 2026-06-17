@@ -27,7 +27,7 @@ if (isset($_GET['stats'])) {
 $valid_info_hashes = array_values(array_filter($peer['info_hashes']));
 
 ////	Scrape Mode (specific torrents)
-// Open trackers accept any info_hash; closed trackers silently drop the
+// Open trackers accept any info_hash; closed trackers (BEP 27) silently drop the
 // disallowed entries and reply with whatever's left. If nothing's left
 // after filtering we error out rather than falling through to the
 // full-scrape branch — that would leak every tracked torrent to a user

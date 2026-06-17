@@ -65,7 +65,9 @@ if (! $connection) {
     tracker_error('Connection Failed. Tracker may be mis-configured. '.mysqli_connect_error());
 }
 
-////	Load allowed torrents for closed tracker
+////	Load allowed torrents for closed tracker (BEP 27)
+// Closed-tracker mode is the tracker-side half of BEP 27 (private torrents):
+// only info_hashes registered here may be announced to or scraped.
 
 if (! $settings['open_tracker']) {
     require_once __DIR__.'/model/torrents.select.allowed.php';

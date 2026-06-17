@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 ////	torrents_select_allowed
-// Returns the list of permitted info_hashes for closed-tracker mode.
-// Returns an empty array (not an error) when no torrents are registered.
+// Returns the list of permitted info_hashes for closed-tracker mode — the
+// tracker-side half of BEP 27 (private torrents). Returns an empty array (not
+// an error) when no torrents are registered.
 /**
  * @param PhoenixSettings $settings
  * @return array<int, string>

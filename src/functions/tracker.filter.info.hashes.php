@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 ////	tracker_filter_info_hashes
 // Returns the subset of $info_hashes that appear in $allowed_torrents,
-// preserving the original order. Used by scrape.php on closed trackers to
-// drop disallowed hashes from a multi-hash BEP 48 scrape rather than
-// rejecting the whole request — disallowed entries are silently skipped
-// and the caller replies with whatever's left.
+// preserving the original order. Used by scrape.php on closed trackers (BEP 27
+// private torrents) to drop disallowed hashes from a multi-hash BEP 48 scrape
+// rather than rejecting the whole request — disallowed entries are silently
+// skipped and the caller replies with whatever's left.
 //
 // Returns an empty array when nothing in $info_hashes is allowed; the
 // caller is responsible for treating that as a "not allowed" error.

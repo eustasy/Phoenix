@@ -22,7 +22,7 @@ $settings['db_prefix'] = '%db_prefix%';
 $settings['db_persist'] = '%db_persist%';
 
 ////	General Tracker Options
-/* track anything announced to it */
+/* track anything announced to it; off = closed/private tracker (BEP 27) */
 $settings['open_tracker'] = '%open_tracker%';
 /* how often client will send requests */
 $settings['announce_interval'] = 1800;
