@@ -1,0 +1,9 @@
+/* ==========================================================================
+   Index — public torrent index (index.php).
+   Loaded only on that page via the view's $extra_head. References DS tokens.
+   ========================================================================== */
+
+/* Fix the Health column width so the mini-bars line up across rows. */
+.col-health {
+  width: 150px;
+}

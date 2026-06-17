@@ -36,14 +36,14 @@ function view_admin_support_html(array $settings, bool $tables_installed, array|
 
     // PHP version check
     if (version_compare($php_version, '8.2.0', '>=')) {
-        $php_compat_html = '<div class="alert alert-success" style="display:flex;gap:var(--space-2);align-items:center"><span class="ph-ico" data-lucide="circle-check-big"></span>Your PHP version is supported. <span class="dim">PHP Version: '.htmlspecialchars($php_version).'</span></div>';
+        $php_compat_html = '<div class="alert alert-success alert-center"><span class="ph-ico" data-lucide="circle-check-big"></span>Your PHP version is supported. <span class="dim">PHP Version: '.htmlspecialchars($php_version).'</span></div>';
     } else {
-        $php_compat_html = '<div class="alert alert-danger" style="display:flex;gap:var(--space-2);align-items:center"><span class="ph-ico" data-lucide="circle-alert"></span>Phoenix requires PHP &gt;= 8.2. <span class="dim">PHP Version: '.htmlspecialchars($php_version).'</span></div>';
+        $php_compat_html = '<div class="alert alert-danger alert-center"><span class="ph-ico" data-lucide="circle-alert"></span>Phoenix requires PHP &gt;= 8.2. <span class="dim">PHP Version: '.htmlspecialchars($php_version).'</span></div>';
     }
 
     // MySQL support check + tables status
     if (! $has_mysqli) {
-        $mysql_html = '<div class="alert alert-danger" style="display:flex;gap:var(--space-2);align-items:center"><span class="ph-ico" data-lucide="circle-alert"></span>Your server does not support MySQL.</div>';
+        $mysql_html = '<div class="alert alert-danger alert-center"><span class="ph-ico" data-lucide="circle-alert"></span>Your server does not support MySQL.</div>';
     } else {
         // mysqli_get_client_info typically returns "mysqlnd 8.x.y-…", but a
         // build without a '-' suffix is valid; strpos() returns false there
@@ -54,7 +54,7 @@ function view_admin_support_html(array $settings, bool $tables_installed, array|
             $dash !== false ? substr($mysql_version, 0, $dash) : $mysql_version,
             'mysqlnd ',
         );
-        $mysql_html = '<div class="alert alert-success" style="display:flex;gap:var(--space-2);align-items:center"><span class="ph-ico" data-lucide="circle-check-big"></span>Your server supports MySQL. <span class="dim">MySQL Version: '.htmlspecialchars($mysql_version).'</span></div>';
+        $mysql_html = '<div class="alert alert-success alert-center"><span class="ph-ico" data-lucide="circle-check-big"></span>Your server supports MySQL. <span class="dim">MySQL Version: '.htmlspecialchars($mysql_version).'</span></div>';
 
         // Tables status
         if ($tables_installed) {
@@ -62,14 +62,14 @@ function view_admin_support_html(array $settings, bool $tables_installed, array|
             if ($database_size) {
                 $size_note = ' <span class="dim">Their current size is '.number_format((float) ($database_size['Total'] ?? 0)).' bytes.</span>';
             }
-            $mysql_html .= '<div class="alert alert-success" style="display:flex;gap:var(--space-2);align-items:center"><span class="ph-ico" data-lucide="database"></span>All your tables are installed.'.$size_note.'</div>';
+            $mysql_html .= '<div class="alert alert-success alert-center"><span class="ph-ico" data-lucide="database"></span>All your tables are installed.'.$size_note.'</div>';
         } else {
-            $mysql_html .= '<div class="alert alert-danger" style="display:flex;gap:var(--space-2);align-items:center"><span class="ph-ico" data-lucide="circle-alert"></span>Some or all of your tables are not installed. Install them from <a href="?page=utilities">Utilities</a>.</div>';
+            $mysql_html .= '<div class="alert alert-danger alert-center"><span class="ph-ico" data-lucide="circle-alert"></span>Some or all of your tables are not installed. Install them from <a href="?page=utilities">Utilities</a>.</div>';
         }
     }
 
     $body = $php_compat_html.$mysql_html.
-        '<p class="muted" style="font-size:var(--font-size-sm)">Read-only diagnostics. Phoenix requires PHP &ge; 8.2 and a MySQL-compatible database.</p>';
+        '<p class="muted text-sm">Read-only diagnostics. Phoenix requires PHP &ge; 8.2 and a MySQL-compatible database.</p>';
 
     return view_admin_layout_html($settings, 'Server Support', $body, 'support', $csrf_token, 'Server', '', true);
 }

@@ -38,11 +38,11 @@ function view_admin_edit_html(array $settings, string $info_hash, array|false $t
     $back = '<a class="btn btn-secondary btn-sm" href="?page=torrents"><span class="ph-ico" data-lucide="arrow-left"></span>Back</a>';
 
     $message_html = $message
-        ? '<div class="alert alert-info" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="info" style="flex-shrink:0"></span><div>'.htmlspecialchars($message).'</div></div>'
+        ? '<div class="alert alert-info"><span class="ph-ico" data-lucide="info"></span><div>'.htmlspecialchars($message).'</div></div>'
         : '';
 
     if ($torrent === false) {
-        $body = $message_html.'<div class="alert alert-danger" style="display:flex;gap:var(--space-2);align-items:center"><span class="ph-ico" data-lucide="circle-alert"></span>Torrent not found.</div>';
+        $body = $message_html.'<div class="alert alert-danger alert-center"><span class="ph-ico" data-lucide="circle-alert"></span>Torrent not found.</div>';
 
         return view_admin_layout_html($settings, 'Edit Torrent', $body, 'torrents', $csrf_token, 'Tracker', $back, true);
     }
@@ -70,7 +70,7 @@ function view_admin_edit_html(array $settings, string $info_hash, array|false $t
     $body = $message_html.'
 		<div class="ph-form-card">
 			<div class="ph-field"><label>Info hash <span class="dim">(read-only)</span></label>
-				<div class="hash" style="background:var(--color-code-bg);border:1px solid var(--color-code-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);width:100%"><span class="hash-text" style="max-width:none;font-size:var(--font-size-sm)">'.$hash.'</span></div>
+				<div class="hash hash-box"><span class="hash-text">'.$hash.'</span></div>
 			</div>
 			<form class="mysql" action="?page=edit&amp;info_hash='.$hash.'" method="POST">
 				<input type="hidden" name="process" value="torrent_edit">
@@ -85,7 +85,7 @@ function view_admin_edit_html(array $settings, string $info_hash, array|false $t
 					<div class="ph-field"><label>Trackers (one per line)</label><textarea name="trackers" class="code" rows="3">'.$trackers.'</textarea></div>
 					<div class="ph-field"><label>Web seeds (one per line)</label><textarea name="webseeds" class="code" rows="3">'.$webseeds.'</textarea></div>
 				</div>
-				<label class="checkbox" style="margin-block:var(--space-2)"><input type="checkbox" name="listed" value="1"'.$checked.'><span class="checkbox-label">Listed on the public index</span></label>
+				<label class="checkbox my-2"><input type="checkbox" name="listed" value="1"'.$checked.'><span class="checkbox-label">Listed on the public index</span></label>
 				<div class="ph-form-actions">
 					<button type="submit" name="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="save"></span>Save Changes</button>
 					<a class="btn btn-ghost" href="?page=torrents">Cancel</a>

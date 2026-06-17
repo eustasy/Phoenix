@@ -89,7 +89,7 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
     // when auth is configured.
     $logout_html = '';
     if (! empty($settings['admin_password'])) {
-        $logout_html = '<form method="POST" style="display:inline">'.
+        $logout_html = '<form method="POST" class="d-inline">'.
             '<input type="hidden" name="logout" value="1">'.
             '<input type="hidden" name="csrf" value="'.htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8').'">'.
             '<button type="submit" class="btn btn-ghost btn-sm"><span class="ph-ico" data-lucide="log-out"></span>Log out</button>'.
@@ -122,8 +122,8 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
 		<div class="ph-sidebar-foot">
 			'.view_theme_toggle_html('Light mode', 'Dark mode').'
 			<hr class="ph-sidebar-sep">
-			<div class="flex items-center" style="justify-content:space-between;gap:var(--space-2)">
-				<span class="dim" style="font-size:var(--font-size-xs);font-family:var(--font-mono)">eustasy</span>
+			<div class="flex items-center justify-between gap-2">
+				<span class="dim mono text-xs">eustasy</span>
 				'.$logout_html.'
 			</div>
 		</div>

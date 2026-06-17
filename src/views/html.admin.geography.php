@@ -25,7 +25,7 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
         $body = '<div class="ph-empty">
 			<span class="ph-ico" data-lucide="globe-2"></span>
 			<p>Geographic data isn\'t available yet.</p>
-			<p class="dim" style="max-width:52ch;margin:var(--space-2) auto 0">Enable the privacy-preserving events ledger and geo enrichment to populate this map: turn on <code>stats_enabled</code> and <code>stats_geo</code>, run <code>composer require geoip2/geoip2</code>, and point <code>stats_geo_database</code> at a GeoLite2 country <code>.mmdb</code>.</p>
+			<p class="dim geo-empty-note">Enable the privacy-preserving events ledger and geo enrichment to populate this map: turn on <code>stats_enabled</code> and <code>stats_geo</code>, run <code>composer require geoip2/geoip2</code>, and point <code>stats_geo_database</code> at a GeoLite2 country <code>.mmdb</code>.</p>
 		</div>';
 
         return view_admin_layout_html($settings, 'Geography', $body, 'geography', $csrf_token, 'Tracker', '', true);
@@ -92,7 +92,7 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
 				<div class="geo-maphead">
 					<div>
 						<div class="geo-metric-label" id="geo-metric-label"></div>
-						<div class="dim" id="geo-sub" style="font-size:var(--font-size-sm);margin-top:2px"></div>
+						<div class="dim geo-sub" id="geo-sub"></div>
 					</div>
 					<div class="geo-legend" id="geo-legend"></div>
 				</div>
@@ -100,7 +100,7 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
 				<p class="dim geo-foot">Country-level only &mdash; Phoenix never stores raw IP addresses. <span id="geo-note"></span></p>
 			</div>
 			<aside class="geo-side">
-				<div class="ph-stat" id="geo-summary" style="--stat-bg:var(--color-info-bg);--stat-fg:var(--color-blue)">
+				<div class="ph-stat ph-stat-blue" id="geo-summary">
 					<div class="ph-stat-top"><div class="ph-stat-value" id="geo-total">0</div><div class="ph-stat-ico" id="geo-summary-ico"><span class="ph-ico" data-lucide="share-2"></span></div></div>
 					<div class="ph-stat-label" id="geo-total-label"></div>
 					<div class="ph-stat-sub"><b id="geo-countries">0</b> countries &middot; top: <b id="geo-topcountry">&mdash;</b></div>
@@ -154,7 +154,7 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
               '<span class="geo-co"><span class="nm">' + (COUNTRY[e[0]] || e[0]) + '</span><span class="bar"><i style="width:' + Math.round(e[1]/max*100) + '%"></i></span></span>' +
               '<span class="geo-val">' + e[1].toLocaleString() + '</span></div>';
           });
-          document.getElementById('geo-list').innerHTML = html || '<p class="dim" style="font-size:var(--font-size-sm)">No data for this metric yet.</p>';
+          document.getElementById('geo-list').innerHTML = html || '<p class="dim text-sm">No data for this metric yet.</p>';
           phInitIcons();
         }
         function geoBuildMap(d) {

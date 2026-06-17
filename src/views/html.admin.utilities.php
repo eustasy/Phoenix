@@ -27,7 +27,7 @@ function view_admin_utilities_html(array $settings, bool $tables_installed, stri
     // An action row: a description on the left, a single-button form on the
     // right. class="mysql" hooks the layout's double-submit guard.
     $action = static function (string $title, string $desc, string $process, string $label, string $csrf_field): string {
-        return '<tr><td><strong>'.$title.'</strong><div class="dim" style="font-size:var(--font-size-sm)">'.$desc.'</div></td>'.
+        return '<tr><td><strong>'.$title.'</strong><div class="dim text-sm">'.$desc.'</div></td>'.
             '<td class="tar"><form class="mysql" action="?page=utilities" method="POST">'.
             '<input type="hidden" name="process" value="'.$process.'">'.$csrf_field.
             '<button type="submit" name="submit" class="btn btn-secondary btn-sm">'.$label.'</button></form></td></tr>';
@@ -36,7 +36,7 @@ function view_admin_utilities_html(array $settings, bool $tables_installed, stri
     $body = '';
 
     if ($message) {
-        $body .= '<div class="alert alert-info" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="info" style="flex-shrink:0"></span><div>'.htmlspecialchars($message).'</div></div>';
+        $body .= '<div class="alert alert-info"><span class="ph-ico" data-lucide="info"></span><div>'.htmlspecialchars($message).'</div></div>';
     }
 
     $rows = '';
@@ -44,10 +44,10 @@ function view_admin_utilities_html(array $settings, bool $tables_installed, stri
     // Setup/Reset action. Available when resets are enabled, or whenever the
     // tables are missing (so a fresh install can proceed).
     if ($settings['db_reset'] || ! $tables_installed) {
-        $body .= '<div class="alert alert-warning" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="triangle-alert" style="flex-shrink:0"></span><div>Set <code>$settings[\'db_reset\']</code> to false to disable resets, or delete <code>public/admin.php</code> once you\'re up and running.</div></div>';
+        $body .= '<div class="alert alert-warning"><span class="ph-ico" data-lucide="triangle-alert"></span><div>Set <code>$settings[\'db_reset\']</code> to false to disable resets, or delete <code>public/admin.php</code> once you\'re up and running.</div></div>';
         $rows .= $action('Setup', 'Install, upgrade, or reset the database', 'setup', 'Setup', $csrf_field);
     } else {
-        $rows .= '<tr><td><strong>Setup</strong><div class="dim" style="font-size:var(--font-size-sm)">Install, upgrade, or reset the database</div></td>'.
+        $rows .= '<tr><td><strong>Setup</strong><div class="dim text-sm">Install, upgrade, or reset the database</div></td>'.
             '<td class="tar"><span class="badge">Disabled</span></td></tr>';
     }
 

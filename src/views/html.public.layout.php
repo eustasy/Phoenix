@@ -59,7 +59,7 @@ function view_public_layout_html(string $title, string $body, string $active, st
 			</a>
 			<nav class="ph-pub-nav">
 				'.$nav_links.'
-				'.view_theme_toggle_html('Light', 'Dark', '', 'margin-inline-start:var(--space-2)').'
+				'.view_theme_toggle_html('Light', 'Dark').'
 			</nav>
 		</div>
 	</header>

@@ -24,7 +24,7 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
     $back = '<a class="btn btn-secondary btn-sm" href="?page=add"><span class="ph-ico" data-lucide="file-plus"></span>Single add</a>';
 
     if (! $tables_installed) {
-        $body = '<div class="alert alert-danger" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="triangle-alert" style="flex-shrink:0"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a> before adding torrents.</div></div>';
+        $body = '<div class="alert alert-danger"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a> before adding torrents.</div></div>';
 
         return view_admin_layout_html($settings, 'Bulk Upload', $body, 'add', $csrf_token, 'Tracker', $back, true);
     }
@@ -33,7 +33,7 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
     // session only with a CSRF token — and that exists only with an admin
     // password set. Without one, point the operator at the alternatives.
     if ($csrf_token === '') {
-        $body = '<div class="alert alert-warning" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="shield-alert" style="flex-shrink:0"></span><div>Bulk upload sends each file to the authenticated add API, which needs a session token. Set an <strong>admin password</strong> on the <a href="?page=settings">Settings</a> page to enable it &mdash; or script <code>POST /api/torrent/add</code> with an API key instead.</div></div>';
+        $body = '<div class="alert alert-warning"><span class="ph-ico" data-lucide="shield-alert"></span><div>Bulk upload sends each file to the authenticated add API, which needs a session token. Set an <strong>admin password</strong> on the <a href="?page=settings">Settings</a> page to enable it &mdash; or script <code>POST /api/torrent/add</code> with an API key instead.</div></div>';
 
         return view_admin_layout_html($settings, 'Bulk Upload', $body, 'add', $csrf_token, 'Tracker', $back, true);
     }
@@ -55,7 +55,7 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
 			<input type="file" id="bulk-file-input" accept=".torrent,application/x-bittorrent" multiple hidden>
 			<input type="file" id="bulk-folder-input" webkitdirectory multiple hidden>
 
-			<div id="bulk-summary" class="alert alert-info" hidden style="display:flex;gap:var(--space-2);align-items:center"><span class="ph-ico" data-lucide="info" style="flex-shrink:0"></span><div></div></div>
+			<div id="bulk-summary" class="alert alert-info alert-center" hidden><span class="ph-ico" data-lucide="info"></span><div></div></div>
 
 			<div id="bulk-results" class="ph-card-table" hidden>
 				<table><thead><tr><th>File</th><th class="tar">Result</th></tr></thead><tbody></tbody></table>
@@ -137,8 +137,7 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
             torrents.forEach(function (f) {
               var tr = document.createElement('tr');
               var name = document.createElement('td');
-              name.className = 'mono';
-              name.style.fontSize = 'var(--font-size-xs)';
+              name.className = 'mono text-xs';
               name.textContent = f.name;
               var status = document.createElement('td');
               status.className = 'tar';
@@ -163,7 +162,7 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
             if (stopped) {
               queue.forEach(function (job) { job.status.innerHTML = '<span class="dim">Not attempted</span>'; });
               queue.length = 0;
-              summaryBox.className = 'alert alert-warning';
+              summaryBox.className = 'alert alert-warning alert-center';
               summary.textContent = 'Stopped: the server stopped responding after ' + (counts.added + counts.exists + counts.failed) + ' of ' + counts.total + '. Reload and try a smaller batch.';
             }
             busy = false;
@@ -209,8 +208,7 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
           function fail(cell, msg) {
             cell.innerHTML = '';
             var b = document.createElement('span');
-            b.className = 'badge';
-            b.style.color = 'var(--color-danger)';
+            b.className = 'badge text-danger';
             b.textContent = msg;
             cell.appendChild(b);
           }

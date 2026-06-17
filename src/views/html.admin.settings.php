@@ -24,7 +24,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
     $body = '';
 
     if ($message) {
-        $body .= '<div class="alert alert-info" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="info" style="flex-shrink:0"></span><div>'.htmlspecialchars($message).'</div></div>';
+        $body .= '<div class="alert alert-info"><span class="ph-ico" data-lucide="info"></span><div>'.htmlspecialchars($message).'</div></div>';
     }
 
     ////	Effective settings (read-only, secrets masked)
@@ -50,7 +50,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
         '<div class="ph-card-table kv"><table><tbody>'.$rows.'</tbody></table></div>';
 
     if (! $writable) {
-        $body .= '<div class="alert alert-warning" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="triangle-alert" style="flex-shrink:0"></span><div>The <code>config/</code> directory is not writable, so settings cannot be changed here. This is often intentional &mdash; it holds the database credentials and is kept out of the document root. Edit <code>config/phoenix.custom.php</code> directly, or make the directory writable to enable editing.</div></div>';
+        $body .= '<div class="alert alert-warning"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The <code>config/</code> directory is not writable, so settings cannot be changed here. This is often intentional &mdash; it holds the database credentials and is kept out of the document root. Edit <code>config/phoenix.custom.php</code> directly, or make the directory writable to enable editing.</div></div>';
 
         return view_admin_layout_html($settings, 'Settings', $body, 'settings', $csrf_token, 'Server', '', true);
     }
@@ -60,7 +60,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
 		<div class="ph-form-card">
 			<form class="mysql" method="POST">
 				<input type="hidden" name="process" value="password">'.$csrf_field.'
-				<div class="ph-field" style="margin-bottom:var(--space-4)"><label>New password</label><input type="password" name="new_password" autocomplete="new-password"></div>
+				<div class="ph-field mb-4"><label>New password</label><input type="password" name="new_password" autocomplete="new-password"></div>
 				<button type="submit" name="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="key-round"></span>Change Password</button>
 			</form>
 		</div>';
@@ -74,26 +74,26 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
 
         if (! empty($settings['admin_totp_secret'])) {
             $body .= '<div class="ph-form-card">
-				<div class="flex items-center gap-3" style="margin-bottom:var(--space-4)"><span class="ph-ico" data-lucide="shield-check" style="width:22px;color:var(--color-success)"></span><div><strong>Two-factor authentication is enabled.</strong><div class="dim" style="font-size:var(--font-size-sm)">A 6-digit code is required at login.</div></div></div>
+				<div class="flex items-center gap-3 mb-4"><span class="ph-ico ph-2fa-ico" data-lucide="shield-check"></span><div><strong>Two-factor authentication is enabled.</strong><div class="dim text-sm">A 6-digit code is required at login.</div></div></div>
 				<form class="mysql" method="POST">
 					<input type="hidden" name="process" value="totp_disable">'.$csrf_field.'
-					<div class="ph-field" style="margin-bottom:var(--space-4)"><label>Enter a current authenticator code to turn it off</label><input type="text" name="totp_code" inputmode="numeric" autocomplete="off" class="mono" placeholder="000000"></div>
-					<button type="submit" name="submit" class="btn btn-outline btn-sm" style="color:var(--color-danger);border-color:var(--color-danger)">Disable 2FA</button>
+					<div class="ph-field mb-4"><label>Enter a current authenticator code to turn it off</label><input type="text" name="totp_code" inputmode="numeric" autocomplete="off" class="mono" placeholder="000000"></div>
+					<button type="submit" name="submit" class="btn btn-outline btn-sm btn-outline-danger">Disable 2FA</button>
 				</form>
 			</div>';
         } else {
             $qr_html = '';
             if ($totp_qr !== null && $totp_qr !== '') {
-                $qr_html = '<p><img src="'.htmlspecialchars($totp_qr).'" alt="Two-factor QR code" style="border:1px solid var(--color-border);border-radius:var(--radius-md)"></p>';
+                $qr_html = '<p><img src="'.htmlspecialchars($totp_qr).'" alt="Two-factor QR code" class="qr-img"></p>';
             }
             $body .= '<div class="ph-form-card">
-				<p class="muted" style="margin-top:0;font-size:var(--font-size-sm)">Scan this with an authenticator app (or enter the secret manually), then enter a code to enable it.</p>
+				<p class="muted mt-0 text-sm">Scan this with an authenticator app (or enter the secret manually), then enter a code to enable it.</p>
 				'.$qr_html.'
 				<p>Secret: <code>'.htmlspecialchars((string) $totp_secret).'</code></p>
 				<form class="mysql" method="POST">
 					<input type="hidden" name="process" value="totp_enable">
 					<input type="hidden" name="totp_secret" value="'.htmlspecialchars((string) $totp_secret).'">'.$csrf_field.'
-					<div class="ph-field" style="margin-bottom:var(--space-4)"><label>Authenticator code</label><input type="text" name="totp_code" inputmode="numeric" autocomplete="off" class="mono" placeholder="000000"></div>
+					<div class="ph-field mb-4"><label>Authenticator code</label><input type="text" name="totp_code" inputmode="numeric" autocomplete="off" class="mono" placeholder="000000"></div>
 					<button type="submit" name="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="shield-check"></span>Enable 2FA</button>
 				</form>
 			</div>';
@@ -104,12 +104,12 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
     $switch = static function (array $settings, string $flag, string $label, string $note = '', bool $disabled = false): string {
         $checked = ! empty($settings[$flag]) ? ' checked' : '';
         $attrs = $disabled ? ' disabled' : '';
-        $label_style = $disabled ? ' style="opacity:.55"' : '';
+        $label_class = $disabled ? ' is-disabled' : '';
 
-        return '<label class="switch"'.$label_style.'><input type="checkbox" name="'.$flag.'" value="1" role="switch"'.$checked.$attrs.'><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label">'.htmlspecialchars($label).$note.'</span></label>';
+        return '<label class="switch'.$label_class.'"><input type="checkbox" name="'.$flag.'" value="1" role="switch"'.$checked.$attrs.'><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label">'.htmlspecialchars($label).$note.'</span></label>';
     };
 
-    $full_scrape_note = ' <span style="color:var(--color-warning)">&mdash; warning: on a closed tracker this exposes every tracked info_hash to anyone who scrapes.</span>';
+    $full_scrape_note = ' <span class="text-warning">&mdash; warning: on a closed tracker this exposes every tracked info_hash to anyone who scrapes.</span>';
     $geo_note = $geo_available
         ? ' <span class="dim">&mdash; tag events &amp; map peers by country (coarse; the IP is never stored)</span>'
         : ' <span class="dim">&mdash; needs the geoip2 library and a GeoLite2 database</span>';
@@ -118,7 +118,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
 		<div class="ph-form-card">
 			<form class="mysql" method="POST">
 				<input type="hidden" name="process" value="settings">'.$csrf_field.'
-				<div style="display:flex;flex-direction:column;gap:var(--space-4)">'.
+				<div class="flex flex-col gap-4">'.
                     $switch($settings, 'open_tracker', 'open_tracker', ' <span class="dim">&mdash; accept announces for any info hash</span>').
                     $switch($settings, 'public_index', 'public_index', ' <span class="dim">&mdash; expose the public torrent listing</span>').
                     $switch($settings, 'full_scrape', 'full_scrape', $full_scrape_note).

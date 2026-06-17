@@ -38,15 +38,15 @@ function view_install_html(
     ////	Locked config directory — show the banner instead of the form.
     if (! $settings_writable) {
         $body = '<div class="ph-form-card">
-			<div class="alert alert-danger" style="display:flex;gap:var(--space-2);align-items:flex-start;margin:0"><span class="ph-ico" data-lucide="triangle-alert" style="flex-shrink:0"></span><div><code>config/</code> is not writable. Make it writable to proceed with installation.</div></div>
+			<div class="alert alert-danger m-0"><span class="ph-ico" data-lucide="triangle-alert"></span><div><code>config/</code> is not writable. Make it writable to proceed with installation.</div></div>
 		</div>';
 
-        return view_auth_layout_html('Phoenix Setup', 'Phoenix Setup', 'First-run installation', $body, $foot, true, 'background:var(--color-bg-secondary);align-items:flex-start;padding-block:var(--space-10)', $extra_head);
+        return view_auth_layout_html('Phoenix Setup', 'Phoenix Setup', 'First-run installation', $body, $foot, true, 'ph-auth-install', $extra_head);
     }
 
     $error_html = '';
     if ($install_error) {
-        $error_html = '<div class="alert alert-danger" style="display:flex;gap:var(--space-2);align-items:center;margin-top:0"><span class="ph-ico" data-lucide="circle-alert"></span>'.htmlspecialchars($install_error).'</div>';
+        $error_html = '<div class="alert alert-danger alert-center mt-0"><span class="ph-ico" data-lucide="circle-alert"></span>'.htmlspecialchars($install_error).'</div>';
     }
 
     ////	Optional two-factor section
@@ -57,9 +57,9 @@ function view_install_html(
     $totp_html = '';
     if ($totp_secret !== null) {
         if ($totp_qr !== null && $totp_qr !== '') {
-            $totp_display = '<p><img src="'.htmlspecialchars($totp_qr).'" alt="Two-factor QR code" style="border:1px solid var(--color-border);border-radius:var(--radius-md)"></p>';
+            $totp_display = '<p><img src="'.htmlspecialchars($totp_qr).'" alt="Two-factor QR code" class="qr-img"></p>';
         } else {
-            $totp_display = '<p class="muted" style="font-size:var(--font-size-sm)">Scan is unavailable (no image support). Add this secret manually:</p>
+            $totp_display = '<p class="muted text-sm">Scan is unavailable (no image support). Add this secret manually:</p>
 				<p><code>'.htmlspecialchars($totp_secret).'</code></p>';
             if ($totp_url !== null) {
                 $totp_display .= '<p><a href="'.htmlspecialchars($totp_url).'">'.htmlspecialchars($totp_url).'</a></p>';
@@ -67,12 +67,12 @@ function view_install_html(
         }
 
         $totp_html = '
-			<fieldset class="setup-fieldset" style="margin:0">
-				<div class="setup-legend"><span class="ph-ico" data-lucide="shield-check"></span>Two-Factor Authentication <span class="dim" style="text-transform:none;letter-spacing:0;font-weight:400">&mdash; optional</span></div>
-				<p class="muted" style="margin:0 0 var(--space-3);font-size:var(--font-size-sm)">Scan with an authenticator app, then enter a code to enable &mdash; or leave it blank to skip.</p>
+			<fieldset class="setup-fieldset m-0">
+				<div class="setup-legend"><span class="ph-ico" data-lucide="shield-check"></span>Two-Factor Authentication <span class="dim setup-legend-opt">&mdash; optional</span></div>
+				<p class="muted setup-note">Scan with an authenticator app, then enter a code to enable &mdash; or leave it blank to skip.</p>
 				'.$totp_display.'
 				<input type="hidden" name="totp_secret" value="'.htmlspecialchars($totp_secret).'">
-				<div class="ph-field" style="margin-bottom:0"><label>Confirmation code</label>
+				<div class="ph-field mb-0"><label>Confirmation code</label>
 					<input type="text" name="totp_code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" class="mono" placeholder="000000">
 				</div>
 			</fieldset>';
@@ -104,7 +104,7 @@ function view_install_html(
 				</div>
 				<div class="ph-field-row">
 					<div class="ph-field"><label>Table prefix</label><input type="text" name="db_prefix" value="'.htmlspecialchars($form['db_prefix']).'" class="mono"></div>
-					<div class="ph-field" style="display:flex;align-items:flex-end;padding-bottom:var(--space-2)">
+					<div class="ph-field setup-field-inline">
 						<label class="checkbox"><input type="checkbox" name="db_persist" value="1"'.$checked($form['db_persist']).'><span class="checkbox-label">Persistent connections</span></label>
 					</div>
 				</div>
@@ -112,23 +112,23 @@ function view_install_html(
 
 			<fieldset class="setup-fieldset">
 				<div class="setup-legend"><span class="ph-ico" data-lucide="radio"></span>Tracker</div>
-				<div style="display:flex;flex-direction:column;gap:var(--space-3)">
+				<div class="flex flex-col gap-3">
 					<label class="checkbox"><input type="checkbox" name="open_tracker" value="1"'.$checked($form['open_tracker']).'><span class="checkbox-label">Open tracker <span class="dim">&mdash; accept announces for any info hash</span></span></label>
 					<label class="checkbox"><input type="checkbox" name="public_index" value="1"'.$checked($form['public_index']).'><span class="checkbox-label">Public index <span class="dim">&mdash; expose the public torrent listing</span></span></label>
 				</div>
 			</fieldset>
 
 			<fieldset class="setup-fieldset">
-				<div class="setup-legend"><span class="ph-ico" data-lucide="bar-chart-3"></span>Statistics <span class="dim" style="text-transform:none;letter-spacing:0;font-weight:400">&mdash; optional</span></div>
-				<div style="display:flex;flex-direction:column;gap:var(--space-3)">
+				<div class="setup-legend"><span class="ph-ico" data-lucide="bar-chart-3"></span>Statistics <span class="dim setup-legend-opt">&mdash; optional</span></div>
+				<div class="flex flex-col gap-3">
 					<label class="checkbox"><input type="checkbox" name="stats_enabled" value="1"'.$checked($form['stats_enabled']).'><span class="checkbox-label">Event logging <span class="dim">&mdash; record completions to the events ledger</span></span></label>
-					<label class="checkbox"'.($geo_available ? '' : ' style="opacity:.55"').'><input type="checkbox" name="stats_geo" value="1"'.$checked($form['stats_geo']).($geo_available ? '' : ' disabled').'><span class="checkbox-label">Geo enrichment '.$geo_note.'</span></label>
+					<label class="checkbox'.($geo_available ? '' : ' is-disabled').'"><input type="checkbox" name="stats_geo" value="1"'.$checked($form['stats_geo']).($geo_available ? '' : ' disabled').'><span class="checkbox-label">Geo enrichment '.$geo_note.'</span></label>
 				</div>
 			</fieldset>
 
-			<fieldset class="setup-fieldset"'.($totp_html === '' ? ' style="margin:0"' : '').'>
+			<fieldset class="setup-fieldset'.($totp_html === '' ? ' m-0' : '').'">
 				<div class="setup-legend"><span class="ph-ico" data-lucide="key-round"></span>Admin</div>
-				<div class="ph-field" style="margin-bottom:0"><label>Admin password <span style="color:var(--color-danger)">*</span></label>
+				<div class="ph-field mb-0"><label>Admin password <span class="text-danger">*</span></label>
 					<input type="password" name="admin_password" required>
 					<div class="ph-hint">Required &mdash; protects the control panel.</div>
 				</div>
@@ -140,5 +140,5 @@ function view_install_html(
 			</div>
 		</form>';
 
-    return view_auth_layout_html('Phoenix Setup', 'Phoenix Setup', 'First-run installation', $body, $foot, true, 'background:var(--color-bg-secondary);align-items:flex-start;padding-block:var(--space-10)', $extra_head);
+    return view_auth_layout_html('Phoenix Setup', 'Phoenix Setup', 'First-run installation', $body, $foot, true, 'ph-auth-install', $extra_head);
 }

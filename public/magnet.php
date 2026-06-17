@@ -36,7 +36,7 @@ $body = '<div class="ph-page-title">
 		<input type="file" id="file-input" accept=".torrent">
 	</label>
 
-	<div class="alert alert-danger" id="error" hidden><span style="display:flex;gap:var(--space-2);align-items:center"><span class="ph-ico" data-lucide="circle-alert"></span><span id="error-text"></span></span></div>
+	<div class="alert alert-danger alert-center" id="error" hidden><span class="ph-ico" data-lucide="circle-alert"></span><span id="error-text"></span></div>
 
 	<section id="results" hidden>
 		<div class="ph-form-card">
@@ -55,7 +55,7 @@ $body = '<div class="ph-page-title">
 			</div>
 			<div class="ph-field"><label>kt &mdash; Keyword Topic (space-separated)</label><input type="text" id="f-kt"></div>
 
-			<div class="ph-field" style="margin-bottom:0">
+			<div class="ph-field mb-0">
 				<label>Magnet Link</label>
 				<div class="magnet-output-wrap">
 					<textarea id="magnet-out" class="magnet-out" readonly rows="4"></textarea>

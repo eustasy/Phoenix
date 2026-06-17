@@ -14,7 +14,7 @@ function view_login_html(bool $show_error = false, bool $totp_required = false, 
 
     $error_html = '';
     if ($show_error) {
-        $error_html = '<div class="alert alert-danger" style="display:flex;gap:var(--space-2);align-items:center;margin-top:0"><span class="ph-ico" data-lucide="circle-alert"></span>Incorrect password.</div>';
+        $error_html = '<div class="alert alert-danger alert-center mt-0"><span class="ph-ico" data-lucide="circle-alert"></span>Incorrect password.</div>';
     }
 
     ////	Optional second-factor field
@@ -35,7 +35,7 @@ function view_login_html(bool $show_error = false, bool $totp_required = false, 
 					<input type="password" name="password" autofocus placeholder="••••••••">
 				</div>
 				'.$code_html.'
-				<button class="btn btn-primary btn-block" style="margin-top:var(--space-2)"><span class="ph-ico" data-lucide="log-in"></span>Log In</button>
+				<button class="btn btn-primary btn-block mt-2"><span class="ph-ico" data-lucide="log-in"></span>Log In</button>
 			</form>
 		</div>';
 

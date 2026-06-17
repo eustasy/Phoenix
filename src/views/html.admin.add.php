@@ -30,11 +30,11 @@ function view_admin_add_html(array $settings, bool $tables_installed, string|fal
     $body = '';
 
     if ($message) {
-        $body .= '<div class="alert alert-info" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="info" style="flex-shrink:0"></span><div>'.htmlspecialchars($message).'</div></div>';
+        $body .= '<div class="alert alert-info"><span class="ph-ico" data-lucide="info"></span><div>'.htmlspecialchars($message).'</div></div>';
     }
 
     if (! $tables_installed) {
-        $body .= '<div class="alert alert-danger" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="triangle-alert" style="flex-shrink:0"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a> before adding torrents.</div></div>';
+        $body .= '<div class="alert alert-danger"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a> before adding torrents.</div></div>';
 
         return view_admin_layout_html($settings, 'Add a Torrent', $body, 'add', $csrf_token, 'Tracker', '', true);
     }
@@ -48,7 +48,7 @@ function view_admin_add_html(array $settings, bool $tables_installed, string|fal
 			<input type="file" id="torrent-file" accept=".torrent,application/x-bittorrent">
 		</label>
 
-		<div class="alert alert-danger" id="add-error" hidden style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="circle-alert" style="flex-shrink:0"></span><div id="add-error-text"></div></div>
+		<div class="alert alert-danger" id="add-error" hidden><span class="ph-ico" data-lucide="circle-alert"></span><div id="add-error-text"></div></div>
 
 		<form id="add-form" class="ph-form-card" action="?page=add" method="POST">
 			<div class="ph-field-row">
@@ -62,7 +62,7 @@ function view_admin_add_html(array $settings, bool $tables_installed, string|fal
 				<div class="ph-field"><label>Trackers (one per line)</label><textarea name="trackers" class="code" rows="3"></textarea></div>
 				<div class="ph-field"><label>Web seeds (one per line)</label><textarea name="webseeds" class="code" rows="3"></textarea></div>
 			</div>
-			<label class="checkbox" style="margin-block:var(--space-2)"><input type="checkbox" name="listed" value="1" checked><span class="checkbox-label">Listed on the public index</span></label>
+			<label class="checkbox my-2"><input type="checkbox" name="listed" value="1" checked><span class="checkbox-label">Listed on the public index</span></label>
 			<input type="hidden" name="process" value="torrent_add">'.$csrf_field.'
 			<div class="ph-form-actions">
 				<button type="submit" name="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="plus"></span>Add Torrent</button>

@@ -50,16 +50,16 @@ function view_stats_html(array $stats, array $settings): string
 		</div>
 	</div>
 
-	<div class="ph-stat-grid" style="margin-top:var(--space-4)">
-		<div class="ph-stat" style="--stat-fg:var(--color-purple)">
+	<div class="ph-stat-grid mt-4">
+		<div class="ph-stat">
 			<div class="ph-stat-top"><div class="ph-stat-value">'.number_format($stats['torrents']).'</div><div class="ph-stat-ico tint-purple"><span class="ph-ico" data-lucide="database"></span></div></div>
 			<div class="ph-stat-label">Torrents with peers</div>
 		</div>
-		<div class="ph-stat" style="--stat-bg:var(--color-success-bg);--stat-fg:var(--color-green)">
+		<div class="ph-stat ph-stat-green">
 			<div class="ph-stat-top"><div class="ph-stat-value">'.number_format($stats['downloads']).'</div><div class="ph-stat-ico"><span class="ph-ico" data-lucide="circle-check-big"></span></div></div>
 			<div class="ph-stat-label">Completed downloads</div>
 		</div>
-		<div class="ph-stat" style="--stat-bg:var(--color-warning-bg);--stat-fg:var(--color-orange)">
+		<div class="ph-stat ph-stat-orange">
 			<div class="ph-stat-top"><div class="ph-stat-value">'.format_bytes($stats['traffic']).'</div><div class="ph-stat-ico"><span class="ph-ico" data-lucide="arrow-up-down"></span></div></div>
 			<div class="ph-stat-label">Traffic served</div>
 			<div class="ph-stat-sub mono">'.number_format($stats['traffic']).' bytes</div>

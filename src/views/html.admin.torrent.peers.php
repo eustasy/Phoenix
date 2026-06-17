@@ -37,7 +37,7 @@ function view_admin_torrent_peers_html(array $settings, string $info_hash, ?stri
 
     $back = '<a class="btn btn-secondary btn-sm" href="?page=torrents"><span class="ph-ico" data-lucide="arrow-left"></span>Back</a>';
 
-    $body = '<p class="muted" style="margin-top:0">'.$subtitle.'</p>';
+    $body = '<p class="muted mt-0">'.$subtitle.'</p>';
 
     if ($peers === []) {
         $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="users"></span><p>No active peers.</p></div>';
@@ -56,7 +56,7 @@ function view_admin_torrent_peers_html(array $settings, string $info_hash, ?stri
 
             $state = $peer['state'] === 1
                 ? '<span class="listed">Seeding</span>'
-                : '<span class="listed is-no" style="color:var(--color-orange)">Leeching</span>';
+                : '<span class="listed is-leeching">Leeching</span>';
 
             $rows .= '<tr>'.
                 '<td>'.htmlspecialchars($peer['client'], ENT_QUOTES, 'UTF-8').'</td>'.

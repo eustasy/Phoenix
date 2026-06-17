@@ -170,6 +170,10 @@ body { background-color: var(--color-bg); color: var(--color-text); }
 .btn-icon { padding: var(--space-2); }
 .btn-icon .ph-ico { width: 18px; height: 18px; }
 .btn-xs { padding: 2px var(--space-2); font-size: var(--font-size-xs); }
+/* Destructive tints — a ghost button that stays red (incl. hover), and a
+   danger outline button. */
+.btn-ghost.is-danger, .btn-ghost.is-danger:hover { color: var(--color-danger); }
+.btn-outline-danger { color: var(--color-danger); border-color: var(--color-danger); }
 
 /* --------------------------------------------------------------------------
    Alert icons
@@ -178,6 +182,11 @@ body { background-color: var(--color-bg); color: var(--color-text); }
    wraps). Without this the Lucide SVG falls back to its intrinsic 24px and
    overhangs the 21px line.
    -------------------------------------------------------------------------- */
+/* Every Phoenix alert leads with an icon, so lay them all out as a row. The
+   default aligns the glyph to the first text line (multi-line copy); add
+   .alert-center for single-line messages. */
+.alert { display: flex; gap: var(--space-2); align-items: flex-start; }
+.alert-center { align-items: center; }
 .alert .ph-ico { width: 1.25em; height: 1.25em; flex-shrink: 0; margin-block-start: 0.125em; }
 
 /* --------------------------------------------------------------------------
@@ -202,6 +211,11 @@ body { background-color: var(--color-bg); color: var(--color-text); }
 .ph-stat-ico .ph-ico { width: 20px; height: 20px; }
 .ph-stat-ico.tint-purple { background-color: var(--flexoki-purple-50); color: var(--color-purple); }
 .theme-dark .ph-stat-ico.tint-purple { background-color: var(--flexoki-purple-950); }
+/* Card accent variants — set the icon tint the .ph-stat-ico above reads. */
+.ph-stat-blue   { --stat-bg: var(--color-info-bg);    --stat-fg: var(--color-blue); }
+.ph-stat-purple { --stat-bg: var(--color-info-bg);    --stat-fg: var(--color-purple); }
+.ph-stat-green  { --stat-bg: var(--color-success-bg); --stat-fg: var(--color-green); }
+.ph-stat-orange { --stat-bg: var(--color-warning-bg); --stat-fg: var(--color-orange); }
 .ph-stat-value { font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); letter-spacing: var(--letter-spacing-tight); font-variant-numeric: tabular-nums; line-height: 1.1; }
 .ph-stat-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-top: var(--space-1); }
 .ph-stat-sub { font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin-top: var(--space-2); font-variant-numeric: tabular-nums; }
@@ -252,6 +266,10 @@ body { background-color: var(--color-bg); color: var(--color-text); }
 .hash-copy:hover { background-color: var(--color-surface-overlay); color: var(--color-text); }
 .hash-copy .ph-ico { width: 14px; height: 14px; }
 .hash-copy.is-copied { color: var(--color-success); }
+/* Read-only full-hash box (Edit Torrent) — the hash sits in a code-style well
+   and shows in full rather than truncating. */
+.hash-box { width: 100%; padding: var(--space-2) var(--space-3); background-color: var(--color-code-bg); border: var(--border-width) solid var(--color-code-border); border-radius: var(--radius-md); }
+.hash-box .hash-text { max-width: none; font-size: var(--font-size-sm); }
 
 /* --------------------------------------------------------------------------
    Data table additions
@@ -292,6 +310,9 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .listed::before { content: ""; width: 7px; height: 7px; border-radius: var(--radius-full); background-color: var(--color-green); }
 .listed.is-no { color: var(--color-text-tertiary); }
 .listed.is-no::before { background-color: var(--color-border-active); }
+/* Leeching peer — orange label, neutral dot. */
+.listed.is-leeching { color: var(--color-orange); }
+.listed.is-leeching::before { background-color: var(--color-border-active); }
 
 /* --------------------------------------------------------------------------
    Public page chrome
@@ -313,6 +334,7 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-pub-nav a { color: var(--color-text-secondary); text-decoration: none; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); padding: var(--space-1-5) var(--space-2-5, 0.625rem); border-radius: var(--radius-md); }
 .ph-pub-nav a:hover { background-color: var(--color-surface-raised); color: var(--color-text); }
 .ph-pub-nav a.is-active { color: var(--color-text); background-color: var(--color-bg-tertiary); }
+.ph-pub-nav .ph-theme-toggle { margin-inline-start: var(--space-2); }
 
 .ph-pub-main { flex: 1; max-width: 1120px; margin: 0 auto; width: 100%; padding: var(--space-8) var(--space-6) var(--space-12); }
 .ph-pub-main.prose { max-width: 760px; }
@@ -395,7 +417,9 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .kv td:first-child { font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--color-text); white-space: nowrap; }
 
 /* Auth pages */
-.ph-auth { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--space-6); }
+.ph-auth { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--space-6); background-color: var(--color-bg-secondary); }
+/* Installer variant — top-aligned with extra breathing room for the long form. */
+.ph-auth-install { align-items: flex-start; padding-block: var(--space-10); }
 .ph-auth-card { width: 100%; max-width: 400px; }
 .ph-auth-wide { max-width: 680px; }
 .ph-auth-brand { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); margin-bottom: var(--space-6); text-align: center; }
@@ -407,14 +431,39 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 
 /* utility */
 .flex { display: flex; }
+.flex-col { flex-direction: column; }
 .items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-end { justify-content: flex-end; }
 .gap-2 { gap: var(--space-2); }
 .gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.d-inline { display: inline; }
+.m-0 { margin: 0; }
 .mt-0 { margin-top: 0; }
+.mt-2 { margin-top: var(--space-2); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
 .mb-0 { margin-bottom: 0; }
+.mb-4 { margin-bottom: var(--space-4); }
+.my-2 { margin-block: var(--space-2); }
 .tar { text-align: end; }
 .nowrap { white-space: nowrap; }
 .w-full { width: 100%; }
+.text-sm { font-size: var(--font-size-sm); }
+.text-xs { font-size: var(--font-size-xs); }
+.text-danger { color: var(--color-danger); }
+.text-warning { color: var(--color-warning); }
+.text-orange { color: var(--color-orange); }
+.is-disabled { opacity: 0.55; }
+
+/* Misc element helpers */
+/* Two-factor enrolment QR — a bordered code-style frame (overrides the DS
+   img radius). Used on the installer and the Settings 2FA form. */
+.qr-img { border: var(--border-width) solid var(--color-border); border-radius: var(--radius-md); }
+/* Small inline label icons. */
+.ph-li-ico { width: 15px; color: var(--color-text-tertiary); }
+.ph-2fa-ico { width: 22px; color: var(--color-success); }
 
 /* --------------------------------------------------------------------------
    Red sidebar treatment (admin)
@@ -458,6 +507,8 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .geo-metric-label { font-weight: var(--font-weight-bold); font-size: var(--font-size-lg); }
 .geo-map { width: 100%; aspect-ratio: 2 / 1; height: auto; min-height: 320px; }
 .geo-foot { font-size: var(--font-size-xs); margin-top: var(--space-3); max-width: none; }
+.geo-empty-note { max-width: 52ch; margin: var(--space-2) auto 0; }
+.geo-sub { font-size: var(--font-size-sm); margin-top: 2px; }
 .geo-legend { display: flex; align-items: center; gap: var(--space-1); font-size: var(--font-size-xs); color: var(--color-text-tertiary); }
 .geo-legend .sw { width: 18px; height: 11px; border-radius: 2px; display: inline-block; }
 .geo-legend .lo { margin-inline-end: var(--space-1); }

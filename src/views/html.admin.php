@@ -34,30 +34,30 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
     $body = '';
 
     if ($show_installed) {
-        $body .= '<div class="alert alert-success" style="display:flex;align-items:center;gap:var(--space-2)"><span class="ph-ico" data-lucide="check-circle-2"></span><strong>Installation complete.</strong>&nbsp;Your tracker is live and accepting announces.</div>';
+        $body .= '<div class="alert alert-success alert-center"><span class="ph-ico" data-lucide="check-circle-2"></span><strong>Installation complete.</strong>&nbsp;Your tracker is live and accepting announces.</div>';
     }
 
     if ($stats !== false) {
         $registered = $stats['registered'] ?? 0;
-        $top_margin = $show_installed ? ' style="margin-top:var(--space-5)"' : '';
+        $top_margin = $show_installed ? ' mt-5' : '';
 
-        $body .= '<div class="ph-stat-grid"'.$top_margin.'>
-			<div class="ph-stat" style="--stat-bg:var(--color-info-bg);--stat-fg:var(--color-blue)">
+        $body .= '<div class="ph-stat-grid'.$top_margin.'">
+			<div class="ph-stat ph-stat-blue">
 				<div class="ph-stat-top"><div class="ph-stat-value">'.number_format($stats['peers']).'</div><div class="ph-stat-ico"><span class="ph-ico" data-lucide="share-2"></span></div></div>
 				<div class="ph-stat-label">Active peers</div>
 				<div class="ph-stat-sub"><b>'.number_format($stats['seeders']).'</b> seeders &middot; <b>'.number_format($stats['leechers']).'</b> leechers</div>
 			</div>
-			<div class="ph-stat" style="--stat-bg:var(--color-info-bg);--stat-fg:var(--color-purple)">
+			<div class="ph-stat ph-stat-purple">
 				<div class="ph-stat-top"><div class="ph-stat-value">'.number_format($registered).'</div><div class="ph-stat-ico tint-purple"><span class="ph-ico" data-lucide="database"></span></div></div>
 				<div class="ph-stat-label">Registered torrents</div>
 				<div class="ph-stat-sub"><b>'.number_format($stats['torrents']).'</b> with active peers</div>
 			</div>
-			<div class="ph-stat" style="--stat-bg:var(--color-success-bg);--stat-fg:var(--color-green)">
+			<div class="ph-stat ph-stat-green">
 				<div class="ph-stat-top"><div class="ph-stat-value">'.number_format($stats['downloads']).'</div><div class="ph-stat-ico"><span class="ph-ico" data-lucide="circle-check-big"></span></div></div>
 				<div class="ph-stat-label">Completed downloads</div>
 				<div class="ph-stat-sub">All-time</div>
 			</div>
-			<div class="ph-stat" style="--stat-bg:var(--color-warning-bg);--stat-fg:var(--color-orange)">
+			<div class="ph-stat ph-stat-orange">
 				<div class="ph-stat-top"><div class="ph-stat-value">'.format_bytes($stats['traffic']).'</div><div class="ph-stat-ico"><span class="ph-ico" data-lucide="arrow-up-down"></span></div></div>
 				<div class="ph-stat-label">Traffic served</div>
 				<div class="ph-stat-sub mono">'.number_format($stats['traffic']).' bytes</div>
@@ -74,7 +74,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
         $rows = '';
         foreach ($task_labels as $task_name => [$icon, $label]) {
             if (isset($tasks[$task_name])) {
-                $rows .= '<tr><td><span class="flex items-center gap-2"><span class="ph-ico" data-lucide="'.$icon.'" style="width:15px;color:var(--color-text-tertiary)"></span>'.$label.'</span></td>'.
+                $rows .= '<tr><td><span class="flex items-center gap-2"><span class="ph-ico ph-li-ico" data-lucide="'.$icon.'"></span>'.$label.'</span></td>'.
                     '<td class="mono muted">'.date('Y-m-d H:i', $tasks[$task_name]).'</td>'.
                     '<td class="table-col-numeric"><span class="badge badge-green">done</span></td></tr>';
             }
@@ -89,7 +89,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
 		</div>';
         }
     } elseif (! $tables_installed) {
-        $body .= '<div class="alert alert-danger" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="triangle-alert" style="flex-shrink:0"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a>, and check <a href="?page=support">Server Support</a> for diagnostics.</div></div>';
+        $body .= '<div class="alert alert-danger"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a>, and check <a href="?page=support">Server Support</a> for diagnostics.</div></div>';
     } else {
         $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="bar-chart-3"></span><p>No tracker statistics yet.</p></div>';
     }

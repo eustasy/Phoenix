@@ -24,3 +24,20 @@
   width: 15px;
   height: 15px;
 }
+/* "— optional" tag appended to a legend: drop the legend's caps treatment. */
+.setup-legend-opt {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+/* Intro paragraph inside a fieldset. */
+.setup-note {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-sm);
+}
+/* Field cell that bottom-aligns its control with the row beside it. */
+.setup-field-inline {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: var(--space-2);
+}

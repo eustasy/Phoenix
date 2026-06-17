@@ -67,7 +67,7 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
 
         $state = $peer['state'] === 1
             ? '<span class="listed">Seeding</span>'
-            : '<span class="listed is-no" style="color:var(--color-orange)">Leeching</span>';
+            : '<span class="listed is-leeching">Leeching</span>';
 
         $rows .= '<tr>'.
             '<td><span class="flex items-center gap-2">'.$client.'</span></td>'.
@@ -93,17 +93,17 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
     if ($offset > 0 || $last < $total) {
         $prev = $offset > 0
             ? '<a class="btn btn-ghost btn-sm" href="?page=peers&amp;offset='.max(0, $offset - $limit).'"><span class="ph-ico" data-lucide="arrow-left"></span>Previous</a>'
-            : '<span class="btn btn-ghost btn-sm" aria-disabled="true" style="opacity:.5;pointer-events:none"><span class="ph-ico" data-lucide="arrow-left"></span>Previous</span>';
+            : '<span class="btn btn-ghost btn-sm" aria-disabled="true"><span class="ph-ico" data-lucide="arrow-left"></span>Previous</span>';
         $next = $last < $total
             ? '<a class="btn btn-ghost btn-sm" href="?page=peers&amp;offset='.($offset + $limit).'">Next<span class="ph-ico" data-lucide="arrow-right"></span></a>'
-            : '<span class="btn btn-ghost btn-sm" aria-disabled="true" style="opacity:.5;pointer-events:none">Next<span class="ph-ico" data-lucide="arrow-right"></span></span>';
-        $pager = '<div class="flex items-center gap-2" style="justify-content:flex-end;margin-top:var(--space-4)">'.$prev.$next.'</div>';
+            : '<span class="btn btn-ghost btn-sm" aria-disabled="true">Next<span class="ph-ico" data-lucide="arrow-right"></span></span>';
+        $pager = '<div class="flex items-center gap-2 justify-end mt-4">'.$prev.$next.'</div>';
     }
 
     $body = '<div class="ph-toolbar">
 			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search peers" placeholder="Search client, address, torrent&hellip;" oninput="phFilterTable(this, \'#tbl-peers\')"></span>
 			<span class="ph-spacer"></span>
-			<span class="dim" style="font-size:var(--font-size-sm)">'.$window.'</span>
+			<span class="dim text-sm">'.$window.'</span>
 		</div>
 
 		<div class="ph-card-table wide">

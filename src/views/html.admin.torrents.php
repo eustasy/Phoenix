@@ -47,7 +47,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
     $body = '';
 
     if ($message) {
-        $body .= '<div class="alert alert-info" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="info" style="flex-shrink:0"></span><div>'.htmlspecialchars($message).'</div></div>';
+        $body .= '<div class="alert alert-info"><span class="ph-ico" data-lucide="info"></span><div>'.htmlspecialchars($message).'</div></div>';
     }
 
     if ($torrents === []) {
@@ -64,16 +64,16 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
 
             // Toggle form sends the OPPOSITE of the current listed state. List/
             // Unlist sits first so the trailing actions stay aligned across rows.
-            $toggle_form = '<form method="POST" style="display:inline">'.
+            $toggle_form = '<form method="POST" class="d-inline">'.
                 '<input type="hidden" name="process" value="torrent_listed">'.
                 '<input type="hidden" name="info_hash" value="'.$info_hash.'">'.
                 '<input type="hidden" name="listed" value="'.($listed === 1 ? 0 : 1).'">'.$csrf_field.
                 '<button type="submit" class="btn btn-ghost btn-xs">'.($listed === 1 ? 'Unlist' : 'List').'</button></form>';
 
-            $delete_form = '<form method="POST" style="display:inline" onsubmit="return confirm(\'Delete this torrent and its peers?\')">'.
+            $delete_form = '<form method="POST" class="d-inline" onsubmit="return confirm(\'Delete this torrent and its peers?\')">'.
                 '<input type="hidden" name="process" value="torrent_delete">'.
                 '<input type="hidden" name="info_hash" value="'.$info_hash.'">'.$csrf_field.
-                '<button type="submit" class="btn btn-ghost btn-xs" style="color:var(--color-danger)">Delete</button></form>';
+                '<button type="submit" class="btn btn-ghost btn-xs is-danger">Delete</button></form>';
 
             $edit_link = '<a class="btn btn-ghost btn-xs" href="?page=edit&amp;info_hash='.$info_hash.'">Edit</a>';
             $peers_link = '<a class="btn btn-ghost btn-xs" href="?page=peers&amp;info_hash='.$info_hash.'">Peers</a>';
@@ -133,7 +133,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
                 '</tr>';
         }
 
-        $body .= '<div class="ph-section-head"><h3>Unregistered swarms</h3><span class="dim" style="font-size:var(--font-size-sm)">Active peers, no torrents row</span></div>'.
+        $body .= '<div class="ph-section-head"><h3>Unregistered swarms</h3><span class="dim text-sm">Active peers, no torrents row</span></div>'.
             '<div class="ph-card-table"><table>'.
             '<thead><tr><th>Info hash</th><th class="table-col-numeric">Seed</th><th class="table-col-numeric">Leech</th><th class="table-col-numeric">Peers</th><th class="tar">Actions</th></tr></thead>'.
             '<tbody>'.$swarm_rows.'</tbody></table></div>';

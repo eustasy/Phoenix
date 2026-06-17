@@ -49,7 +49,7 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
     $head .= '<th class="ph-sort table-col-numeric" data-type="num">Seeders '.$sort_ico.'</th>'.
         '<th class="ph-sort table-col-numeric" data-type="num">Leechers</th>'.
         '<th class="ph-sort table-col-numeric" data-type="num">Downloads</th>'.
-        '<th class="ph-sort" data-type="num" style="width:150px">Health</th>'.
+        '<th class="ph-sort col-health" data-type="num">Health</th>'.
         '<th class="tar">Magnet</th>';
 
     ////	Body rows
@@ -111,7 +111,10 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
 		</div>
 	</div>
 
-	<p class="dim" style="font-size:var(--font-size-sm);margin-top:var(--space-4)">Health is the seeder share of each swarm.</p>';
+	<p class="dim text-sm mt-4">Health is the seeder share of each swarm.</p>';
 
-    return view_public_layout_html('Torrent Index — Phoenix', $body, 'index', $version, false, '', 'phMakeSortable(\'#tbl-index\');');
+    $extra_head = '
+	<link rel="stylesheet" href="/assets/index.css">';
+
+    return view_public_layout_html('Torrent Index — Phoenix', $body, 'index', $version, false, $extra_head, 'phMakeSortable(\'#tbl-index\');');
 }

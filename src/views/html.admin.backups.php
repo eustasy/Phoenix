@@ -21,7 +21,7 @@ function view_admin_backups_html(array $settings, array $backups, string|false $
 
     // Run-now button lives in the topbar. class="mysql" so the layout's
     // double-submit guard disables it on submit (a dump can take a while).
-    $actions = '<form class="mysql" method="POST" style="margin:0">'.
+    $actions = '<form class="mysql m-0" method="POST">'.
         '<input type="hidden" name="process" value="backup">'.$csrf_field.
         '<button type="submit" name="submit" class="btn btn-primary btn-sm"><span class="ph-ico" data-lucide="play"></span>Run backup now</button>'.
         '</form>';
@@ -29,11 +29,11 @@ function view_admin_backups_html(array $settings, array $backups, string|false $
     $body = '';
 
     if ($message) {
-        $body .= '<div class="alert alert-info" style="display:flex;gap:var(--space-2);align-items:flex-start"><span class="ph-ico" data-lucide="info" style="flex-shrink:0"></span><div>'.htmlspecialchars($message).'</div></div>';
+        $body .= '<div class="alert alert-info"><span class="ph-ico" data-lucide="info"></span><div>'.htmlspecialchars($message).'</div></div>';
     }
 
     // Environment caveat (the run fails with a clear message when unmet).
-    $body .= '<p class="muted" style="margin-top:0;font-size:var(--font-size-sm)">Backups require the <code>mysqldump</code> binary, <code>proc_open</code>, and a writable backup directory available to the web-server user.</p>';
+    $body .= '<p class="muted mt-0 text-sm">Backups require the <code>mysqldump</code> binary, <code>proc_open</code>, and a writable backup directory available to the web-server user.</p>';
 
     if ($backups === []) {
         $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="archive"></span><p>No backups yet.</p></div>';
@@ -41,7 +41,7 @@ function view_admin_backups_html(array $settings, array $backups, string|false $
         $rows = '';
         foreach ($backups as $backup) {
             $rows .= '<tr>'.
-                '<td class="mono" style="font-size:var(--font-size-xs)">'.htmlspecialchars($backup['name']).'</td>'.
+                '<td class="mono text-xs">'.htmlspecialchars($backup['name']).'</td>'.
                 '<td class="table-col-numeric mono">'.number_format($backup['size']).' bytes</td>'.
                 '<td class="mono muted">'.date('Y-m-d H:i', $backup['mtime']).'</td>'.
                 '<td><div class="row-actions"><a class="btn btn-ghost btn-xs" href="?page=backups&amp;download='.urlencode($backup['name']).'"><span class="ph-ico" data-lucide="download"></span>Download</a></div></td>'.

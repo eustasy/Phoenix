@@ -17,11 +17,12 @@ declare(strict_types=1);
 //   $body       - trusted HTML for the card area
 //   $foot       - trusted HTML for the footer line, or '' to omit it
 //   $wide       - widen the card (the multi-fieldset installer opts in)
-//   $auth_style - inline style for the .ph-auth wrapper (background, padding)
-//   $extra_head - per-page <style> injected into <head>
+//   $wrap_class - extra CSS class(es) for the .ph-auth wrapper (e.g.
+//                 ph-auth-install for the installer's top-aligned variant)
+//   $extra_head - per-page <style>/<link> injected into <head>
 //   $inline_js  - per-page inline JS appended after assets/app.js
 
-function view_auth_layout_html(string $title, string $heading, string $subtitle, string $body, string $foot = '', bool $wide = false, string $auth_style = 'background:var(--color-bg-secondary)', string $extra_head = '', string $inline_js = ''): string
+function view_auth_layout_html(string $title, string $heading, string $subtitle, string $body, string $foot = '', bool $wide = false, string $wrap_class = '', string $extra_head = '', string $inline_js = ''): string
 {
     require_once __DIR__.'/html.head.php';
     require_once __DIR__.'/html.mark.php';
@@ -29,13 +30,13 @@ function view_auth_layout_html(string $title, string $heading, string $subtitle,
     require_once __DIR__.'/html.scripts.php';
 
     $card_class = 'ph-auth-card'.($wide ? ' ph-auth-wide' : '');
-    $style_attr = $auth_style !== '' ? ' style="'.htmlspecialchars($auth_style, ENT_QUOTES, 'UTF-8').'"' : '';
+    $wrap_classes = 'ph-auth'.($wrap_class !== '' ? ' '.$wrap_class : '');
     $foot_html = $foot !== '' ? '
 		<p class="ph-auth-foot">'.$foot.'</p>' : '';
 
     return view_head_html($title, $extra_head).'
 <body>
-<div class="ph-auth"'.$style_attr.'>
+<div class="'.$wrap_classes.'">
 	'.view_theme_toggle_html('Light', 'Dark', 'ph-theme-fixed').'
 
 	<div class="'.$card_class.'">
