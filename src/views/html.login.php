@@ -14,16 +14,16 @@ function view_login_html(bool $show_error = false, bool $totp_required = false, 
 
     $error_html = '';
     if ($show_error) {
-        $error_html = '<div class="alert alert-danger alert-center mt-0"><span class="ph-ico" data-lucide="circle-alert"></span>Incorrect password.</div>';
+        $error_html = '<div class="alert alert-danger alert-center mt-0" role="alert"><span class="ph-ico" data-lucide="circle-alert"></span>Incorrect password.</div>';
     }
 
     ////	Optional second-factor field
     $code_html = '';
     if ($totp_required) {
         $code_html = '<div class="ph-field">
-				<label>Authentication code</label>
-				<input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" class="mono" placeholder="000000">
-				<div class="ph-hint">6-digit code from your authenticator app.</div>
+				<label for="login-code">Authentication code</label>
+				<input type="text" id="login-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" class="mono" placeholder="000000" aria-describedby="login-code-hint">
+				<div class="ph-hint" id="login-code-hint">6-digit code from your authenticator app.</div>
 			</div>';
     }
 
@@ -31,8 +31,8 @@ function view_login_html(bool $show_error = false, bool $totp_required = false, 
 			'.$error_html.'
 			<form method="POST" action="">
 				<input type="hidden" name="process" value="login">
-				<div class="ph-field"><label>Password</label>
-					<input type="password" name="password" autofocus placeholder="••••••••">
+				<div class="ph-field"><label for="login-password">Password</label>
+					<input type="password" id="login-password" name="password" autocomplete="current-password" autofocus placeholder="••••••••">
 				</div>
 				'.$code_html.'
 				<button class="btn btn-primary btn-block mt-2"><span class="ph-ico" data-lucide="log-in"></span>Log In</button>

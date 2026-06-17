@@ -46,7 +46,7 @@ function view_install_html(
 
     $error_html = '';
     if ($install_error) {
-        $error_html = '<div class="alert alert-danger alert-center mt-0"><span class="ph-ico" data-lucide="circle-alert"></span>'.htmlspecialchars($install_error).'</div>';
+        $error_html = '<div class="alert alert-danger alert-center mt-0" role="alert"><span class="ph-ico" data-lucide="circle-alert"></span>'.htmlspecialchars($install_error).'</div>';
     }
 
     ////	Optional two-factor section
@@ -72,8 +72,8 @@ function view_install_html(
 				<p class="muted setup-note">Scan with an authenticator app, then enter a code to enable &mdash; or leave it blank to skip.</p>
 				'.$totp_display.'
 				<input type="hidden" name="totp_secret" value="'.htmlspecialchars($totp_secret).'">
-				<div class="ph-field mb-0"><label>Confirmation code</label>
-					<input type="text" name="totp_code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" class="mono" placeholder="000000">
+				<div class="ph-field mb-0"><label for="install-totp-code">Confirmation code</label>
+					<input type="text" id="install-totp-code" name="totp_code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" class="mono" placeholder="000000">
 				</div>
 			</fieldset>';
     }
@@ -95,15 +95,15 @@ function view_install_html(
 			<fieldset class="setup-fieldset">
 				<div class="setup-legend"><span class="ph-ico" data-lucide="database"></span>Database</div>
 				<div class="ph-field-row">
-					<div class="ph-field"><label>Host</label><input type="text" name="db_host" value="'.htmlspecialchars($form['db_host']).'"></div>
-					<div class="ph-field"><label>Database name</label><input type="text" name="db_name" value="'.htmlspecialchars($form['db_name']).'"></div>
+					<div class="ph-field"><label for="db_host">Host</label><input type="text" id="db_host" name="db_host" value="'.htmlspecialchars($form['db_host']).'"></div>
+					<div class="ph-field"><label for="db_name">Database name</label><input type="text" id="db_name" name="db_name" value="'.htmlspecialchars($form['db_name']).'"></div>
 				</div>
 				<div class="ph-field-row">
-					<div class="ph-field"><label>Username</label><input type="text" name="db_user" value="'.htmlspecialchars($form['db_user']).'"></div>
-					<div class="ph-field"><label>Password</label><input type="password" name="db_pass"></div>
+					<div class="ph-field"><label for="db_user">Username</label><input type="text" id="db_user" name="db_user" value="'.htmlspecialchars($form['db_user']).'"></div>
+					<div class="ph-field"><label for="db_pass">Password</label><input type="password" id="db_pass" name="db_pass"></div>
 				</div>
 				<div class="ph-field-row">
-					<div class="ph-field"><label>Table prefix</label><input type="text" name="db_prefix" value="'.htmlspecialchars($form['db_prefix']).'" class="mono"></div>
+					<div class="ph-field"><label for="db_prefix">Table prefix</label><input type="text" id="db_prefix" name="db_prefix" value="'.htmlspecialchars($form['db_prefix']).'" class="mono"></div>
 					<div class="ph-field setup-field-inline">
 						<label class="checkbox"><input type="checkbox" name="db_persist" value="1"'.$checked($form['db_persist']).'><span class="checkbox-label">Persistent connections</span></label>
 					</div>
@@ -128,9 +128,9 @@ function view_install_html(
 
 			<fieldset class="setup-fieldset'.($totp_html === '' ? ' m-0' : '').'">
 				<div class="setup-legend"><span class="ph-ico" data-lucide="key-round"></span>Admin</div>
-				<div class="ph-field mb-0"><label>Admin password <span class="text-danger">*</span></label>
-					<input type="password" name="admin_password" required>
-					<div class="ph-hint">Required &mdash; protects the control panel.</div>
+				<div class="ph-field mb-0"><label for="admin_password">Admin password <span class="text-danger" aria-hidden="true">*</span></label>
+					<input type="password" id="admin_password" name="admin_password" autocomplete="new-password" required aria-describedby="admin_password-hint">
+					<div class="ph-hint" id="admin_password-hint">Required &mdash; protects the control panel.</div>
 				</div>
 			</fieldset>
 			'.$totp_html.'

@@ -390,7 +390,7 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
    Forms — full-width field override + field rows
    -------------------------------------------------------------------------- */
 .ph-field { margin-bottom: var(--space-4); }
-.ph-field > label { display: block; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); margin-bottom: var(--space-1-5); }
+.ph-field > label, .ph-field > .ph-field-label { display: block; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); margin-bottom: var(--space-1-5); }
 .ph-field input:not([type="checkbox"]):not([type="radio"]),
 .ph-field textarea,
 .ph-field select { width: 100%; max-width: none; margin-bottom: 0; }

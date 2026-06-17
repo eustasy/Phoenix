@@ -17,7 +17,7 @@ function view_hash_html(string $hash, int $short = 12): string
 
     return '<span class="hash">'.
         '<span class="hash-text">'.$text.'</span>'.
-        '<button class="hash-copy" title="Copy info hash" data-hash="'.$full.'">'.
+        '<button class="hash-copy" type="button" title="Copy info hash" aria-label="Copy info hash" data-hash="'.$full.'">'.
         '<span class="ph-ico" data-lucide="copy"></span>'.
         '</button>'.
         '</span>';

@@ -38,11 +38,11 @@ function view_admin_edit_html(array $settings, string $info_hash, array|false $t
     $back = '<a class="btn btn-secondary btn-sm" href="?page=torrents"><span class="ph-ico" data-lucide="arrow-left"></span>Back</a>';
 
     $message_html = $message
-        ? '<div class="alert alert-info"><span class="ph-ico" data-lucide="info"></span><div>'.htmlspecialchars($message).'</div></div>'
+        ? '<div class="alert alert-info" role="status"><span class="ph-ico" data-lucide="info"></span><div>'.htmlspecialchars($message).'</div></div>'
         : '';
 
     if ($torrent === false) {
-        $body = $message_html.'<div class="alert alert-danger alert-center"><span class="ph-ico" data-lucide="circle-alert"></span>Torrent not found.</div>';
+        $body = $message_html.'<div class="alert alert-danger alert-center" role="alert"><span class="ph-ico" data-lucide="circle-alert"></span>Torrent not found.</div>';
 
         return view_admin_layout_html($settings, 'Edit Torrent', $body, 'torrents', $csrf_token, 'Tracker', $back, true);
     }
@@ -69,21 +69,21 @@ function view_admin_edit_html(array $settings, string $info_hash, array|false $t
 
     $body = $message_html.'
 		<div class="ph-form-card">
-			<div class="ph-field"><label>Info hash <span class="dim">(read-only)</span></label>
+			<div class="ph-field"><span class="ph-field-label">Info hash <span class="dim">(read-only)</span></span>
 				<div class="hash hash-box"><span class="hash-text">'.$hash.'</span></div>
 			</div>
 			<form class="mysql" action="?page=edit&amp;info_hash='.$hash.'" method="POST">
 				<input type="hidden" name="process" value="torrent_edit">
 				<input type="hidden" name="info_hash" value="'.$hash.'">'.$csrf_field.'
 				<div class="ph-field-row">
-					<div class="ph-field"><label>Name</label><input type="text" name="name" value="'.$name.'"></div>
-					<div class="ph-field"><label>Size (bytes)</label><input type="number" name="size" value="'.intval($torrent['size']).'"></div>
+					<div class="ph-field"><label for="edit-name">Name</label><input type="text" id="edit-name" name="name" value="'.$name.'"></div>
+					<div class="ph-field"><label for="edit-size">Size (bytes)</label><input type="number" id="edit-size" name="size" value="'.intval($torrent['size']).'"></div>
 				</div>
-				<div class="ph-field"><label>Filename</label><input type="text" name="filename" value="'.$filename.'"></div>
-				<div class="ph-field"><label>Files (JSON)</label><textarea name="files" class="code" rows="3">'.$files.'</textarea></div>
+				<div class="ph-field"><label for="edit-filename">Filename</label><input type="text" id="edit-filename" name="filename" value="'.$filename.'"></div>
+				<div class="ph-field"><label for="edit-files">Files (JSON)</label><textarea id="edit-files" name="files" class="code" rows="3">'.$files.'</textarea></div>
 				<div class="ph-field-row">
-					<div class="ph-field"><label>Trackers (one per line)</label><textarea name="trackers" class="code" rows="3">'.$trackers.'</textarea></div>
-					<div class="ph-field"><label>Web seeds (one per line)</label><textarea name="webseeds" class="code" rows="3">'.$webseeds.'</textarea></div>
+					<div class="ph-field"><label for="edit-trackers">Trackers (one per line)</label><textarea id="edit-trackers" name="trackers" class="code" rows="3">'.$trackers.'</textarea></div>
+					<div class="ph-field"><label for="edit-webseeds">Web seeds (one per line)</label><textarea id="edit-webseeds" name="webseeds" class="code" rows="3">'.$webseeds.'</textarea></div>
 				</div>
 				<label class="checkbox my-2"><input type="checkbox" name="listed" value="1"'.$checked.'><span class="checkbox-label">Listed on the public index</span></label>
 				<div class="ph-form-actions">

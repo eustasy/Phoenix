@@ -24,7 +24,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
     $body = '';
 
     if ($message) {
-        $body .= '<div class="alert alert-info"><span class="ph-ico" data-lucide="info"></span><div>'.htmlspecialchars($message).'</div></div>';
+        $body .= '<div class="alert alert-info" role="status"><span class="ph-ico" data-lucide="info"></span><div>'.htmlspecialchars($message).'</div></div>';
     }
 
     ////	Effective settings (read-only, secrets masked)
@@ -60,7 +60,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
 		<div class="ph-form-card">
 			<form class="mysql" method="POST">
 				<input type="hidden" name="process" value="password">'.$csrf_field.'
-				<div class="ph-field mb-4"><label>New password</label><input type="password" name="new_password" autocomplete="new-password"></div>
+				<div class="ph-field mb-4"><label for="new_password">New password</label><input type="password" id="new_password" name="new_password" autocomplete="new-password"></div>
 				<button type="submit" name="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="key-round"></span>Change Password</button>
 			</form>
 		</div>';
@@ -77,7 +77,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
 				<div class="flex items-center gap-3 mb-4"><span class="ph-ico ph-2fa-ico" data-lucide="shield-check"></span><div><strong>Two-factor authentication is enabled.</strong><div class="dim text-sm">A 6-digit code is required at login.</div></div></div>
 				<form class="mysql" method="POST">
 					<input type="hidden" name="process" value="totp_disable">'.$csrf_field.'
-					<div class="ph-field mb-4"><label>Enter a current authenticator code to turn it off</label><input type="text" name="totp_code" inputmode="numeric" autocomplete="off" class="mono" placeholder="000000"></div>
+					<div class="ph-field mb-4"><label for="totp_disable_code">Enter a current authenticator code to turn it off</label><input type="text" id="totp_disable_code" name="totp_code" inputmode="numeric" autocomplete="off" class="mono" placeholder="000000"></div>
 					<button type="submit" name="submit" class="btn btn-outline btn-sm btn-outline-danger">Disable 2FA</button>
 				</form>
 			</div>';
@@ -93,7 +93,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
 				<form class="mysql" method="POST">
 					<input type="hidden" name="process" value="totp_enable">
 					<input type="hidden" name="totp_secret" value="'.htmlspecialchars((string) $totp_secret).'">'.$csrf_field.'
-					<div class="ph-field mb-4"><label>Authenticator code</label><input type="text" name="totp_code" inputmode="numeric" autocomplete="off" class="mono" placeholder="000000"></div>
+					<div class="ph-field mb-4"><label for="totp_enable_code">Authenticator code</label><input type="text" id="totp_enable_code" name="totp_code" inputmode="numeric" autocomplete="off" class="mono" placeholder="000000"></div>
 					<button type="submit" name="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="shield-check"></span>Enable 2FA</button>
 				</form>
 			</div>';
