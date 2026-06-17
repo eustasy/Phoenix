@@ -80,7 +80,7 @@ navigation bar, then the page-specific body. Pages opt into a wider column
 
 **Example data.**
 
-* Version line: `Phoenix v4.2beta5 2026-06-14 11:04:15Z eustasy`
+* Version line: `v4.3beta6`
 * Page title: `Phoenix Admin: Torrents`
 * Nav is always the same seven items; sub-pages (Peers, Edit) keep **Torrents**
   marked current.

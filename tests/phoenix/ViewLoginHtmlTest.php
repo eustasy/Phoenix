@@ -43,8 +43,8 @@ class ViewLoginHtmlTest extends TestCase
 
     public function testVersionFlowsIntoFooter(): void
     {
-        $html = view_login_html(false, false, 'v4.2beta5');
-        $this->assertStringContainsString('v4.2beta5', $html);
+        $html = view_login_html(false, false, 'v4.3beta6');
+        $this->assertStringContainsString('v4.3beta6', $html);
     }
 
     public function testReturnsString(): void

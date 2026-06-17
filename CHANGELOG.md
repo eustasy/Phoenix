@@ -1,9 +1,22 @@
 # Phoenix Changelog
 
-## Unreleased
+## v4.3beta6 - 17/06/2026
 
+The 4.3 line is a top-to-bottom visual redesign of every HTML surface onto a shared, dependency-light design system, plus an expansion of the 4.2 admin panel with new Geography, Peers, and bulk-upload pages. At the protocol layer it adds two BEP-conformance features and a full audit of Phoenix against the BEP index. The database schema is unchanged — **no DB migration is required** — and the new tracker-response keys are additive, so existing clients are unaffected.
+
+- FEATURE: Restyle every HTML surface — public index, public stats, login, installer, and all nine admin pages — onto a shared design system: a vendored `ds.css` bundle plus a Phoenix stylesheet (`public/assets/`), the Inter web font, Lucide icons, the flame mark, and a persisted light/dark theme toggle that applies before first paint to avoid a flash. The public index and stats pages, previously near-unstyled, are now first-class pages. No build step — the assets are served as-is.
+- FEATURE: Rework the admin panel into an app shell — a sticky flame-marked sidebar with Tracker / Server nav groups (icons + active state), theme toggle, and logout, and a main column with a breadcrumb + title top bar. The layout owns the page heading and actions, so each page passes title/crumb/actions/body; every existing form contract (process values, CSRF fields, field names, multipart upload) is preserved.
+- FEATURE: Add an admin **Geography** page — a world map of the swarm by country (active peers, or logged events when stat-tracking is on) with a metric toggle. Backed by new geo-aggregation models and gated on a configured GeoLite2 database; coarse country only, no IP is ever stored.
+- FEATURE: Add a global **Peers** page listing every peer across all swarms — client (detected from the peer_id for display, never stored), address, seeding/leeching state, transfer totals, and last-seen — with a client-side filter and pagination.
+- FEATURE: Add a **Bulk Upload** page that accepts many `.torrent` files or a whole folder (drag-and-drop or picker) and POSTs each to the add API in the browser, with a per-file results table; it halts cleanly if the server stops responding. It needs an admin session (CSRF), and explains the alternative when no admin password is set.
+- FEATURE: The **Add a Torrent** page now parses a dropped or picked `.torrent` in the browser and fills the form, so the operator can amend any field before submitting — the file itself is never uploaded.
+- FEATURE: Surface the opt-in geo stat-tracking from 4.1 in the UI — offer the `stats_enabled` / `stats_geo` toggles at install and on the Settings page, and auto-discover a (gitignored) GeoLite2 database so geo enrichment lights up without a path setting. Show live torrent and peer counts as badges in the sidebar nav.
+- FEATURE: Click-to-copy info hashes, and client-side filtering/sorting on the torrent and peer tables and the public index, all without a page reload.
 - FEATURE: Return the client's own public IP in the announce response under the BEP 24 `external ip` key, so a NATed peer can learn how the tracker sees it — packed to raw bytes in the bencode response, and mirrored as a human-readable string in the `?xml`/`?json` debug views. It prefers the address family the request arrived on, and is gated by the new `announce_external_ip` setting (default on) ([#68](https://github.com/eustasy/phoenix/issues/68)).
 - FEATURE: Annotate tracker failure responses with BEP 31's `retry in` key, so a client knows whether and when to retry — `"never"` for permanent rejections (invalid info_hash/peer_id, a disallowed torrent, scraping disabled) and the rate-limit window in seconds for a throttled announce. Threaded through `tracker_error()` into the bencode, `?xml`, and `?json` error formats ([#69](https://github.com/eustasy/phoenix/issues/69)).
+- IMPROVES: Extract all inline CSS, JavaScript, and large HTML bodies into separate files under `public/assets/` and `src/partials/`, so each can be linted (stylelint, prettier/oxc, html-validate) and browser-cached, replacing the per-page inline `<style>`/`<script>` blocks.
+- IMPROVES: Accessibility pass over the forms and interactive surfaces — every input associated with a `<label>`, `role="alert"`/`role="status"` on result banners (including the JS-revealed ones), `aria-label` on icon-only buttons, and `aria-current` on the active nav item.
+- IMPROVES: Add `BEPs.md`, a conformance audit of all 54 indexed BEPs (implemented / not-applicable / missing), and correct the HTTP scrape references throughout the code and docs from BEP 15 (the UDP tracker protocol) to BEP 48 (the HTTP scrape convention Phoenix actually implements).
 
 ## v4.2beta5 - 14/06/2026
 
