@@ -20,15 +20,15 @@ and is marked accordingly as we work through it.
 
 ## Summary
 
-All 54 indexed BEPs reviewed: **6 implemented**, **4 applicable but missing**,
+All 54 indexed BEPs reviewed: **7 implemented**, **3 applicable but missing**,
 **44 not applicable** (client / DHT / peer-wire / metainfo / feed concerns).
 
 - **Implemented (tracker scope):** BEP 3 (announce), 7 (IPv6 peers), 20 (peer-id
-  → client label), 23 (compact peers), 27 (private/closed tracker), 48 (HTTP
-  scrape).
+  → client label), 23 (compact peers), 24 (return client external IP), 27
+  (private/closed tracker), 48 (HTTP scrape).
 - **Applicable but not implemented:** BEP 15 (UDP tracker — excluded by the
-  HTTP/PHP architecture), 24 (return client external IP — optional), 31
-  (`retry in` on failures — optional), 8 (peer obfuscation — deferred/niche).
+  HTTP/PHP architecture), 31 (`retry in` on failures — optional), 8 (peer
+  obfuscation — deferred/niche).
 - **Documentation fix applied:** the scrape endpoint and several comments/docs
   labelled HTTP scrape as "BEP 15", but BEP 15 is the *UDP* protocol; the HTTP
   scrape convention is **BEP 48**. All such references were re-pointed to BEP 48
@@ -76,7 +76,7 @@ Final and active process BEPs (the protocol's governance and core specs).
 | 16 | Superseeding | ➖ N/A | Client seeding strategy; invisible to the tracker. |
 | 17 | HTTP Seeding (Hoffman-style) | ➖ N/A | Web-seed variant fetched by clients. |
 | 21 | Extension for Partial Seeds | ➖ N/A | Peer-protocol extension; the tracker only ever sees `left`, from which it derives seed/leech. |
-| 24 | Tracker Returns External IP | ❌ Missing | Phoenix *consumes* a client external-IP hint but never *returns* an `external ip` key. See [BEP 24](#bep-24--tracker-returns-external-ip). |
+| 24 | Tracker Returns External IP | ✅ Implemented | Announce echoes the client's own public address under `external ip` (gated by `announce_external_ip`). See [BEP 24](#bep-24--tracker-returns-external-ip). |
 | 30 | Merkle tree torrent extension | ➖ N/A | `.torrent` metainfo / hashing; client + file format. |
 | 31 | Tracker Failure Retry Extension | ❌ Missing | Failure responses carry only `failure reason`, no `retry in`. See [BEP 31](#bep-31--tracker-failure-retry-extension). |
 | 32 | IPv6 extension for DHT | ➖ N/A | DHT. |
@@ -241,18 +241,21 @@ A peer can therefore announce and be returned over either family.
 
 ### BEP 24 — Tracker Returns External IP
 
-**Verdict: ❌ Missing.**
+**Verdict: ✅ Implemented.**
 
-BEP 24 has the tracker echo the requester's own public address back in the
-announce response under an `external ip` key (compact 4- or 16-byte form), so a
-NATed client can learn its external IP. Phoenix does not emit this — the announce
-response is limited to `complete` / `incomplete` / `interval` / `min interval` /
-`peers` / `peers6` (`view_announce_bencode()`).
+The announce response echoes the requester's own public address back under an
+`external ip` key (raw 4-byte IPv4 or 16-byte IPv6, packed by `inet_pton()`),
+so a NATed client can learn how the tracker sees it. `peer_external_ip()`
+(`src/functions/peer.external.ip.php`) picks the address — preferring the family
+the request arrived on (per `REMOTE_ADDR`) when the peer resolved on both —
+from the already-resolved `$peer['ipv4']`/`$peer['ipv6']`, and
+`view_announce_bencode()` emits the packed key. The `?xml`/`?json` debug views
+carry the same value as a human-readable string. Gated by the
+`announce_external_ip` setting (default on). Implemented in #68.
 
-Note the direction: the `external_ip` references in `src/functions/` are about
-*accepting* a client-declared address as an input candidate, which is the
-opposite of BEP 24. This is a small, optional, self-contained addition if ever
-wanted (append one compact-encoded key in the announce view).
+Not to be confused with the existing `external_ip` setting, which governs the
+*opposite* direction — whether the tracker accepts a client-declared address as
+an input candidate.
 
 ### BEP 31 — Tracker Failure Retry Extension
 

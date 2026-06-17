@@ -157,17 +157,23 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
     $strategy = peer_select_strategy($peer, $counts['complete'], $counts['incomplete'], $settings);
     $rows = peers_select_active($connection, $settings, $peer, $stale_threshold, $strategy);
 
+    // BEP 24: echo the client's own public address back to it, unless disabled.
+    require_once __DIR__.'/../functions/peer.external.ip.php';
+    $external_ip = $settings['announce_external_ip']
+        ? peer_external_ip($peer, $_SERVER)
+        : false;
+
     if (isset($_GET['xml'])) {
         require_once __DIR__.'/../views/xml.announce.php';
         header('Content-Type: text/xml');
 
-        return view_announce_xml($counts, $settings, $rows);
+        return view_announce_xml($counts, $settings, $rows, $external_ip);
     }
     if (isset($_GET['json'])) {
         require_once __DIR__.'/../views/json.announce.php';
         header('Content-Type: application/json');
 
-        return view_announce_json($counts, $settings, $rows);
+        return view_announce_json($counts, $settings, $rows, $external_ip);
     }
     require_once __DIR__.'/../views/bencode.announce.php';
     // text/plain matches the de-facto convention for tracker bencode and stops
@@ -175,5 +181,5 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
     // default_charset set in phoenix.php so the raw bytes pass through.
     header('Content-Type: text/plain; charset=ISO-8859-1');
 
-    return view_announce_bencode($counts, $settings, $rows, (bool)$peer['compact'], (bool)$peer['no_peer_id']);
+    return view_announce_bencode($counts, $settings, $rows, (bool)$peer['compact'], (bool)$peer['no_peer_id'], $external_ip);
 }

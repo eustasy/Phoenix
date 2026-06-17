@@ -170,4 +170,30 @@ class ViewAnnounceJsonTest extends PhoenixTestCase
         $this->assertSame(JSON_ERROR_NONE, json_last_error());
     }
 
+    public function testExternalIpField(): void
+    {
+        $result = view_announce_json(
+            $this->defaultCounts(),
+            $this->defaultSettings(),
+            [],
+            '203.0.113.5', // BEP 24
+        );
+
+        $data = json_decode($result, true);
+        $this->assertArrayHasKey('external_ip', $data);
+        $this->assertSame('203.0.113.5', $data['external_ip']);
+    }
+
+    public function testExternalIpOmittedByDefault(): void
+    {
+        $result = view_announce_json(
+            $this->defaultCounts(),
+            $this->defaultSettings(),
+            [],
+        );
+
+        $data = json_decode($result, true);
+        $this->assertArrayNotHasKey('external_ip', $data);
+    }
+
 }

@@ -188,4 +188,29 @@ class ViewAnnounceXmlTest extends PhoenixTestCase
         $this->assertSame('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', (string)$peer->peer_id);
     }
 
+    public function testExternalIpElement(): void
+    {
+        $result = view_announce_xml(
+            $this->defaultCounts(),
+            $this->defaultSettings(),
+            [],
+            '203.0.113.5', // BEP 24
+        );
+
+        $xml = simplexml_load_string($result);
+        $this->assertNotFalse($xml);
+        $this->assertSame('203.0.113.5', (string)$xml->external_ip);
+    }
+
+    public function testExternalIpOmittedByDefault(): void
+    {
+        $result = view_announce_xml(
+            $this->defaultCounts(),
+            $this->defaultSettings(),
+            [],
+        );
+
+        $this->assertStringNotContainsString('<external_ip>', $result);
+    }
+
 }

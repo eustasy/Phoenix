@@ -1,5 +1,9 @@
 # Phoenix Changelog
 
+## Unreleased
+
+- FEATURE: Return the client's own public IP in the announce response under the BEP 24 `external ip` key, so a NATed peer can learn how the tracker sees it — packed to raw bytes in the bencode response, and mirrored as a human-readable string in the `?xml`/`?json` debug views. It prefers the address family the request arrived on, and is gated by the new `announce_external_ip` setting (default on) ([#68](https://github.com/eustasy/phoenix/issues/68)).
+
 ## v4.2beta5 - 14/06/2026
 
 The 4.2 line expands the admin panel into a full web management UI on top of 4.1's management API, adds a torrent-update endpoint, and ships a disposable Docker development environment. The tracker protocol and database schema are unchanged — **no DB migration is required.**

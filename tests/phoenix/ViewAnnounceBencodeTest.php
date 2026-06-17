@@ -274,4 +274,50 @@ class ViewAnnounceBencodeTest extends PhoenixTestCase
         $this->assertStringContainsString('4:porti6882e', $result);
     }
 
+    public function testExternalIpOmittedByDefault(): void
+    {
+        $result = view_announce_bencode(
+            $this->defaultCounts(),
+            $this->defaultSettings(),
+            [],
+            false,
+            false,
+        );
+
+        $this->assertStringNotContainsString('external ip', $result);
+    }
+
+    public function testExternalIpv4PackedAndKeyOrdered(): void
+    {
+        $result = view_announce_bencode(
+            $this->defaultCounts(),
+            $this->defaultSettings(),
+            [],
+            false,
+            false,
+            '203.0.113.5', // BEP 24 external ip
+        );
+
+        // BEP 24: key 'external ip', value is the raw 4-byte packed address.
+        $this->assertStringContainsString('11:external ip4:'.inet_pton('203.0.113.5'), $result);
+        // Sorted between 'complete' and 'incomplete' (raw byte order).
+        $this->assertLessThan(strpos($result, '10:incomplete'), strpos($result, '11:external ip'));
+        $this->assertGreaterThan(strpos($result, '8:complete'), strpos($result, '11:external ip'));
+    }
+
+    public function testExternalIpv6Packed(): void
+    {
+        $result = view_announce_bencode(
+            $this->defaultCounts(),
+            $this->defaultSettings(),
+            [],
+            false,
+            false,
+            '2001:db8::1',
+        );
+
+        // IPv6 packs to 16 raw bytes.
+        $this->assertStringContainsString('11:external ip16:'.inet_pton('2001:db8::1'), $result);
+    }
+
 }

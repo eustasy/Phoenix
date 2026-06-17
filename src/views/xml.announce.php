@@ -17,14 +17,21 @@ declare(strict_types=1);
  * @param PhoenixSettings $settings
  * @param array<int, array<string, float|int|string|null>> $rows
  */
-function view_announce_xml(array $counts, array $settings, array $rows): string
+function view_announce_xml(array $counts, array $settings, array $rows, string|false $external_ip = false): string
 {
+    // BEP 24: the tracker's view of the client's own public address (parity
+    // with the bencode response; here as a human-readable string).
+    $external = $external_ip !== false
+        ? '<external_ip>'.$external_ip.'</external_ip>'
+        : '';
+
     $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
         '<announce>'.
         '<complete>'.$counts['complete'].'</complete>'.
         '<incomplete>'.$counts['incomplete'].'</incomplete>'.
         '<interval>'.$settings['announce_interval'].'</interval>'.
         '<min_interval>'.$settings['min_interval'].'</min_interval>'.
+        $external.
         '<peers>';
 
     foreach ($rows as $row) {

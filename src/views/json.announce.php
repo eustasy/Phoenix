@@ -17,7 +17,7 @@ declare(strict_types=1);
  * @param PhoenixSettings $settings
  * @param array<int, array<string, float|int|string|null>> $rows
  */
-function view_announce_json(array $counts, array $settings, array $rows): string
+function view_announce_json(array $counts, array $settings, array $rows, string|false $external_ip = false): string
 {
     $peers = [];
 
@@ -37,11 +37,19 @@ function view_announce_json(array $counts, array $settings, array $rows): string
         $peers[] = $peer_data;
     }
 
-    return json_encode([
+    $response = [
         'complete' => $counts['complete'],
         'incomplete' => $counts['incomplete'],
         'interval' => $settings['announce_interval'],
         'min_interval' => $settings['min_interval'],
         'peers' => $peers,
-    ]) ?: '';
+    ];
+
+    // BEP 24: the tracker's view of the client's own public address (parity
+    // with the bencode response; here as a human-readable string).
+    if ($external_ip !== false) {
+        $response['external_ip'] = $external_ip;
+    }
+
+    return json_encode($response) ?: '';
 }

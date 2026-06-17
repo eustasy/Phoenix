@@ -38,6 +38,8 @@ $settings['max_peers'] = 100;
 $settings['external_ip'] = false;
 /* default to compact announces when not specified */
 $settings['default_compact'] = true;
+/* echo the client's own public IP back in announce responses (BEP 24) */
+$settings['announce_external_ip'] = true;
 /* allow scrapes with no info_hash, which return EVERY torrent's stats. */
 /* Conventional for open trackers. Set false on a closed/private tracker: */
 /* a full scrape ignores the allowed-torrents filter, so leaving it on */
