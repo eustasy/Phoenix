@@ -27,12 +27,13 @@ class ViewAdminUploadHtmlTest extends TestCase
         $this->assertStringContainsString('<title>Phoenix Admin: Bulk Upload</title>', $html);
         // It's a sibling of single-add, so the Add nav stays current.
         $this->assertStringContainsString('<a href="?page=add" class="is-active" aria-current="page">', $html);
-        // The uploader, its CSRF token, the file/folder pickers, and the API endpoint.
+        // The uploader, its CSRF token, the file/folder pickers, and the script
+        // that drives them (the API endpoint lives in assets/upload.js).
         $this->assertStringContainsString('id="bulk-drop"', $html);
         $this->assertStringContainsString('data-csrf="deadbeef"', $html);
         $this->assertStringContainsString('webkitdirectory', $html);
         $this->assertStringContainsString('multiple', $html);
-        $this->assertStringContainsString('/api/torrent/add.php', $html);
+        $this->assertStringContainsString('/assets/upload.js', $html);
     }
 
     public function testNoticeWhenTablesMissing(): void
@@ -50,6 +51,6 @@ class ViewAdminUploadHtmlTest extends TestCase
         $html = view_admin_upload_html($this->settings(), true, '');
         $this->assertStringContainsString('admin password', $html);
         $this->assertStringNotContainsString('id="bulk-drop"', $html);
-        $this->assertStringNotContainsString('/api/torrent/add.php', $html);
+        $this->assertStringNotContainsString('/assets/upload.js', $html);
     }
 }

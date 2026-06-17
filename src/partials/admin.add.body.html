@@ -1,0 +1,32 @@
+<!-- Add a Torrent body (src/views/html.admin.add.php). Static markup included via
+     PHP; the only dynamic value is the CSRF token. The drop zone parses the file
+     client-side and fills the form (assets/add.js); the file is never uploaded. -->
+<label class="ph-drop" id="torrent-drop">
+	<span class="ph-ico" data-lucide="upload-cloud"></span>
+	<span class="ph-drop-title"><strong>Drop a .torrent file</strong> to fill the form automatically</span>
+	<small class="dim">or click to browse &mdash; parsed in your browser, nothing is uploaded<span id="torrent-drop-hint"></span></small>
+	<input type="file" id="torrent-file" accept=".torrent,application/x-bittorrent">
+</label>
+
+<div class="alert alert-danger" id="add-error" hidden><span class="ph-ico" data-lucide="circle-alert"></span><div id="add-error-text"></div></div>
+
+<form id="add-form" class="ph-form-card" action="?page=add" method="POST">
+	<div class="ph-field-row">
+		<div class="ph-field"><label for="add-name">Name</label><input type="text" name="name" id="add-name"></div>
+		<div class="ph-field"><label for="add-size">Size (bytes)</label><input type="number" name="size" id="add-size"></div>
+	</div>
+	<div class="ph-field"><label for="add-info-hash">Info hash</label><input type="text" name="info_hash" id="add-info-hash" class="mono"></div>
+	<div class="ph-field"><label for="add-filename">Filename</label><input type="text" name="filename" id="add-filename"></div>
+	<div class="ph-field"><label for="add-files">Files (JSON)</label><textarea name="files" id="add-files" class="code" rows="3"></textarea></div>
+	<div class="ph-field-row">
+		<div class="ph-field"><label for="add-trackers">Trackers (one per line)</label><textarea name="trackers" id="add-trackers" class="code" rows="3"></textarea></div>
+		<div class="ph-field"><label for="add-webseeds">Web seeds (one per line)</label><textarea name="webseeds" id="add-webseeds" class="code" rows="3"></textarea></div>
+	</div>
+	<label class="checkbox my-2"><input type="checkbox" name="listed" value="1" checked><span class="checkbox-label">Listed on the public index</span></label>
+	<input type="hidden" name="process" value="torrent_add">
+	<input type="hidden" name="csrf" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
+	<div class="ph-form-actions">
+		<button type="submit" name="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="plus"></span>Add Torrent</button>
+		<button type="reset" class="btn btn-ghost">Clear</button>
+	</div>
+</form>

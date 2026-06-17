@@ -38,29 +38,12 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
         return view_admin_layout_html($settings, 'Bulk Upload', $body, 'add', $csrf_token, 'Tracker', $back, true);
     }
 
-    $body = '<div id="bulk" data-csrf="'.htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8').'">
-				<label class="ph-drop" id="bulk-drop">
-					<span class="ph-ico" data-lucide="upload-cloud"></span>
-					<div><strong>Drop .torrent files or a folder</strong> to add them all</div>
-					<small class="dim">each file is sent straight to the add API &mdash; no form, no per-file editing</small>
-				</label>
-
-				<div class="ph-toolbar">
-					<button type="button" class="btn btn-secondary btn-sm" id="bulk-files"><span class="ph-ico" data-lucide="files"></span>Choose files</button>
-					<button type="button" class="btn btn-secondary btn-sm" id="bulk-folder"><span class="ph-ico" data-lucide="folder"></span>Choose folder</button>
-					<span class="ph-spacer"></span>
-					<label class="switch"><input type="checkbox" id="bulk-listed" role="switch" checked><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label">List on the public index</span></label>
-				</div>
-
-				<input type="file" id="bulk-file-input" accept=".torrent,application/x-bittorrent" multiple hidden>
-				<input type="file" id="bulk-folder-input" webkitdirectory multiple hidden>
-
-				<div id="bulk-summary" class="alert alert-info alert-center" hidden><span class="ph-ico" data-lucide="info"></span><div></div></div>
-
-				<div id="bulk-results" class="ph-card-table" hidden>
-					<table><thead><tr><th>File</th><th class="tar">Result</th></tr></thead><tbody></tbody></table>
-				</div>
-			</div>';
+    // Static page body — self-contained markup in src/partials/admin.upload.body.html
+    // (HTML-/a11y-lintable). The only dynamic value is the CSRF token, echoed
+    // inline; captured into $body for the layout.
+    ob_start();
+    include __DIR__.'/../partials/admin.upload.body.html';
+    $body = (string) ob_get_clean();
 
     // The bulk-upload queue lives in assets/upload.js; it reads the CSRF token
     // from #bulk[data-csrf], so no PHP data needs inlining.

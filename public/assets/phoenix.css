@@ -410,6 +410,9 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-drop.is-over { border-color: var(--color-action); background-color: var(--color-info-bg); }
 .ph-drop .ph-ico { width: 32px; height: 32px; margin: 0 auto var(--space-3); color: var(--color-text-tertiary); }
 .ph-drop strong { color: var(--color-text); font-weight: var(--font-weight-medium); }
+/* Title line — a <span> (phrasing, valid inside the <label> drop zone) shown as
+   its own block. */
+.ph-drop-title { display: block; }
 .ph-drop input[type="file"] { display: none; }
 
 /* Key/value settings table */

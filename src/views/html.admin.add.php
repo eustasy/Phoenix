@@ -23,10 +23,6 @@ function view_admin_add_html(array $settings, bool $tables_installed, string|fal
 {
     require_once __DIR__.'/html.admin.layout.php';
 
-    // Hidden field carrying the CSRF token. Escaped defensively even though the
-    // token is always hex.
-    $csrf_field = '<input type="hidden" name="csrf" value="'.htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8').'">';
-
     $body = '';
 
     if ($message) {
@@ -39,36 +35,12 @@ function view_admin_add_html(array $settings, bool $tables_installed, string|fal
         return view_admin_layout_html($settings, 'Add a Torrent', $body, 'add', $csrf_token, 'Tracker', '', true);
     }
 
-    // The drop zone parses the file client-side and fills the form below; the
-    // file itself is never uploaded from here. The form posts plain fields.
-    $body .= '<label class="ph-drop" id="torrent-drop">
-			<span class="ph-ico" data-lucide="upload-cloud"></span>
-			<div><strong>Drop a .torrent file</strong> to fill the form automatically</div>
-			<small class="dim">or click to browse &mdash; parsed in your browser, nothing is uploaded<span id="torrent-drop-hint"></span></small>
-			<input type="file" id="torrent-file" accept=".torrent,application/x-bittorrent">
-		</label>
-
-		<div class="alert alert-danger" id="add-error" hidden><span class="ph-ico" data-lucide="circle-alert"></span><div id="add-error-text"></div></div>
-
-		<form id="add-form" class="ph-form-card" action="?page=add" method="POST">
-			<div class="ph-field-row">
-				<div class="ph-field"><label>Name</label><input type="text" name="name"></div>
-				<div class="ph-field"><label>Size (bytes)</label><input type="number" name="size"></div>
-			</div>
-			<div class="ph-field"><label>Info hash</label><input type="text" name="info_hash" class="mono"></div>
-			<div class="ph-field"><label>Filename</label><input type="text" name="filename"></div>
-			<div class="ph-field"><label>Files (JSON)</label><textarea name="files" class="code" rows="3"></textarea></div>
-			<div class="ph-field-row">
-				<div class="ph-field"><label>Trackers (one per line)</label><textarea name="trackers" class="code" rows="3"></textarea></div>
-				<div class="ph-field"><label>Web seeds (one per line)</label><textarea name="webseeds" class="code" rows="3"></textarea></div>
-			</div>
-			<label class="checkbox my-2"><input type="checkbox" name="listed" value="1" checked><span class="checkbox-label">Listed on the public index</span></label>
-			<input type="hidden" name="process" value="torrent_add">'.$csrf_field.'
-			<div class="ph-form-actions">
-				<button type="submit" name="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="plus"></span>Add Torrent</button>
-				<button type="reset" class="btn btn-ghost">Clear</button>
-			</div>
-		</form>';
+    // Static page body — self-contained markup in src/partials/admin.add.body.html
+    // (HTML-/a11y-lintable). The only dynamic value is the CSRF token, echoed
+    // inline; appended to $body (after any message) for the layout.
+    ob_start();
+    include __DIR__.'/../partials/admin.add.body.html';
+    $body .= (string) ob_get_clean();
 
     // Drag/drop parsing + form-fill lives in assets/add.js, which uses
     // PhoenixTorrent (assets/torrent-parse.js); both load as page sources.
