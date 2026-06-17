@@ -108,7 +108,7 @@ class ScrapeSpecificControllerTest extends PhoenixTestCase
     ];
 
     /**
-     * BEP 15 specifies exactly three keys per torrent dict (complete,
+     * BEP 48 specifies exactly three keys per torrent dict (complete,
      * downloaded, incomplete). Phoenix's XML/JSON renders extend that with
      * peers/size/traffic for caller convenience, but the bencode output
      * must stay strictly conformant — strict BitTorrent clients are within

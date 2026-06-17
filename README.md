@@ -58,7 +58,7 @@ Phoenix follows an MVC-inspired structure optimized for procedural PHP:
 phoenix/
 ├── public/              # Web-accessible entry points (thin; delegate to src/controller/)
 │   ├── announce.php     # BitTorrent announce endpoint (BEP 3)
-│   ├── scrape.php       # BitTorrent scrape endpoint (BEP 15)
+│   ├── scrape.php       # BitTorrent scrape endpoint (BEP 48)
 │   ├── index.php        # Public torrent listing (optional)
 │   ├── api/             # Management API (Authorization: Bearer <key>; index is public)
 │   │   ├── index.php    # GET  /api — Phoenix version (no auth)

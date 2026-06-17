@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 ////	view_scrape_bencode
-// Renders a normalized $scrape array as a bencode scrape response (BEP 15).
+// Renders a normalized $scrape array as a bencode scrape response (BEP 48).
 // The files-dict key is the raw 20-byte info_hash (hex2bin), not hex.
-// BEP 15 uses 'complete' (seeders), 'downloaded' (finished downloads),
+// BEP 48 uses 'complete' (seeders), 'downloaded' (finished downloads),
 // 'incomplete' (leechers).
 //
 // Arguments:
@@ -18,7 +18,7 @@ declare(strict_types=1);
 // The files dict is built as a PHP array keyed by raw binary info_hash and
 // cast to (object) so bencode_encode() emits it as a dict even when empty
 // (no torrents -> 'de', not an empty list). The encoder sorts the hashes and
-// each stats dict into the byte order BEP 15 wants.
+// each stats dict into the byte order BEP 48 wants.
 //
 // Returns: bencoded scrape response string.
 /** @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, traffic: int}> $scrape */

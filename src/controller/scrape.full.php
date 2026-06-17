@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 ////	scrape_full_controller
-// Handles a BEP 15 full-scrape request (no info_hash supplied, full_scrape
+// Handles a BEP 48 full-scrape request (no info_hash supplied, full_scrape
 // enabled). Caller is responsible for checking $settings['full_scrape']
 // before invoking. Returns the rendered XML/JSON/bencode body. On scrape
 // failure calls tracker_error() (which exits).

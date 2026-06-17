@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 ////	scrape_specific_controller
-// Handles a BEP 15 scrape request for one or more specific info_hashes.
+// Handles a BEP 48 scrape request for one or more specific info_hashes.
 // Caller is responsible for verifying the request is authorised (open
 // tracker, or all hashes appear in $allowed_torrents) before invoking.
 // Returns the rendered XML/JSON/bencode body. On scrape failure calls

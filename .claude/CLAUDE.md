@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Phoenix is a lightweight BitTorrent tracker written in procedural PHP with a MySQL/MariaDB backend. It implements the announce/scrape protocols (BEP 3, BEP 7, BEP 15, BEP 23). It is a tracker first, not a full torrent listing site — but it does ship an optional public index of explicitly-listed torrents (`public/index.php`), a public stats page (`public/scrape.php?stats`), a client-side magnet generator (`public/magnet.php`), and an admin panel (`public/admin.php`).
+Phoenix is a lightweight BitTorrent tracker written in procedural PHP with a MySQL/MariaDB backend. It implements the announce/scrape protocols (BEP 3, BEP 7, BEP 23, BEP 48). It is a tracker first, not a full torrent listing site — but it does ship an optional public index of explicitly-listed torrents (`public/index.php`), a public stats page (`public/scrape.php?stats`), a client-side magnet generator (`public/magnet.php`), and an admin panel (`public/admin.php`).
 
 ## Common commands
 
@@ -50,7 +50,7 @@ The codebase follows what the changelog calls a "puff-style" layout — small, s
 Every entry point sits in `public`, bootstraps via `require_once __DIR__.'/../src/phoenix.php'` (which loads settings, opens the DB, defines `tracker_error`), then delegates the real work to request handlers in `src/controller/` — `*_controller()` functions returning a response string the entry point echoes. The `public/*.php` files stay thin (`announce.php` is ~12 lines); `index.php` is the exception, calling its model and view directly:
 
 * `announce.php` → `announce_controller()` (`src/controller/announce.php`) — BEP 3 announce: sanitizes input, resolves peer addresses, handles peer events (new/change/access/stopped/completed), then builds and outputs the bencode response.
-* `scrape.php` — BEP 15 scrape; routes by mode to `scrape_stats_controller` / `scrape_specific_controller` / `scrape_full_controller` (`src/controller/scrape.*.php`). `?stats` returns tracker stats; with `info_hash`(es) returns specific torrents (closed trackers filter to allowed ones first); otherwise full scrape (if enabled).
+* `scrape.php` — BEP 48 (HTTP) scrape; routes by mode to `scrape_stats_controller` / `scrape_specific_controller` / `scrape_full_controller` (`src/controller/scrape.*.php`). `?stats` returns tracker stats; with `info_hash`(es) returns specific torrents (closed trackers filter to allowed ones first); otherwise full scrape (if enabled).
 * `index.php` — public torrent index, gated by `$settings['public_index']`.
 * `admin.php` — admin panel and first-run installer; routes to `admin_install_controller` (no config yet), else `admin_login_controller` then `admin_panel_controller` (`src/controller/admin.*.php`). Requires no `phoenix.custom.php` to enter installer mode.
 * `magnet.php` — pure client-side magnet generator. **Does not bootstrap** `../src/phoenix.php` and does not touch the tracker — it's a self-contained utility page.

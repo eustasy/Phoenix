@@ -34,7 +34,7 @@ class ViewScrapeBencodeTest extends PhoenixTestCase
     public function testInfoHashEncodedAsRawTwentyBytes(): void
     {
         $out = view_scrape_bencode($this->fixture());
-        // BEP 15: key is the raw 20-byte info_hash, prefixed by '20:'.
+        // BEP 48: key is the raw 20-byte info_hash, prefixed by '20:'.
         $rawHash = hex2bin('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
         $this->assertStringContainsString('20:'.$rawHash, $out);
     }
