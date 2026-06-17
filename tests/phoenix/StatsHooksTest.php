@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Phoenix\Tests;
 
 // Exercises the three stat-tracking hooks end-to-end through phoenix_hook(),
-// the real dispatcher the announce controller uses. Each firing runs in a
-// fresh subprocess: phoenix_hook() include_once's the hook file, so a single
-// PHPUnit process could only ever execute a given hook body once — a
-// subprocess per firing both sidesteps that and faithfully models the
-// announce flow (one process per request). The parent seeds/reads the shared
-// TESTING_-prefixed tables; the subprocess bootstraps the same DB and writes
-// to them.
+// the real dispatcher the announce controller uses. phoenix_hook() uses a plain
+// include (not include_once — see its own comment: FPM workers fire each hook
+// per request, many requests per process), so a hook body re-runs on every call
+// and can be fired repeatedly in one process. Firing in-process — rather than in
+// a subprocess, as this test used to — keeps the firings under the coverage
+// driver, so the opt-in insert path (which only runs with stats_enabled and the
+// event opted into stats_events) is recorded as covered, not just exercised.
+// The real one-process-per-request dispatch is still covered by the announce
+// controller tests and the smoke suite.
 class StatsHooksTest extends PhoenixTestCase
 {
     private const HASH = '__TEST_HOOK_1__';
@@ -43,16 +45,22 @@ class StatsHooksTest extends PhoenixTestCase
     }
 
     /**
-     * Fire one hook in a fresh subprocess. Bootstraps the test DB (TESTING_
-     * prefix), overrides the stats settings, builds $peer, and calls the real
-     * phoenix_hook(). Returns the captured process result.
+     * Fire one hook in-process through the real phoenix_hook(), with the stats
+     * settings overridden for this firing and a fixed $peer. The hook writes to
+     * the shared TESTING_-prefixed events table, which the parent then reads.
      *
      * @param array<int, string> $events
-     * @return array{stdout: string, stderr: string, exit: int}
      */
-    private function fire(string $hook, bool $enabled, array $events): array
+    private function fire(string $hook, bool $enabled, array $events): void
     {
-        $bootstrap = __DIR__.'/../bootstrap.php';
+        require_once __DIR__.'/../../src/functions/phoenix.hook.php';
+
+        $settings = self::$settings;
+        $settings['stats_enabled'] = $enabled;
+        $settings['stats_events'] = $events;
+        $settings['stats_geo'] = false;
+        $settings['stats_geo_database'] = '';
+
         $peer = [
             'info_hash' => self::HASH,
             'peer_id' => $this->peerIdHex(),
@@ -60,20 +68,7 @@ class StatsHooksTest extends PhoenixTestCase
             'ipv6' => false,
         ];
 
-        $script = '<?php '.
-            'require '.var_export($bootstrap, true).'; '.
-            '$connection = $GLOBALS[\'phoenix_connection\']; '.
-            '$settings = $GLOBALS[\'phoenix_settings\']; '.
-            '$time = $GLOBALS[\'phoenix_time\']; '.
-            '$settings[\'stats_enabled\'] = '.var_export($enabled, true).'; '.
-            '$settings[\'stats_events\'] = '.var_export($events, true).'; '.
-            '$settings[\'stats_geo\'] = false; '.
-            '$settings[\'stats_geo_database\'] = \'\'; '.
-            '$peer = '.var_export($peer, true).'; '.
-            'require '.var_export(__DIR__.'/../../src/functions/phoenix.hook.php', true).'; '.
-            'phoenix_hook('.var_export($hook, true).', $connection, $settings, $time, $peer);';
-
-        return $this->runPhpSubprocess($script);
+        phoenix_hook($hook, self::$connection, $settings, self::$time, $peer);
     }
 
     /** @return array<int, array<string, string|null>> */
@@ -93,16 +88,14 @@ class StatsHooksTest extends PhoenixTestCase
     public function testDownloadCompleteDisabledWritesNoRow(): void
     {
         $this->seedTorrent('owner');
-        $r = $this->fire('download.complete', false, ['completed']);
-        $this->assertSame(0, $r['exit'], $r['stderr']);
+        $this->fire('download.complete', false, ['completed']);
         $this->assertCount(0, $this->eventRows());
     }
 
     public function testDownloadCompleteEnabledWritesExactlyOneRow(): void
     {
         $this->seedTorrent('owner');
-        $r = $this->fire('download.complete', true, ['completed']);
-        $this->assertSame(0, $r['exit'], $r['stderr']);
+        $this->fire('download.complete', true, ['completed']);
 
         $rows = $this->eventRows();
         $this->assertCount(1, $rows);
@@ -117,16 +110,14 @@ class StatsHooksTest extends PhoenixTestCase
     public function testDownloadCompleteEnabledButEmptyEventsWritesNoRow(): void
     {
         $this->seedTorrent('owner');
-        $r = $this->fire('download.complete', true, []);
-        $this->assertSame(0, $r['exit'], $r['stderr']);
+        $this->fire('download.complete', true, []);
         $this->assertCount(0, $this->eventRows());
     }
 
     public function testDownloadCompleteResolvesEmptyUserWhenTorrentAbsent(): void
     {
         // No torrent seeded -> torrent_user returns '' but a row is still logged.
-        $r = $this->fire('download.complete', true, ['completed']);
-        $this->assertSame(0, $r['exit'], $r['stderr']);
+        $this->fire('download.complete', true, ['completed']);
 
         $rows = $this->eventRows();
         $this->assertCount(1, $rows);
@@ -137,50 +128,61 @@ class StatsHooksTest extends PhoenixTestCase
     {
         $this->seedTorrent('owner');
         // 'started' not in the list -> no row (the default posture).
-        $r = $this->fire('peer.new', true, ['completed']);
-        $this->assertSame(0, $r['exit'], $r['stderr']);
+        $this->fire('peer.new', true, ['completed']);
         $this->assertCount(0, $this->eventRows());
     }
 
-    public function testPeerNewGateOpen(): void
+    public function testPeerNewGateOpenLogsFullRow(): void
     {
         $this->seedTorrent('owner');
-        // 'started' listed -> exactly one 'started' row.
-        $r = $this->fire('peer.new', true, ['started']);
-        $this->assertSame(0, $r['exit'], $r['stderr']);
+        // 'started' listed -> exactly one fully-populated 'started' row.
+        $this->fire('peer.new', true, ['started']);
 
         $rows = $this->eventRows();
         $this->assertCount(1, $rows);
         $this->assertSame('started', $rows[0]['event']);
+        $this->assertSame('qBittorrent 4.6.2.0', $rows[0]['client']);
         $this->assertSame('owner', $rows[0]['user']);
+        $this->assertSame('', $rows[0]['country']);
+        $this->assertSame('', $rows[0]['continent']);
+    }
+
+    public function testPeerNewResolvesEmptyUserWhenTorrentAbsent(): void
+    {
+        // No torrent seeded -> torrent_user returns '' but the row still logs.
+        $this->fire('peer.new', true, ['started']);
+
+        $rows = $this->eventRows();
+        $this->assertCount(1, $rows);
+        $this->assertSame('', $rows[0]['user']);
     }
 
     public function testPeerStoppedGateClosed(): void
     {
         $this->seedTorrent('owner');
-        $r = $this->fire('peer.stopped', true, ['completed']);
-        $this->assertSame(0, $r['exit'], $r['stderr']);
+        $this->fire('peer.stopped', true, ['completed']);
         $this->assertCount(0, $this->eventRows());
     }
 
-    public function testPeerStoppedGateOpen(): void
+    public function testPeerStoppedGateOpenLogsFullRow(): void
     {
         $this->seedTorrent('owner');
-        $r = $this->fire('peer.stopped', true, ['stopped']);
-        $this->assertSame(0, $r['exit'], $r['stderr']);
+        $this->fire('peer.stopped', true, ['stopped']);
 
         $rows = $this->eventRows();
         $this->assertCount(1, $rows);
         $this->assertSame('stopped', $rows[0]['event']);
+        $this->assertSame('qBittorrent 4.6.2.0', $rows[0]['client']);
+        $this->assertSame('owner', $rows[0]['user']);
+        $this->assertSame('', $rows[0]['country']);
+        $this->assertSame('', $rows[0]['continent']);
     }
 
     public function testGlobalGateDisablesPeerHooksRegardlessOfEvents(): void
     {
         $this->seedTorrent('owner');
-        $a = $this->fire('peer.new', false, ['started']);
-        $b = $this->fire('peer.stopped', false, ['stopped']);
-        $this->assertSame(0, $a['exit'], $a['stderr']);
-        $this->assertSame(0, $b['exit'], $b['stderr']);
+        $this->fire('peer.new', false, ['started']);
+        $this->fire('peer.stopped', false, ['stopped']);
         $this->assertCount(0, $this->eventRows());
     }
 }
