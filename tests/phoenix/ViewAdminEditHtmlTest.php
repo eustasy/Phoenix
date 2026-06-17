@@ -74,7 +74,7 @@ class ViewAdminEditHtmlTest extends TestCase
             false,
             'tok',
         );
-        $this->assertStringContainsString('<textarea name="files" class="code" rows="3"></textarea>', $html);
+        $this->assertStringContainsString('<textarea id="edit-files" name="files" class="code" rows="3"></textarea>', $html);
         $this->assertStringContainsString('name="name" value=""', $html);
     }
 
