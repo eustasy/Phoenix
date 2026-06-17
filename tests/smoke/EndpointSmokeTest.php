@@ -627,6 +627,79 @@ class EndpointSmokeTest extends SmokeTestCase
     }
 
     #[Depends('testApiDelistAndListTogglesPublicIndex')]
+    public function testApiUpdatesTorrentFields(): void
+    {
+        // Drive public/api/torrent/update.php end-to-end over HTTP (the entry
+        // point only ever runs in the PCOV'd server, never in-process). Add a
+        // dedicated torrent owned by 'smoke' on its own info_hash, then update
+        // its editable fields and confirm the response and the row both change;
+        // also cover the XML serialisation, the POST-only guard, and the
+        // non-owner refusal.
+        $hash = str_repeat('2', 40);
+        $add = $this->post('/api/torrent/add.php', [
+            'info_hash' => $hash,
+            'name' => 'Before Update',
+            'size' => '100',
+        ], $this->bearer('smoke-api-key'));
+        $this->assertSame(200, $add['status'], $add['body']);
+
+        // Owner updates name + size + listed; only the sent fields change.
+        $upd = $this->post('/api/torrent/update.php', [
+            'info_hash' => $hash,
+            'name' => 'After Update',
+            'size' => '2048',
+            'listed' => '0',
+        ], $this->bearer('smoke-api-key'));
+        $this->assertSame(200, $upd['status'], $upd['body']);
+        $decoded = json_decode($upd['body'], true);
+        $this->assertIsArray($decoded);
+        $this->assertSame('After Update', $decoded['torrent']['name']);
+        $this->assertSame(2048, $decoded['torrent']['size']);
+        $this->assertSame(0, $decoded['torrent']['listed']);
+        $this->assertSame('smoke', $decoded['torrent']['user']);
+
+        // The row really changed in the database.
+        $db = $this->db();
+        $prefix = $this->dbCreds()['db_prefix'];
+        $row = mysqli_fetch_assoc(mysqli_query(
+            $db,
+            "SELECT `name`, `size`, `listed` FROM `{$prefix}torrents` WHERE `info_hash`='{$hash}'",
+        ));
+        $this->assertIsArray($row);
+        $this->assertSame('After Update', $row['name']);
+        $this->assertEquals(2048, $row['size']);
+        $this->assertEquals(0, $row['listed']);
+
+        // ?xml serialises the updated row as XML.
+        $xml = $this->post('/api/torrent/update.php?xml=1', [
+            'info_hash' => $hash,
+            'name' => 'Xml Update',
+        ], $this->bearer('smoke-api-key'));
+        $this->assertSame(200, $xml['status'], $xml['body']);
+        $this->assertStringContainsString('<name>Xml Update</name>', $xml['body']);
+
+        // POST only: a GET is refused before auth, serialised as JSON.
+        $get = $this->get('/api/torrent/update.php', ['info_hash' => $hash], $this->bearer('smoke-api-key'));
+        $this->assertSame(200, $get['status']);
+        $this->assertSame(['error' => 'Method not allowed.'], json_decode($get['body'], true));
+
+        // A non-owner gets the non-disclosing 'Torrent not found.', and the row
+        // is left untouched (still the XML-set name).
+        $other = $this->post('/api/torrent/update.php', [
+            'info_hash' => $hash,
+            'name' => 'Hijacked',
+        ], $this->bearer('other-api-key'));
+        $this->assertSame(200, $other['status']);
+        $this->assertSame(['error' => 'Torrent not found.'], json_decode($other['body'], true));
+        $unchanged = mysqli_fetch_assoc(mysqli_query(
+            $db,
+            "SELECT `name` FROM `{$prefix}torrents` WHERE `info_hash`='{$hash}'",
+        ));
+        $this->assertIsArray($unchanged);
+        $this->assertSame('Xml Update', $unchanged['name']);
+    }
+
+    #[Depends('testApiDelistAndListTogglesPublicIndex')]
     public function testApiDeleteRemovesTorrentAndPeers(): void
     {
         // Add a dedicated torrent owned by 'smoke' and seed it a couple of peers
