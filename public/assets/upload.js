@@ -34,7 +34,6 @@
     addFiles(toArray(folderInput.files))
     folderInput.value = ""
   })
-
   ;["dragenter", "dragover"].forEach(function (ev) {
     drop.addEventListener(ev, function (e) {
       e.preventDefault()
