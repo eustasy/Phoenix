@@ -44,10 +44,10 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: lts/*
-          cache: npm
+      #    cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      #- name: Install dependencies
+      #  run: npm ci
 
       - uses: qltysh/qlty-action/install@fd52dc852530a708d68c3b7342f8d33d1df4cd55 # v2.2.1
 
