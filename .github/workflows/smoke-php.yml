@@ -102,7 +102,7 @@ jobs:
       - name: Merge e2e coverage to Clover
         if: matrix.php-version == '8.6'
         run: |
-          echo "PCOV dumps: $(ls -1 "$SMOKE_COV_DIR" 2>/dev/null | wc -l) file(s)"
+          echo "PCOV dumps: $(find "$SMOKE_COV_DIR" -maxdepth 1 -type f 2>/dev/null | wc -l) file(s)"
           php tests/smoke/merge-coverage.php "$SMOKE_COV_DIR" coverage/smoke-clover.xml
           echo "clover size: $(wc -c < coverage/smoke-clover.xml) bytes"
 
