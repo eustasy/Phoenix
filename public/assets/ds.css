@@ -158,12 +158,12 @@
 :root {
   /* Typography */
   --font-body:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+    "Inter", -apple-system, "BlinkMacSystemFont", "Segoe UI", "Helvetica", "Arial",
     sans-serif;
   --font-heading: var(--font-body);
   --font-mono:
-    "Berkeley Mono", "MonoLisa", "IBM Plex Mono", "Source Code Pro", Menlo,
-    SFMono-Regular, Consolas, monospace;
+    "Berkeley Mono", "MonoLisa", "IBM Plex Mono", "Source Code Pro", "Menlo",
+    "SFMono-Regular", "Consolas", "Monaco", monospace;
 
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
@@ -472,8 +472,7 @@
 }
 
 html {
-  -moz-text-size-adjust: none;
-  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
   text-size-adjust: none;
   tab-size: 4;
 }
@@ -532,7 +531,7 @@ ol[role="list"] {
 /* Anchor defaults */
 a:not([class]) {
   text-decoration-skip-ink: auto;
-  color: currentColor;
+  color: currentcolor;
 }
 
 /* Consistent textarea behavior */
@@ -1692,7 +1691,7 @@ dialog::backdrop {
   position: absolute;
   width: 1em;
   height: 1em;
-  border: 2px solid currentColor;
+  border: 2px solid currentcolor;
   border-inline-end-color: transparent;
   border-radius: var(--radius-full);
   animation: btn-spin 0.6s linear infinite;
@@ -2443,14 +2442,12 @@ dialog.dialog {
 
 /* Align to end (right-side menus) */
 .dropdown-menu-end {
-  inset-inline-start: auto;
-  inset-inline-end: 0;
+  inset-inline: auto 0;
 }
 
 /* Open upward — place above the trigger */
 .dropdown-menu-up {
-  inset-block-start: auto;
-  inset-block-end: calc(100% + var(--space-1));
+  inset-block: auto calc(100% + var(--space-1));
   animation-name: dropdown-enter-up;
 }
 
@@ -2916,12 +2913,11 @@ fieldset:disabled .fieldset-legend {
   /* Icon padding on the leading side */
   padding-inline-start: calc(var(--space-3) + 1rem + var(--space-2)) !important;
   /* Shortcut badge padding on the trailing side */
-  padding-inline-end: calc(var(--space-2) + 1.5rem + var(--space-2)) !important;
 }
 
 /* Remove browser-native clear/cancel button */
 .input-search-field::-webkit-search-cancel-button {
-  -webkit-appearance: none;
+  appearance: none;
 }
 
 /* Expanded state — triggered by focus or .is-open (set by JS) */
@@ -3174,8 +3170,7 @@ fieldset:disabled .fieldset-legend {
 .listbox-popup {
   position: absolute;
   inset-block-start: calc(100% + var(--space-1));
-  inset-inline-start: 0;
-  inset-inline-end: 0;
+  inset-inline: 0;
   z-index: 100;
   box-shadow: var(--shadow-md);
 }
@@ -3650,10 +3645,8 @@ fieldset:disabled .fieldset-legend {
 .navbar-drawer .navbar-nav a[aria-current="page"]::after,
 .navbar-drawer .navbar-nav a.is-active::after {
   display: block;
-  inset-block-start: 20%;
-  inset-block-end: 20%;
-  inset-inline-start: 0;
-  inset-inline-end: auto;
+  inset-block: 20%;
+  inset-inline: 0 auto;
   height: auto;
   width: 2px;
 }
@@ -3802,11 +3795,9 @@ fieldset:disabled .fieldset-legend {
 /* Vertical active indicator — left bar instead of bottom bar */
 .navbar-vertical .navbar-nav a[aria-current="page"]::after,
 .navbar-vertical .navbar-nav a.is-active::after {
-  inset-block-end: auto;
   inset-inline: auto;
   inset-inline-start: 0;
-  inset-block-start: 20%;
-  inset-block-end: 20%;
+  inset-block: 20%;
   height: auto;
   width: 2px;
 }
@@ -3819,8 +3810,7 @@ fieldset:disabled .fieldset-legend {
 
 /* Animated indicator for vertical axis */
 .navbar-vertical .navbar-nav .nav-indicator {
-  inset-block-start: 0;
-  inset-block-end: auto;
+  inset-block: 0 auto;
   inset-inline-start: 0;
   width: 2px;
   height: auto;
@@ -4023,8 +4013,7 @@ fieldset:disabled .fieldset-legend {
 
 /* Horizontal layout variant */
 .radio-group-inline {
-  flex-direction: row;
-  flex-wrap: wrap;
+  flex-flow: row wrap;
   gap: var(--space-4);
 }
 
@@ -4657,8 +4646,7 @@ caption {
 .user-menu {
   position: absolute;
   inset-block-end: calc(100% + var(--space-2));
-  inset-inline-start: var(--space-2);
-  inset-inline-end: var(--space-2);
+  inset-inline: var(--space-2) var(--space-2);
   background-color: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-xl);
