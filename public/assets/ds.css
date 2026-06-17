@@ -1,5 +1,12 @@
 /* Eustasy Design System — bundled for Phoenix */
 
+/* Cascade layers: the text utilities live in a later `utilities` layer so they
+   beat base component styles without !important. Unlayered styles outrank
+   layered ones, so everything except those utilities is wrapped in `base`. */
+@layer base, utilities;
+
+@layer base {
+
 /* ===== ds/themes/flexoki.css ===== */
 /* ==========================================================================
    Flexoki 2.0 Theme for eustasy/.ui
@@ -505,7 +512,7 @@ h6 {
 
 /* Reduced motion: disable transitions/animations for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
-  /* stylelint-disable selector-max-universal, time-min-milliseconds -- near-instant reset across all elements is intentional */
+  /* stylelint-disable selector-max-universal, time-min-milliseconds, declaration-no-important -- near-instant reduced-motion reset must override every component's animation/transition */
   *,
   *::before,
   *::after {
@@ -514,7 +521,7 @@ h6 {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  /* stylelint-enable selector-max-universal, time-min-milliseconds */
+  /* stylelint-enable selector-max-universal, time-min-milliseconds, declaration-no-important */
 }
 
 /* Remove list styles on ul, ol elements with a list role */
@@ -864,11 +871,7 @@ var {
    Shared input styles
    -------------------------------------------------------------------------- */
 
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
-    [type="file"]
-  ):not([type="color"]):not([type="submit"]):not([type="reset"]):not(
-    [type="button"]
-  ),
+input:where(:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="submit"]):not([type="reset"]):not([type="button"])),
 textarea,
 select {
   display: block;
@@ -887,21 +890,13 @@ select {
     box-shadow var(--duration-fast) var(--easing);
 }
 
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
-    [type="file"]
-  ):not([type="color"]):not([type="submit"]):not([type="reset"]):not(
-    [type="button"]
-  ):hover,
+input:where(:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="submit"]):not([type="reset"]):not([type="button"])):hover,
 textarea:hover,
 select:hover {
   border-color: var(--color-border-hover);
 }
 
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
-    [type="file"]
-  ):not([type="color"]):not([type="submit"]):not([type="reset"]):not(
-    [type="button"]
-  ):focus-visible,
+input:where(:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="submit"]):not([type="reset"]):not([type="button"])):focus-visible,
 textarea:focus-visible,
 select:focus-visible {
   border-color: var(--color-action);
@@ -2528,7 +2523,7 @@ dialog.dialog {
      <fieldset class="fieldset">
        <legend class="fieldset-legend">Shipping address</legend>
        <p class="fieldset-hint">All fields are required.</p>
-       <!-- form fields -->
+       \3c !-- form fields -->
      </fieldset>
    ========================================================================== */
 
@@ -2770,7 +2765,7 @@ fieldset:disabled .fieldset-legend {
 
 /* Override base margin on the input element */
 .input-field {
-  margin-block-end: 0 !important;
+  margin-block-end: 0;
 }
 
 .input-hint {
@@ -2823,14 +2818,14 @@ fieldset:disabled .fieldset-legend {
 }
 
 .input-addon-group .input-field:not(:first-child) {
-  border-start-start-radius: 0 !important;
-  border-end-start-radius: 0 !important;
-  border-inline-start: none !important;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  border-inline-start: none;
 }
 
 .input-addon-group .input-field:not(:last-child) {
-  border-start-end-radius: 0 !important;
-  border-end-end-radius: 0 !important;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
 }
 
 .input-addon {
@@ -2896,11 +2891,10 @@ fieldset:disabled .fieldset-legend {
 }
 
 .input-search-field {
-  /* base/forms.css uses a high-specificity :not() chain — !important needed */
-  max-width: none !important;
-  width: 14rem !important;
+  max-width: none;
+  width: 14rem;
   /* Icon padding on the leading side */
-  padding-inline: calc(var(--space-3) + 1rem + var(--space-2)) calc(var(--space-2) + 1.5rem + var(--space-2)) !important;
+  padding-inline: calc(var(--space-3) + 1rem + var(--space-2)) calc(var(--space-2) + 1.5rem + var(--space-2));
   /* Shortcut badge padding on the trailing side */
 }
 
@@ -2912,7 +2906,7 @@ fieldset:disabled .fieldset-legend {
 /* Expanded state — triggered by focus or .is-open (set by JS) */
 .input-search-field:focus,
 .input-search.is-open .input-search-field {
-  width: var(--width-input) !important;
+  width: var(--width-input);
 }
 
 /* Hide shortcut badge when open */
@@ -2922,14 +2916,13 @@ fieldset:disabled .fieldset-legend {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* base/forms.css sets transition: border-color, box-shadow with specificity
-     (0,8,1). We must use !important here to also animate width. All three
-     properties are listed so border/shadow transitions are not lost. */
+  /* Base forms only transitions border-color + box-shadow; redeclare all three
+     so animating width here doesn't drop the border/shadow transitions. */
   .input-search-field {
     transition:
       width var(--duration-normal) var(--easing),
       border-color var(--duration-fast) var(--easing),
-      box-shadow var(--duration-fast) var(--easing) !important;
+      box-shadow var(--duration-fast) var(--easing);
   }
 
   .input-search-shortcut {
@@ -3521,6 +3514,7 @@ fieldset:disabled .fieldset-legend {
   }
 
   .navbar-hide-mobile {
+    /* stylelint-disable-next-line declaration-no-important -- hide utility must force display:none over any element it is applied to */
     display: none !important;
   }
 
@@ -4096,7 +4090,7 @@ fieldset:disabled .fieldset-legend {
 
 /* Override base margin */
 .select-field {
-  margin-block-end: 0 !important;
+  margin-block-end: 0;
 }
 
 .select-hint {
@@ -4378,6 +4372,10 @@ caption {
 }
 
 
+}
+
+@layer utilities {
+
 /* ===== components/text.css ===== */
 /* ==========================================================================
    Text
@@ -4389,122 +4387,122 @@ caption {
 
 /* Size */
 .text-xs {
-  font-size: var(--font-size-xs) !important;
+  font-size: var(--font-size-xs);
 }
 .text-sm {
-  font-size: var(--font-size-sm) !important;
+  font-size: var(--font-size-sm);
 }
 .text-base {
-  font-size: var(--font-size-base) !important;
+  font-size: var(--font-size-base);
 }
 .text-lg {
-  font-size: var(--font-size-lg) !important;
+  font-size: var(--font-size-lg);
 }
 .text-xl {
-  font-size: var(--font-size-xl) !important;
+  font-size: var(--font-size-xl);
 }
 
 /* Weight */
 .text-normal {
-  font-weight: var(--font-weight-normal) !important;
+  font-weight: var(--font-weight-normal);
 }
 .text-medium {
-  font-weight: var(--font-weight-medium) !important;
+  font-weight: var(--font-weight-medium);
 }
 .text-bold {
-  font-weight: var(--font-weight-bold) !important;
+  font-weight: var(--font-weight-bold);
 }
 
 /* Color */
 .text-default {
-  color: var(--color-text) !important;
+  color: var(--color-text);
 }
 .text-muted {
-  color: var(--color-text-secondary) !important;
+  color: var(--color-text-secondary);
 }
 .text-subtle {
-  color: var(--color-text-tertiary) !important;
+  color: var(--color-text-tertiary);
 }
 .text-disabled {
-  color: var(--color-text-disabled) !important;
+  color: var(--color-text-disabled);
 }
 .text-danger {
-  color: var(--color-danger) !important;
+  color: var(--color-danger);
 }
 .text-success {
-  color: var(--color-success) !important;
+  color: var(--color-success);
 }
 .text-warning {
-  color: var(--color-warning) !important;
+  color: var(--color-warning);
 }
 .text-info {
-  color: var(--color-info) !important;
+  color: var(--color-info);
 }
 
 /* Alignment */
 .text-start {
-  text-align: start !important;
+  text-align: start;
 }
 .text-center {
-  text-align: center !important;
+  text-align: center;
 }
 .text-end {
-  text-align: end !important;
+  text-align: end;
 }
 
 /* Transform */
 .text-uppercase {
-  text-transform: uppercase !important;
+  text-transform: uppercase;
 }
 .text-lowercase {
-  text-transform: lowercase !important;
+  text-transform: lowercase;
 }
 .text-capitalize {
-  text-transform: capitalize !important;
+  text-transform: capitalize;
 }
 
 /* Wrapping / overflow */
 .text-nowrap {
-  white-space: nowrap !important;
+  white-space: nowrap;
 }
 .text-truncate {
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .text-wrap {
-  white-space: normal !important;
+  white-space: normal;
 }
 .text-break {
-  overflow-wrap: break-word !important;
-  word-break: break-word !important;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Decoration */
 .text-underline {
-  text-decoration: underline !important;
+  text-decoration: underline;
 }
 .text-no-underline {
-  text-decoration: none !important;
+  text-decoration: none;
 }
 .text-strikethrough {
-  text-decoration: line-through !important;
+  text-decoration: line-through;
 }
 
 /* Leading */
 .text-leading-tight {
-  line-height: var(--line-height-tight) !important;
+  line-height: var(--line-height-tight);
 }
 .text-leading-normal {
-  line-height: var(--line-height-normal) !important;
+  line-height: var(--line-height-normal);
 }
 .text-leading-loose {
-  line-height: var(--line-height-loose) !important;
+  line-height: var(--line-height-loose);
 }
 
 /* Mono */
 .text-mono {
-  font-family: var(--font-mono) !important;
+  font-family: var(--font-mono);
 }
 
 /* Visually hidden (screen-reader only) — does not truncate */
@@ -4520,6 +4518,9 @@ caption {
   border: 0;
 }
 
+}
+
+@layer base {
 
 /* ===== components/textarea.css ===== */
 /* ==========================================================================
@@ -4569,7 +4570,7 @@ caption {
 .textarea-field {
   resize: vertical;
   min-height: 6rem;
-  margin-block-end: 0 !important;
+  margin-block-end: 0;
 }
 
 .textarea-hint {
@@ -4688,8 +4689,9 @@ caption {
   border-block-start: var(--border-width) solid var(--color-border);
   margin: var(--space-1-5) 0;
 }
-.user-menu-signout {
-  color: var(--color-danger) !important;
+.user-menu a.user-menu-signout,
+.user-menu button.user-menu-signout {
+  color: var(--color-danger);
 }
 .user-menu-signout .user-menu-icon {
   opacity: 1;
@@ -4716,4 +4718,6 @@ caption {
 [aria-expanded="true"] .user-menu-chevron {
   transform: rotate(180deg);
 }
+
+} /* @layer base */
 

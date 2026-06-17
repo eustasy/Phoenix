@@ -80,7 +80,9 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
     }
     $actions = '<div class="seg" role="tablist" aria-label="Map metric">'.$toggle.'</div>';
 
-    $extra_head = '
+    // Load the jsVectorMap stylesheet before phoenix.css so Phoenix's .jvm-*
+    // overrides win by source order (no !important needed).
+    $head_pre = '
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/css/jsvectormap.min.css">';
     $extra_srcs = [
         'https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js',
@@ -120,5 +122,5 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
     $inline_js = 'var GEO = '.$geo_json.";\nvar GEO_DEFAULT = ".json_encode($default).";\n"
         .(string) file_get_contents(__DIR__.'/../../public/assets/_geography.js');
 
-    return view_admin_layout_html($settings, 'Geography', $body, 'geography', $csrf_token, 'Tracker', $actions, false, $extra_head, $inline_js, $extra_srcs);
+    return view_admin_layout_html($settings, 'Geography', $body, 'geography', $csrf_token, 'Tracker', $actions, false, '', $inline_js, $extra_srcs, $head_pre);
 }

@@ -21,17 +21,19 @@ declare(strict_types=1);
 //   $crumb       - small label above the title (e.g. "Tracker" / "Server")
 //   $actions     - trusted HTML for the topbar action area (buttons), or ''
 //   $narrow      - narrow the body column (forms/diagnostics opt in)
-//   $extra_head  - per-page <style>/<link> injected into <head>
+//   $extra_head  - per-page <style>/<link> injected after phoenix.css
 //   $inline_js   - inline JS for the rare page that must receive PHP data
 //                  (emitted in a <script> only when non-empty)
 //   $extra_srcs  - per-page <script src> URLs (feature/page .js + libraries);
 //                  assets/admin.js is always prepended
+//   $head_pre    - vendor base <link>/<style> injected before phoenix.css, so
+//                  Phoenix can override it (e.g. the jsVectorMap stylesheet)
 
 /**
  * @param PhoenixSettings $settings
  * @param list<string> $extra_srcs
  */
-function view_admin_layout_html(array $settings, string $title, string $body, string $active, string $csrf_token = '', string $crumb = 'Tracker', string $actions = '', bool $narrow = false, string $extra_head = '', string $inline_js = '', array $extra_srcs = []): string
+function view_admin_layout_html(array $settings, string $title, string $body, string $active, string $csrf_token = '', string $crumb = 'Tracker', string $actions = '', bool $narrow = false, string $extra_head = '', string $inline_js = '', array $extra_srcs = [], string $head_pre = ''): string
 {
     require_once __DIR__.'/html.head.php';
     require_once __DIR__.'/html.mark.php';
@@ -106,7 +108,7 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
     // ahead of any page-specific sources.
     $admin_srcs = array_merge(['/assets/admin.js'], $extra_srcs);
 
-    return view_head_html('Phoenix Admin: '.$title, $extra_head).'
+    return view_head_html('Phoenix Admin: '.$title, $extra_head, $head_pre).'
 <body>
 <div class="app">
 

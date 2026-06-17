@@ -9,9 +9,11 @@ declare(strict_types=1);
 // applies the persisted theme before first paint (avoiding a flash). Returns
 // everything up to and including </head>; the caller opens <body> and its own
 // page wrapper. $extra_head is trusted HTML (per-page <style>/<link>), injected
-// verbatim. $title is plain text and is escaped here.
+// verbatim after phoenix.css (page overrides win). $head_pre is trusted HTML
+// injected before phoenix.css, for vendor base styles the app must override
+// (e.g. the jsVectorMap stylesheet). $title is plain text and is escaped here.
 
-function view_head_html(string $title, string $extra_head = ''): string
+function view_head_html(string $title, string $extra_head = '', string $head_pre = ''): string
 {
     return '<!DOCTYPE html>
 <html lang="en" class="theme-light">
@@ -23,7 +25,7 @@ function view_head_html(string $title, string $extra_head = ''): string
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="/assets/ds.css">
+	<link rel="stylesheet" href="/assets/ds.css">'.$head_pre.'
 	<link rel="stylesheet" href="/assets/phoenix.css">'.$extra_head.'
 	<script>(function(){var t="light";try{t=localStorage.getItem("phoenix-theme")||"light";}catch(e){}document.documentElement.className="theme-"+(t==="dark"?"dark":"light");})();</script>
 </head>';

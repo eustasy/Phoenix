@@ -3,6 +3,12 @@
    Only references DS semantic tokens (var(--color-*), var(--space-*), …).
    ========================================================================== */
 
+/* Phoenix rules sit in the `base` layer (order declared in ds.css, restated
+   here) so the design system's text utilities win without !important. */
+@layer base, utilities;
+
+@layer base {
+
 html, body { height: 100%; }
 body { background-color: var(--color-bg); color: var(--color-text); }
 
@@ -13,6 +19,7 @@ body { background-color: var(--color-bg); color: var(--color-text); }
 /* The hidden attribute must beat an inline display (e.g. display:flex on a
    JS-toggled alert), so a placeholder banner stays hidden until JS reveals it
    by clearing the attribute. */
+/* stylelint-disable-next-line declaration-no-important -- only !important beats an inline style */
 [hidden] { display: none !important; }
 
 /* Phoenix flame mark — disc themes with --color-action; warm flame on top. */
@@ -356,7 +363,7 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-toolbar .ph-spacer { flex: 1; }
 .ph-search { position: relative; display: inline-flex; align-items: center; min-width: 240px; flex: 1; max-width: 360px; }
 .ph-search .ph-ico { position: absolute; inset-inline-start: var(--space-3); width: 16px; height: 16px; color: var(--color-text-tertiary); pointer-events: none; }
-.ph-search input { width: 100% !important; max-width: none !important; padding-inline-start: calc(var(--space-3) + 16px + var(--space-2)) !important; }
+.ph-search input { width: 100%; max-width: none; padding-inline-start: calc(var(--space-3) + 16px + var(--space-2)); }
 .ph-count { font-size: var(--font-size-sm); color: var(--color-text-tertiary); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* Magnet link button in tables */
@@ -386,7 +393,7 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-field > label { display: block; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); margin-bottom: var(--space-1-5); }
 .ph-field input:not([type="checkbox"]):not([type="radio"]),
 .ph-field textarea,
-.ph-field select { width: 100% !important; max-width: none !important; margin-bottom: 0 !important; }
+.ph-field select { width: 100%; max-width: none; margin-bottom: 0; }
 .ph-field .ph-hint { font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin-top: var(--space-1-5); }
 .ph-field textarea.code { font-family: var(--font-mono); font-size: var(--font-size-sm); }
 .ph-field-row { display: grid; gap: var(--space-4); grid-template-columns: 1fr 1fr; }
@@ -485,7 +492,7 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-sidebar .ph-nav-badge { background-color: rgba(255, 252, 240, 0.16); color: var(--flexoki-paper); }
 .ph-sidebar .ph-theme-toggle { color: var(--flexoki-red-100); border-color: rgba(255, 252, 240, 0.22); }
 .ph-sidebar .ph-theme-toggle:hover { background-color: rgba(255, 252, 240, 0.10); color: var(--flexoki-paper); border-color: rgba(255, 252, 240, 0.4); }
-.ph-sidebar .dim { color: var(--flexoki-red-200) !important; }
+.ph-sidebar .dim { color: var(--flexoki-red-200); }
 .ph-sidebar .btn-ghost { color: var(--flexoki-red-100); }
 .ph-sidebar .btn-ghost:hover { background-color: rgba(255, 252, 240, 0.10); color: var(--flexoki-paper); }
 /* Cream disc so the flame reads on red */
@@ -527,13 +534,17 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .geo-co .bar i { display: block; height: 100%; border-radius: var(--radius-full); background-color: var(--geo-c, var(--color-action)); }
 .geo-val { font-size: var(--font-size-sm); font-variant-numeric: tabular-nums; color: var(--color-text-secondary); white-space: nowrap; }
 
-/* jsVectorMap overrides to fit the system */
-.jvm-container { background-color: transparent !important; }
-.jvm-tooltip { background-color: var(--color-surface-overlay) !important; color: var(--color-text) !important; border: var(--border-width) solid var(--color-border) !important; border-radius: var(--radius-md) !important; box-shadow: var(--shadow-md) !important; font-family: var(--font-body) !important; font-size: var(--font-size-xs) !important; font-weight: var(--font-weight-medium) !important; padding: var(--space-1) var(--space-2) !important; }
-
 /* Responsive: collapse sidebar on small screens */
 @media (max-width: 860px) {
   .app { grid-template-columns: 1fr; }
   .ph-sidebar { position: static; height: auto; flex-direction: column; }
   .ph-topbar, .ph-body { padding-inline: var(--space-4); }
 }
+
+} /* @layer base */
+
+/* jsVectorMap overrides — left unlayered so they win over the jsVectorMap CDN
+   stylesheet (also unlayered) by source order: it is loaded before phoenix.css
+   via the head's $head_pre slot, so no !important is needed. */
+.jvm-container { background-color: transparent; }
+.jvm-tooltip { background-color: var(--color-surface-overlay); color: var(--color-text); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); font-family: var(--font-body); font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); padding: var(--space-1) var(--space-2); }
