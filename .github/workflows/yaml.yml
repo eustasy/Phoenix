@@ -1,28 +1,26 @@
 # eustasy/.Normal 4.0beta10
-name: "Normal: Markdown"
+name: "Normal: YAML"
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - "**.md"
-      - ".github/workflows/md.yml"
-      - ".qlty/configs/.markdownlint.json"
+      - "**.yml"
+      - "**.yaml"
       - ".qlty/qlty.toml"
   pull_request:
     branches: [main]
     paths:
-      - "**.md"
-      - ".github/workflows/md.yml"
-      - ".qlty/configs/.markdownlint.json"
+      - "**.yml"
+      - "**.yaml"
       - ".qlty/qlty.toml"
 
 permissions:
   contents: read
 
 jobs:
-  md:
-    name: Lint + format
+  yaml:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -31,5 +29,5 @@ jobs:
 
       - uses: qltysh/qlty-action/install@fd52dc852530a708d68c3b7342f8d33d1df4cd55 # v2.2.1
 
-      - name: Lint + format check (markdownlint)
-        run: qlty check --all --filter=markdownlint
+      - name: Lint (yamllint, actionlint, zizmor)
+        run: qlty check --all --no-formatters --filter=yamllint,actionlint,zizmor

@@ -1,27 +1,29 @@
 # eustasy/.Normal 4.0beta10
-name: "Normal: Markdown"
+name: "Normal: CSS/SCSS"
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - "**.md"
-      - ".github/workflows/md.yml"
-      - ".qlty/configs/.markdownlint.json"
+      - "**.css"
+      - "**.scss"
+      - ".github/workflows/css.yml"
+      - ".qlty/configs/.stylelintrc.json"
       - ".qlty/qlty.toml"
   pull_request:
     branches: [main]
     paths:
-      - "**.md"
-      - ".github/workflows/md.yml"
-      - ".qlty/configs/.markdownlint.json"
+      - "**.css"
+      - "**.scss"
+      - ".github/workflows/css.yml"
+      - ".qlty/configs/.stylelintrc.json"
       - ".qlty/qlty.toml"
 
 permissions:
   contents: read
 
 jobs:
-  md:
+  css:
     name: Lint + format
     runs-on: ubuntu-latest
     steps:
@@ -31,5 +33,5 @@ jobs:
 
       - uses: qltysh/qlty-action/install@fd52dc852530a708d68c3b7342f8d33d1df4cd55 # v2.2.1
 
-      - name: Lint + format check (markdownlint)
-        run: qlty check --all --filter=markdownlint
+      - name: Lint + format check (stylelint)
+        run: qlty check --all --filter=stylelint

@@ -68,29 +68,6 @@ name = "phpstan"
 [[plugin]]
 name = "sqlfluff"
 
-# qlty's bundled sqlfluff driver hard-codes `--dialect ansi`, and the CLI flag
-# overrides `dialect` in .sqlfluff — so ansi can't parse our MySQL/MariaDB DDL
-# (backtick identifiers, ENGINE=MyISAM, …) and every file errors with an
-# unparsable-section "PRS" violation. Those PRS objects lack the `fixes` field
-# qlty's sqlfluff output parser requires, so the whole invocation aborts. Re-
-# declare both drivers verbatim with `--dialect mysql` to fix it.
-[plugins.definitions.sqlfluff.drivers.lint]
-script = "sqlfluff lint ${target} --format json --nofail --dialect mysql"
-success_codes = [0]
-output = "stdout"
-output_format = "sqlfluff"
-batch = true
-output_missing = "parse"
-suggested = "config"
-
-[plugins.definitions.sqlfluff.drivers.fix]
-script = "sqlfluff fix --disable-progress-bar --quiet --dialect mysql ${target}"
-success_codes = [0]
-output = "rewrite"
-batch = true
-driver_type = "formatter"
-suggested = "config"
-
 [[plugin]]
 name = "yamllint"
 
@@ -130,6 +107,21 @@ name = "trivy"
 
 [[plugin]]
 name = "osv-scanner"
+
+# ── Plugin definition overrides ──────────────────────────────────────────────
+# qlty's built-in sqlfluff driver hardcodes `--dialect ansi` in its lint and fix
+# scripts. sqlfluff gives CLI flags precedence over config files, so that flag
+# silently overrides `dialect = ...` in .qlty/configs/.sqlfluff — leaving ANSI
+# unable to parse dialect-specific syntax (e.g. MySQL backticks, `int(1)`,
+# `ENGINE=InnoDB`), which surfaces as a parse *error* rather than lint findings.
+# Re-declaring just the driver `script` merges over the built-in definition
+# (output/output_format/etc. are preserved), dropping the flag so .sqlfluff's
+# `dialect` becomes the single source of truth again.
+[plugins.definitions.sqlfluff.drivers.lint]
+script = "sqlfluff lint ${target} --format json --nofail"
+
+[plugins.definitions.sqlfluff.drivers.fix]
+script = "sqlfluff fix --disable-progress-bar --quiet ${target}"
 
 # ── Per-plugin file excludes ─────────────────────────────────────────────────
 # qlty has no plugin-level `exclude_patterns` key (it is silently ignored); scope

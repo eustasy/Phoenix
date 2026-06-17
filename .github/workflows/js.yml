@@ -1,0 +1,58 @@
+# eustasy/.Normal 4.0beta10
+name: "Normal: JS / TS"
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "**.js"
+      - "**.ts"
+      - "**.mjs"
+      - "**.cjs"
+      - "**.mts"
+      - "**.cts"
+      - ".github/workflows/js.yml"
+      - ".qlty/configs/oxlint.json"
+      - ".qlty/configs/.prettierrc.json"
+      - ".qlty/qlty.toml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**.js"
+      - "**.ts"
+      - "**.mjs"
+      - "**.cjs"
+      - "**.mts"
+      - "**.cts"
+      - ".github/workflows/js.yml"
+      - ".qlty/configs/oxlint.json"
+      - ".qlty/configs/.prettierrc.json"
+      - ".qlty/qlty.toml"
+
+permissions:
+  contents: read
+
+jobs:
+  js:
+    name: Lint + format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - uses: qltysh/qlty-action/install@fd52dc852530a708d68c3b7342f8d33d1df4cd55 # v2.2.1
+
+      - name: Lint (oxc, knip)
+        run: qlty check --all --no-formatters --filter=oxc,knip
+
+      - name: Format check (prettier)
+        run: git ls-files -- '*.js' '*.ts' '*.mjs' '*.cjs' '*.mts' '*.cts' | xargs -r qlty check --filter=prettier

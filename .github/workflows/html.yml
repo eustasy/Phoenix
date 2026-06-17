@@ -1,0 +1,37 @@
+# eustasy/.Normal 4.0beta10
+name: "Normal: HTML"
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "**.html"
+      - "**.htm"
+      - ".github/workflows/html.yml"
+      - ".qlty/configs/.htmlvalidate.json"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**.html"
+      - "**.htm"
+      - ".github/workflows/html.yml"
+      - ".qlty/configs/.htmlvalidate.json"
+
+permissions:
+  contents: read
+
+jobs:
+  html:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+
+      - name: Lint HTML (html-validate)
+        run: git ls-files -- '*.html' '*.htm' | xargs -r npx --yes html-validate --config .qlty/configs/.htmlvalidate.json
