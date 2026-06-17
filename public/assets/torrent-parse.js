@@ -8,7 +8,7 @@
  */
 (function (global) {
   function decode(bytes) {
-    try { return new TextDecoder('utf-8').decode(bytes); } catch (e) { return ''; }
+    try { return new TextDecoder('utf-8').decode(bytes); } catch { return ''; }
   }
 
   // Returns { torrent, infoBytes } where infoBytes is the raw slice of the
