@@ -3,20 +3,17 @@
 declare(strict_types=1);
 
 ////	Download Complete
-// A download has been completed.
-// The torrent has already been listed,
-// or had its download count incremented.
-// The peer has already been set to seeding.
+// A download has been completed: the torrent's download count was incremented
+// and the peer set to seeding.
 //
-// Stat-tracking logger (opt-in). Records a 'completed' event in the events
-// ledger when stats are enabled and 'completed' is a logged event. Privacy
-// contract: the peer_id is used transiently to derive a coarse client label
-// and the IP is used transiently for a minified geo lookup — NEITHER is ever
-// stored. Only the torrent owner, client label, ISO geo codes, time,
-// info_hash, and event name are persisted.
+// Logs a 'completed' event via stats_log_event() — a no-op unless stats are
+// enabled and 'completed' is opted into stats_events. The shared logger keeps
+// the privacy contract: peer_id and IP are used transiently (client label +
+// coarse geo) and never stored.
 //
 // Runs inside phoenix_hook()'s scope, so $connection, $settings, $time, and
-// $peer are already in scope; a bare `return;` exits the include.
+// $peer are already in scope. Hooks fire per event and must declare no
+// functions of their own (FPM workers include them many times per process).
 
 /**
  * @var mysqli $connection
@@ -25,41 +22,5 @@ declare(strict_types=1);
  * @var PhoenixPeer $peer
  */
 
-// Gate 1: stats off entirely -> the include does almost nothing.
-if (empty($settings['stats_enabled'])) {
-    return;
-}
-
-// Gate 2: this event class is not being logged.
-if (! in_array('completed', $settings['stats_events'], true)) {
-    return;
-}
-
-require_once __DIR__.'/../functions/stats.client.detect.php';
-require_once __DIR__.'/../functions/stats.geo.lookup.php';
-require_once __DIR__.'/../model/torrent.user.php';
-require_once __DIR__.'/../model/event.insert.php';
-
-// $peer['ipv4']/['ipv6'] are string|false; pick the first usable one for the
-// transient geo lookup (discarded immediately after).
-$stats_ipv4 = $peer['ipv4'] ?? false;
-$stats_ipv6 = $peer['ipv6'] ?? false;
-$stats_ip = '';
-if (is_string($stats_ipv4) && $stats_ipv4 !== '') {
-    $stats_ip = $stats_ipv4;
-} elseif (is_string($stats_ipv6) && $stats_ipv6 !== '') {
-    $stats_ip = $stats_ipv6;
-}
-
-$stats_info_hash = (string) $peer['info_hash'];
-$stats_geo = stats_geo_lookup($settings, $stats_ip);
-
-event_insert($connection, $settings, [
-    'time' => $time,
-    'info_hash' => $stats_info_hash,
-    'event' => 'completed',
-    'client' => stats_client_detect((string) $peer['peer_id']),
-    'user' => torrent_user($connection, $settings, $stats_info_hash),
-    'country' => $stats_geo['country'],
-    'continent' => $stats_geo['continent'],
-]);
+require_once __DIR__.'/../functions/stats.log.event.php';
+stats_log_event($connection, $settings, $time, $peer, 'completed');
