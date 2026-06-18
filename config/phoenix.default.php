@@ -56,6 +56,9 @@ $settings['clean_with_requests'] = 1;
 /* should your tracker clean with cron */
 /* means clean_with_requests can be disabled for faster responses */
 $settings['clean_with_cron'] = false;
+/* days of maintenance-task run history to keep in the task_runs log; */
+/* 0 = keep forever. pruned during the regular cleanup (announce or cron) */
+$settings['task_retention'] = 0;
 /* If this server is behind a frontend proxy, the client IP */
 /* will come in the form of a X-Forwarded-For. This option */
 /* should only be set if your frontend proxy properly handles */

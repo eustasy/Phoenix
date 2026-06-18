@@ -20,36 +20,37 @@ class TasksSelectTest extends PhoenixTestCase
         );
     }
 
-    private function seedTask(string $name, int $value): void
+    private function seedTask(string $name, int $value, string $source = 'cron'): void
     {
         mysqli_query(
             self::$connection,
-            'REPLACE INTO `'.self::$settings['db_prefix'].'tasks` (`name`, `value`) VALUES '.
-            '(\''.$name.'\', '.$value.');',
+            'REPLACE INTO `'.self::$settings['db_prefix'].'tasks` (`name`, `value`, `source`) VALUES '.
+            '(\''.$name.'\', '.$value.', \''.$source.'\');',
         );
     }
 
-    public function testReturnsSeededTasksAsNameValueMap(): void
+    public function testReturnsSeededTasksWithValueAndSource(): void
     {
-        $this->seedTask('__TEST_a', 1700000000);
-        $this->seedTask('__TEST_b', 1700000100);
+        $this->seedTask('__TEST_a', 1700000000, 'admin');
+        $this->seedTask('__TEST_b', 1700000100, 'cron');
 
         $tasks = \tasks_select(self::$connection, self::$settings);
 
         $this->assertArrayHasKey('__TEST_a', $tasks);
         $this->assertArrayHasKey('__TEST_b', $tasks);
-        $this->assertSame(1700000000, $tasks['__TEST_a']);
-        $this->assertSame(1700000100, $tasks['__TEST_b']);
+        $this->assertSame(['value' => 1700000000, 'source' => 'admin'], $tasks['__TEST_a']);
+        $this->assertSame(['value' => 1700000100, 'source' => 'cron'], $tasks['__TEST_b']);
     }
 
-    public function testValuesAreIntegers(): void
+    public function testValueIsIntegerAndSourcePresent(): void
     {
         // task_log stores the value as a string-typed mysqli column; the model
         // must intval() it so the view can date()-format it.
-        $this->seedTask('__TEST_c', 1699999999);
+        $this->seedTask('__TEST_c', 1699999999, 'auto');
 
         $tasks = \tasks_select(self::$connection, self::$settings);
-        $this->assertIsInt($tasks['__TEST_c']);
-        $this->assertSame(1699999999, $tasks['__TEST_c']);
+        $this->assertIsInt($tasks['__TEST_c']['value']);
+        $this->assertSame(1699999999, $tasks['__TEST_c']['value']);
+        $this->assertSame('auto', $tasks['__TEST_c']['source']);
     }
 }

@@ -10,6 +10,6 @@ require_once __DIR__.'/../src/phoenix.php';
 if ($settings['clean_with_cron']) {
     require_once __DIR__.'/../src/functions/task.clean.php';
     require_once __DIR__.'/../src/model/db.optimize.php';
-    task_clean($connection, $settings, $time);
-    db_optimize($connection, $settings, $time);
+    task_clean($connection, $settings, $time, 'cron');
+    db_optimize($connection, $settings, $time, false, true, 'cron');
 }

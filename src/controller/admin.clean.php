@@ -11,7 +11,7 @@ function admin_clean_action(mysqli $connection, array $settings, int $time): str
 {
     require_once __DIR__.'/../functions/task.clean.php';
 
-    if (task_clean($connection, $settings, $time)) {
+    if (task_clean($connection, $settings, $time, 'admin')) {
         return 'The peers list has been cleaned.';
     } else {
         return 'Could not clean the peers list.';

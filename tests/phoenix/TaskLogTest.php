@@ -14,37 +14,63 @@ class TaskLogTest extends PhoenixTestCase
 
     protected function tearDown(): void
     {
-        mysqli_query(
-            self::$connection,
-            'DELETE FROM `'.self::$settings['db_prefix'].'tasks` WHERE `name` LIKE \'__TEST_%\';',
-        );
+        foreach (['tasks', 'task_runs'] as $table) {
+            mysqli_query(
+                self::$connection,
+                'DELETE FROM `'.self::$settings['db_prefix'].$table.'` WHERE `name` LIKE \'__TEST_%\';',
+            );
+        }
     }
 
-    public function testInsertsRow(): void
+    /** @return array<string, string|null> */
+    private function fetchLast(): array
     {
-        $this->assertTrue(task_log(self::$connection, self::$settings, '__TEST__', 1));
-
         $row = mysqli_fetch_assoc(mysqli_query(
             self::$connection,
-            'SELECT `value` FROM `'.self::$settings['db_prefix'].'tasks` '.
-            'WHERE `name` = \'__TEST__\';',
+            'SELECT `value`, `source` FROM `'.self::$settings['db_prefix'].'tasks` WHERE `name` = \'__TEST__\';',
         ));
         $this->assertIsArray($row);
-        $this->assertEquals(1, $row['value']);
+
+        return $row;
     }
 
-    public function testReplacesExistingRow(): void
+    private function countHistory(): int
     {
-        task_log(self::$connection, self::$settings, '__TEST__', 1);
-        $this->assertTrue(task_log(self::$connection, self::$settings, '__TEST__', 42));
-
         $row = mysqli_fetch_assoc(mysqli_query(
             self::$connection,
-            'SELECT `value` FROM `'.self::$settings['db_prefix'].'tasks` '.
-            'WHERE `name` = \'__TEST__\';',
+            'SELECT COUNT(*) AS `c` FROM `'.self::$settings['db_prefix'].'task_runs` WHERE `name` = \'__TEST__\';',
         ));
-        $this->assertIsArray($row);
-        $this->assertEquals(42, $row['value']);
+
+        return intval($row['c']);
     }
 
+    public function testLogsLastRunAndHistoryWithSource(): void
+    {
+        $this->assertTrue(task_log(self::$connection, self::$settings, '__TEST__', 1, 'admin'));
+
+        $last = $this->fetchLast();
+        $this->assertEquals(1, $last['value']);
+        $this->assertSame('admin', $last['source']);
+        // History gets one row too.
+        $this->assertSame(1, $this->countHistory());
+    }
+
+    public function testLastRunReplacesButHistoryAppends(): void
+    {
+        task_log(self::$connection, self::$settings, '__TEST__', 1, 'auto');
+        $this->assertTrue(task_log(self::$connection, self::$settings, '__TEST__', 42, 'cron'));
+
+        // tasks keeps only the latest run (REPLACE)...
+        $last = $this->fetchLast();
+        $this->assertEquals(42, $last['value']);
+        $this->assertSame('cron', $last['source']);
+        // ...while task_runs accumulates every run (append).
+        $this->assertSame(2, $this->countHistory());
+    }
+
+    public function testSourceDefaultsToAuto(): void
+    {
+        task_log(self::$connection, self::$settings, '__TEST__', 5);
+        $this->assertSame('auto', $this->fetchLast()['source']);
+    }
 }

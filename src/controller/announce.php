@@ -159,7 +159,7 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
         mt_rand(1, 100) <= $settings['clean_with_requests']
     ) {
         require_once __DIR__.'/../functions/task.clean.php';
-        task_clean($connection, $settings, $time);
+        task_clean($connection, $settings, $time, 'auto');
     }
 
     ////	Build Peer List Response

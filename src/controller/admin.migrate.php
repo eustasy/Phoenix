@@ -16,7 +16,7 @@ function admin_migrate_action(mysqli $connection, array $settings, int $time): s
 
     if (db_create($connection, $settings) && db_migrate($connection, $settings)) {
         require_once __DIR__.'/../model/task.log.php';
-        task_log($connection, $settings, 'migrate', $time);
+        task_log($connection, $settings, 'migrate', $time, 'admin');
 
         return 'Your schema has been upgraded.';
     } else {

@@ -44,7 +44,7 @@ function admin_setup_action(mysqli $connection, array $settings, int $time, bool
 
     if ($success) {
         require_once __DIR__.'/../model/task.log.php';
-        task_log($connection, $settings, 'install', $time);
+        task_log($connection, $settings, 'install', $time, 'admin');
 
         return 'Your MySQL Tracker Database has been setup.';
     } else {

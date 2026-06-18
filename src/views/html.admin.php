@@ -19,12 +19,13 @@ declare(strict_types=1);
 //   $stats - array<string,int>|false, merged tracker stats (seeders, leechers,
 //            peers, torrents, downloads, traffic) plus 'registered' (total
 //            torrents). False hides the stats block (e.g. tables not installed).
-//   $tasks - array<string,int>, maintenance task name => last-run Unix timestamp.
+//   $tasks - maintenance task name => {value: last-run Unix timestamp, source:
+//            who ran it ('admin'|'cron'|'auto', '' if pre-source-tracking)}.
 
 /**
  * @param PhoenixSettings $settings
  * @param array<string, int>|false $stats
- * @param array<string, int> $tasks
+ * @param array<string, array{value: int, source: string}> $tasks
  */
 function view_admin_html(array $settings, bool $tables_installed, bool $show_installed = false, string $csrf_token = '', array|false $stats = false, array $tasks = []): string
 {
@@ -70,12 +71,18 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             'migrate' => ['git-merge', 'Migrated'],
             'clean' => ['brush-cleaning', 'Cleaned'],
             'optimize' => ['gauge', 'Optimized'],
+            'backup' => ['archive', 'Backed up'],
         ];
         $rows = '';
         foreach ($task_labels as $task_name => [$icon, $label]) {
             if (isset($tasks[$task_name])) {
+                $run = $tasks[$task_name];
+                $by = $run['source'] !== ''
+                    ? '<span class="badge">'.htmlspecialchars(ucfirst($run['source']), ENT_QUOTES, 'UTF-8').'</span>'
+                    : '<span class="dim">&mdash;</span>';
                 $rows .= '<tr><td><span class="flex items-center gap-2"><span class="ph-ico ph-li-ico" data-lucide="'.$icon.'"></span>'.$label.'</span></td>'.
-                    '<td class="mono muted">'.date('Y-m-d H:i', $tasks[$task_name]).'</td>'.
+                    '<td class="mono muted">'.date('Y-m-d H:i', $run['value']).'</td>'.
+                    '<td>'.$by.'</td>'.
                     '<td class="table-col-numeric"><span class="badge badge-green">done</span></td></tr>';
             }
         }
@@ -83,7 +90,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             $body .= '<div class="ph-section-head"><h3>Maintenance</h3><a class="btn btn-ghost btn-sm" href="?page=utilities">Run tasks<span class="ph-ico" data-lucide="arrow-right"></span></a></div>
 		<div class="ph-card-table">
 			<table>
-				<thead><tr><th>Task</th><th>Last run</th><th class="table-col-numeric">Status</th></tr></thead>
+				<thead><tr><th>Task</th><th>Last run</th><th>By</th><th class="table-col-numeric">Status</th></tr></thead>
 				<tbody>'.$rows.'</tbody>
 			</table>
 		</div>';

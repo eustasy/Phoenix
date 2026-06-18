@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 ////	db_create
-// Creates the events, peers, tasks, and torrents tables in the connection's
+// Creates the events, peers, tasks, task_runs, and torrents tables in the
+// connection's
 // currently selected database, using $settings['db_prefix'] as the table
 // prefix. The events table is created unconditionally so stat-tracking can
 // later be enabled with a config flip alone (see stats_enabled).
@@ -19,7 +20,7 @@ function db_create(mysqli $connection, array $settings, bool $debug = false): bo
 {
     require_once __DIR__.'/../functions/db.apply.prefix.php';
 
-    $tables = ['events', 'peers', 'tasks', 'torrents'];
+    $tables = ['events', 'peers', 'tasks', 'task.runs', 'torrents'];
 
     $failure = false;
     foreach ($tables as $table) {

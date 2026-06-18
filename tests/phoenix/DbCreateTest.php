@@ -15,7 +15,7 @@ class DbCreateTest extends PhoenixTestCase
     public function testCreatesTablesOnFirstCall(): void
     {
         $this->assertTrue(db_create(self::$connection, self::$settings));
-        foreach (['peers', 'tasks', 'torrents'] as $table) {
+        foreach (['peers', 'tasks', 'task_runs', 'torrents'] as $table) {
             $check = mysqli_query(
                 self::$connection,
                 'SELECT TABLE_NAME FROM `information_schema`.`TABLES` '.

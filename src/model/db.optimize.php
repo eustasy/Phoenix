@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
-/** @param PhoenixSettings $settings */
-function db_optimize(mysqli $connection, array $settings, int $time, string|false $table = false, bool $and_default = true): bool
+/**
+ * @param PhoenixSettings $settings
+ * @param string $source who triggered the run: 'admin' or 'cron'
+ */
+function db_optimize(mysqli $connection, array $settings, int $time, string|false $table = false, bool $and_default = true, string $source = 'admin'): bool
 {
     require_once __DIR__.'/task.log.php';
 
@@ -14,6 +17,7 @@ function db_optimize(mysqli $connection, array $settings, int $time, string|fals
     if ($and_default) {
         $tables[] = 'peers';
         $tables[] = 'tasks';
+        $tables[] = 'task_runs';
         $tables[] = 'torrents';
     }
 
@@ -44,7 +48,7 @@ function db_optimize(mysqli $connection, array $settings, int $time, string|fals
     }
 
     if ($result) {
-        task_log($connection, $settings, 'optimize', $time);
+        task_log($connection, $settings, 'optimize', $time, $source);
     }
 
     return $result;

@@ -15,3 +15,8 @@ if (! $result['ok']) {
     echo $result['error'].PHP_EOL;
     exit(1);
 }
+
+// Record the run so the dashboard's "Last backup" reflects scheduled backups
+// too (the admin Backups page already logs its own runs).
+require_once __DIR__.'/../src/model/task.log.php';
+task_log($connection, $settings, 'backup', $time, 'cron');

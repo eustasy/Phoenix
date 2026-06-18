@@ -20,7 +20,7 @@ function admin_backup_action(mysqli $connection, array $settings, int $time): st
     }
 
     require_once __DIR__.'/../model/task.log.php';
-    task_log($connection, $settings, 'backup', $time);
+    task_log($connection, $settings, 'backup', $time, 'admin');
 
     return 'Backup written: '.basename((string) $result['file']);
 }

@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
-/** @param PhoenixSettings $settings */
-function task_clean(mysqli $connection, array $settings, int $time): bool
+/**
+ * @param PhoenixSettings $settings
+ * @param string $source who triggered the run: 'auto' (announce), 'cron', or 'admin'
+ */
+function task_clean(mysqli $connection, array $settings, int $time, string $source = 'auto'): bool
 {
     require_once __DIR__.'/../model/task.log.php';
     require_once __DIR__.'/../model/events.clean.php';
@@ -17,8 +20,8 @@ function task_clean(mysqli $connection, array $settings, int $time): bool
     $threshold = $time - ($settings['announce_interval'] * 3);
     $cleaned = peers_clean($connection, $settings, $threshold);
 
-    // Clean tasks and torrents tables (test/sentinel rows)
-    $cleaned = tasks_clean($connection, $settings) && $cleaned;
+    // Clean tasks and torrents tables (sentinels; task_runs also time-pruned)
+    $cleaned = tasks_clean($connection, $settings, $time) && $cleaned;
     $cleaned = torrents_clean($connection, $settings) && $cleaned;
 
     // Prune the stat-tracking ledger (sentinels, plus rows older than
@@ -26,7 +29,7 @@ function task_clean(mysqli $connection, array $settings, int $time): bool
     $cleaned = events_clean($connection, $settings, $time) && $cleaned;
 
     if ($cleaned) {
-        task_log($connection, $settings, 'clean', $time);
+        task_log($connection, $settings, 'clean', $time, $source);
     }
 
     return $cleaned;

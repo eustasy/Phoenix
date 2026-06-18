@@ -64,7 +64,10 @@ class ViewAdminHtmlTest extends TestCase
     {
         // When the dashboard controller supplies stats, the overview renders
         // with number_format()-ed figures and last-run lines.
-        $tasks = ['clean' => 1700000000, 'optimize' => 1700000100];
+        $tasks = [
+            'clean' => ['value' => 1700000000, 'source' => 'cron'],
+            'optimize' => ['value' => 1700000100, 'source' => 'admin'],
+        ];
         $html = view_admin_html($this->settings(), true, false, '', $this->stats(), $tasks);
 
         // Stat cards carry the headline figures.
@@ -75,10 +78,14 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertStringContainsString('with active peers', $html);
         $this->assertStringContainsString('Traffic served', $html);
         $this->assertStringContainsString('123,456 bytes', $html);
-        // Maintenance rows render only for tasks that have run.
+        // Maintenance rows render only for tasks that have run, with a By column
+        // naming who ran each (capitalised source).
         $this->assertStringContainsString('Cleaned', $html);
         $this->assertStringContainsString('Optimized', $html);
         $this->assertStringNotContainsString('Migrated', $html);
+        $this->assertStringContainsString('<th>By</th>', $html);
+        $this->assertStringContainsString('>Cron</span>', $html);
+        $this->assertStringContainsString('>Admin</span>', $html);
     }
 
     public function testShowsNotInstalledNoticeWhenTablesMissing(): void
