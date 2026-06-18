@@ -1,17 +1,19 @@
-# Migrating from Phoenix 3.x to 4.0
+# Migrating from Phoenix 3.x to 4.3
 
-Phoenix 4.0 is a ground-up refactor of the 3.x codebase. The tracker protocol
-behaviour is unchanged — announce, scrape, and stats respond exactly as before
-— but **where files live on disk has moved**, so every operator upgrading from
-3.x has three things to re-point: the **web server document root**, the
-**configuration file**, and the **cron jobs**.
+Phoenix 4.0 was a ground-up refactor of the 3.x codebase, and 4.1–4.3 built on
+it. The tracker protocol behaviour is unchanged — announce, scrape, and stats
+respond as before — but two things every operator upgrading from 3.x must handle
+did change: **where files live on disk** (moved in 4.0), so you re-point the
+**web server document root**, the **configuration file**, and the **cron jobs**;
+and the **database schema** (4.1 and 4.3 added tables and columns), so you apply
+a few idempotent migrations.
 
-This guide covers a 3.x → 4.0 upgrade only. For the per-release detail, see
+This guide covers a 3.x → 4.3 upgrade. For per-release detail, see
 [CHANGELOG.md](CHANGELOG.md).
 
 ## At a glance
 
-| What | 3.x | 4.0 |
+| What | 3.x | 4.3 |
 | --- | --- | --- |
 | Web root | repo root (`announce.php`, `scrape.php`, … at top level) | `public/` only |
 | Bootstrap | `_phoenix.php` | `src/phoenix.php` |
@@ -22,21 +24,29 @@ This guide covers a 3.x → 4.0 upgrade only. For the per-release detail, see
 | Backups dir | `_backups` | `backups` |
 | Minimum PHP | 7.1 | 8.2 |
 
-## 1. Database — no migration required
+## 1. Database — apply the migrations
 
-**4.0 ships the same schema as 3.2.** If you are already running 3.2, there is
-**nothing to change in the database** — no `ALTER TABLE`, no new columns.
+**4.0 itself shipped the same schema as 3.2** — its only schema change was
+organisational: the `CREATE TABLE` statements that used to be built in PHP now
+live in standalone files under `sql/` (`sql/peers.sql`, `sql/torrents.sql`,
+`sql/tasks.sql`, plus the newer `sql/events.sql` and `sql/task.runs.sql`),
+loaded automatically by `db_create()`.
 
-The only schema change in 4.0 is organisational: the `CREATE TABLE` statements
-that used to be built in PHP now live in standalone files under `sql/`
-(`sql/peers.sql`, `sql/torrents.sql`, `sql/tasks.sql`). They describe the same
-tables and are loaded automatically by `db_create()`; you only touch them for a
-manual import (`mysql <database> < sql/peers.sql`).
+But **4.1 and 4.3 added to the schema**, so a 3.x → 4.3 upgrade does need DB
+changes:
 
-> **Upgrading from 3.1 or earlier?** Apply the **3.2 SQL Migration** first — it
-> adds the `size`/`listed` torrent columns and the `uploaded`/`downloaded` peer
-> columns. The block is in [CHANGELOG.md](CHANGELOG.md) under **v.3.2**. Once
-> that is applied you are on the 4.0 schema and need no further DB changes.
+- **4.1** — a new `events` stat-tracking table, and `user` / `filename` /
+  `files` / `trackers` / `webseeds` columns on `torrents`.
+- **4.3** — a `source` column on `tasks` plus a new `task_runs` history table,
+  and an index on `torrents.listed`.
+
+Apply them with the admin panel's **Upgrade Schema** action, or import a handful
+of files by hand — see step 7. Every migration is idempotent, so re-running is
+safe.
+
+> **Upgrading from 3.1 or earlier?** The **3.2 migration** comes first — it adds
+> the `size`/`listed` torrent columns and the `uploaded`/`downloaded` peer
+> columns. It is the first file listed in step 7; the 4.1 and 4.3 changes follow.
 
 ## 2. Minimum PHP is now 8.2
 
@@ -81,7 +91,10 @@ forward-compatible: code reads `$settings['key']` directly with no fallback
 layer, and every key still exists in the new default file. While you are there,
 review the new tunables in `config/phoenix.default.php` — notably
 `reject_private_ips` (rejects RFC1918/loopback source addresses by default) and
-`clean_with_cron` (see step 5).
+`clean_with_cron` (see step 5). Newer 4.x additions worth a look:
+`stats_enabled` (opt-in event/Geography stat-tracking), `announce_external_ip`
+(return the client's own IP per BEP 24), and `task_retention` (how long to keep
+maintenance-task run history; `0` = forever).
 
 ## 5. Update your cron jobs
 
@@ -113,33 +126,50 @@ mv public/admin.php src/admin.php
 
 Move it back into `public/` temporarily if you ever need to re-run setup.
 
-## 7. Schema upgrades (4.1 and later)
+## 7. Schema upgrades (4.1 through 4.3)
 
-From 4.1 onwards, schema changes ship as idempotent, date-ordered SQL files in
-`sql/migrations/`. Every file uses `ADD COLUMN IF NOT EXISTS` (or equivalent)
-so it is safe to run more than once and causes no errors when the column is
-already present.
+Schema changes ship two ways: **new tables** as standalone files under `sql/`
+(created by `db_create()`), and **changes to existing tables** as idempotent,
+date-ordered files under `sql/migrations/` (each uses `ADD COLUMN IF NOT EXISTS`
+or `CREATE TABLE IF NOT EXISTS`, so re-running is safe).
 
-**Via the admin panel:** navigate to `public/admin.php`, log in, and click
-**Upgrade Schema**. The panel runs every migration file in filename order and
-reports success or failure.
+**Via the admin panel (recommended):** navigate to `public/admin.php`, log in,
+and click **Upgrade Schema**. It creates any new tables and runs every migration
+in filename order — covering all of 4.1 and 4.3 in one click — and reports
+success or failure.
 
-**Manually:** import each file in order against your database. If your install
-uses a prefix other than the default `phoenix_`, edit the table names in the file
-before importing (or let `db_migrate()` rewrite them by running via the panel).
+**Manually:** import the new-table file and then the migrations in order. If your
+install uses a prefix other than the default `phoenix_`, edit the table names in
+each file before importing (or just use the panel, which rewrites the prefix for
+you):
 
 ```bash
-mysql <database> < sql/migrations/2026-05-09-3.2-haggard.sql
-mysql <database> < sql/migrations/2026-06-12-4.1-torrent-user-and-meta.sql
+# 4.1's events table has no migration — create it from its schema file.
+mysql <database> < sql/events.sql
+
+# Migrations, in order. These add the torrent meta columns (4.1) and the task
+# `source` column + `task_runs` history table (4.3).
+mysql <database> < sql/migrations/2026-05-09_3.2-haggard.sql
+mysql <database> < sql/migrations/2026-06-12_4.0-torrent-meta.sql
+mysql <database> < sql/migrations/2026-06-18_4.3-task-history.sql
 ```
 
-New installs created with 4.1 or later get the current schema directly from
-`sql/*.sql` via `db_create()` and do not need to run migrations.
+The 4.3 **`torrents.listed` index** is a performance-only addition: it ships in
+the base schema (so new installs get it) but has no migration. On an existing
+install you can add it once — optional, but it speeds the public index:
+
+```sql
+ALTER TABLE `phoenix_torrents` ADD INDEX `listed` (`listed`);
+```
+
+New installs created with 4.3 get the complete schema directly from `sql/*.sql`
+via `db_create()` and need no migrations.
 
 ## Checklist
 
 - [ ] Runtime is PHP >= 8.2 with `mysqli` and `xml`.
-- [ ] (3.1 or earlier only) 3.2 SQL migration applied; otherwise no DB change.
+- [ ] Database upgraded — **Upgrade Schema** in the panel, or `sql/events.sql` plus the `sql/migrations/*.sql` files imported in order (3.1 or earlier: the 3.2 migration is the first of those).
+- [ ] (Optional) `torrents.listed` index added on existing installs for faster public-index reads.
 - [ ] Document root re-pointed at `public/`; `src/`, `bin/`, `config/`, `tests/` are above the web root and not reachable over HTTP.
 - [ ] Config copied to `config/phoenix.custom.php`.
 - [ ] Cron jobs updated to `bin/clean-and-optimize.php` and `bin/backup-database.php`.

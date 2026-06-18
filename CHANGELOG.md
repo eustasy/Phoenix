@@ -1,5 +1,16 @@
 # Phoenix Changelog
 
+## v4.3beta7 - 18/06/2026
+
+A correctness-and-polish follow-up to the 4.3 redesign: maintenance tasks now keep a run history recording who ran each, duplicate announces from clients that send every request twice no longer double-count, and the public index gains a read-path index plus a health-first default sort. **DB schema modifications required** for the new task-run history.
+
+- FEATURE: Record a history of maintenance-task runs and **who triggered each** — `admin` (the panel), `cron` (the `bin/` scripts), or `auto` (the announce-time cleanup). A new `task_runs` append log keeps the full history (pruned by the new `task_retention` setting — days to keep, `0` = forever, the default), while the `tasks` table still holds each task's latest run for the Dashboard, which now shows a **By** column. Scheduled cron backups are logged too — previously only admin-panel backups were recorded. **DB schema modifications required.**
+- FIX: Stop double-counting from clients that send every announce twice (e.g. Transmission). A duplicate `completed` no longer increments the downloads counter twice, and duplicate `completed` / `stopped` announces no longer double-log stat events: a completion is counted only on the leech→seed transition, and a stop acts only when a peer actually exists. (A small race remains under genuinely concurrent workers, noted in the code.)
+- IMPROVES: The public Torrent Index now sorts by **Health, healthiest first**, on load instead of alphabetically, so a seederless or unhealthy torrent stands out. Still client-side and overridable by clicking any column header; no-JS visitors keep the alphabetical server order.
+- IMPROVES: Index the torrents `listed` column so the public index filters listed torrents without a full table scan. Fresh installs get the index automatically; existing installs add it once with `ALTER TABLE <prefix>torrents ADD INDEX listed (listed);` — it is a performance index, so there is no migration.
+- FIX: The click-to-copy info-hash button reverts from the tick back to the copy icon after a moment, so it reads as ready to reuse (it previously stuck on the checkmark).
+- IMPROVES: Internal tidy-ups with no behaviour change — extract the announce event dispatch into a single `peer_handle_event()` (thinner controller, unit-testable), and de-duplicate the three stat-tracking hooks into a shared `stats_log_event()`.
+
 ## v4.3beta6 - 17/06/2026
 
 The 4.3 line is a top-to-bottom visual redesign of every HTML surface onto a shared, dependency-light design system, plus an expansion of the 4.2 admin panel with new Geography, Peers, and bulk-upload pages. At the protocol layer it adds two BEP-conformance features and a full audit of Phoenix against the BEP index. The database schema is unchanged — **no DB migration is required** — and the new tracker-response keys are additive, so existing clients are unaffected.

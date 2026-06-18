@@ -8,7 +8,7 @@
 --
 -- Uses the literal default prefix `phoenix_`. db_migrate() rewrites it to
 -- $settings['db_prefix'] before executing. To import manually:
---   mysql <database> < sql/migrations/2026-05-09-3.2-haggard.sql
+--   mysql <database> < sql/migrations/2026-05-09_3.2-haggard.sql
 -- and edit the table name first if your install uses a different prefix.
 
 ALTER TABLE `phoenix_peers`

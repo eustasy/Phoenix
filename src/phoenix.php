@@ -33,7 +33,7 @@ $settings = settings_load(
     __DIR__.'/../config/phoenix.default.php',
     __DIR__.'/../config/phoenix.custom.php',
 );
-$settings['phoenix_version'] = 'v4.3beta6';
+$settings['phoenix_version'] = 'v4.3beta7';
 
 ////	Resolve the GeoLite2 database
 // When geo enrichment is on, resolve the database from standard locations
