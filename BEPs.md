@@ -319,3 +319,35 @@ peers in the clear — compact (`peers`/`peers6`) or plain dicts. There is no
 obfuscation layer, and it's a deferred spec that few trackers or clients ever
 adopted, so "missing" here is unremarkable. Flagged only for completeness as a
 tracker-facing proposal Phoenix does not implement.
+
+## Optional items within the implemented BEPs
+
+Beyond the whole-BEP verdicts above, each tracker BEP carries *optional*
+keys/parameters. Phoenix implements essentially all the ones with a real
+consumer; this tracks both sides so the gaps are deliberate, not forgotten.
+
+### Implemented (optional)
+
+| Item | BEP | Notes |
+| --- | --- | --- |
+| `min interval` | 3 | `min_interval` setting (600s default) |
+| `complete` / `incomplete` | 3 | swarm counts in the announce reply |
+| Compact peer lists | 23 | `compact=` request flag + `default_compact` |
+| `peers6` / IPv6 peers | 7 | dual-stack |
+| Honour `no_peer_id` | 3 | omits `peer id` in non-compact replies |
+| Honour `numwant` | 3 | clamped to `max_peers` |
+| Consume client `ip=` | 3 | gated by `external_ip` |
+| `external ip` (returned) | 24 | gated by `announce_external_ip` |
+| `retry in` on errors | 31 | `"never"` or seconds |
+| scrape `min_request_interval` | 48 | `scrape_min_interval` setting (1800s default) |
+
+### Not implemented (optional)
+
+| Item | BEP | What it's for | Worth doing? |
+| --- | --- | --- | --- |
+| `warning message` | 3 | Non-fatal notice shown to the user while the reply is still processed (e.g. maintenance soon, deprecated client). | Maybe — the only one with real operator value; a setting plus one response key. |
+| `tracker id` | 3 | Tracker-assigned session id the client echoes back on later announces. | No — Phoenix is stateless and keys peers by `(info_hash, peer_id)`; nothing would consume it. |
+| scrape per-torrent `name` | 48 | Optional torrent name inside each scrape `files` entry. | No — deliberately omitted; it bloats scrape and strict clients can reject extra keys (the bencode scrape is pinned to exactly `complete`/`downloaded`/`incomplete`). |
+| `key` request param | 3 | Client identity hint to follow a peer across IP changes. | No — redundant; the `peer_id` is stable across IP changes, so the row updates regardless. |
+| `supportcrypto` / crypto flags | — (MSE, not a BEP) | Encryption-capability hint; trackers may relay `crypto_flags` in compact peers. | No — niche, largely obsolete, not a tracker BEP. |
+| `corrupt` / `redundant` request stats | 3 | Informational counters some clients send. | No — purely informational. |
