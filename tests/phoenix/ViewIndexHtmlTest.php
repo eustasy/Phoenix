@@ -59,7 +59,7 @@ class ViewIndexHtmlTest extends PhoenixTestCase
 
         // Plain (non-sortable) headers render as bare <th>; sortable ones carry
         // classes, so assert their labels appear.
-        foreach (['>Title ', '<th>Hash</th>', '>Seeders ', '>Leechers</th>', '>Downloads</th>', '>Health</th>', '>Magnet</th>'] as $header) {
+        foreach (['>Title ', '<th>Hash</th>', '>Seeders ', '>Leechers</th>', '>Downloads</th>', '>Health ', '>Magnet</th>'] as $header) {
             $this->assertStringContainsString($header, $html);
         }
         $this->assertStringContainsString('<span class="ph-name">Test Torrent</span>', $html);

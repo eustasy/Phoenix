@@ -89,7 +89,8 @@ class EndpointSmokeTest extends SmokeTestCase
         ]);
         $this->assertSame(200, $r['status']);
         $this->assertStringStartsWith('d', $r['body']);
-        $this->assertStringContainsString('8:intervali1800e', $r['body']);
+        // announce_interval default is 300 (5 min) in config/phoenix.default.php.
+        $this->assertStringContainsString('8:intervali300e', $r['body']);
         $this->assertStringContainsString('5:peers', $r['body']);
     }
 
@@ -321,10 +322,14 @@ class EndpointSmokeTest extends SmokeTestCase
 
         // Seed a torrent row so the dump has real torrent data to check: a
         // completed announce creates one via torrent_increment_downloads (and a
-        // peer row), exercising both sides of the data-vs-schema split.
+        // peer row), exercising both sides of the data-vs-schema split. Use a
+        // FRESH peer_id: announce.php only counts a completion on the leech ->
+        // seed transition, and self::PEER_ID already announced this hash as a
+        // seeder earlier, so reusing it would be a no-op for the counter.
+        $completePeer = str_repeat('7', 40);
         $this->get('/announce.php', [
             'info_hash' => self::HASH,
-            'peer_id' => self::PEER_ID,
+            'peer_id' => $completePeer,
             'port' => '6881',
             'left' => '0',
             'event' => 'completed',
@@ -345,7 +350,7 @@ class EndpointSmokeTest extends SmokeTestCase
         // ...the torrent row IS dumped (its info_hash appears as data), but the
         // peer row is NOT — peers is schema-only.
         $this->assertStringContainsString(self::HASH, $dump);
-        $this->assertStringNotContainsString(self::PEER_ID, $dump);
+        $this->assertStringNotContainsString($completePeer, $dump);
 
         // Rotation deleted the stale backup (older than backup_rotate days).
         $this->assertFileDoesNotExist($oldBackup);
