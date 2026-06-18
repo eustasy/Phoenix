@@ -100,57 +100,13 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
     announce_check_rate_limit($connection, $settings, $peer, $time);
 
     ////	Handle Peer Event
-    require_once __DIR__.'/../model/peer.select.php';
-    require_once __DIR__.'/../functions/peer.changed.php';
-    require_once __DIR__.'/../functions/phoenix.hook.php';
-
-    $peer['old'] = peer_select($connection, $settings, $peer);
-
+    // Apply the announce event (select old row, dispatch stopped/completed/
+    // new/changed/access, fire lifecycle hooks). Returns false for 'stopped',
+    // where the client expects an empty body.
+    require_once __DIR__.'/../functions/peer.handle.event.php';
     $event = $_GET['event'] ?? null;
-
-    // EVENT: stopped — remove the peer and return empty; the client expects no body
-    if ($event === 'stopped') {
-        // Only act when there's actually a peer to remove. Clients such as
-        // Transmission send every announce twice; without this guard a duplicate
-        // 'stopped' re-fires the hook (double-logging the event) on a no-op
-        // delete. The peers table is keyed on (info_hash, peer_id), so the row
-        // is already gone by the second request and $peer['old'] is false.
-        if ($peer['old']) {
-            require_once __DIR__.'/../model/peer.delete.php';
-            peer_delete($connection, $settings, $peer);
-            phoenix_hook('peer.stopped', $connection, $settings, $time, $peer);
-        }
-
+    if (! peer_handle_event($connection, $settings, $time, $peer, $event)) {
         return '';
-    }
-
-    // EVENT: completed — count the download and force seeding state, but only on
-    // the leech -> seed transition. A peer already recorded as seeding (state 1)
-    // re-announcing 'completed' — including the duplicate announces Transmission
-    // and others send — must not increment the downloads counter or re-fire the
-    // hook. (Sequential duplicates are fully deduped here; truly concurrent
-    // workers would need an atomic conditional UPDATE for the same guarantee.)
-    if ($event === 'completed') {
-        $already_seeding = $peer['old'] && (int) ($peer['old']['state'] ?? 0) === 1;
-        $peer['state'] = 1;
-        if (! $already_seeding) {
-            require_once __DIR__.'/../model/torrent.increment.downloads.php';
-            torrent_increment_downloads($connection, $settings, is_string($peer['info_hash']) ? $peer['info_hash'] : '');
-            phoenix_hook('download.complete', $connection, $settings, $time, $peer);
-        }
-    }
-
-    // CHANGED or NEW peer — REPLACE the row, then run new/change hook
-    if (peer_changed($peer, $peer['old'])) {
-        require_once __DIR__.'/../model/peer.insert.php';
-        peer_insert($connection, $settings, $time, $peer);
-        phoenix_hook($peer['old'] ? 'peer.change' : 'peer.new', $connection, $settings, $time, $peer);
-
-        // UNCHANGED peer — bump the access timestamp only
-    } else {
-        require_once __DIR__.'/../model/peer.update.php';
-        peer_update($connection, $settings, $time, $peer);
-        phoenix_hook('peer.access', $connection, $settings, $time, $peer);
     }
 
     ////	Cleanup (probabilistic)
