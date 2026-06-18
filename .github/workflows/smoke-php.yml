@@ -1,4 +1,4 @@
-name: Smoke (PHP)
+name: "Smoke: PHP"
 
 on:
   workflow_dispatch:
