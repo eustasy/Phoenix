@@ -89,8 +89,7 @@ class EndpointSmokeTest extends SmokeTestCase
         ]);
         $this->assertSame(200, $r['status']);
         $this->assertStringStartsWith('d', $r['body']);
-        // announce_interval default is 300 (5 min) in config/phoenix.default.php.
-        $this->assertStringContainsString('8:intervali300e', $r['body']);
+        $this->assertStringContainsString('8:intervali1800e', $r['body']);
         $this->assertStringContainsString('5:peers', $r['body']);
     }
 
