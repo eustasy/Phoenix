@@ -10,7 +10,7 @@
 --
 -- Uses the literal default prefix `phoenix_`. db_migrate() rewrites it to
 -- $settings['db_prefix'] before executing. To import manually:
---   mysql <database> < sql/migrations/2026-06-18_4.3-task-history.sql
+--   mysql <database> < sql/migrations/2026-06-18_4.4-task-history.sql
 -- and edit the table name first if your install uses a different prefix.
 
 ALTER TABLE `phoenix_tasks`

@@ -10,7 +10,7 @@
 --
 -- Uses the literal default prefix `phoenix_`. db_migrate() rewrites it to
 -- $settings['db_prefix'] before executing. To import manually:
---   mysql <database> < sql/migrations/2026-06-18_4.3-torrents-listed-index.sql
+--   mysql <database> < sql/migrations/2026-06-18_4.4-torrents-listed-index.sql
 -- and edit the table name first if your install uses a different prefix.
 
 ALTER TABLE `phoenix_torrents`
