@@ -5,15 +5,22 @@
 
 function phCopyHash(btn) {
   var value = btn.getAttribute("data-hash") || ""
+  // Re-query the icon on every swap: lucide.createIcons() REPLACES the node, so
+  // a reference captured earlier goes stale and the revert would no-op.
+  var setIcon = function (name) {
+    var ico = btn.querySelector(".ph-ico")
+    if (ico) ico.setAttribute("data-lucide", name)
+    if (window.lucide) lucide.createIcons({ attrs: { class: "ph-ico" } })
+  }
   var done = function () {
     btn.classList.add("is-copied")
-    var ico = btn.querySelector(".ph-ico")
-    if (ico) ico.setAttribute("data-lucide", "check")
-    if (window.lucide) lucide.createIcons({ attrs: { class: "ph-ico" } })
-    setTimeout(function () {
+    setIcon("check")
+    // Revert to the copy icon so the button reads as ready to use again. Clear
+    // any pending revert first, so rapid re-clicks don't flip it mid-confirm.
+    if (btn._revert) clearTimeout(btn._revert)
+    btn._revert = setTimeout(function () {
       btn.classList.remove("is-copied")
-      if (ico) ico.setAttribute("data-lucide", "copy")
-      if (window.lucide) lucide.createIcons({ attrs: { class: "ph-ico" } })
+      setIcon("copy")
     }, 1200)
   }
   if (navigator.clipboard && navigator.clipboard.writeText) {
