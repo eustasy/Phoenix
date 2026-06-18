@@ -33,27 +33,38 @@ function phMakeSortable(tableRef) {
   var table = typeof tableRef === "string" ? document.querySelector(tableRef) : tableRef
   if (!table) return
   var ths = table.tHead ? table.tHead.rows[0].cells : []
+
+  // Sort the body by the column at `idx`, marking the header so aria-sort + the
+  // chevron reflect it. Shared by the click handler and the optional initial
+  // sort below.
+  function sortBy(th, idx, asc) {
+    var body = table.tBodies[0]
+    if (!body) return
+    for (var j = 0; j < ths.length; j++) ths[j].removeAttribute("aria-sort")
+    th.setAttribute("aria-sort", asc ? "ascending" : "descending")
+    var type = th.getAttribute("data-type") || "text"
+    var rows = Array.prototype.slice.call(body.rows)
+    rows.sort(function (a, b) {
+      var av = cellVal(a.cells[idx], type),
+        bv = cellVal(b.cells[idx], type)
+      if (av < bv) return asc ? -1 : 1
+      if (av > bv) return asc ? 1 : -1
+      return 0
+    })
+    rows.forEach(function (r) {
+      body.appendChild(r)
+    })
+  }
+
   for (var i = 0; i < ths.length; i++) {
     ;(function (th, idx) {
       if (!th.classList.contains("ph-sort")) return
       th.addEventListener("click", function () {
-        var asc = th.getAttribute("aria-sort") !== "ascending"
-        for (var j = 0; j < ths.length; j++) ths[j].removeAttribute("aria-sort")
-        th.setAttribute("aria-sort", asc ? "ascending" : "descending")
-        var type = th.getAttribute("data-type") || "text"
-        var body = table.tBodies[0]
-        var rows = Array.prototype.slice.call(body.rows)
-        rows.sort(function (a, b) {
-          var av = cellVal(a.cells[idx], type),
-            bv = cellVal(b.cells[idx], type)
-          if (av < bv) return asc ? -1 : 1
-          if (av > bv) return asc ? 1 : -1
-          return 0
-        })
-        rows.forEach(function (r) {
-          body.appendChild(r)
-        })
+        sortBy(th, idx, th.getAttribute("aria-sort") !== "ascending")
       })
+      // A header may request an initial sort via data-sort-default="asc|desc".
+      var def = th.getAttribute("data-sort-default")
+      if (def === "asc" || def === "desc") sortBy(th, idx, def === "asc")
     })(ths[i], i)
   }
   function cellVal(cell, type) {

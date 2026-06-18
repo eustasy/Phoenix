@@ -49,7 +49,7 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
     $head .= '<th class="ph-sort table-col-numeric" data-type="num">Seeders '.$sort_ico.'</th>'.
         '<th class="ph-sort table-col-numeric" data-type="num">Leechers</th>'.
         '<th class="ph-sort table-col-numeric" data-type="num">Downloads</th>'.
-        '<th class="ph-sort col-health" data-type="num">Health</th>'.
+        '<th class="ph-sort col-health" data-type="num" data-sort-default="desc">Health '.$sort_ico.'</th>'.
         '<th class="tar">Magnet</th>';
 
     ////	Body rows
