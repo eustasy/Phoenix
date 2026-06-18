@@ -25,9 +25,9 @@ $settings['db_persist'] = '%db_persist%';
 /* track anything announced to it; off = closed/private tracker (BEP 27) */
 $settings['open_tracker'] = '%open_tracker%';
 /* how often client will send requests */
-$settings['announce_interval'] = 1800;
+$settings['announce_interval'] = 300; // 5 minutes
 /* how often client can force requests */
-$settings['min_interval'] = 600;
+$settings['min_interval'] = 60; // 1 minute
 /* default # of peers to announce */
 $settings['default_peers'] = 50;
 /* max # of peers to announce */

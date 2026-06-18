@@ -110,19 +110,34 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
 
     // EVENT: stopped — remove the peer and return empty; the client expects no body
     if ($event === 'stopped') {
-        require_once __DIR__.'/../model/peer.delete.php';
-        peer_delete($connection, $settings, $peer);
-        phoenix_hook('peer.stopped', $connection, $settings, $time, $peer);
+        // Only act when there's actually a peer to remove. Clients such as
+        // Transmission send every announce twice; without this guard a duplicate
+        // 'stopped' re-fires the hook (double-logging the event) on a no-op
+        // delete. The peers table is keyed on (info_hash, peer_id), so the row
+        // is already gone by the second request and $peer['old'] is false.
+        if ($peer['old']) {
+            require_once __DIR__.'/../model/peer.delete.php';
+            peer_delete($connection, $settings, $peer);
+            phoenix_hook('peer.stopped', $connection, $settings, $time, $peer);
+        }
 
         return '';
     }
 
-    // EVENT: completed — increment downloads and force seeding state
+    // EVENT: completed — count the download and force seeding state, but only on
+    // the leech -> seed transition. A peer already recorded as seeding (state 1)
+    // re-announcing 'completed' — including the duplicate announces Transmission
+    // and others send — must not increment the downloads counter or re-fire the
+    // hook. (Sequential duplicates are fully deduped here; truly concurrent
+    // workers would need an atomic conditional UPDATE for the same guarantee.)
     if ($event === 'completed') {
+        $already_seeding = $peer['old'] && (int) ($peer['old']['state'] ?? 0) === 1;
         $peer['state'] = 1;
-        require_once __DIR__.'/../model/torrent.increment.downloads.php';
-        torrent_increment_downloads($connection, $settings, is_string($peer['info_hash']) ? $peer['info_hash'] : '');
-        phoenix_hook('download.complete', $connection, $settings, $time, $peer);
+        if (! $already_seeding) {
+            require_once __DIR__.'/../model/torrent.increment.downloads.php';
+            torrent_increment_downloads($connection, $settings, is_string($peer['info_hash']) ? $peer['info_hash'] : '');
+            phoenix_hook('download.complete', $connection, $settings, $time, $peer);
+        }
     }
 
     // CHANGED or NEW peer — REPLACE the row, then run new/change hook

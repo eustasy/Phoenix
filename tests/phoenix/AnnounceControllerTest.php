@@ -54,6 +54,10 @@ class AnnounceControllerTest extends PhoenixTestCase
             self::$connection,
             'DELETE FROM `'.self::$settings['db_prefix'].'peers` WHERE `info_hash` = \''.self::HASH.'\';',
         );
+        mysqli_query(
+            self::$connection,
+            'DELETE FROM `'.self::$settings['db_prefix'].'events` WHERE `info_hash` = \''.self::HASH.'\';',
+        );
         parent::tearDown();
     }
 
@@ -124,6 +128,18 @@ class AnnounceControllerTest extends PhoenixTestCase
         return intval($row['downloads']);
     }
 
+    private function fetchEventCount(string $event): int
+    {
+        $result = mysqli_query(
+            self::$connection,
+            'SELECT COUNT(*) AS `c` FROM `'.self::$settings['db_prefix'].'events` '.
+            'WHERE `info_hash` = \''.self::HASH.'\' AND `event` = \''.$event.'\';',
+        );
+        $row = mysqli_fetch_assoc($result);
+
+        return intval($row['c']);
+    }
+
     ////	Format dispatch
 
     public function testRendersBencodeByDefault(): void
@@ -188,6 +204,62 @@ class AnnounceControllerTest extends PhoenixTestCase
         $row = $this->fetchPeer(self::PEER_ID_A);
         $this->assertNotNull($row);
         $this->assertSame('1', $row['state']);
+    }
+
+    public function testDuplicateCompletedIncrementsDownloadsOnce(): void
+    {
+        // Clients such as Transmission send every announce twice. The second
+        // 'completed' finds the peer already seeding and must not double-count.
+        $before = $this->fetchTorrentDownloads();
+
+        $this->makeRequest(['event' => 'completed']);
+        \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+        \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+
+        $this->assertSame($before + 1, $this->fetchTorrentDownloads());
+    }
+
+    public function testCompletedFromAlreadySeedingPeerDoesNotIncrement(): void
+    {
+        // A peer already recorded as seeding (state 1) re-sending 'completed'
+        // is a no-op for the counter — only the leech -> seed transition counts.
+        mysqli_query(
+            self::$connection,
+            'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
+            '(`info_hash`, `peer_id`, `compactv4`, `compactv6`, `ipv4`, `portv4`, `portv6`, `left`, `state`, `updated`) VALUES '.
+            '(\''.self::HASH.'\', \''.self::PEER_ID_A.'\', \'\', \'\', \'192.0.2.1\', 6881, 0, 0, 1, '.self::$time.');',
+        );
+        $before = $this->fetchTorrentDownloads();
+
+        $this->makeRequest(['event' => 'completed']);
+        \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+
+        $this->assertSame($before, $this->fetchTorrentDownloads());
+    }
+
+    public function testDuplicateStoppedLogsEventOnce(): void
+    {
+        // Seed an active peer so the first 'stopped' has a row to remove (and
+        // logs); the duplicate finds it already gone ($peer['old'] === false)
+        // and must not re-fire the hook. Stats on, 'stopped' opted in.
+        mysqli_query(
+            self::$connection,
+            'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
+            '(`info_hash`, `peer_id`, `compactv4`, `compactv6`, `ipv4`, `portv4`, `portv6`, `left`, `state`, `updated`) VALUES '.
+            '(\''.self::HASH.'\', \''.self::PEER_ID_A.'\', \'\', \'\', \'192.0.2.1\', 6881, 0, 0, 1, '.self::$time.');',
+        );
+
+        $settings = $this->settingsForTest();
+        $settings['stats_enabled'] = true;
+        $settings['stats_events'] = ['stopped'];
+        $settings['stats_geo'] = false;
+
+        $this->makeRequest(['event' => 'stopped']);
+        \announce_controller(self::$connection, $settings, self::$time, [self::HASH]);
+        \announce_controller(self::$connection, $settings, self::$time, [self::HASH]);
+
+        $this->assertNull($this->fetchPeer(self::PEER_ID_A));
+        $this->assertSame(1, $this->fetchEventCount('stopped'));
     }
 
     public function testNewPeerInsertsRow(): void
