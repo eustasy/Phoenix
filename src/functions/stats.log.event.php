@@ -15,7 +15,7 @@ declare(strict_types=1);
 // are persisted.
 /**
  * @param PhoenixSettings $settings
- * @param array<string, mixed> $peer
+ * @param PhoenixPeer $peer
  */
 function stats_log_event(mysqli $connection, array $settings, int $time, array $peer, string $event): void
 {
