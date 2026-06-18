@@ -1,5 +1,8 @@
 -- Phoenix torrents table.
 --
+-- `listed` is indexed because the public index filters `WHERE listed = 1`; the
+-- table is read far more than written, so the index earns its small write cost.
+--
 -- Uses the literal default prefix `phoenix_`. db_create() rewrites it to
 -- $settings['db_prefix'] before executing. To import manually:
 --   mysql <database> < sql/torrents.sql
@@ -16,5 +19,6 @@ CREATE TABLE IF NOT EXISTS `phoenix_torrents` (
 	`files` longtext NULL,
 	`trackers` longtext NULL,
 	`webseeds` longtext NULL,
-	PRIMARY KEY (`info_hash`)
+	PRIMARY KEY (`info_hash`),
+	KEY `listed` (`listed`)
 ) ENGINE = MyISAM DEFAULT CHARSET = latin1;
