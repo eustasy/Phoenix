@@ -192,9 +192,13 @@ class ScrapeSpecificControllerTest extends PhoenixTestCase
         $json = \scrape_specific_controller(self::$connection, self::$settings, [self::HASH_A]);
 
         // Pin the entire decoded payload — single-hash responses contain
-        // exactly one torrent entry, so equality is the right shape here.
+        // exactly one torrent entry plus the top-level BEP 48 throttle hint,
+        // so equality is the right shape here.
         $this->assertSame(
-            [self::HASH_A => self::HASH_A_JSON],
+            [
+                self::HASH_A => self::HASH_A_JSON,
+                'min_request_interval' => self::$settings['scrape_min_interval'],
+            ],
             json_decode($json, true),
         );
     }
