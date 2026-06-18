@@ -179,4 +179,19 @@ class ViewScrapeJsonTest extends PhoenixTestCase
         $this->assertEquals(0, $torrent['downloads']);
         $this->assertEquals(0, $torrent['traffic']);
     }
+
+    public function testMinRequestIntervalKeyOnlyWhenNonZero()
+    {
+        $scrape = [[
+            'info_hash' => 'abcdef1234567890abcdef1234567890abcdef12',
+            'seeders' => 1, 'leechers' => 0, 'peers' => 1,
+            'size' => 100, 'downloads' => 0, 'traffic' => 0,
+        ]];
+
+        $with = json_decode(view_scrape_json($scrape, 1800), true);
+        $this->assertSame(1800, $with['min_request_interval']);
+
+        $without = json_decode(view_scrape_json($scrape, 0), true);
+        $this->assertArrayNotHasKey('min_request_interval', $without);
+    }
 }

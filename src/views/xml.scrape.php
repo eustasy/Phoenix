@@ -17,8 +17,11 @@ declare(strict_types=1);
 //            - traffic: int
 //
 // Returns: XML string.
-/** @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, traffic: int}> $scrape */
-function view_scrape_xml(array $scrape): string
+/**
+ * @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, traffic: int}> $scrape
+ * @param int $min_request_interval BEP 48 scrape-throttle hint (seconds); 0 omits it
+ */
+function view_scrape_xml(array $scrape, int $min_request_interval = 0): string
 {
     // Wrapped in a <scrape> root so the document is well-formed even when
     // $scrape contains zero or many torrents — a bare list of <torrent>
@@ -34,6 +37,11 @@ function view_scrape_xml(array $scrape): string
             '<downloads>'.$torrent['downloads'].'</downloads>'.
             '<traffic>'  .$torrent['traffic']  .'</traffic>'.
         '</torrent>';
+    }
+
+    // BEP 48's min_request_interval (parity with the bencode `flags` dict).
+    if ($min_request_interval > 0) {
+        $xml .= '<min_request_interval>'.$min_request_interval.'</min_request_interval>';
     }
 
     return $xml.'</scrape>';

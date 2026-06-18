@@ -21,8 +21,11 @@ declare(strict_types=1);
 // each stats dict into the byte order BEP 48 wants.
 //
 // Returns: bencoded scrape response string.
-/** @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, traffic: int}> $scrape */
-function view_scrape_bencode(array $scrape): string
+/**
+ * @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, traffic: int}> $scrape
+ * @param int $min_request_interval BEP 48 scrape-throttle hint (seconds); 0 omits it
+ */
+function view_scrape_bencode(array $scrape, int $min_request_interval = 0): string
 {
     require_once __DIR__.'/../functions/bencode.encode.php';
 
@@ -35,5 +38,12 @@ function view_scrape_bencode(array $scrape): string
         ];
     }
 
-    return bencode_encode(['files' => (object) $files]);
+    $response = ['files' => (object) $files];
+    // BEP 48: advertise the minimum seconds between scrapes in a `flags` dict so
+    // clients can throttle. Omitted when 0; sorts after `files` automatically.
+    if ($min_request_interval > 0) {
+        $response['flags'] = ['min_request_interval' => $min_request_interval];
+    }
+
+    return bencode_encode($response);
 }

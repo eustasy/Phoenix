@@ -45,6 +45,9 @@ $settings['announce_external_ip'] = true;
 /* a full scrape ignores the allowed-torrents filter, so leaving it on */
 /* exposes your whole torrent list to anyone who scrapes. */
 $settings['full_scrape'] = true;
+/* minimum seconds between scrape requests, advertised to clients as BEP 48's */
+/* `min_request_interval` in the scrape response. 0 = do not advertise it */
+$settings['scrape_min_interval'] = 1800; // 30 minutes
 /* randomise peer selection to spread load */
 $settings['random_peers'] = true;
 /* minimum swarm size before RAND() is used */

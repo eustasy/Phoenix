@@ -90,4 +90,14 @@ class ViewScrapeXmlTest extends PhoenixTestCase
         $this->assertStringContainsString('<info_hash>bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb</info_hash>', $xml);
     }
 
+    public function testMinRequestIntervalElementOnlyWhenNonZero(): void
+    {
+        $with = view_scrape_xml($this->fixture(), 1800);
+        $this->assertStringContainsString('<min_request_interval>1800</min_request_interval>', $with);
+        // Still well-formed inside the <scrape> root.
+        $this->assertNotFalse(simplexml_load_string($with));
+
+        $this->assertStringNotContainsString('min_request_interval', view_scrape_xml($this->fixture(), 0));
+    }
+
 }

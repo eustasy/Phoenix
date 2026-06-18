@@ -106,6 +106,17 @@ class ScrapeFullControllerTest extends PhoenixTestCase
         $this->assertStringNotContainsString('7:traffic', $bencode);
     }
 
+    public function testBencodeCarriesScrapeMinIntervalFromSettings(): void
+    {
+        // The controller threads $settings['scrape_min_interval'] into the
+        // BEP 48 `flags` dict; a non-zero value is advertised.
+        $_GET = [];
+        $settings = self::$settings;
+        $settings['scrape_min_interval'] = 900;
+        $bencode = \scrape_full_controller(self::$connection, $settings);
+        $this->assertStringContainsString('5:flagsd20:min_request_intervali900e', $bencode);
+    }
+
     public function testRendersXmlForFullScrape(): void
     {
         $_GET = ['xml' => '1'];

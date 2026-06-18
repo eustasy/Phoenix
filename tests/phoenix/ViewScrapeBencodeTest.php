@@ -135,4 +135,16 @@ class ViewScrapeBencodeTest extends PhoenixTestCase
         $this->assertStringContainsString('10:downloadedi777777e', $out);
     }
 
+    public function testFlagsCarryMinRequestIntervalOnlyWhenNonZero(): void
+    {
+        // BEP 48: the throttle hint rides in a `flags` dict as a bencode integer.
+        $with = view_scrape_bencode($this->fixture(), 1800);
+        $this->assertStringContainsString('5:flags', $with);
+        $this->assertStringContainsString('20:min_request_intervali1800e', $with);
+
+        // Zero omits the dict entirely.
+        $without = view_scrape_bencode($this->fixture(), 0);
+        $this->assertStringNotContainsString('flags', $without);
+    }
+
 }

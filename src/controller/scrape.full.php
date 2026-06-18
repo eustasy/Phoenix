@@ -28,16 +28,16 @@ function scrape_full_controller(mysqli $connection, array $settings): string
         require_once __DIR__.'/../views/xml.scrape.php';
         header('Content-Type: text/xml');
 
-        return view_scrape_xml($scrape);
+        return view_scrape_xml($scrape, $settings['scrape_min_interval']);
     }
     if (isset($_GET['json'])) {
         require_once __DIR__.'/../views/json.scrape.php';
         header('Content-Type: application/json');
 
-        return view_scrape_json($scrape);
+        return view_scrape_json($scrape, $settings['scrape_min_interval']);
     }
     require_once __DIR__.'/../views/bencode.scrape.php';
     header('Content-Type: text/plain; charset=ISO-8859-1');
 
-    return view_scrape_bencode($scrape);
+    return view_scrape_bencode($scrape, $settings['scrape_min_interval']);
 }
