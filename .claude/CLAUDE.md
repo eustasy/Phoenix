@@ -1,128 +1,98 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code working in this repository. This file is an index;
+the detail lives in `.claude/docs/`. Read the linked doc before working in
+that area — they hold the conventions and gotchas CI enforces but the code
+doesn't make obvious.
 
 ## Project
 
-Phoenix is a lightweight BitTorrent tracker written in procedural PHP with a MySQL/MariaDB backend. It implements the announce/scrape protocols (BEP 3, BEP 7, BEP 23, BEP 48). It is a tracker first, not a full torrent listing site — but it does ship an optional public index of explicitly-listed torrents (`public/index.php`), a public stats page (`public/scrape.php?stats`), a client-side magnet generator (`public/magnet.php`), and an admin panel (`public/admin.php`).
+**Phoenix** is a lightweight BitTorrent tracker in procedural PHP with a
+MySQL/MariaDB backend. It implements announce/scrape (BEP 3, 7, 23, 24, 27,
+48). It is a tracker first, not a torrent listing site — but it ships an
+optional public index (`public/index.php`), a public stats page
+(`public/scrape.php?stats`), a client-side magnet generator
+(`public/magnet.php`), an admin panel + first-run installer (`public/admin.php`),
+and an authenticated management REST API (`public/api/`).
 
-## Common commands
+**Stack:** PHP 8.2–8.6, `mysqli`. No framework, no front-end build step. Optional
+Composer libraries (`geoip2/geoip2` for geo stats, `eustasy/authenticatron` for
+admin 2FA), loaded conditionally and guarded with `class_exists()`. PHPUnit for
+tests; qlty orchestrates phpstan (level 9) + php-cs-fixer + other linters.
+
+## Non-negotiable invariants
+
+These break CI or security if violated. Details in the linked docs.
+
+- **One function per file** in `src/{functions,model,views,controller}/`;
+  file name = function name with `.` for `_` (`parse_ipv4()` → `parse.ipv4.php`).
+  Enforced by `ConventionsTest`. → [conventions](docs/conventions.md)
+- **A function `require_once`s its own dependencies** at the top of its body.
+  The sole exception is `tracker_error()` (bootstrap-loaded).
+  → [architecture](docs/architecture.md)
+- **`info_hash`/`peer_id` pass through `maybe_binary_to_hex()`** at the boundary.
+  This hex sanitization is the primary SQL-injection defense for the
+  string-concatenated queries. → [database](docs/database.md)
+- **Bencode is never hand-assembled** — views build a PHP structure and hand it
+  to `bencode_encode()`, the single emitter. → [views](docs/views.md)
+- **Every settable value exists in `config/phoenix.default.php`.** Code reads
+  `$settings['key']` with no fallback layer. → [configuration](docs/configuration.md)
+- `declare(strict_types=1);` first in every PHP file; tabs for indentation; no
+  closing `?>`. → [conventions](docs/conventions.md)
+
+## Verifying changes
 
 ```bash
-# Install dev dependencies (PHPUnit). Required before running tests.
-composer install
-
-# Run the full PHPUnit suite (requires a reachable DB and phoenix.custom.php).
-vendor/bin/phpunit
-
-# Run a single test class.
-vendor/bin/phpunit --filter ParseIpv4Test
-
-# Run a single test method.
-vendor/bin/phpunit --filter 'ParseIpv4Test::testIpv4WithPort'
-
-# Lint, static analysis, and format checks (run by GitHub Actions via qlty).
-# `qlty check` runs every configured linter: phpstan + php-cs-fixer (PHP),
-# sqlfluff (SQL), and markdownlint (Markdown).
-qlty check          # check changed files
-qlty check --all    # check the whole tree, as CI does
+composer install                      # PHPUnit + dev deps (once)
+vendor/bin/phpunit                    # full suite (needs a reachable DB)
+vendor/bin/phpunit --filter ParseIpv4Test          # one class
+vendor/bin/phpunit --filter 'ParseIpv4Test::testIpv4WithPort'  # one method
+qlty check                            # lint/format/static-analysis (changed files)
+qlty check --all                      # whole tree, as CI does
 ```
 
-CI runs the workflows in `.github/workflows/`: `php.yml` (phpstan + php-cs-fixer via qlty) and `test-php.yml` (the PHPUnit suite against a MariaDB service container) across PHP 8.2–8.6, plus `sql.yml` (sqlfluff), `md.yml` (markdownlint), and `security.yml`.
+Tests need a reachable DB and a `phoenix.custom.php`; the bootstrap suffixes the
+table prefix with `TESTING_` so it never touches production tables. Match an
+existing test's structure when adding one. → [testing](docs/testing.md)
 
-## Architecture
+## Workflow rules
 
-### "Puff" structure
+- **Never auto-commit.** The user commits as they go. Don't offer to.
+- When work closes a tracked issue, run `gh issue view <N>` and use
+  `Fix #<N>: <Title>.` verbatim. Otherwise a short present-tense subject.
+  One concern per commit. Include the `Co-Authored-By:` trailer.
+- New tunable behavior → add a setting, don't hardcode.
+- `config/phoenix.default.php` says "do not modify" — that's for *installs*;
+  it is the right place to add new settings during development.
 
-The codebase follows what the changelog calls a "puff-style" layout — small, single-purpose files glued together by `require_once`:
+## Documentation map
 
-* **`src/controller/`** — request handlers, one per endpoint/action (`announce.php`, `scrape.{full,specific,stats}.php`, `admin.*.php`). Each exposes a `*_controller()` function the matching `public/*.php` entry point calls after bootstrap; this is where per-request input sanitization, model calls, and view selection live.
-* **`src/functions/`** — one function per file, enforced by `ConventionsTest`. File `parse.ipv4.php` defines `parse_ipv4()` (file name = function name, underscores become dots). Functions are pure-ish PHP (no top-level execution beyond defining the function). Business logic helpers: sanitization, validation, address parsing, peer selection strategies, etc. Helpers get their own file and are `require_once`d at the top of the calling function's body — never a second function in the same file. `////    <function_name>` header comment, then a brief description, then the function.
-* **`src/model/`** — database operations. One function per file, each returns results or false. All queries live here.
-* **`src/views/`** — presentation layer. Bencode, XML, and HTML output functions. Receives normalized data arrays, never raw DB results or `$_GET`/`$_POST`. **Bencode is never hand-assembled in a view:** the `bencode.*.php` views build a plain PHP structure (ints, byte strings, lists, dicts) and hand it to `bencode_encode()` (`bencode.encode.php`), the single emitter. It owns length prefixes, balanced container tokens, and dict-key ordering — keys are sorted into raw byte order (`ksort(SORT_STRING)`) per BEP 3, so callers never pre-sort. An empty array encodes as an empty *list* (`le`); cast to `(object)` to force a dict (`de`), as `view_scrape_bencode` does for the binary-keyed, possibly-empty files dict. Cast numeric DB columns to `int` before encoding (mysqli returns them as strings, which would otherwise emit as bencode strings, not integers).
-* **`src/hooks/`** — operator-customizable lifecycle scripts. The tracker calls `phoenix_hook()` at well-defined points; that helper checks `is_readable()` and `include`s the hook from inside its own scope (plain `include`, never `include_once` — hooks fire per event, and FPM workers serve many requests per process; hooks must not declare functions at top level). Hooks see exactly `$connection`, `$settings`, `$time`, and `$peer` (the last passed by reference, so mutations propagate). `phoenix.download.complete.php`, `phoenix.peer.new.php`, and `phoenix.peer.stopped.php` ship with gated stat-tracking logic that early-returns unless `$settings['stats_enabled']` is on; `phoenix.peer.access.php` and `phoenix.peer.change.php` stay empty on purpose (they fire on every keepalive announce — logging them would flood the events table).
-* **`config/`** — `phoenix.default.php` is the template (do not modify). User configuration goes into `phoenix.custom.php` (gitignored, created by the installer).
-* **`bin/`** — standalone scripts intended for cron (`backup-database.php`, `clean-and-optimize.php`). They `require_once '../src/phoenix.php'` to bootstrap.
-* **`tests/phoenix/`** — one PHPUnit test class per function/component (see test runner notes below).
+Each entry lists the source paths it covers — read the doc before touching those
+paths.
 
-### Entry points
+- [architecture.md](docs/architecture.md) — `src/phoenix.php`, `public/*.php`,
+  `src/controller/`, `bin/`. Puff layout, the five layers, entry points,
+  bootstrap, and how a request flows through announce/scrape/admin/api.
+- [conventions.md](docs/conventions.md) — all of `src/`, `tests/phoenix/ConventionsTest.php`,
+  `.qlty/configs/`. File structure, naming, four-stroke headers, style, commits.
+  Read before adding any file.
+- [database.md](docs/database.md) — `sql/`, `sql/migrations/`, `src/model/`,
+  `src/functions/db.*.php`, `sanitize.maybe_binary_to_hex.php`. Tables, schema
+  files, prefixing, migrations, the hex-sanitizer SQLi defense, `db_host` `p:`.
+- [http-api.md](docs/http-api.md) — `public/admin.php`, `public/api/`,
+  `src/controller/{admin,api}.*.php`, `src/functions/{auth,api}.*.php`,
+  `torrent.parse.*.php`. Admin panel router, REST API, and the auth model.
+- [views.md](docs/views.md) — `src/views/`, `src/functions/bencode.*.php`,
+  `src/partials/`. Output layers (bencode/JSON/XML/HTML), the bencode emitter
+  contract, content negotiation. HTML redesign brief in [DESIGN.md](DESIGN.md).
+- [configuration.md](docs/configuration.md) — `config/phoenix.default.php`,
+  `config/phoenix.custom.php`, `src/functions/settings.load.php`. The settings
+  model and a guide to the notable `$settings` keys.
+- [stats-hooks.md](docs/stats-hooks.md) — `src/hooks/`, `src/functions/{phoenix.hook,stats.*}.php`,
+  `src/model/{event,events,stats}.*.php`. Events ledger, lifecycle hooks, geo.
+- [testing.md](docs/testing.md) — `tests/`, `phpunit*.xml.dist`, `.qlty/`,
+  `.github/workflows/`. PHPUnit setup, smoke suite, CI workflows, qlty.
 
-Every entry point sits in `public`, bootstraps via `require_once __DIR__.'/../src/phoenix.php'` (which loads settings, opens the DB, defines `tracker_error`), then delegates the real work to request handlers in `src/controller/` — `*_controller()` functions returning a response string the entry point echoes. The `public/*.php` files stay thin (`announce.php` is ~12 lines); `index.php` is the exception, calling its model and view directly:
-
-* `announce.php` → `announce_controller()` (`src/controller/announce.php`) — BEP 3 announce: sanitizes input, resolves peer addresses, handles peer events (new/change/access/stopped/completed), then builds and outputs the bencode response.
-* `scrape.php` — BEP 48 (HTTP) scrape; routes by mode to `scrape_stats_controller` / `scrape_specific_controller` / `scrape_full_controller` (`src/controller/scrape.*.php`). `?stats` returns tracker stats; with `info_hash`(es) returns specific torrents (closed trackers filter to allowed ones first); otherwise full scrape (if enabled).
-* `index.php` — public torrent index, gated by `$settings['public_index']`.
-* `admin.php` — admin panel and first-run installer; routes to `admin_install_controller` (no config yet), else `admin_login_controller` then `admin_panel_controller` (`src/controller/admin.*.php`). Requires no `phoenix.custom.php` to enter installer mode.
-* `magnet.php` — pure client-side magnet generator. **Does not bootstrap** `../src/phoenix.php` and does not touch the tracker — it's a self-contained utility page.
-
-### Web exposure
-
-Only `public/` is meant to be web-served. The PDS layout puts `src/` (controllers, functions, model, views, hooks), `bin/` (cron scripts), `config/` (database credentials in `phoenix.custom.php`), and `tests/` one level above the document root, so when the server is configured correctly none of them are reachable over HTTP. Server-config docs live in `APACHE.md` and `NGINX.md`; both cover document root configuration, stripping `.php` from URLs, and rate-limiting the admin endpoint.
-
-### Bootstrap (`src/phoenix.php`)
-
-Orchestration only — the meaningful work lives in extracted, unit-testable functions:
-
-* `settings_load()` (in `settings.load.php`) loads `phoenix.default.php` followed by `phoenix.custom.php` (or hard-coded fallbacks if the custom file is missing) and returns the populated `$settings` array.
-* `db_connect()` (in `db.connect.php`) wraps `mysqli_connect()` in a try/catch so callers always get a `mysqli` or `false`, regardless of `mysqli_report()` mode (PHP 8.1+ defaults to throwing).
-
-Bootstrap then `require_once`s `tracker.error.php`, runs `db_is_configured`, applies `db_persist_host`, calls `db_connect`, and (for closed trackers) loads the allowed-torrents list. After this point, scripts can rely on `$connection`, `$settings`, and `$time` being in scope.
-
-**`tracker_error` is the one shared helper that lives in the bootstrap rather than each function.** Every entry point either bootstraps via `phoenix.php` or includes `tracker.error.php` explicitly (see `public/admin.php`, which loads it before its installer-mode branch can run without `phoenix.php`). Functions calling `tracker_error()` therefore do *not* `require_once` it themselves — the puff-style "declare your own deps" rule has this single carve-out. Any new entry point that skips `phoenix.php` must include `tracker.error.php` explicitly.
-
-**Gotcha:** The DB connection logic mutates `$settings['db_host']` in place — when `db_persist` is true it prepends `p:`. Anywhere outside `mysqli_connect` that reads `db_host` (e.g. `bin/backup-database.php` writing a credentials file) must strip the `p:` prefix.
-
-### Database
-
-Three MyISAM tables (chosen for write-heavy workload, no transactions/foreign keys):
-
-* `<prefix>peers` — active peers, ephemeral. PK `(info_hash, peer_id)`. Cleanup deletes rows where `updated < time - 3 * announce_interval`.
-* `<prefix>torrents` — tracked torrents. PK `info_hash`. Holds `name`, `size`, `listed`, `downloads`.
-* `<prefix>tasks` — task log (`name` PK).
-
-Schema lives in `sql/<table>.sql`, one CREATE TABLE per file using the literal default prefix `phoenix_`. `db_create()` reads each file, rewrites the prefix to `$settings['db_prefix']` if different, and executes against the connection's selected database. Files are also importable manually with `mysql <database> < sql/peers.sql` for installs that bypass the wizard.
-
-`info_hash` and `peer_id` are stored as 40-char hex strings, not raw 20-byte binary. Conversion happens at the boundary via `maybe_binary_to_hex()` (in `sanitize.maybe_binary_to_hex.php`). This is the project's primary SQL injection defense: the hex sanitizer ensures these values can't carry SQL metacharacters into the many string-concatenated queries in the codebase.
-
-### Settings model
-
-Configuration is a single flat `$settings` array threaded through every function call. New tunables go in `phoenix.default.php` with a sensible default and a one-line `/* comment */`. The user-facing override file is `phoenix.custom.php` — code reads `$settings['foo']` directly with no fallback layer, so every key MUST exist in `phoenix.default.php`.
-
-The installer (`public/admin.php` in installer mode) generates `config/phoenix.custom.php` by writing `$settings['key'] = 'value';` lines for the keys it knows about.
-
-## Test runner
-
-PHPUnit is wired up via `composer.json` and `phpunit.xml.dist`. The test bootstrap (`tests/bootstrap.php`):
-
-1. Loads Composer's autoloader and `src/phoenix.php` (giving access to `$connection`, `$settings`, `$time`).
-2. Suffixes `$settings['db_prefix']` with `TESTING_` so tests can't touch production tables.
-3. Calls `db_create()` to ensure the prefixed tables exist.
-4. Exposes `$connection`, `$settings`, `$time` via `$GLOBALS` so each test class can pick them up in `setUpBeforeClass()`.
-
-All test classes live in the `Phoenix\Tests` namespace and extend `PhoenixTestCase` (in `tests/phoenix/PhoenixTestCase.php`), which copies the globals into `protected static` properties (`self::$connection`, `self::$settings`, `self::$time`).
-
-Test classes are autoloaded via PSR-4 (`Phoenix\Tests\` → `tests/phoenix/`), so files must be named in PascalCase matching the class (e.g. `ParseIpv4Test.php` → `class ParseIpv4Test`). PHPUnit discovers classes ending in `Test` automatically.
-
-Tests that mutate the DB should clean up in `tearDown()` using the `__TEST_%` LIKE pattern; `task_clean()` already removes such rows so its test relies on that rather than fixture cleanup.
-
-To test functions that call `exit()` (notably `tracker_error()`), spawn a subprocess via `proc_open(PHP_BINARY, ...)` and assert against captured stdout + exit code — see `TrackerErrorTest.php`. Running it in-process would terminate the PHPUnit worker.
-
-## Conventions
-
-These come from `CONTRIBUTING.md` and consistent practice in the codebase:
-
-* **Tabs for indentation**, spaces for alignment.
-* **"Four stroke" section headers**: `////  Name`, followed by a short `//` description. Used both at file top-level and inside functions to mark logical sections.
-* **No closing `?>`** on PHP-only files.
-* **One function per file** in `src/functions/`, named `<category>.<verb>.php`.
-* **PHP-native solutions** over shell scripts when adding maintenance/utility code, so configuration stays in `$settings` rather than being spread across language boundaries (e.g. `bin/backup-database.php`, not `.sh`).
-* **Settings over hardcoded behavior**: any tunable parameter (size, count, on/off, path) gets a setting in `phoenix.default.php` with a sensible default.
-
-## Commits
-
-* Use `Fix #<issue>: <Title from issue>.` verbatim from the GitHub issue when the work closes a tracked issue.
-* Otherwise use a short descriptive subject, present tense.
-* One concern per commit — avoid batching unrelated fixes.
-* Include `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>` (or current model) trailer.
-
-Run `gh issue view <N>` before writing a commit message to confirm the issue is still open and to copy its title verbatim.
+Repo-level docs: `README.md` (install/config), `CONTRIBUTING.md` (dev env, Docker),
+`MIGRATING.md` (3.x→4.0), `APACHE.md`/`NGINX.md` (server config), `BEPs.md` (spec
+coverage), `CHANGELOG.md`.
