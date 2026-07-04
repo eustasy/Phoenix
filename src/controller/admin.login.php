@@ -53,7 +53,13 @@ function admin_login_controller(array $settings): ?string
                 session_regenerate_id(true);
                 require_once __DIR__.'/../functions/auth.set.authenticated.php';
                 auth_set_authenticated();
-                header('Location: '.$_SERVER['REQUEST_URI']);
+                // Return to the page just logged into, but only if it is a
+                // same-origin path — never an attacker's '//host' (open redirect).
+                require_once __DIR__.'/../functions/auth.safe.redirect.path.php';
+                $return_to = isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI'])
+                    ? $_SERVER['REQUEST_URI']
+                    : '';
+                header('Location: '.auth_safe_redirect_path($return_to));
                 exit;
             }
 

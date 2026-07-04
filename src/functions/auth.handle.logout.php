@@ -22,7 +22,14 @@ function auth_handle_logout(): void
             return;
         }
         session_destroy();
-        header('Location: '.strtok($_SERVER['REQUEST_URI'], '?'));
+        // Redirect back to the current path (query stripped so ?logout isn't
+        // re-submitted), guarded against an off-site '//host' open redirect.
+        require_once __DIR__.'/auth.safe.redirect.path.php';
+        $uri = isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI'])
+            ? $_SERVER['REQUEST_URI']
+            : '';
+        $path = strtok($uri, '?');
+        header('Location: '.auth_safe_redirect_path($path === false ? '' : $path));
         exit;
     }
 }
