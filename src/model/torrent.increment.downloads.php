@@ -25,9 +25,13 @@ function torrent_increment_downloads(mysqli $connection, array $settings, string
                 '`downloads`=`downloads`+1;',
             [$info_hash],
         );
-    } catch (mysqli_sql_exception) {
-        // Silently ignore — the download count is best-effort.
-        $ignored = true;
+    } catch (mysqli_sql_exception $e) {
+        // Best-effort: never break the announce, but surface the failure when
+        // report_errors is on so a broken counter is not invisible in prod.
+        if ($settings['report_errors']) {
+            require_once __DIR__.'/../functions/phoenix.hook.event.php';
+            phoenix_hook_event('error', ['throwable' => $e, 'source' => 'torrent_increment_downloads']);
+        }
     }
 
     return true;

@@ -23,7 +23,11 @@ function peer_delete(mysqli $connection, array $settings, array $peer): true
             'WHERE info_hash=? AND peer_id=?;',
             [$peer['info_hash'], $peer['peer_id']],
         );
-    } catch (mysqli_sql_exception) {
+    } catch (mysqli_sql_exception $e) {
+        if ($settings['report_errors']) {
+            require_once __DIR__.'/../functions/phoenix.hook.event.php';
+            phoenix_hook_event('error', ['throwable' => $e, 'source' => 'peer_delete']);
+        }
         $peer_delete = false;
     }
     if (! $peer_delete) {

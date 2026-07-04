@@ -50,6 +50,21 @@ error_configure($settings);
 
 require_once __DIR__.'/functions/tracker.error.php';
 
+////	Error reporting hooks (opt-in)
+// When report_errors is on: fire the 'init' event so an operator can initialise
+// their monitor (e.g. \Sentry\init()) and attach request context up front, then
+// register handlers that route uncaught exceptions + fatal shutdown errors
+// through phoenix_hook_event('error', ...). Both run after the autoload/settings
+// load and BEFORE the DB connect below, so even a connection failure lands in an
+// initialised context. Off by default = nothing registered, identical to before.
+if ($settings['report_errors']) {
+    require_once __DIR__.'/functions/phoenix.hook.event.php';
+    phoenix_hook_event('init', ['settings' => $settings]);
+
+    require_once __DIR__.'/functions/error.handle.register.php';
+    error_handle_register();
+}
+
 ////	Database Connection
 require_once __DIR__.'/functions/db.is.configured.php';
 if (! db_is_configured($settings)) {
@@ -62,7 +77,9 @@ $settings['db_host'] = db_persist_host($settings['db_host'], (bool)$settings['db
 require_once __DIR__.'/functions/db.connect.php';
 $connection = db_connect($settings);
 if (! $connection) {
-    tracker_error('Connection Failed. Tracker may be mis-configured. '.mysqli_connect_error());
+    // A live tracker losing its DB is a server fault worth reporting; the hook
+    // dispatch does not need the DB, so it works even here.
+    tracker_error('Connection Failed. Tracker may be mis-configured. '.mysqli_connect_error(), null, $settings['report_errors']);
 }
 
 ////	Load allowed torrents for closed tracker (BEP 27)

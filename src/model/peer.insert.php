@@ -55,7 +55,11 @@ function peer_insert(mysqli $connection, array $settings, int $time, array $peer
                 $time,                // unix timestamp
             ],
         );
-    } catch (mysqli_sql_exception) {
+    } catch (mysqli_sql_exception $e) {
+        if ($settings['report_errors']) {
+            require_once __DIR__.'/../functions/phoenix.hook.event.php';
+            phoenix_hook_event('error', ['throwable' => $e, 'source' => 'peer_insert']);
+        }
         $peer_new = false;
     }
 

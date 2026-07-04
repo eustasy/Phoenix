@@ -18,7 +18,8 @@
 	},
 	"suggest": {
 		"eustasy/authenticatron": "Enables optional TOTP two-factor auth on the admin panel (also needs ext-gd for the enrolment QR code).",
-		"geoip2/geoip2": "Enables minified geo enrichment (country/continent) of stat-tracking events; see the stats_geo settings."
+		"geoip2/geoip2": "Enables minified geo enrichment (country/continent) of stat-tracking events; see the stats_geo settings.",
+		"sentry/sentry": "Enables optional error/event reporting to Sentry (or any monitor) via the report_errors setting and the src/hooks/phoenix.init.php + phoenix.error.php hooks."
 	},
 	"autoload-dev": {
 		"psr-4": {

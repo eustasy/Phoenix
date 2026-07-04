@@ -94,6 +94,10 @@ $settings['error_log'] = '';
 /* NEVER enable in production: display_errors corrupts bencode */
 /* responses and discloses internals. Errors are always logged. */
 $settings['debug'] = false;
+/* fire an 'error' hook (src/hooks/phoenix.error.php) for server-side */
+/* failures + uncaught exceptions/fatals, so an external monitor such as */
+/* Sentry can be wired up without touching core. off by default. */
+$settings['report_errors'] = false;
 
 ////	Admin Options
 /* bcrypt hash of the admin password; empty = no auth */

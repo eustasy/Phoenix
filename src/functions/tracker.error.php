@@ -12,8 +12,21 @@ declare(strict_types=1);
 // Views are required relative to __DIR__ so this file works the same whether
 // it's loaded from phoenix.php's file scope or from a function body.
 
-function tracker_error(string $error, int|string|null $retry_in = null): never
+function tracker_error(string $error, int|string|null $retry_in = null, bool $report = false): never
 {
+    // Server-fault callers (a caught DB exception's degradation, a failed DB
+    // connect) set $report so the failure reaches phoenix_hook_event('error');
+    // client-fault rejections (bad info_hash / port) leave it false to keep the
+    // monitor free of malformed-request noise.
+    if ($report) {
+        require_once __DIR__.'/phoenix.hook.event.php';
+        phoenix_hook_event('error', [
+            'message' => $error,
+            'level' => 'error',
+            'source' => 'tracker_error',
+        ]);
+    }
+
     if (isset($_GET['xml'])) {
         require_once __DIR__.'/../views/xml.error.php';
         header('Content-Type: text/xml');

@@ -24,7 +24,11 @@ function peer_update(mysqli $connection, array $settings, int $time, array $peer
             'WHERE `info_hash`=? AND `peer_id`=?;',
             [$time, $peer['uploaded'], $peer['downloaded'], $peer['left'], $peer['info_hash'], $peer['peer_id']],
         );
-    } catch (mysqli_sql_exception) {
+    } catch (mysqli_sql_exception $e) {
+        if ($settings['report_errors']) {
+            require_once __DIR__.'/../functions/phoenix.hook.event.php';
+            phoenix_hook_event('error', ['throwable' => $e, 'source' => 'peer_update']);
+        }
         $peer_update = false;
     }
     if (! $peer_update) {
