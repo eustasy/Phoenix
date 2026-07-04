@@ -135,6 +135,14 @@ class EndpointSmokeTest extends SmokeTestCase
         $r = $this->get('/index.php', ['xml' => '1']);
         $this->assertSame(200, $r['status']);
         $this->assertStringContainsString('<torrents>', $r['body']);
+        // XML is served as application/xml; charset=UTF-8. application/* is not
+        // touched by the binary protocol's iso-8859-1 default_charset (unlike
+        // text/*), and the explicit UTF-8 matches the body, so non-ASCII torrent
+        // names survive instead of being mangled.
+        $this->assertStringContainsStringIgnoringCase(
+            'charset=UTF-8',
+            (string) $this->headerValue($r, 'Content-Type'),
+        );
     }
 
     #[Depends('testInstallSucceeds')]

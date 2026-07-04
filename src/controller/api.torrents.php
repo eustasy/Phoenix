@@ -38,7 +38,7 @@ function api_torrents_controller(mysqli $connection, array $settings): string
     ////	Render
     if (isset($_GET['xml'])) {
         require_once __DIR__.'/../views/xml.torrents.php';
-        header('Content-Type: text/xml');
+        header('Content-Type: application/xml; charset=UTF-8');
 
         return view_torrents_xml($torrents);
     }

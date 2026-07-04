@@ -33,7 +33,7 @@ unset($torrent);
 ////	Render
 if (isset($_GET['xml'])) {
     require_once __DIR__.'/../src/views/xml.index.php';
-    header('Content-Type: text/xml');
+    header('Content-Type: application/xml; charset=UTF-8');
     echo view_index_xml($index, $show_meta);
 } elseif (isset($_GET['json'])) {
     require_once __DIR__.'/../src/views/json.index.php';

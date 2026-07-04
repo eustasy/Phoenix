@@ -148,7 +148,7 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
 
     if (isset($_GET['xml'])) {
         require_once __DIR__.'/../views/xml.announce.php';
-        header('Content-Type: text/xml');
+        header('Content-Type: application/xml; charset=UTF-8');
 
         return view_announce_xml($counts, $settings, $rows, $external_ip);
     }

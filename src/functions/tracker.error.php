@@ -29,7 +29,7 @@ function tracker_error(string $error, int|string|null $retry_in = null, bool $re
 
     if (isset($_GET['xml'])) {
         require_once __DIR__.'/../views/xml.error.php';
-        header('Content-Type: text/xml');
+        header('Content-Type: application/xml; charset=UTF-8');
         echo view_error_xml($error, $retry_in);
     } elseif (isset($_GET['json'])) {
         require_once __DIR__.'/../views/json.error.php';

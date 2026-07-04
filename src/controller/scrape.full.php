@@ -26,7 +26,7 @@ function scrape_full_controller(mysqli $connection, array $settings): string
 
     if (isset($_GET['xml'])) {
         require_once __DIR__.'/../views/xml.scrape.php';
-        header('Content-Type: text/xml');
+        header('Content-Type: application/xml; charset=UTF-8');
 
         return view_scrape_xml($scrape, $settings['scrape_min_interval']);
     }
