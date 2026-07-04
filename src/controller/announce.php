@@ -77,6 +77,18 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
         $peer['portv6'] = $peer['port'];
     }
 
+    // Ports must fit the smallint(5) unsigned peers columns and be a valid
+    // listening port (1-65535). A value outside that range — from ?port= or a
+    // client-supplied ip:port, which parse_ipv4()/parse_ipv6() do not bound —
+    // would overflow the column, so reject the announce with a clear error
+    // rather than letting the insert throw and silently drop the peer.
+    if (
+        (is_int($peer['portv4']) && ($peer['portv4'] < 1 || $peer['portv4'] > 65535)) ||
+        (is_int($peer['portv6']) && ($peer['portv6'] < 1 || $peer['portv6'] > 65535))
+    ) {
+        tracker_error('Invalid port.', 'never');
+    }
+
     // Validate we got at least one valid IP+port pair
     if (
         (

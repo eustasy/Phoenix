@@ -414,6 +414,39 @@ class AnnounceControllerTest extends PhoenixTestCase
         $this->assertStringContainsString('Peer ID is invalid', $result['stdout']);
     }
 
+    public function testRejectsPortAboveMax(): void
+    {
+        // A port outside the smallint(5) unsigned range (1-65535) would overflow
+        // the peers column; the controller rejects it up front rather than
+        // failing at insert time and silently dropping the peer.
+        $result = $this->runControllerSubprocess(
+            [
+                'info_hash' => self::HASH,
+                'peer_id' => self::PEER_ID_A,
+                'port' => '70000',
+            ],
+            ['open_tracker' => true],
+            [self::HASH],
+        );
+        $this->assertSame(2, $result['exit']);
+        $this->assertStringContainsString('Invalid port', $result['stdout']);
+    }
+
+    public function testRejectsNegativePort(): void
+    {
+        $result = $this->runControllerSubprocess(
+            [
+                'info_hash' => self::HASH,
+                'peer_id' => self::PEER_ID_A,
+                'port' => '-1',
+            ],
+            ['open_tracker' => true],
+            [self::HASH],
+        );
+        $this->assertSame(2, $result['exit']);
+        $this->assertStringContainsString('Invalid port', $result['stdout']);
+    }
+
     public function testClosedTrackerRejectsUnlistedHash(): void
     {
         // open_tracker=false + $allowed_torrents empty → "Torrent is not
