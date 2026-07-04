@@ -157,4 +157,28 @@ class PeerInsertTest extends PhoenixTestCase
         $this->assertSame('192.0.2.4', $row['ipv4']);
     }
 
+    public function testStoresNegativeLeftSentinel(): void
+    {
+        // Regression: peer_parse_announce_optional() sets left=-1 ("bytes
+        // remaining unknown") when a client omits `left`. The peers.`left`
+        // column is signed, so this round-trips instead of throwing an
+        // out-of-range strict-mode exception — which previously 500'd announce.
+        $peer = $this->fixturePeer([
+            'info_hash' => '__TEST_PI_LEFT__',
+            'peer_id' => '__TEST_PI_LEFT__',
+            'left' => -1,
+        ]);
+        $this->assertTrue(peer_insert(self::$connection, self::$settings, self::$time, $peer));
+
+        $result = mysqli_query(
+            self::$connection,
+            'SELECT `left` FROM `'.self::$settings['db_prefix'].'peers` '.
+            'WHERE `info_hash` = \'__TEST_PI_LEFT__\' AND `peer_id` = \'__TEST_PI_LEFT__\';',
+        );
+        $this->assertNotFalse($result);
+        $row = mysqli_fetch_assoc($result);
+        $this->assertNotNull($row);
+        $this->assertSame(-1, (int) $row['left']);
+    }
+
 }

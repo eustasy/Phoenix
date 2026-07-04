@@ -10,6 +10,10 @@
 --
 -- `ipv4` and `ipv6` default to '' as the "no address" sentinel, matching what
 -- peer_insert writes when only the other family is present.
+--
+-- `left` is SIGNED so it can hold the -1 "bytes remaining unknown" sentinel
+-- peer_parse_announce_optional() sets when a client omits `left`. An unsigned
+-- column rejects -1 under strict mode, which previously 500'd the announce.
 
 CREATE TABLE IF NOT EXISTS `phoenix_peers` (
 	`info_hash` varchar(40) NOT NULL,
@@ -22,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `phoenix_peers` (
 	`portv6` smallint(5) unsigned NOT NULL,
 	`uploaded` bigint(20) unsigned NOT NULL DEFAULT '0',
 	`downloaded` bigint(20) unsigned NOT NULL DEFAULT '0',
-	`left` bigint(20) unsigned NOT NULL DEFAULT '0',
+	`left` bigint(20) NOT NULL DEFAULT '0',
 	`state` tinyint(1) unsigned NOT NULL DEFAULT '0',
 	`updated` int(10) unsigned NOT NULL,
 	PRIMARY KEY (`info_hash`, `peer_id`)

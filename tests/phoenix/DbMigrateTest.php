@@ -121,4 +121,30 @@ class DbMigrateTest extends PhoenixTestCase
         $this->assertStringContainsString('Error #', $output);
         $this->assertStringContainsString('Database Migration failed.', $output);
     }
+
+    public function testPeerLeftColumnIsSignedAfterMigration(): void
+    {
+        // Force the pre-migration state (unsigned `left`), then confirm the
+        // migration widens it back to signed so the -1 "bytes remaining
+        // unknown" sentinel from an announce without `left` can be stored.
+        mysqli_query(
+            self::$connection,
+            'ALTER TABLE `'.self::$settings['db_prefix'].'peers` '.
+            'MODIFY `left` bigint(20) unsigned NOT NULL DEFAULT \'0\';',
+        );
+
+        $this->assertTrue(db_migrate(self::$connection, self::$settings));
+
+        $result = mysqli_query(
+            self::$connection,
+            'SELECT `COLUMN_TYPE` FROM `information_schema`.`COLUMNS` '.
+            'WHERE TABLE_SCHEMA = \''.self::$settings['db_name'].'\' '.
+            'AND TABLE_NAME = \''.self::$settings['db_prefix'].'peers\' '.
+            'AND COLUMN_NAME = \'left\';',
+        );
+        $this->assertNotFalse($result);
+        $row = mysqli_fetch_assoc($result);
+        $this->assertNotNull($row);
+        $this->assertStringNotContainsStringIgnoringCase('unsigned', (string) $row['COLUMN_TYPE']);
+    }
 }

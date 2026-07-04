@@ -29,27 +29,35 @@ function peer_insert(mysqli $connection, array $settings, int $time, array $peer
     // Values bind as statement parameters (mysqli_execute_query treats each as a
     // string — identical to the previous quote-everything SQL). Table/column
     // names cannot be bound, so db_prefix stays interpolated (operator config).
-    $peer_new = mysqli_execute_query(
-        $connection,
-        'REPLACE INTO `'.$settings['db_prefix'].'peers` '.
-        '(`info_hash`, `peer_id`, `compactv4`, `compactv6`, `ipv4`, `ipv6`, `portv4`, `portv6`, `uploaded`, `downloaded`, `left`, `state`, `updated`) '.
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [
-            $peer['info_hash'],   // 40-byte info_hash in HEX
-            $peer['peer_id'],     // 40-byte peer_id in HEX
-            $compactv4,           // compacted peer info (hex)
-            $compactv6,
-            $peer['ipv4'],        // dotted-decimal / colon-hex IP strings
-            $peer['ipv6'],
-            $peer['portv4'],      // integer ports
-            $peer['portv6'],
-            $peer['uploaded'],    // transfer counters
-            $peer['downloaded'],
-            $peer['left'],        // integer left
-            $peer['state'],       // integer state
-            $time,                // unix timestamp
-        ],
-    );
+    //
+    // A DB error here — e.g. an out-of-range value under strict mode (the PHP
+    // 8.1+ mysqli_report default) — degrades to a graceful tracker_error()
+    // rather than an uncaught 500 on the announce hot path, mirroring torrent_add.
+    try {
+        $peer_new = mysqli_execute_query(
+            $connection,
+            'REPLACE INTO `'.$settings['db_prefix'].'peers` '.
+            '(`info_hash`, `peer_id`, `compactv4`, `compactv6`, `ipv4`, `ipv6`, `portv4`, `portv6`, `uploaded`, `downloaded`, `left`, `state`, `updated`) '.
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+                $peer['info_hash'],   // 40-byte info_hash in HEX
+                $peer['peer_id'],     // 40-byte peer_id in HEX
+                $compactv4,           // compacted peer info (hex)
+                $compactv6,
+                $peer['ipv4'],        // dotted-decimal / colon-hex IP strings
+                $peer['ipv6'],
+                $peer['portv4'],      // integer ports
+                $peer['portv6'],
+                $peer['uploaded'],    // transfer counters
+                $peer['downloaded'],
+                $peer['left'],        // integer left (may be the -1 "unknown" sentinel)
+                $peer['state'],       // integer state
+                $time,                // unix timestamp
+            ],
+        );
+    } catch (mysqli_sql_exception) {
+        $peer_new = false;
+    }
 
     if (! $peer_new) {
         tracker_error('Failed to add new peer.');
