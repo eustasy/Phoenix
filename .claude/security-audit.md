@@ -66,7 +66,7 @@ POST /admin.php  process=install&db_host=127.0.0.1&db_user=root&db_pass=auditpas
 → HTTP/1.1 302 Found
   Location: admin.php?installed=1
 # config/phoenix.custom.php written by the anonymous request:
-$settings['admin_password'] = '$2y$10$fUEQObl8b/N.W6gP4o0xs...';   # attacker's hash
+$settings['admin_password'] = '### attacker's hash ###';
 ```
 
 **Remediation.** Gate the installer behind a one-time secret: e.g. require a setup token
