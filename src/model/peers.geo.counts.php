@@ -28,7 +28,14 @@ function peers_geo_counts(mysqli $connection, array $settings): array
 
     try {
         $reader = new \GeoIp2\Database\Reader($settings['stats_geo_database']);
-    } catch (\Throwable) {
+    } catch (\Throwable $e) {
+        // A Reader that will not construct means a corrupt/unreadable .mmdb —
+        // always unexpected, so surface it rather than silently disabling geo.
+        if ($settings['report_errors']) {
+            require_once __DIR__.'/../functions/phoenix.hook.event.php';
+            phoenix_hook_event('error', ['throwable' => $e, 'source' => 'peers_geo_counts']);
+        }
+
         return [];
     }
 
@@ -43,6 +50,7 @@ function peers_geo_counts(mysqli $connection, array $settings): array
         tracker_error('Unable to get peers.');
     }
 
+    $geo_reported = false;
     $counts = [];
     while ($row = mysqli_fetch_assoc($result)) {
         // Prefer the IPv4 address; fall back to IPv6.
@@ -56,7 +64,16 @@ function peers_geo_counts(mysqli $connection, array $settings): array
         try {
             $record = $reader->country($ip);
             $country = strtoupper((string) ($record->country->isoCode ?? ''));
-        } catch (\Throwable) {
+        } catch (\GeoIp2\Exception\AddressNotFoundException) {
+            // Expected: this IP is not in the database.
+            $country = '';
+        } catch (\Throwable $e) {
+            // Unexpected mid-batch error; report once per call to avoid a flood.
+            if (! $geo_reported && $settings['report_errors']) {
+                require_once __DIR__.'/../functions/phoenix.hook.event.php';
+                phoenix_hook_event('error', ['throwable' => $e, 'source' => 'peers_geo_counts']);
+                $geo_reported = true;
+            }
             $country = '';
         }
         if ($country === '') {
