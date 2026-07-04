@@ -149,4 +149,34 @@ class PhoenixHookEventTest extends PhoenixTestCase
             @unlink($marker);
         }
     }
+
+    public function testPhpWarningIsReported(): void
+    {
+        // A non-fatal PHP warning routes through the error hook via the
+        // set_error_handler that error_handle_register() installs — without
+        // aborting execution. Run in a subprocess so the handler registration
+        // does not disturb PHPUnit's own error handling.
+        $hookPath = self::HOOKS_DIR.'/phoenix.error.php';
+        $backup = $hookPath.'.audit-bak';
+        $marker = tempnam(sys_get_temp_dir(), 'phx_warn_');
+        $this->assertNotFalse($marker);
+        $this->assertTrue(rename($hookPath, $backup));
+        file_put_contents(
+            $hookPath,
+            "<?php\n\nfile_put_contents(".var_export($marker, true).
+            ", (\$context['message'] ?? '').'|'.(\$context['source'] ?? ''));\n",
+        );
+        try {
+            $register = __DIR__.'/../../src/functions/error.handle.register.php';
+            $script = '<?php error_reporting(E_ALL); require '.var_export($register, true).'; '.
+                'error_handle_register(); trigger_error("boom-warn", E_USER_WARNING);';
+            $this->runPhpSubprocess($script);
+
+            $this->assertSame('boom-warn|php_error', (string) file_get_contents($marker));
+        } finally {
+            unlink($hookPath);
+            rename($backup, $hookPath);
+            @unlink($marker);
+        }
+    }
 }

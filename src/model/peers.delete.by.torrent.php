@@ -19,7 +19,12 @@ function peers_delete_by_torrent(mysqli $connection, array $settings, string $in
             'DELETE FROM `'.$settings['db_prefix'].'peers` WHERE `info_hash` = ?;',
             [$info_hash],
         );
-    } catch (mysqli_sql_exception) {
+    } catch (mysqli_sql_exception $e) {
+        if ($settings['report_errors']) {
+            require_once __DIR__.'/../functions/phoenix.hook.event.php';
+            phoenix_hook_event('error', ['throwable' => $e, 'source' => 'peers_delete_by_torrent']);
+        }
+
         return false;
     }
 

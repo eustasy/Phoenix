@@ -25,7 +25,12 @@ function torrent_set_listed(mysqli $connection, array $settings, string $info_ha
 
     try {
         $result = mysqli_execute_query($connection, $sql, $params);
-    } catch (mysqli_sql_exception) {
+    } catch (mysqli_sql_exception $e) {
+        if ($settings['report_errors']) {
+            require_once __DIR__.'/../functions/phoenix.hook.event.php';
+            phoenix_hook_event('error', ['throwable' => $e, 'source' => 'torrent_set_listed']);
+        }
+
         return false;
     }
 

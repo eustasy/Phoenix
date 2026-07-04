@@ -54,14 +54,25 @@ function torrent_add(mysqli $connection, array $settings, array $torrent): bool|
                 $torrent['webseeds'],
             ],
         );
-    } catch (mysqli_sql_exception) {
+    } catch (mysqli_sql_exception $e) {
         $result = false;
+        $caught = $e;
     }
 
     if ($result) {
         return true;
     }
 
-    // 1062 = ER_DUP_ENTRY: the info_hash is already tracked.
-    return mysqli_errno($connection) === 1062 ? 'exists' : false;
+    // 1062 = ER_DUP_ENTRY: the info_hash is already tracked — an expected
+    // outcome, never reported. Any OTHER failure is unexpected, so surface it
+    // (when report_errors is on) with the original exception.
+    if (mysqli_errno($connection) === 1062) {
+        return 'exists';
+    }
+    if (isset($caught) && $settings['report_errors']) {
+        require_once __DIR__.'/../functions/phoenix.hook.event.php';
+        phoenix_hook_event('error', ['throwable' => $caught, 'source' => 'torrent_add']);
+    }
+
+    return false;
 }

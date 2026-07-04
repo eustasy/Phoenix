@@ -28,6 +28,28 @@ function error_handle_register(): void
         error_log('Uncaught '.$e::class.': '.$e->getMessage().' in '.$e->getFile().':'.$e->getLine());
     });
 
+    set_error_handler(static function (int $errno, string $message, string $file = '', int $line = 0): bool {
+        // Non-fatal PHP errors (warnings / notices). Respect the active
+        // error_reporting mask and @-suppression — both zero out $errno — so we
+        // surface only what PHP itself would report, then return false so PHP
+        // still logs it and execution continues. A notice must never abort an
+        // announce, so this reports but never converts the error into a throw.
+        if ((error_reporting() & $errno) === 0) {
+            return false;
+        }
+        $notice = E_NOTICE | E_USER_NOTICE | E_DEPRECATED | E_USER_DEPRECATED;
+        phoenix_hook_event('error', [
+            'message' => $message,
+            'level' => ($errno & $notice) !== 0 ? 'notice' : 'warning',
+            'source' => 'php_error',
+            'errno' => $errno,
+            'file' => $file,
+            'line' => $line,
+        ]);
+
+        return false;
+    });
+
     register_shutdown_function(static function (): void {
         $error = error_get_last();
         if (

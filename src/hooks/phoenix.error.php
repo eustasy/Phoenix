@@ -14,8 +14,9 @@ declare(strict_types=1);
 //   'throwable' => \Throwable   the original exception (model writes / uncaught)
 //   'message'   => string       a text message (tracker_error / fatal shutdown)
 //   'level'     => string       'error' | 'fatal'
-//   'source'    => string       e.g. 'peer_insert', 'tracker_error', 'shutdown'
-//   'file','line'               present for fatal shutdown errors
+//   'source'    => string       e.g. 'peer_insert', 'torrent_add', 'tracker_error', 'php_error', 'shutdown'
+//   'errno'     => int          the PHP error level (source 'php_error')
+//   'file','line'               present for 'php_error' and fatal shutdown errors
 //
 // phoenix_hook_event() swallows anything this file throws (so a broken reporter
 // can never take down the request) and blocks re-entrant events, but keep the

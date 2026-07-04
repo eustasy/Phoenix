@@ -159,4 +159,30 @@ class TorrentAddTest extends PhoenixTestCase
             ['path' => 'b.txt', 'length' => 5],
         ], $decoded);
     }
+
+    public function testDuplicateAddIsNotReported(): void
+    {
+        // A duplicate info_hash is an EXPECTED outcome (returns 'exists'), not a
+        // fault: even with report_errors on it must not fire the error hook —
+        // otherwise a routine re-add would page ops and hand clients a way to
+        // flood the monitor on demand.
+        $settings = self::$settings;
+        $settings['report_errors'] = true;
+
+        $hookPath = __DIR__.'/../../src/hooks/phoenix.error.php';
+        $backup = $hookPath.'.audit-bak';
+        $marker = tempnam(sys_get_temp_dir(), 'phx_dup_');
+        $this->assertNotFalse($marker);
+        $this->assertTrue(rename($hookPath, $backup));
+        file_put_contents($hookPath, "<?php\n\nfile_put_contents(".var_export($marker, true).", 'fired');\n");
+        try {
+            $this->assertTrue(torrent_add(self::$connection, $settings, $this->torrent()));
+            $this->assertSame('exists', torrent_add(self::$connection, $settings, $this->torrent()));
+            $this->assertSame('', (string) file_get_contents($marker), 'a duplicate add must not fire the error hook');
+        } finally {
+            unlink($hookPath);
+            rename($backup, $hookPath);
+            @unlink($marker);
+        }
+    }
 }
