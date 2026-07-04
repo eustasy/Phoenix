@@ -38,6 +38,14 @@ function admin_login_controller(array $settings): ?string
         if ($login_attempted) {
             require_once __DIR__.'/../functions/auth.verify.login.php';
             if (auth_verify_login($settings)) {
+                // Transparently upgrade the stored hash if PASSWORD_DEFAULT has
+                // moved on since it was created — best-effort, never blocks login.
+                require_once __DIR__.'/../functions/auth.rehash.password.php';
+                auth_rehash_password(
+                    $settings,
+                    isset($_POST['password']) && is_string($_POST['password']) ? $_POST['password'] : '',
+                    __DIR__.'/../../config/phoenix.custom.php',
+                );
                 // Successful login clears the brute-force counter and retires
                 // any pre-login session id (anti session-fixation) so an
                 // attacker who planted one cannot resume the authed session.
