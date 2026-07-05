@@ -31,11 +31,16 @@ function scrape_stats_controller(mysqli $connection, array $settings): string
     }
     if (isset($_GET['json'])) {
         require_once __DIR__.'/../views/json.stats.php';
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=UTF-8');
 
         return view_stats_json($stats, $settings);
     }
     require_once __DIR__.'/../views/html.stats.php';
+    // This branch is a browser-facing HTML page, so upgrade the scrape endpoint's
+    // baseline tracker headers (set in public/scrape.php) to the public-HTML set:
+    // CSP, Referrer-Policy, and the SAMEORIGIN frame guard.
+    require_once __DIR__.'/../functions/http.security.headers.php';
+    http_security_headers('public_html');
     // Override phoenix.php's iso-8859-1 default_charset (set for the binary
     // tracker protocol) so the UTF-8 HTML page — em dashes, torrent names —
     // isn't decoded as Latin-1.

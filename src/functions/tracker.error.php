@@ -27,13 +27,22 @@ function tracker_error(string $error, int|string|null $retry_in = null, bool $re
         ]);
     }
 
+    // An error is still a response, so it carries the universal nosniff. The
+    // richer per-endpoint headers are set by the entry point before bootstrap
+    // (and persist onto this response); this only guarantees the baseline for
+    // any path that reaches tracker_error without one — nosniff replaces itself
+    // idempotently, and the 'tracker' profile adds nothing that would clash with
+    // an api/admin entry point's already-queued headers.
+    require_once __DIR__.'/http.security.headers.php';
+    http_security_headers('tracker');
+
     if (isset($_GET['xml'])) {
         require_once __DIR__.'/../views/xml.error.php';
         header('Content-Type: application/xml; charset=UTF-8');
         echo view_error_xml($error, $retry_in);
     } elseif (isset($_GET['json'])) {
         require_once __DIR__.'/../views/json.error.php';
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=UTF-8');
         echo view_error_json($error, $retry_in);
     } else {
         require_once __DIR__.'/../views/bencode.error.php';

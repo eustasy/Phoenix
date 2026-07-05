@@ -9,6 +9,13 @@ declare(strict_types=1);
 // (announce/scrape/index); the admin panel deliberately omits it.
 header('Access-Control-Allow-Origin: *');
 
+// Security headers up front (before bootstrap) so both the success response and
+// any tracker_error() from bootstrap carry them. The tracker profile (nosniff
+// only) is the baseline for every scrape response; the ?stats HTML branch layers
+// the public-HTML set on top inside scrape_stats_controller.
+require_once __DIR__.'/../src/functions/http.security.headers.php';
+http_security_headers('tracker');
+
 require_once __DIR__.'/../src/phoenix.php';
 
 require_once __DIR__.'/../src/functions/sanitize.tracker.php';

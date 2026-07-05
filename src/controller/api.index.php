@@ -18,7 +18,7 @@ function api_index_controller(array $settings): string
         return view_api_index_xml($settings);
     }
     require_once __DIR__.'/../views/json.api.index.php';
-    header('Content-Type: application/json');
+    header('Content-Type: application/json; charset=UTF-8');
 
     return view_api_index_json($settings);
 }

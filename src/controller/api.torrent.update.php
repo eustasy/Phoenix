@@ -128,7 +128,7 @@ function api_torrent_update_controller(mysqli $connection, array $settings): str
         return view_torrent_xml($view);
     }
     require_once __DIR__.'/../views/json.torrent.php';
-    header('Content-Type: application/json');
+    header('Content-Type: application/json; charset=UTF-8');
 
     return view_torrent_json($view);
 }

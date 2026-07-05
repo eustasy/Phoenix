@@ -63,6 +63,65 @@ class EndpointSmokeTest extends SmokeTestCase
     //// Post-config (config + tables now exist)
 
     #[Depends('testInstallSucceeds')]
+    public function testSecurityHeadersPerEndpointGroup(): void
+    {
+        // Finding #7: every response carries X-Content-Type-Options: nosniff, and
+        // each endpoint group layers on the headers appropriate to it. Guards
+        // against a regression that drops or mis-scopes the set. Runs before the
+        // closed-tracker test (which flips open_tracker off), so announce works.
+
+        // Public tracker (announce) -> nosniff only; none of the document
+        // headers (no CSP, no Cache-Control) leak onto a machine response.
+        $announce = $this->get('/announce.php', [
+            'info_hash' => self::HASH,
+            'peer_id' => self::PEER_ID,
+            'port' => '6881',
+            'left' => '0',
+        ]);
+        $this->assertSame('nosniff', $this->headerValue($announce, 'X-Content-Type-Options'));
+        $this->assertNull($this->headerValue($announce, 'Content-Security-Policy'));
+        $this->assertNull($this->headerValue($announce, 'Cache-Control'));
+
+        // Public HTML (index) -> nosniff + Referrer-Policy + SAMEORIGIN + a page
+        // CSP whose frame-ancestors is 'self'.
+        $index = $this->get('/index.php');
+        $this->assertSame('nosniff', $this->headerValue($index, 'X-Content-Type-Options'));
+        $this->assertSame('SAMEORIGIN', $this->headerValue($index, 'X-Frame-Options'));
+        $this->assertSame('strict-origin-when-cross-origin', $this->headerValue($index, 'Referrer-Policy'));
+        $indexCsp = (string) $this->headerValue($index, 'Content-Security-Policy');
+        $this->assertStringContainsString("default-src 'self'", $indexCsp);
+        $this->assertStringContainsString("frame-ancestors 'self'", $indexCsp);
+
+        // Admin -> nosniff + DENY framing + no-store + a page CSP locked to
+        // frame-ancestors 'none'. PHP's session cache limiter may replace
+        // Cache-Control with a stricter superset, so assert no-store is present
+        // rather than an exact match.
+        $admin = $this->get('/admin.php');
+        $this->assertSame('nosniff', $this->headerValue($admin, 'X-Content-Type-Options'));
+        $this->assertSame('DENY', $this->headerValue($admin, 'X-Frame-Options'));
+        $this->assertStringContainsString('no-store', (string) $this->headerValue($admin, 'Cache-Control'));
+        $this->assertStringContainsString("frame-ancestors 'none'", (string) $this->headerValue($admin, 'Content-Security-Policy'));
+
+        // API -> nosniff + DENY + no-store + the locked-down default-src 'none'
+        // CSP (the API loads no assets). No admin/public page CSP leaks here.
+        $api = $this->get('/api/index.php');
+        $this->assertSame('nosniff', $this->headerValue($api, 'X-Content-Type-Options'));
+        $this->assertSame('DENY', $this->headerValue($api, 'X-Frame-Options'));
+        $this->assertStringContainsString('no-store', (string) $this->headerValue($api, 'Cache-Control'));
+        $this->assertSame(
+            "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+            $this->headerValue($api, 'Content-Security-Policy'),
+        );
+
+        // JSON responses now declare an explicit charset, matching the
+        // bencode/HTML/XML content types.
+        $this->assertStringContainsStringIgnoringCase(
+            'application/json; charset=UTF-8',
+            (string) $this->headerValue($api, 'Content-Type'),
+        );
+    }
+
+    #[Depends('testInstallSucceeds')]
     public function testAdminLoginFormShown(): void
     {
         $r = $this->get('/admin.php');

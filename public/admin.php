@@ -29,6 +29,13 @@ if (is_readable($admin_autoload)) {
 // as iso-8859-1. Set before any output so both installer and panel modes match.
 header('Content-Type: text/html; charset=UTF-8');
 
+// Admin security headers before either mode emits output (the installer echoes
+// early, before phoenix.php's full bootstrap): the strict profile — DENY
+// framing, no-referrer, no-store, and the page CSP with frame-ancestors 'none'.
+// Set up front so a bootstrap tracker_error() in normal mode carries them too.
+require_once __DIR__.'/../src/functions/http.security.headers.php';
+http_security_headers('admin');
+
 $config_path = __DIR__.'/../config/phoenix.custom.php';
 $config_exists = is_readable($config_path);
 

@@ -154,7 +154,7 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
     }
     if (isset($_GET['json'])) {
         require_once __DIR__.'/../views/json.announce.php';
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=UTF-8');
 
         return view_announce_json($counts, $settings, $rows, $external_ip);
     }

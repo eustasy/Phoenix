@@ -43,7 +43,7 @@ function api_torrents_controller(mysqli $connection, array $settings): string
         return view_torrents_xml($torrents);
     }
     require_once __DIR__.'/../views/json.torrents.php';
-    header('Content-Type: application/json');
+    header('Content-Type: application/json; charset=UTF-8');
 
     return view_torrents_json($torrents);
 }

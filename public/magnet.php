@@ -8,6 +8,11 @@ declare(strict_types=1);
 // when the tracker is misconfigured. It reuses only the pure view partials for
 // the shared page chrome.
 
+// magnet.php does not bootstrap phoenix.php, so it loads the security-header
+// helper itself. It is a browser-facing HTML page → the public-HTML profile.
+require_once __DIR__.'/../src/functions/http.security.headers.php';
+http_security_headers('public_html');
+
 header('Content-Type: text/html; charset=UTF-8');
 
 // Derive the local announce URL from the current request to pre-fill the

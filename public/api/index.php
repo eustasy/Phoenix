@@ -18,6 +18,12 @@ if (! isset($_GET['xml'])) {
     $_GET['json'] = '1';
 }
 
+// The API serves JSON/XML data and loads no assets, so emit the locked-down api
+// security headers before bootstrap — bootstrap errors via tracker_error() then
+// carry them too.
+require_once __DIR__.'/../../src/functions/http.security.headers.php';
+http_security_headers('api');
+
 require_once __DIR__.'/../../src/phoenix.php';
 require_once __DIR__.'/../../src/controller/api.index.php';
 
