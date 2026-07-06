@@ -5,6 +5,22 @@ single-purpose files glued together by `require_once`. These conventions keep
 that layout navigable; CI enforces most of them (qlty runs phpstan and
 php-cs-fixer, `ConventionsTest` checks the structural rules).
 
+## Table of Contents
+
+- [Local development environment](#local-development-environment)
+  - [Docker (recommended)](#docker-recommended)
+    - [Reloading code without wiping the database](#reloading-code-without-wiping-the-database)
+    - [Keeping your config across reloads](#keeping-your-config-across-reloads)
+  - [Without Docker](#without-docker)
+- [Project Structure](#project-structure)
+  - [Architecture Notes](#architecture-notes)
+- [Conventions](#conventions)
+  - [One function per file](#one-function-per-file)
+  - [File layout](#file-layout)
+  - [Style](#style)
+- [Tests](#tests)
+- [Commits](#commits)
+
 ## Local development environment
 
 ### Docker (recommended)
@@ -84,7 +100,58 @@ vendor/bin/phpunit
 
 See the **Tests** section below for conventions.
 
-## One function per file
+## Project Structure
+
+Phoenix follows an MVC-inspired structure optimized for procedural PHP:
+
+```text
+phoenix/
+├── public/              # Web-accessible entry points (thin; delegate to src/controller/)
+│   ├── announce.php     # BitTorrent announce endpoint (BEP 3)
+│   ├── scrape.php       # BitTorrent scrape endpoint (BEP 48)
+│   ├── index.php        # Public torrent listing (optional)
+│   ├── api/             # Management API (Authorization: Bearer <key>; index is public)
+│   │   ├── index.php    # GET  /api — Phoenix version (no auth)
+│   │   ├── torrents.php # GET  /api/torrents — your torrents + swarm stats (all, for admin)
+│   │   └── torrent/
+│   │       ├── add.php    # POST /api/torrent/add — add a torrent
+│   │       ├── update.php # POST /api/torrent/update — edit a torrent's fields
+│   │       ├── list.php   # POST /api/torrent/list — show on the index
+│   │       ├── delist.php # POST /api/torrent/delist — hide from the index
+│   │       └── delete.php # POST /api/torrent/delete — delete (+ its peers)
+│   ├── admin.php        # Admin panel & installer
+│   └── magnet.php       # Client-side magnet link generator
+├── src/
+│   ├── phoenix.php      # Bootstrap: loads config, connects to DB
+│   ├── controller/      # Request handlers, one per endpoint/action (*_controller())
+│   ├── functions/       # Business logic helpers (one function per file)
+│   ├── model/           # Database operations (one query function per file)
+│   ├── views/           # Presentation layer (bencode, XML, HTML)
+│   └── hooks/           # User-defined lifecycle hooks (optional)
+├── config/
+│   ├── phoenix.default.php    # Default configuration (DO NOT EDIT)
+│   └── phoenix.custom.php     # Your configuration (gitignored)
+├── bin/                 # Cron maintenance scripts
+│   ├── backup-database.php
+│   └── clean-and-optimize.php
+└── tests/               # PHPUnit test suite
+```
+
+### Architecture Notes
+
+- **Entry points** (`public/*.php`) are thin: they bootstrap, then delegate to a controller.
+- **Controllers** (`src/controller/*.php`) orchestrate each request: sanitize input → call model → call view. (`public/index.php` is small enough to skip the controller and call its model and view directly.)
+- **Models** (`src/model/*.php`) handle all database operations. Each file exports one function that accepts `$connection`, `$settings`, and domain parameters.
+- **Views** (`src/views/*.php`) handle presentation. Bencode for BitTorrent protocol, HTML for humans, XML/JSON for debugging. The bencode views build a plain PHP structure and serialise it through a single emitter, `bencode_encode()`, which guarantees correct length prefixes and BEP-3 dict key ordering.
+- **Functions** (`src/functions/*.php`) contain business logic helpers that don't fit cleanly into model or view (sanitization, validation, address parsing, etc.).
+- **Hooks** (`src/hooks/*.php`) are optional operator-defined scripts called at lifecycle points (peer.new, peer.stopped, download.complete, etc.). Keep them empty in this repo.
+
+## Conventions
+
+Structural rules for the `src/` layers, enforced by `ConventionsTest` and the
+linters.
+
+### One function per file
 
 **Every file in `src/functions/`, `src/model/`, `src/views/`, and
 `src/controller/` defines exactly one function.** Helpers get their own file,
@@ -103,7 +170,7 @@ fails the suite otherwise.
   level (the dispatcher uses plain `include`, so a declaration would fatal on
   the second event in a process).
 
-## File layout
+### File layout
 
 - `declare(strict_types=1);` first in every PHP file.
 - A "four stroke" section header naming the function — `////` then a tab,
@@ -111,7 +178,7 @@ fails the suite otherwise.
   function. The same header style marks logical sections inside functions.
 - No closing `?>` on PHP-only files.
 
-## Style
+### Style
 
 - PHP is PSR-12 — four-space indentation — enforced by php-cs-fixer via
   `qlty check` (config in `.qlty/configs/.php-cs-fixer.dist.php`). SQL files

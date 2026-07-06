@@ -12,10 +12,18 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 ## Table of Contents
 
 - [Installation](#installation)
-- [Project Structure](#project-structure)
+  - [Requirements](#requirements)
+  - [With server access](#with-server-access)
+  - [Managed LAMP / shared hosting](#managed-lamp--shared-hosting)
 - [Configuration](#configuration)
+  - [Stat-Tracking](#stat-tracking)
+    - [Geo enrichment](#geo-enrichment)
+  - [Two-Factor Authentication (optional)](#two-factor-authentication-optional)
+  - [Admin password requirements](#admin-password-requirements)
+  - [Recovering admin access](#recovering-admin-access)
+  - [Reverse proxies & client IP address](#reverse-proxies--client-ip-address)
 - [Server Configuration](#server-configuration)
-- [Cron](#cron-automating-maintenance)
+- [Cron (Automating Maintenance)](#cron-automating-maintenance)
 - [Documentation](#documentation)
 
 ## Installation
@@ -50,52 +58,6 @@ Use this path when you use a cPanel-style host with no direct web server configu
     - Or import the schema files manually (`sql/peers.sql`, `sql/torrents.sql`, `sql/tasks.sql`, `sql/events.sql`), copy `config/phoenix.default.php` to `config/phoenix.custom.php`, and fill in your database credentials.
 6. After setup, secure `admin.php` as described above.
 
-## Project Structure
-
-Phoenix follows an MVC-inspired structure optimized for procedural PHP:
-
-```text
-phoenix/
-├── public/              # Web-accessible entry points (thin; delegate to src/controller/)
-│   ├── announce.php     # BitTorrent announce endpoint (BEP 3)
-│   ├── scrape.php       # BitTorrent scrape endpoint (BEP 48)
-│   ├── index.php        # Public torrent listing (optional)
-│   ├── api/             # Management API (Authorization: Bearer <key>; index is public)
-│   │   ├── index.php    # GET  /api — Phoenix version (no auth)
-│   │   ├── torrents.php # GET  /api/torrents — your torrents + swarm stats (all, for admin)
-│   │   └── torrent/
-│   │       ├── add.php    # POST /api/torrent/add — add a torrent
-│   │       ├── update.php # POST /api/torrent/update — edit a torrent's fields
-│   │       ├── list.php   # POST /api/torrent/list — show on the index
-│   │       ├── delist.php # POST /api/torrent/delist — hide from the index
-│   │       └── delete.php # POST /api/torrent/delete — delete (+ its peers)
-│   ├── admin.php        # Admin panel & installer
-│   └── magnet.php       # Client-side magnet link generator
-├── src/
-│   ├── phoenix.php      # Bootstrap: loads config, connects to DB
-│   ├── controller/      # Request handlers, one per endpoint/action (*_controller())
-│   ├── functions/       # Business logic helpers (one function per file)
-│   ├── model/           # Database operations (one query function per file)
-│   ├── views/           # Presentation layer (bencode, XML, HTML)
-│   └── hooks/           # User-defined lifecycle hooks (optional)
-├── config/
-│   ├── phoenix.default.php    # Default configuration (DO NOT EDIT)
-│   └── phoenix.custom.php     # Your configuration (gitignored)
-├── bin/                 # Cron maintenance scripts
-│   ├── backup-database.php
-│   └── clean-and-optimize.php
-└── tests/               # PHPUnit test suite
-```
-
-### Architecture Notes
-
-- **Entry points** (`public/*.php`) are thin: they bootstrap, then delegate to a controller.
-- **Controllers** (`src/controller/*.php`) orchestrate each request: sanitize input → call model → call view. (`public/index.php` is small enough to skip the controller and call its model and view directly.)
-- **Models** (`src/model/*.php`) handle all database operations. Each file exports one function that accepts `$connection`, `$settings`, and domain parameters.
-- **Views** (`src/views/*.php`) handle presentation. Bencode for BitTorrent protocol, HTML for humans, XML/JSON for debugging. The bencode views build a plain PHP structure and serialise it through a single emitter, `bencode_encode()`, which guarantees correct length prefixes and BEP-3 dict key ordering.
-- **Functions** (`src/functions/*.php`) contain business logic helpers that don't fit cleanly into model or view (sanitization, validation, address parsing, etc.).
-- **Hooks** (`src/hooks/*.php`) are optional operator-defined scripts called at lifecycle points (peer.new, peer.stopped, download.complete, etc.). Keep them empty in this repo.
-
 ## Configuration
 
 Configuration should take place in `config/phoenix.custom.php`, NOT `config/phoenix.default.php`. Phoenix _will_ attempt to use the default configuration if yours is missing.
@@ -123,17 +85,38 @@ The admin panel supports an optional TOTP second factor (the codes from authenti
 
 Once enabled, the login page asks for the 6-digit code alongside the password. To recover from a lost authenticator, remove the `$settings['admin_totp_secret'] = '...';` line from `config/phoenix.custom.php`; the panel reverts to password-only and you can re-enrol.
 
+### Admin password requirements
+
+The admin password is set in three places — the installer, the **Settings** page's _Change password_ action, and the first-run set-password gate — all sharing one policy (following NIST SP 800-63B: length over composition):
+
+- **At least 12 characters.**
+- **At most 72 bytes** — bcrypt (`PASSWORD_DEFAULT`) silently truncates beyond 72 bytes, so a longer passphrase would have its tail ignored.
+
+An optional TOTP second factor can be enrolled alongside the password (see [Two-Factor Authentication](#two-factor-authentication-optional)).
+
 ### Recovering admin access
 
-The admin password is stored as a bcrypt hash (`$settings['admin_password']`) in `config/phoenix.custom.php`, and you normally change it from the panel's **Settings** page. If you lose it, edit that file directly. Generate a fresh hash:
+The admin password is stored as a bcrypt hash (`$settings['admin_password']`) in `config/phoenix.custom.php`, and you normally change it from the panel's **Settings** page. If you're locked out, choose whichever path fits:
 
-```bash
-php -r "echo password_hash('your-new-password', PASSWORD_DEFAULT), PHP_EOL;"
-```
+- **Reset from the panel.** Remove the `$settings['admin_password']` line from `config/phoenix.custom.php` (or set it to `''`). On the next load, `admin.php` presents a one-time **"set admin password"** gate — the same ≥12-character policy, with optional TOTP re-enrolment — and writes the new hash for you, so no manual hashing is needed. This needs `config/` to be writable, and you should only do it while `public/admin.php` is not publicly reachable, because the gate itself is unauthenticated. (Setting `$settings['admin_auth_optional'] = true` instead runs the panel with **no** password at all — only for an `admin.php` already protected by other means, such as reverse-proxy auth or an IP allowlist.)
+- **Set a hash directly.** When `config/` isn't writable — or you'd rather not expose the gate — generate a hash and paste it in yourself:
 
-Set `$settings['admin_password']` to the printed value. Alternatively, remove the `$settings['admin_password']` line (or set it to `''`): with no password set the panel skips authentication entirely, so you can open it and set a new password from **Settings** straight away — only do this when `public/admin.php` is not publicly reachable.
+  ```bash
+  php -r "echo password_hash('your-new-password', PASSWORD_DEFAULT), PHP_EOL;"
+  ```
 
-If you relocated `public/admin.php` out of the web root after setup, restore it first. Lost your two-factor device as well? Removing `$settings['admin_totp_secret']` reverts the panel to password-only (see [Two-Factor Authentication](#two-factor-authentication-optional)).
+  Set `$settings['admin_password']` to the printed value. Editing the file directly bypasses the length policy, so pick a strong password yourself.
+
+If you relocated `public/admin.php` out of the web root after setup, restore it first. To start over completely, delete `config/phoenix.custom.php` and re-run **Setup**; the installer writes a fresh [setup token](#installation) to `config/.phoenix-setup-token` that you must supply again. Lost your two-factor device as well? Removing `$settings['admin_totp_secret']` reverts the panel to password-only (see [Two-Factor Authentication](#two-factor-authentication-optional)).
+
+### Reverse proxies & client IP address
+
+Phoenix identifies each peer by its connecting IP, so behind a reverse proxy or CDN it must know which forwarded-address header to trust — otherwise it either sees only the proxy or lets clients spoof their address. By default it trusts **nothing** and uses the direct connection (`REMOTE_ADDR`) only: safe, but wrong behind a proxy. Two settings (both empty and fail-closed by default) control it:
+
+- `$settings['forwarded_headers']` — an ordered list of headers to trust, e.g. `['x-forwarded-for']` or `['cf-connecting-ip']`. Recognised: `x-forwarded-for`, `forwarded` (RFC 7239), `x-real-ip`, `cf-connecting-ip`, `true-client-ip`, and the legacy `client-ip`. List **only** headers your proxy sets and strips from client input.
+- `$settings['trusted_proxies']` — CIDR ranges of your proxies. A forwarded header is honoured only when `REMOTE_ADDR` falls inside one of these ranges; chain headers (`X-Forwarded-For` / `Forwarded`) are walked from the right, skipping these ranges, to find the real client.
+
+If `trusted_proxies` is empty, forwarded headers are **not** trusted unless you explicitly set `$settings['allow_any_proxy'] = true` — which trusts the header from any direct connection and so lets anyone reaching the tracker spoof their address. Leave it off unless you fully control who can connect. Often it is cleaner to let the web server rewrite `REMOTE_ADDR` itself (Apache `mod_remoteip`, Nginx `real_ip`) and leave these empty — see [APACHE.md](./APACHE.md) / [NGINX.md](./NGINX.md).
 
 ## Server Configuration
 
@@ -159,7 +142,7 @@ Phoenix ships with example web server configurations covering document root loca
 - [MIGRATING.md](./MIGRATING.md) — upgrading from 3.x to 4.0.
 - [APACHE.md](./APACHE.md) — web server configuration for Apache 2.4.
 - [NGINX.md](./NGINX.md) — web server configuration for Nginx.
-- [CONTRIBUTING.md](./CONTRIBUTING.md) — development environment, tests, and contribution conventions.
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — development environment, project structure, and contribution conventions.
 - [ALTERNATIVES.md](./ALTERNATIVES.md) — other BitTorrent tracker projects.
 - [CHANGELOG.md](./CHANGELOG.md) — release history.
 - [LICENSE.md](./LICENSE.md) — MIT licence.
