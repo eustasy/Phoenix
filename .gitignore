@@ -1,6 +1,7 @@
 *~
 *.custom.*
 *.local.*
+.phoenix-setup-token
 *.mmdb
 /backups/*.sql
 /vendor/

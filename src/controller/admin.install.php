@@ -18,6 +18,14 @@ function admin_install_controller(string $config_path): string
     $settings_writable = is_writable(dirname($config_path));
     $install_error = null;
 
+    // Setup-token gate (findings #1 / #2): the token file lives in config/ (out
+    // of the docroot), so completing setup requires filesystem access — proving
+    // the requester is the operator, not a stranger who reached admin.php first.
+    // Created on first load; verified below before any DB probe or config write.
+    require_once __DIR__.'/../functions/install.setup.token.php';
+    $token_path = dirname($config_path).'/.phoenix-setup-token';
+    $setup_token = $settings_writable ? install_setup_token($token_path) : '';
+
     ////	Optional two-factor enrolment
     // Only offered when the verification library is present. We pick a candidate
     // secret to display: a valid round-tripped one from a previous (failed)
@@ -99,6 +107,16 @@ function admin_install_controller(string $config_path): string
         return view_install_html($settings_writable, $install_error, $form, $totp_secret, $totp_qr, $totp_url);
     }
 
+    // Verify the setup token before any DB probe or config write. hash_equals is
+    // timing-safe; the token was written to config/.phoenix-setup-token on first
+    // load, where only someone with server access can read it.
+    $submitted_token = isset($_POST['setup_token']) && is_string($_POST['setup_token']) ? trim($_POST['setup_token']) : '';
+    if (! hash_equals($setup_token, $submitted_token)) {
+        $install_error = 'The setup token is incorrect. Open config/.phoenix-setup-token on the server and paste its contents here.';
+
+        return view_install_html($settings_writable, $install_error, $form, $totp_secret, $totp_qr, $totp_url);
+    }
+
     ////	Validate the optional second factor before doing anything else
     // The admin proves their authenticator works by entering a code; we only
     // enrol the secret once it verifies, so they can't lock themselves out.
@@ -149,6 +167,9 @@ function admin_install_controller(string $config_path): string
 
         return view_install_html($settings_writable, $install_error, $form, $totp_secret, $totp_qr, $totp_url);
     }
+
+    // Setup complete — the token has served its purpose; remove it.
+    @unlink($token_path);
 
     mysqli_close($test_conn);
     header('Location: admin.php?installed=1');

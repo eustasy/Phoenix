@@ -47,10 +47,30 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertStringContainsString('Set an admin password', $r['body']);
     }
 
-    public function testInstallSucceeds(): void
+    public function testInstallRejectsWrongSetupToken(): void
     {
+        // A wrong token is refused before any DB work — the installer takeover
+        // and SSRF (findings #1 / #2) are gated on filesystem access.
         $r = $this->post('/admin.php', [
             'process' => 'install',
+            'setup_token' => 'not-the-real-token',
+            'admin_password' => self::ADMIN_PW,
+        ] + $this->dbCreds());
+        $this->assertSame(200, $r['status']);
+        $this->assertStringContainsString('setup token is incorrect', $r['body']);
+    }
+
+    public function testInstallSucceeds(): void
+    {
+        // GET the installer so it writes the setup token, then read it from disk
+        // (as a real operator with server access would) and submit it.
+        $this->get('/admin.php');
+        $token = trim((string) @file_get_contents(dirname(__DIR__, 2).'/config/.phoenix-setup-token'));
+        $this->assertNotSame('', $token, 'installer should have written a setup token');
+
+        $r = $this->post('/admin.php', [
+            'process' => 'install',
+            'setup_token' => $token,
             'admin_password' => self::ADMIN_PW,
             'open_tracker' => '1',
             'public_index' => '1',

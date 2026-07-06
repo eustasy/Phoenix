@@ -92,6 +92,14 @@ function view_install_html(
 		<form method="POST" action="" class="ph-form-card">
 			<input type="hidden" name="process" value="install">
 
+			<div class="alert alert-info mt-0" role="note"><span class="ph-ico" data-lucide="shield-check"></span><div>Setup is protected. Phoenix wrote a one-time token to <code>config/.phoenix-setup-token</code> on the server &mdash; open that file and paste its contents below to confirm you control this machine.</div></div>
+			<fieldset class="setup-fieldset">
+				<div class="setup-legend"><span class="ph-ico" data-lucide="key-round"></span>Setup token</div>
+				<div class="ph-field mb-0"><label for="setup_token">Token from <code>config/.phoenix-setup-token</code> <span class="text-danger" aria-hidden="true">*</span></label>
+					<input type="text" id="setup_token" name="setup_token" class="mono" autocomplete="off" required>
+				</div>
+			</fieldset>
+
 			<fieldset class="setup-fieldset">
 				<div class="setup-legend"><span class="ph-ico" data-lucide="database"></span>Database</div>
 				<div class="ph-field-row">

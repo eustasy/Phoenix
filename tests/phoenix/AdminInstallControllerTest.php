@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phoenix\Tests;
 
 require_once __DIR__.'/../../src/controller/admin.install.php';
+require_once __DIR__.'/../../src/functions/install.setup.token.php';
 
 class AdminInstallControllerTest extends PhoenixTestCase
 {
@@ -16,21 +17,40 @@ class AdminInstallControllerTest extends PhoenixTestCase
     /** @var array<string, mixed> */
     private array $postBackup;
 
+    private string $dir;
+    private string $configPath;
+    private string $tokenPath;
+
     protected function setUp(): void
     {
         parent::setUp();
         // admin_install_controller() calls error_reporting(0) internally; save
-        // the current level so we can restore it after each test rather than
-        // leaving the worker silently suppressing warnings for later tests.
+        // the current level so we can restore it after each test.
         $this->errorReporting = error_reporting();
         $this->postBackup = $_POST;
+
+        // Each test gets an isolated config dir so its setup-token file can't
+        // collide with another test's (or leak into the real config/).
+        $this->dir = sys_get_temp_dir().'/phxinstall_'.bin2hex(random_bytes(6));
+        mkdir($this->dir);
+        $this->configPath = $this->dir.'/phoenix.custom.php';
+        $this->tokenPath = $this->dir.'/.phoenix-setup-token';
     }
 
     protected function tearDown(): void
     {
         error_reporting($this->errorReporting);
         $_POST = $this->postBackup;
+        @unlink($this->tokenPath);
+        @unlink($this->configPath);
+        @rmdir($this->dir);
         parent::tearDown();
+    }
+
+    /** The current setup token (created if absent), as the operator would read it. */
+    private function token(): string
+    {
+        return install_setup_token($this->tokenPath);
     }
 
     private function dropTestTables(): void
@@ -45,28 +65,35 @@ class AdminInstallControllerTest extends PhoenixTestCase
 
     public function testReturnsFormWhenNoProcessFlag(): void
     {
-        // First-run GET: no $_POST['process'] means render the bare form, not
-        // attempt a connection. Run in-process so the branch is visible to
-        // the coverage instrumentation.
+        // First-run GET: render the form (including the setup-token field), not
+        // a connection attempt.
         $_POST = [];
-        $html = \admin_install_controller('/tmp/phoenix_should_not_exist.php');
+        $html = \admin_install_controller($this->configPath);
 
         $this->assertIsString($html);
         $this->assertStringContainsString('name="process" value="install"', $html);
-        // Default prefix populated when the user hasn't typed one yet.
         $this->assertStringContainsString('name="db_prefix" value="phoenix_"', $html);
+        $this->assertStringContainsString('name="setup_token"', $html);
+    }
+
+    public function testGetCreatesSetupTokenFile(): void
+    {
+        // Rendering the installer writes the token so the operator can read it.
+        $_POST = [];
+        \admin_install_controller($this->configPath);
+
+        $this->assertFileExists($this->tokenPath);
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{36}$/', trim((string) file_get_contents($this->tokenPath)));
     }
 
     public function testFormRepopulatesUserSubmittedValues(): void
     {
-        // After a failed attempt the form should round-trip the user's input
-        // (other than db_pass) so they don't have to retype everything.
         $_POST = [
             'db_host' => 'db.example.test',
             'db_user' => 'phoenix_user',
             'db_name' => 'phoenix_db',
         ];
-        $html = \admin_install_controller('/tmp/phoenix_should_not_exist.php');
+        $html = \admin_install_controller($this->configPath);
 
         $this->assertIsString($html);
         $this->assertStringContainsString('value="db.example.test"', $html);
@@ -74,33 +101,49 @@ class AdminInstallControllerTest extends PhoenixTestCase
         $this->assertStringContainsString('value="phoenix_db"', $html);
     }
 
+    public function testRejectsInstallWithoutSetupToken(): void
+    {
+        // No token → refused before any DB probe or config write (finding #1/#2).
+        $_POST = ['process' => 'install', 'admin_password' => 'test-admin-pw'];
+        $html = \admin_install_controller($this->configPath);
+
+        $this->assertStringContainsString('setup token is incorrect', $html);
+        $this->assertFileDoesNotExist($this->configPath);
+    }
+
+    public function testRejectsInstallWithWrongSetupToken(): void
+    {
+        $_POST = ['process' => 'install', 'admin_password' => 'test-admin-pw', 'setup_token' => 'deadbeefdeadbeef'];
+        $html = \admin_install_controller($this->configPath);
+
+        $this->assertStringContainsString('setup token is incorrect', $html);
+        $this->assertFileDoesNotExist($this->configPath);
+    }
+
     public function testReturnsFormWithErrorOnBadDbCredentials(): void
     {
-        // process=install but unreachable DB host should re-render with the
-        // "Could not connect" banner instead of writing the config.
+        // With a valid token, an unreachable DB host re-renders "Could not
+        // connect" — proving the token gate is passed and the DB step reached.
         $_POST = [
             'process' => 'install',
+            'setup_token' => $this->token(),
             'db_host' => '127.0.0.1:1', // closed port; mysqli_connect will fail
             'db_user' => 'phoenix_test_user',
             'db_pass' => 'phoenix_test_pass',
             'db_name' => 'phoenix_test_db',
             'admin_password' => 'test-admin-pw',
         ];
-        $html = \admin_install_controller('/tmp/phoenix_should_not_exist.php');
+        $html = \admin_install_controller($this->configPath);
 
         $this->assertIsString($html);
         $this->assertStringContainsString('Could not connect to the database', $html);
-        // Make sure we re-render the form, not just an error page.
         $this->assertStringContainsString('name="process" value="install"', $html);
     }
 
     public function testReturnsFormWithErrorWhenConfigDirectoryIsNotWritable(): void
     {
-        // dirname() of $config_path drives the writable check, so pointing it
-        // at a non-existent directory triggers the not-writable branch
-        // without having to chmod a real path. The view renders its own
-        // "<code>config/</code> is not writable" warning rather than the
-        // $install_error string (which the view ignores when not writable).
+        // A non-existent dir is not writable, so the not-writable branch fires
+        // before (and instead of) the token step — no token is created there.
         $configPath = sys_get_temp_dir().'/phoenix_no_such_dir/phoenix.custom.php';
 
         $_POST = ['process' => 'install', 'admin_password' => 'test-admin-pw'];
@@ -108,23 +151,20 @@ class AdminInstallControllerTest extends PhoenixTestCase
 
         $this->assertIsString($html);
         $this->assertStringContainsString('is not writable', $html);
-        // Should not have attempted a DB connect, so no "Could not connect"
-        // banner and no form should render alongside the warning.
         $this->assertStringNotContainsString('Could not connect', $html);
         $this->assertStringNotContainsString('<form', $html);
     }
 
     public function testReturnsFormWithErrorWhenConfigPathCannotBeWritten(): void
     {
-        // DB connect + db_create succeed, but file_put_contents fails because
-        // the target path is occupied by a directory of the same name. Hits
-        // the "Connected and created tables, but could not write the
-        // configuration file" branch.
-        $configPath = sys_get_temp_dir().'/phoenix_install_collide_'.bin2hex(random_bytes(4));
+        // DB connect + db_create succeed, but file_put_contents fails because the
+        // target path is a directory of the same name.
+        $configPath = $this->dir.'/collide';
         $this->assertTrue(mkdir($configPath));
 
         $_POST = [
             'process' => 'install',
+            'setup_token' => $this->token(), // token lives at dirname($configPath) == $this->dir
             'db_host' => self::$settings['db_host'],
             'db_user' => self::$settings['db_user'],
             'db_pass' => self::$settings['db_pass'],
@@ -148,17 +188,15 @@ class AdminInstallControllerTest extends PhoenixTestCase
 
     public function testWritesConfigAndRedirectsOnSuccessfulInstall(): void
     {
-        // End-to-end happy path: real DB credentials, throwaway config target,
-        // throwaway prefix so the install does not collide with the suite's
-        // other tables. The success branch ends in header() + exit(), which
-        // would terminate the PHPUnit worker, so this one stays in a
-        // subprocess. The non-exit branches above are what give us coverage.
-        $tmpConfig = tempnam(sys_get_temp_dir(), 'phx_install_');
-        $this->assertNotFalse($tmpConfig);
+        // End-to-end happy path. The success branch ends in header() + exit(),
+        // which would kill the PHPUnit worker, so it runs in a subprocess. The
+        // token is pre-created here so the subprocess can submit a matching one.
+        $token = $this->token();
 
         try {
             $post = [
                 'process' => 'install',
+                'setup_token' => $token,
                 'db_host' => self::$settings['db_host'],
                 'db_user' => self::$settings['db_user'],
                 'db_pass' => self::$settings['db_pass'],
@@ -170,7 +208,7 @@ class AdminInstallControllerTest extends PhoenixTestCase
                 '$_POST   = '.var_export($post, true).'; '.
                 '$_SERVER["REQUEST_METHOD"] = "POST"; '.
                 'require '.var_export(self::CONTROLLER_PATH, true).'; '.
-                '$result = admin_install_controller('.var_export($tmpConfig, true).'); '.
+                '$result = admin_install_controller('.var_export($this->configPath, true).'); '.
                 'echo "RESULT_TYPE:".gettype($result)."\n"; '.
                 'if (is_string($result)) { echo $result; }';
             $result = $this->runPhpSubprocess($script);
@@ -179,33 +217,27 @@ class AdminInstallControllerTest extends PhoenixTestCase
             // Successful redirect path exits before "RESULT_TYPE:" prints.
             $this->assertStringNotContainsString('RESULT_TYPE:', $result['stdout']);
 
-            // Config file should now be a valid PHP file with the expected key.
-            $this->assertFileExists($tmpConfig);
-            $contents = file_get_contents($tmpConfig);
+            $this->assertFileExists($this->configPath);
+            $contents = file_get_contents($this->configPath);
             $this->assertNotFalse($contents);
             $this->assertStringContainsString(self::TEST_PREFIX, $contents);
+            // The token is single-use — consumed once setup completes.
+            $this->assertFileDoesNotExist($this->tokenPath);
         } finally {
-            if (is_file($tmpConfig)) {
-                unlink($tmpConfig);
-            }
             $this->dropTestTables();
         }
     }
 
     public function testRejectsInstallWithoutAdminPassword(): void
     {
-        // A fresh install must set a password, or the panel would be left
-        // unauthenticated. With a writable config dir and process=install but
-        // no password, re-render the form with the prompt and write no config.
-        $configPath = sys_get_temp_dir().'/phoenix_pw_required_'.bin2hex(random_bytes(4)).'.php';
-
+        // The password guard fires before the token check, so no token is needed
+        // to exercise it.
         $_POST = ['process' => 'install'];
-        $html = \admin_install_controller($configPath);
+        $html = \admin_install_controller($this->configPath);
 
         $this->assertIsString($html);
         $this->assertStringContainsString('Set an admin password', $html);
         $this->assertStringContainsString('name="process" value="install"', $html);
-        $this->assertFileDoesNotExist($configPath);
+        $this->assertFileDoesNotExist($this->configPath);
     }
-
 }

@@ -8,10 +8,11 @@ instance. `public/`, `src/`, `config/`, `sql/`, deployment guides.
 `p/security-audit`, 117 rules × 244 files); live adversarial testing against a `php -S`
 instance backed by a throwaway MariaDB 11; `composer audit`.
 **Deliverable:** Findings only — no code changed *(original engagement, 2026-07-04)*.
-**Remediation status (updated 2026-07-06):** #3, #4, #6, #7, #8 fixed, plus related hardening
-(admin password rehash-on-login, an error-reporting/monitoring facility, and an XML/JSON
-content-type & charset fix), plus #5 in part (API keys now hashed at rest). #1 and #2 remain
-open. See the Status column, the per-finding Status lines, and the Remediation Log below.
+**Remediation status (updated 2026-07-06):** #1–#4 and #6–#8 fixed, plus #5 in part (API keys
+now hashed at rest; the TOTP secret / `db_pass` inherently can't be) — and related hardening
+(admin password rehash-on-login, an error-reporting/monitoring facility, an XML/JSON
+content-type & charset fix). **Every audit finding is now addressed.** See the Status column,
+the per-finding Status lines, and the Remediation Log below.
 
 ---
 
@@ -33,8 +34,8 @@ data-exfiltration-by-default.
 
 | # | Severity | Finding | Auth required | Status |
 |---|----------|---------|---------------|--------|
-| 1 | High     | Unauthenticated first-run installer takeover | none (pre-install) | ⬜ Open |
-| 2 | Medium   | Unauthenticated SSRF + error disclosure via installer DB test | none (pre-install) | ⬜ Open |
+| 1 | High     | Unauthenticated first-run installer takeover | none (pre-install) | ✅ Fixed |
+| 2 | Medium   | Unauthenticated SSRF + error disclosure via installer DB test | none (pre-install) | ✅ Fixed |
 | 3 | Medium   | X-Forwarded-For IP spoofing (honor_xff + empty trusted_proxies) | none | ✅ Fixed |
 | 4 | Medium   | Uncaught DB exception → HTTP 500 on announce (`left` omitted/negative) | none | ✅ Fixed (`647cf39`) |
 | 5 | Low      | API keys / TOTP secret stored plaintext at rest | n/a | ◐ Partial |
@@ -50,6 +51,12 @@ Plus informational hardening notes and a summary of the (substantial) things don
 
 Fixes applied since this report (newest first; git history has the full diffs):
 
+- **#1 / #2 — Unauthenticated installer takeover + SSRF** — FIXED. The installer is gated behind
+  a one-time **setup token** written to `config/.phoenix-setup-token` (a server-only file outside
+  the docroot). Completing setup requires reading it — i.e. filesystem access — so a network
+  attacker in the pre-setup window is refused *before* any DB probe (#2's SSRF never fires) or
+  config write (#1's takeover). The token is verified with `hash_equals` and deleted on success.
+  The detailed DB-connection errors are kept for the now-gated operator.
 - **#5 — API keys stored in plaintext at rest** — FIXED (the hashable half). API keys are now
   stored as SHA-256 hashes: `api_authenticate_key()` hashes the presented key and compares with
   `hash_equals`. A new admin **API Keys** page (create / rotate / revoke) generates a key, shows
@@ -100,9 +107,9 @@ Fixes applied since this report (newest first; git history has the full diffs):
   range-validated (out-of-range / negative → `Invalid port.` rather than a swallowed insert).
   Regression tests added.
 
-**Still open:** **#1** (installer takeover) & **#2** (installer SSRF) — both need the installer
-gated behind a one-time setup token / CLI. **#5** is now **partial** — API keys are hashed at
-rest; the TOTP secret and `db_pass` inherently can't be (mitigate with file permissions).
+**Still open:** none outright. **#5** is **partial** by nature — API keys are now hashed at
+rest; the TOTP secret and `db_pass` inherently must stay reversible (mitigate with file
+permissions).
 
 ---
 
@@ -111,7 +118,7 @@ rest; the TOTP secret and `db_pass` inherently can't be (mitigate with file perm
 ### 1. [High] Unauthenticated first-run installer takeover
 **Where:** `public/admin.php:36-40`, `src/controller/admin.install.php`
 **Class:** Improper access control / installation (CWE-306)
-**Status:** ⬜ OPEN — needs the installer gated behind a one-time setup token / CLI. Operationally mitigated by removing or IP-restricting `admin.php` after setup (deployment docs).
+**Status:** ✅ FIXED — the installer is gated behind a one-time setup token written to `config/.phoenix-setup-token` (a server-only file, outside the docroot). Completing setup requires filesystem access to read it, so a network attacker in the pre-setup window cannot install; the token is verified (with `hash_equals`) before any DB probe or config write, and deleted on success. Live-verified + unit/smoke tests.
 
 When `config/phoenix.custom.php` does not exist, `admin.php` serves the installer
 (`admin_install_controller`) with **no authentication**. A single anonymous POST completes
@@ -146,7 +153,7 @@ after setup, which closes this once setup is done but not before.
 ### 2. [Medium] Unauthenticated SSRF + error disclosure via installer DB test
 **Where:** `src/controller/admin.install.php:112-124`
 **Class:** Server-side request forgery / information exposure (CWE-918, CWE-209)
-**Status:** ⬜ OPEN — closed by the same installer gating as #1.
+**Status:** ✅ FIXED — the setup token (see #1) is verified *before* the DB-connection test, so an unauthenticated attacker never reaches the outbound `mysqli_connect()` — no SSRF, no error to reflect. The detailed connection error (host vs credentials vs database) is deliberately retained for the now-token-gated operator, who alone can trigger it.
 
 Still in unauthenticated installer mode, the "test DB connection before writing config"
 step calls `@mysqli_connect($test_host, …)` with the attacker-supplied `db_host`, then
