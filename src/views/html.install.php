@@ -129,7 +129,7 @@ function view_install_html(
 			<fieldset class="setup-fieldset'.($totp_html === '' ? ' m-0' : '').'">
 				<div class="setup-legend"><span class="ph-ico" data-lucide="key-round"></span>Admin</div>
 				<div class="ph-field mb-0"><label for="admin_password">Admin password <span class="text-danger" aria-hidden="true">*</span></label>
-					<input type="password" id="admin_password" name="admin_password" autocomplete="new-password" required aria-describedby="admin_password-hint">
+					<input type="password" id="admin_password" name="admin_password" autocomplete="new-password" required aria-describedby="admin_password-hint" data-pwned-check>
 					<div class="ph-hint" id="admin_password-hint">Required &mdash; protects the control panel.</div>
 				</div>
 			</fieldset>
@@ -138,7 +138,8 @@ function view_install_html(
 			<div class="ph-form-actions">
 				<button class="btn btn-primary btn-lg"><span class="ph-ico" data-lucide="wand-2"></span>Install</button>
 			</div>
-		</form>';
+		</form>
+		<script src="/assets/pwned-check.js"></script>';
 
     return view_auth_layout_html('Phoenix Setup', 'Phoenix Setup', 'First-run installation', $body, $foot, true, 'ph-auth-install', $extra_head);
 }

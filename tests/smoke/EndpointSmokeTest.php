@@ -91,6 +91,10 @@ class EndpointSmokeTest extends SmokeTestCase
         $indexCsp = (string) $this->headerValue($index, 'Content-Security-Policy');
         $this->assertStringContainsString("default-src 'self'", $indexCsp);
         $this->assertStringContainsString("frame-ancestors 'self'", $indexCsp);
+        // Split: public pages don't advertise jsDelivr (admin Geography only) or
+        // the pwnedpasswords connect (admin set-password gate only).
+        $this->assertStringNotContainsString('cdn.jsdelivr.net', $indexCsp);
+        $this->assertStringNotContainsString('pwnedpasswords', $indexCsp);
 
         // Admin -> nosniff + DENY framing + no-store + a page CSP locked to
         // frame-ancestors 'none'. PHP's session cache limiter may replace
@@ -100,7 +104,12 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertSame('nosniff', $this->headerValue($admin, 'X-Content-Type-Options'));
         $this->assertSame('DENY', $this->headerValue($admin, 'X-Frame-Options'));
         $this->assertStringContainsString('no-store', (string) $this->headerValue($admin, 'Cache-Control'));
-        $this->assertStringContainsString("frame-ancestors 'none'", (string) $this->headerValue($admin, 'Content-Security-Policy'));
+        $adminCsp = (string) $this->headerValue($admin, 'Content-Security-Policy');
+        $this->assertStringContainsString("frame-ancestors 'none'", $adminCsp);
+        // Admin carries jsDelivr (Geography map) and the pwnedpasswords connect-src
+        // that the set-password gate's client-side breach check needs.
+        $this->assertStringContainsString('cdn.jsdelivr.net', $adminCsp);
+        $this->assertStringContainsString("connect-src 'self' https://api.pwnedpasswords.com", $adminCsp);
 
         // API -> nosniff + DENY + no-store + the locked-down default-src 'none'
         // CSP (the API loads no assets). No admin/public page CSP leaks here.

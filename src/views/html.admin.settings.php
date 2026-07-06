@@ -52,7 +52,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
     if (! $writable) {
         $body .= '<div class="alert alert-warning"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The <code>config/</code> directory is not writable, so settings cannot be changed here. This is often intentional &mdash; it holds the database credentials and is kept out of the document root. Edit <code>config/phoenix.custom.php</code> directly, or make the directory writable to enable editing.</div></div>';
 
-        return view_admin_layout_html($settings, 'Settings', $body, 'settings', $csrf_token, 'Server', '', true);
+        return view_admin_layout_html($settings, 'Settings', $body, 'settings', $csrf_token, 'Server', '', true, '', '', ['/assets/pwned-check.js']);
     }
 
     ////	Change admin password
@@ -60,7 +60,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
 		<div class="ph-form-card">
 			<form class="mysql" method="POST">
 				<input type="hidden" name="process" value="password">'.$csrf_field.'
-				<div class="ph-field mb-4"><label for="new_password">New password</label><input type="password" id="new_password" name="new_password" autocomplete="new-password"></div>
+				<div class="ph-field mb-4"><label for="new_password">New password</label><input type="password" id="new_password" name="new_password" autocomplete="new-password" data-pwned-check></div>
 				<button type="submit" name="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="key-round"></span>Change Password</button>
 			</form>
 		</div>';
@@ -130,5 +130,5 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
 			</form>
 		</div>';
 
-    return view_admin_layout_html($settings, 'Settings', $body, 'settings', $csrf_token, 'Server', '', true);
+    return view_admin_layout_html($settings, 'Settings', $body, 'settings', $csrf_token, 'Server', '', true, '', '', ['/assets/pwned-check.js']);
 }

@@ -26,12 +26,15 @@ declare(strict_types=1);
 // The page CSP is deliberately pragmatic, not strong. The HTML uses inline
 // <script>/<style> blocks and inline style= attributes (no inline event
 // handlers) and loads a handful of third-party CDN assets, so it ships
-// 'unsafe-inline' plus the exact origins those assets come from: Google Fonts
-// (fonts.googleapis.com CSS + fonts.gstatic.com font files), unpkg (Lucide
-// icons JS), and jsDelivr (jsVectorMap CSS/JS/world map data). It still delivers
-// frame-ancestors, object-src, base-uri and form-action, and blocks injected
-// external script sources. Tightening it — nonces, self-hosting the CDN assets,
-// dropping 'unsafe-inline', pinning versions + SRI — is a tracked follow-up.
+// 'unsafe-inline' plus the exact origins those assets come from. It is split by
+// profile so public pages advertise only what they load: Google Fonts
+// (fonts.googleapis.com + fonts.gstatic.com) and unpkg (Lucide icons) on both;
+// jsDelivr (jsVectorMap on the Geography page) and a connect-src to
+// api.pwnedpasswords.com (the set-password gate's client-side breach check) on
+// ADMIN only. It still delivers frame-ancestors, object-src, base-uri and
+// form-action, and blocks injected external script sources. Tightening it —
+// nonces, self-hosting the CDN assets, dropping 'unsafe-inline', pinning
+// versions + SRI — is a tracked follow-up.
 
 function http_security_headers(string $profile): void
 {
@@ -52,30 +55,40 @@ function http_security_headers(string $profile): void
         return;
     }
 
-    // The shared page CSP for the HTML surfaces (admin + public HTML). Only the
-    // frame-ancestors directive differs by profile, so it is appended per-branch.
-    $page_csp = "default-src 'self'; "
-        ."script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; "
-        ."style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
+    // The page CSP for the HTML surfaces, split by profile so public pages
+    // advertise only what they load. Shared base first; script/style/connect and
+    // frame-ancestors differ per profile.
+    $base = "default-src 'self'; "
         ."font-src 'self' https://fonts.gstatic.com; "
         ."img-src 'self' data:; "
-        ."connect-src 'self'; "
         ."object-src 'none'; "
         ."base-uri 'none'; "
         ."form-action 'self'; ";
 
     if ($profile === 'admin') {
+        // Admin additionally loads jsVectorMap (jsDelivr) on the Geography page,
+        // and the set-password gate runs a client-side Pwned Passwords check
+        // against api.pwnedpasswords.com — both admin-only, so scoped here.
         header('X-Frame-Options: DENY');
         header('Referrer-Policy: no-referrer');
         header('Cache-Control: no-store');
-        header('Content-Security-Policy: '.$page_csp."frame-ancestors 'none'");
+        header('Content-Security-Policy: '.$base
+            ."script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; "
+            ."style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
+            ."connect-src 'self' https://api.pwnedpasswords.com; "
+            ."frame-ancestors 'none'");
 
         return;
     }
 
-    // 'public_html' (and any unrecognised profile falls through to this safe,
-    // browser-facing default).
+    // 'public_html' (and any unrecognised profile falls through here). Public
+    // pages load only Lucide (unpkg) + Google Fonts — no jsDelivr, no
+    // pwnedpasswords connect.
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('X-Frame-Options: SAMEORIGIN');
-    header('Content-Security-Policy: '.$page_csp."frame-ancestors 'self'");
+    header('Content-Security-Policy: '.$base
+        ."script-src 'self' 'unsafe-inline' https://unpkg.com; "
+        ."style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        ."connect-src 'self'; "
+        ."frame-ancestors 'self'");
 }

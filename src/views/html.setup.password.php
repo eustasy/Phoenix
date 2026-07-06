@@ -58,7 +58,7 @@ function view_setup_password_html(
 			<form method="POST" action="">
 				<input type="hidden" name="process" value="setup_password">
 				<div class="ph-field"><label for="setup-password">New password</label>
-					<input type="password" id="setup-password" name="password" autocomplete="new-password" required minlength="12" maxlength="72" autofocus aria-describedby="setup-password-hint">
+					<input type="password" id="setup-password" name="password" autocomplete="new-password" required minlength="12" maxlength="72" autofocus aria-describedby="setup-password-hint" data-pwned-check>
 					<div class="ph-hint" id="setup-password-hint">At least 12 characters (max 72 bytes).</div>
 				</div>
 				<div class="ph-field"><label for="setup-confirm">Confirm password</label>
@@ -67,7 +67,8 @@ function view_setup_password_html(
 				'.$totp_html.'
 				<button class="btn btn-primary btn-block mt-2"><span class="ph-ico" data-lucide="lock"></span>Set password</button>
 			</form>
-		</div>';
+		</div>
+		<script src="/assets/pwned-check.js"></script>';
 
     $version_html = $version !== ''
         ? ' <span class="mono">'.htmlspecialchars($version, ENT_QUOTES, 'UTF-8').'</span>'
