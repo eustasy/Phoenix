@@ -5,10 +5,10 @@ declare(strict_types=1);
 // Accepts a raw query-string value (not a $_GET value, which is already decoded).
 // Calls urldecode() itself so binary bytes in %XX form are resolved exactly once.
 //
-// This is the project's primary SQL injection defense for info_hash and peer_id
-// values, which are interpolated directly into single-quoted SQL strings. The
-// ctype_xdigit() check is what makes that interpolation safe — it guarantees
-// the returned value contains only [0-9a-f], which carries no SQL metacharacters.
+// Normalizes info_hash and peer_id to 40-char hex before they reach any query.
+// Queries bind these as parameters (mysqli_execute_query), which is the actual
+// SQL-injection defense; this sanitizer is input validation — it rejects
+// malformed values early and keeps the stored/compared form consistent.
 function maybe_binary_to_hex(string $binary): string|false
 {
     $binary = urldecode($binary);

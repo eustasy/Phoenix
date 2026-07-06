@@ -7,9 +7,9 @@ declare(strict_types=1);
 // existing torrent's fields, plus the submit handler (process=torrent_edit)
 // that applies the change. The admin may edit any torrent. The info_hash
 // arrives from the query string (initial load) or the form (submit), so it MUST
-// pass maybe_binary_to_hex and be 40-char hex before any query (the project's
-// SQL-injection defense); an invalid one bails via tracker_error. Verifies the
-// CSRF token on submit. Dispatched by admin_panel_controller() for page=edit.
+// pass maybe_binary_to_hex and be 40-char hex before any query; an invalid one
+// bails via tracker_error. Verifies the CSRF token on submit. Dispatched by
+// admin_panel_controller() for page=edit.
 
 /** @param PhoenixSettings $settings */
 function admin_edit_controller(mysqli $connection, array $settings): string

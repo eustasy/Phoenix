@@ -72,9 +72,9 @@ function admin_torrent_add_action(mysqli $connection, array $settings): string
         return is_string($posted) && trim($posted) !== '' ? $posted : $base;
     };
 
-    // info_hash: required, normalized to 40 hex chars via maybe_binary_to_hex —
-    // the project's SQL-injection defense. The upload supplies the base (already
-    // 40-char hex); a non-empty info_hash field overrides it.
+    // info_hash: required, normalized to 40 hex chars via maybe_binary_to_hex.
+    // The upload supplies the base (already 40-char hex); a non-empty info_hash
+    // field overrides it.
     require_once __DIR__.'/../functions/sanitize.maybe_binary_to_hex.php';
     $raw_hash = $override('info_hash', $parsed === false ? '' : $parsed['info_hash']);
     $info_hash = maybe_binary_to_hex(is_string($raw_hash) ? $raw_hash : '');

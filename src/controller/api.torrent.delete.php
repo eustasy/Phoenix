@@ -52,7 +52,7 @@ function api_torrent_delete_controller(mysqli $connection, array $settings): str
     }
 
     ////	Sanitize info_hash
-    // 40-char hex, per the project's SQL-injection defense, before any query.
+    // Normalize to 40-char hex before any query.
     require_once __DIR__.'/../functions/sanitize.maybe_binary_to_hex.php';
     $raw_hash = $_POST['info_hash'] ?? $_GET['info_hash'] ?? '';
     $info_hash = maybe_binary_to_hex(is_string($raw_hash) ? $raw_hash : '');

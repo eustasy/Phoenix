@@ -31,8 +31,9 @@ These break CI or security if violated. Details in the linked docs.
   The sole exception is `tracker_error()` (bootstrap-loaded).
   → [architecture](docs/architecture.md)
 - **`info_hash`/`peer_id` pass through `maybe_binary_to_hex()`** at the boundary.
-  This hex sanitization is the primary SQL-injection defense for the
-  string-concatenated queries. → [database](docs/database.md)
+  Queries are parameterized (`mysqli_execute_query` with bound `?` params) —
+  that's the actual SQL-injection defense; this sanitizer validates/normalizes
+  the value before it's bound. → [database](docs/database.md)
 - **Bencode is never hand-assembled** — views build a PHP structure and hand it
   to `bencode_encode()`, the single emitter. → [views](docs/views.md)
 - **Every settable value exists in `config/phoenix.default.php`.** Code reads

@@ -7,10 +7,10 @@ declare(strict_types=1);
 // swarm, each tagged with a detected client label. Reads the peers table
 // directly, so it works for any info_hash — listed, unlisted, or entirely
 // unregistered. The info_hash arrives from the query string, so it MUST pass
-// maybe_binary_to_hex and be a 40-char hex string before any query (the
-// project's SQL-injection defense); an invalid one bails via tracker_error.
-// Read-only — no forms, so the only token built is for the layout's logout
-// form. Dispatched by admin_panel_controller() for page=peers.
+// maybe_binary_to_hex and be a 40-char hex string before any query; an invalid
+// one bails via tracker_error. Read-only — no forms, so the only token built
+// is for the layout's logout form. Dispatched by admin_panel_controller() for
+// page=peers.
 
 /** @param PhoenixSettings $settings */
 function admin_torrent_peers_controller(mysqli $connection, array $settings): string

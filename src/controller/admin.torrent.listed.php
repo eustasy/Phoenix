@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 ////	admin_torrent_listed_action
 // Handles the Torrents page List/Unlist toggle (process=torrent_listed).
-// Sanitizes the form info_hash to 40-char hex via maybe_binary_to_hex (the
-// project's SQL-injection defense) and bails via tracker_error on a bad value,
-// then sets the torrent's `listed` flag. Admin context: no owner guard, so it
-// acts on any torrent. Returns a message for the panel to display.
+// Sanitizes the form info_hash to 40-char hex via maybe_binary_to_hex and
+// bails via tracker_error on a bad value, then sets the torrent's `listed`
+// flag. Admin context: no owner guard, so it acts on any torrent. Returns a
+// message for the panel to display.
 
 /** @param PhoenixSettings $settings */
 function admin_torrent_listed_action(mysqli $connection, array $settings): string

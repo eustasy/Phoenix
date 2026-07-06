@@ -36,14 +36,17 @@ default prefix `phoenix_`. The actual prefix is `$settings['db_prefix']`.
 
 ## SQL injection defense
 
-`info_hash` and `peer_id` are stored as **40-char hex strings**, not raw 20-byte
-binary. Conversion happens at the boundary via `maybe_binary_to_hex()`
-(`sanitize.maybe_binary_to_hex.php`). This is the project's primary SQLi defense:
-the hex sanitizer guarantees these values can't carry SQL metacharacters into
-the many string-concatenated queries. Anything that fails sanitization returns
+The `src/model/` layer is fully parameterized (`mysqli_execute_query` with bound
+`?` params) — that's the actual SQL-injection defense, not string concatenation.
+
+`info_hash` and `peer_id` are still stored as **40-char hex strings**, not raw
+20-byte binary. Conversion happens at the boundary via `maybe_binary_to_hex()`
+(`sanitize.maybe_binary_to_hex.php`), which normalizes and validates the value
+before it's bound as a parameter. Anything that fails sanitization returns
 `false` and is filtered out before reaching the SQL layer.
 
-When adding a query, keep all SQL in `src/model/`, and ensure any hash/peer-id
+When adding a query, keep all SQL in `src/model/`, bind values as parameters
+(never concatenate them into the query string), and ensure any hash/peer-id
 input has already passed through the sanitizer.
 
 ## `db_host` `p:` gotcha
