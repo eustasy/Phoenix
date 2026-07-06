@@ -61,6 +61,6 @@ if ($settings['full_scrape']) {
 
 ////	Not Allowed
 // Reached only when the request supplied no valid info_hashes and
-// full_scrape is disabled. The "Torrent is not allowed." case is now
+// full_scrape is disabled. The "Torrent is not allowed." case is
 // handled inline in the specific-scrape block above.
 tracker_error('Tracker scraping is not allowed.', 'never');

@@ -57,9 +57,7 @@ class ScrapeFullControllerTest extends PhoenixTestCase
 
     // Expected per-torrent rendering for HASH: 1 seeder, 1 leecher, size
     // 4096, 3 downloads → peers = 2, traffic = size * downloads = 12288.
-    // Full-scrape now mirrors specific-scrape's field set; the previous
-    // asymmetry (size always 0 in full-scrape output) was an oversight in
-    // torrents_scrape_all that has been corrected.
+    // Full-scrape mirrors specific-scrape's field set.
 
     private const HASH_BENCODE = 'd8:completei1e10:downloadedi3e10:incompletei1ee';
     private const HASH_XML =

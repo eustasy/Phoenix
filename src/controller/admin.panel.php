@@ -41,7 +41,7 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
 
         case 'peers':
             // With an info_hash, drill into one swarm (live). Without one, show
-            // the swarm-wide listing (UI-only preview for now).
+            // the swarm-wide listing (UI-only preview).
             if (isset($_GET['info_hash']) && $_GET['info_hash'] !== '') {
                 require_once __DIR__.'/admin.torrent.peers.php';
 

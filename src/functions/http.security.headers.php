@@ -32,9 +32,7 @@ declare(strict_types=1);
 // jsDelivr (jsVectorMap on the Geography page) and a connect-src to
 // api.pwnedpasswords.com (the set-password gate's client-side breach check) on
 // ADMIN only. It still delivers frame-ancestors, object-src, base-uri and
-// form-action, and blocks injected external script sources. Tightening it —
-// nonces, self-hosting the CDN assets, dropping 'unsafe-inline', pinning
-// versions + SRI — is a tracked follow-up.
+// form-action, and blocks injected external script sources.
 
 function http_security_headers(string $profile): void
 {

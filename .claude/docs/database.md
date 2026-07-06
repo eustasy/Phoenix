@@ -11,10 +11,10 @@ default prefix `phoenix_`. The actual prefix is `$settings['db_prefix']`.
 - **`<prefix>peers`** — active peers, ephemeral. PK `(info_hash, peer_id)`.
   Cleanup deletes rows where `updated < time - 3 * announce_interval`.
 - **`<prefix>torrents`** — tracked torrents. PK `info_hash`. Holds `name`,
-  `size`, `listed`, `downloads`, and (4.0+) torrent meta (filename, files,
+  `size`, `listed`, `downloads`, torrent meta (filename, files,
   trackers, webseeds) and `user` (owner; the API key that created it).
 - **`<prefix>tasks`** — last-run log per maintenance task (`name` PK).
-- **`<prefix>task_runs`** — task run history (4.3+; pruned by `task_retention`).
+- **`<prefix>task_runs`** — task run history (pruned by `task_retention`).
 - **`<prefix>events`** — optional privacy-preserving stat ledger. Exists from
   install; writing is gated by `stats_enabled`. See [stats-hooks.md](stats-hooks.md).
 

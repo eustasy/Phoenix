@@ -28,12 +28,6 @@ All 54 indexed BEPs reviewed: **8 implemented**, **2 applicable but missing**,
   (private/closed tracker), 31 (`retry in` on failures), 48 (HTTP scrape).
 - **Applicable but not implemented:** BEP 15 (UDP tracker — excluded by the
   HTTP/PHP architecture), 8 (peer obfuscation — deferred/niche).
-- **Documentation fix applied:** the scrape endpoint and several comments/docs
-  labelled HTTP scrape as "BEP 15", but BEP 15 is the *UDP* protocol; the HTTP
-  scrape convention is **BEP 48**. All such references were re-pointed to BEP 48
-  across `README.md`, `.claude/CLAUDE.md`, `public/scrape.php`, the scrape
-  controllers, `scrape.initialize.results`/`tracker.filter.info.hashes`,
-  `bencode.scrape`, and the scrape tests.
 
 ## Process BEPs
 
@@ -180,12 +174,10 @@ implemented, and realistically won't be without a separate daemon.
 This applies to a tracker, so it's a genuine gap rather than N/A — but a
 deliberate architectural one.
 
-**Documentation inaccuracy (fixed):** several places used to credit Phoenix with
-BEP 15 — `.claude/CLAUDE.md`, the `public/scrape.php` header, the
-`scrape.full`/`scrape.specific` controllers, the scrape helpers and view, and
-the scrape tests. What those endpoints actually implement is **HTTP scrape**,
-i.e. the convention formalised by **BEP 48**, so all of those references were
-re-pointed from 15 to 48.
+**Not the same as HTTP scrape:** BEP 15 is the *UDP* tracker protocol, which is
+easy to confuse with Phoenix's scrape endpoints. Those endpoints implement
+**HTTP scrape** — the convention formalised by **BEP 48** — a separate spec from
+BEP 15.
 
 ### BEP 23 — Tracker Returns Compact Peer Lists
 

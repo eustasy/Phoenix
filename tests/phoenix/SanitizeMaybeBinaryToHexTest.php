@@ -39,9 +39,9 @@ class SanitizeMaybeBinaryToHexTest extends PhoenixTestCase
 
     public function testRejectsFortyCharNonHex(): void
     {
-        // 40 chars but not hex: previously slipped through because the only
-        // downstream sanitization was htmlentities, which doesn't escape '\'
-        // and therefore couldn't prevent breaking out of single-quoted SQL.
+        // 40 chars but not hex is rejected: the only downstream sanitization
+        // is htmlentities, which doesn't escape '\' and so can't prevent
+        // breaking out of single-quoted SQL.
         $this->assertFalse(maybe_binary_to_hex(str_repeat('\\', 40)));
         $this->assertFalse(maybe_binary_to_hex(str_repeat('z', 40)));
         $this->assertFalse(maybe_binary_to_hex(str_repeat("'", 40)));

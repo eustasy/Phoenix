@@ -12,7 +12,7 @@ class PeerProxyTrustedTest extends TestCase
 {
     public function testEmptyTrustedFailsClosedByDefault(): void
     {
-        // finding #3: empty trusted_proxies no longer trusts anyone unless opted in.
+        // empty trusted_proxies trusts no one unless opted in.
         $this->assertFalse(peer_proxy_trusted(['REMOTE_ADDR' => '203.0.113.9'], [], false));
         $this->assertFalse(peer_proxy_trusted([], [], false));
     }

@@ -108,8 +108,7 @@ A forwarded header is honored only when the direct connection (`REMOTE_ADDR`) fa
 `trusted_proxies`, so a client connecting straight to the origin cannot spoof. For the chain
 headers (`X-Forwarded-For`, `Forwarded`) Phoenix walks the chain from the right, skipping
 your `trusted_proxies`, to find the real client — so it is safe whether your proxy appends
-or overwrites the header (the old `RequestHeader set X-Forwarded-For` trick is no longer
-needed).
+or overwrites the header.
 
 Recognised `forwarded_headers` values: `x-forwarded-for`, `forwarded` (RFC 7239),
 `x-real-ip`, `cf-connecting-ip`, `true-client-ip`, and the legacy `client-ip`. List **only**

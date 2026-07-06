@@ -6,8 +6,7 @@ declare(strict_types=1);
 // Drives the torrent-list API: authenticate the API key → fetch every torrent
 // (listed and unlisted, any owner) with swarm stats → render the collection.
 // The full list is intentional: API keys are operator-issued, so any valid
-// key is trusted with unlisted torrents and other users' rows alike (per-key
-// scopes are a deferred follow-up).
+// key is trusted with unlisted torrents and other users' rows alike.
 // Driven by public/api/torrents.php; returns the rendered body string — JSON
 // by default, XML when ?xml is set. Calls tracker_error() on auth failure
 // (which exits); the entry point pre-sets the JSON flag so those errors

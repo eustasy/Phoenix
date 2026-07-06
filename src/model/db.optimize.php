@@ -36,8 +36,7 @@ function db_optimize(mysqli $connection, array $settings, int $time, string|fals
     // mysqli_multi_query buffers every result set internally; each must be
     // consumed before the connection is usable again. The first result is
     // already pending after the call returns, so the natural shape is a
-    // do-while: store-and-free the current result, advance, repeat. The
-    // previous while-more loop skipped the first set entirely.
+    // do-while: store-and-free the current result, advance, repeat.
     if ($result) {
         do {
             $res = mysqli_store_result($connection);

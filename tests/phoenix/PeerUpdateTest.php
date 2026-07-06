@@ -49,7 +49,7 @@ class PeerUpdateTest extends PhoenixTestCase
     {
         // Regression: a re-announce that omits `left` carries the -1 "unknown"
         // sentinel; the signed column stores it instead of throwing an
-        // out-of-range strict-mode exception (which previously 500'd announce).
+        // out-of-range strict-mode exception.
         mysqli_query(
             self::$connection,
             'INSERT INTO `'.self::$settings['db_prefix'].'peers` ( `info_hash`, `peer_id`, `compactv4`, `compactv6`, `portv4`, `portv6`, `left`, `updated` ) '.

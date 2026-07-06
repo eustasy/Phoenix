@@ -27,8 +27,8 @@ function peer_insert(mysqli $connection, array $settings, int $time, array $peer
     }
 
     // Values bind as statement parameters (mysqli_execute_query treats each as a
-    // string — identical to the previous quote-everything SQL). Table/column
-    // names cannot be bound, so db_prefix stays interpolated (operator config).
+    // string). Table/column names cannot be bound, so db_prefix stays
+    // interpolated (operator config).
     //
     // A DB error here — e.g. an out-of-range value under strict mode (the PHP
     // 8.1+ mysqli_report default) — degrades to a graceful tracker_error()

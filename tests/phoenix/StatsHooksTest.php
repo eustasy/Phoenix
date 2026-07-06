@@ -9,7 +9,7 @@ namespace Phoenix\Tests;
 // include (not include_once — see its own comment: FPM workers fire each hook
 // per request, many requests per process), so a hook body re-runs on every call
 // and can be fired repeatedly in one process. Firing in-process — rather than in
-// a subprocess, as this test used to — keeps the firings under the coverage
+// a subprocess — keeps the firings under the coverage
 // driver, so the opt-in insert path (which only runs with stats_enabled and the
 // event opted into stats_events) is recorded as covered, not just exercised.
 // The real one-process-per-request dispatch is still covered by the announce

@@ -162,7 +162,7 @@ class PeerInsertTest extends PhoenixTestCase
         // Regression: peer_parse_announce_optional() sets left=-1 ("bytes
         // remaining unknown") when a client omits `left`. The peers.`left`
         // column is signed, so this round-trips instead of throwing an
-        // out-of-range strict-mode exception — which previously 500'd announce.
+        // out-of-range strict-mode exception.
         $peer = $this->fixturePeer([
             'info_hash' => '__TEST_PI_LEFT__',
             'peer_id' => '__TEST_PI_LEFT__',
