@@ -79,7 +79,7 @@ class AdminSettingsControllerTest extends TestCase
 
     public function testRejectsPasswordChangeWithoutCsrf(): void
     {
-        $_POST = ['process' => 'password', 'new_password' => 'newpw'];
+        $_POST = ['process' => 'password', 'new_password' => 'new-password-123'];
 
         $html = \admin_settings_controller($this->settings(), $this->path);
 
@@ -91,14 +91,14 @@ class AdminSettingsControllerTest extends TestCase
     public function testChangesPasswordWithValidCsrf(): void
     {
         $_SESSION['phoenix_csrf'] = 'tok';
-        $_POST = ['process' => 'password', 'new_password' => 'newpw', 'csrf' => 'tok'];
+        $_POST = ['process' => 'password', 'new_password' => 'new-password-123', 'csrf' => 'tok'];
 
         $html = \admin_settings_controller($this->settings(), $this->path);
 
         $this->assertStringContainsString('Admin password changed', $html);
         $stored = $this->readBack();
         $this->assertIsString($stored['admin_password']);
-        $this->assertTrue(password_verify('newpw', $stored['admin_password']));
+        $this->assertTrue(password_verify('new-password-123', $stored['admin_password']));
         // Other custom keys preserved.
         $this->assertSame('filepass', $stored['db_pass']);
         $this->assertSame(['*' => 'adminkey'], $stored['api_keys']);

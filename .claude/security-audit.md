@@ -7,7 +7,11 @@ instance. `public/`, `src/`, `config/`, `sql/`, deployment guides.
 **Method:** Manual vulnerability-class review; Semgrep 1.168 (`p/php`, `p/owasp-top-ten`,
 `p/security-audit`, 117 rules × 244 files); live adversarial testing against a `php -S`
 instance backed by a throwaway MariaDB 11; `composer audit`.
-**Deliverable:** Findings only — no code changed.
+**Deliverable:** Findings only — no code changed *(original engagement, 2026-07-04)*.
+**Remediation status (updated 2026-07-06):** #4, #6, #7, #8 fixed, plus related hardening (admin
+password rehash-on-login, an error-reporting/monitoring facility, and an XML/JSON content-type
+& charset fix). #1–#3 and #5 remain open. See the Status column, the per-finding Status lines,
+and the Remediation Log below.
 
 ---
 
@@ -27,18 +31,65 @@ genuine uncaught-exception bug on the announce hot path, and some defense-in-dep
 (plaintext API keys at rest, missing security headers). None are remote code execution or
 data-exfiltration-by-default.
 
-| # | Severity | Finding | Auth required | Confirmed |
-|---|----------|---------|---------------|-----------|
-| 1 | High     | Unauthenticated first-run installer takeover | none (pre-install) | Live |
-| 2 | Medium   | Unauthenticated SSRF + error disclosure via installer DB test | none (pre-install) | Live |
-| 3 | Medium   | X-Forwarded-For IP spoofing (honor_xff + empty trusted_proxies) | none | Live |
-| 4 | Medium   | Uncaught DB exception → HTTP 500 on announce (`left` omitted/negative) | none | Live |
-| 5 | Low      | API keys / TOTP secret stored plaintext at rest | n/a | Code |
-| 6 | Low      | Open redirect via `REQUEST_URI` in admin login redirect | post-login | Semgrep + code |
-| 7 | Low      | Missing HTTP security headers (CSP / XFO / nosniff) | n/a | Live |
-| 8 | Low      | Empty `admin_password` disables admin auth entirely | n/a | Code (documented) |
+| # | Severity | Finding | Auth required | Status |
+|---|----------|---------|---------------|--------|
+| 1 | High     | Unauthenticated first-run installer takeover | none (pre-install) | ⬜ Open |
+| 2 | Medium   | Unauthenticated SSRF + error disclosure via installer DB test | none (pre-install) | ⬜ Open |
+| 3 | Medium   | X-Forwarded-For IP spoofing (honor_xff + empty trusted_proxies) | none | ⬜ Open |
+| 4 | Medium   | Uncaught DB exception → HTTP 500 on announce (`left` omitted/negative) | none | ✅ Fixed (`647cf39`) |
+| 5 | Low      | API keys / TOTP secret stored plaintext at rest | n/a | ⬜ Open |
+| 6 | Low      | Open redirect via `REQUEST_URI` in admin login redirect | post-login | ✅ Fixed (`2671e33`) |
+| 7 | Low      | Missing HTTP security headers (CSP / XFO / nosniff) | n/a | ✅ Fixed (`aadcca0`) |
+| 8 | Low      | Empty `admin_password` disables admin auth entirely | n/a | ✅ Fixed |
 
 Plus informational hardening notes and a summary of the (substantial) things done right.
+
+---
+
+## Remediation log
+
+Fixes applied since this report (newest first; git history has the full diffs):
+
+- **#8 — Empty `admin_password` disables admin auth** — FIXED. When `admin_password` is empty,
+  `admin.php` now serves a one-time "set admin password" gate (shared `auth_password_valid`
+  policy: ≥12 characters, ≤72 bytes; optional TOTP enrolment mirroring the installer) and
+  persists via `config_write`, instead of the unauthenticated panel. A new `admin_auth_optional`
+  setting (default false) lets an operator knowingly run the panel unauthenticated (e.g. behind
+  reverse-proxy auth). The 12/72 policy is applied consistently at the installer, the Settings
+  change-password action, and the gate.
+- **#7 — Missing HTTP security headers** — FIXED (`aadcca0`). A new `http_security_headers()`
+  helper emits `X-Content-Type-Options: nosniff` on every response, plus a per-group set:
+  `X-Frame-Options` (`DENY` on admin/api, `SAMEORIGIN` on public HTML), `Referrer-Policy`,
+  `Cache-Control: no-store` on admin/api, and a Content-Security-Policy on the HTML/API
+  surfaces. Independently reviewed (no cross-group leakage; the CSP origin set verified against
+  the shipped assets). **Follow-up tracked:** the "strong CSP" — nonces + self-hosting Lucide /
+  jsVectorMap / Google Fonts to drop `'unsafe-inline'` and the CDN origins, plus pinning
+  `lucide@latest` and adding SRI.
+- **XML/JSON content-type & charset** (not an original finding; surfaced during #7) — FIXED
+  (`c155579`). XML was served `text/xml; charset=iso-8859-1` — PHP appends the binary protocol's
+  `default_charset` to `text/*`, and for `text/xml` the HTTP charset overrides the document's own
+  `encoding="UTF-8"` → mojibake on non-ASCII names. Now `application/xml; charset=UTF-8`
+  (`application/*` is untouched by `default_charset`); JSON now declares `charset=UTF-8` explicitly.
+- **#6 — Open redirect via `REQUEST_URI`** — FIXED (`2671e33`). New `auth_safe_redirect_path()`
+  permits only same-origin absolute paths (rejects `//host`, `/\host`, absolute URLs) with a fixed
+  `admin.php` fallback; applied to the login and logout redirects.
+- **Admin password rehash-on-login** (was an informational hardening note) — FIXED (`e4cfd1f`).
+  `auth_rehash_password()` transparently upgrades the stored bcrypt hash via
+  `password_needs_rehash()` when `PASSWORD_DEFAULT` moves on; best-effort, never blocks login.
+- **Error-reporting / monitoring facility** (new capability) — ADDED (`239ded7`, `7d185e7`,
+  `f1bfafc`). A hardened `phoenix_hook_event()` dispatcher + an opt-in `report_errors` setting
+  route uncaught exceptions, fatals, non-fatal PHP warnings/notices, caught DB-write exceptions,
+  and geo-lookup faults to operator-supplied `src/hooks/phoenix.{init,error}.php` (e.g. Sentry) —
+  zero third-party code in core.
+- **#4 — Uncaught DB exception → HTTP 500 on announce** — FIXED (`647cf39`, `3c1776a`).
+  `peer_insert` / `peer_update` catch the strict-mode exception; the `left` column is signed (via
+  migration) so the `-1` "unknown" sentinel round-trips. The sibling **`port`** field is now
+  range-validated (out-of-range / negative → `Invalid port.` rather than a swallowed insert).
+  Regression tests added.
+
+**Still open:** **#1** (installer takeover) & **#2** (installer SSRF) — both need the installer
+gated behind a one-time setup token / CLI; **#3** (XFF spoofing) — a fail-safe when
+`trusted_proxies` is empty; **#5** (plaintext API keys / TOTP at rest) — hash keys at rest.
 
 ---
 
@@ -47,6 +98,7 @@ Plus informational hardening notes and a summary of the (substantial) things don
 ### 1. [High] Unauthenticated first-run installer takeover
 **Where:** `public/admin.php:36-40`, `src/controller/admin.install.php`
 **Class:** Improper access control / installation (CWE-306)
+**Status:** ⬜ OPEN — needs the installer gated behind a one-time setup token / CLI. Operationally mitigated by removing or IP-restricting `admin.php` after setup (deployment docs).
 
 When `config/phoenix.custom.php` does not exist, `admin.php` serves the installer
 (`admin_install_controller`) with **no authentication**. A single anonymous POST completes
@@ -81,6 +133,7 @@ after setup, which closes this once setup is done but not before.
 ### 2. [Medium] Unauthenticated SSRF + error disclosure via installer DB test
 **Where:** `src/controller/admin.install.php:112-124`
 **Class:** Server-side request forgery / information exposure (CWE-918, CWE-209)
+**Status:** ⬜ OPEN — closed by the same installer gating as #1.
 
 Still in unauthenticated installer mode, the "test DB connection before writing config"
 step calls `@mysqli_connect($test_host, …)` with the attacker-supplied `db_host`, then
@@ -109,6 +162,7 @@ string.
 ### 3. [Medium] X-Forwarded-For IP spoofing (honor_xff + empty trusted_proxies)
 **Where:** `src/functions/peer.proxy.trusted.php:17-19`, `peer.address.candidates.php:37-55`
 **Class:** IP spoofing / trust boundary (CWE-348, CWE-290)
+**Status:** ⬜ OPEN — a fail-safe when `trusted_proxies` is empty is not yet added; the deployment docs already steer operators to `honor_xff=false` + proxy-level RemoteIP.
 
 When `honor_xff = true` and `trusted_proxies = []` (empty), `peer_proxy_trusted()` returns
 `true` for **every** connection, so the leftmost `X-Forwarded-For` / `Client-IP` entry is
@@ -144,6 +198,7 @@ should be the strongly-recommended default.
 **Where:** `src/model/peer.insert.php:32`, `src/functions/peer.parse.announce.optional.php:21-23`,
 `sql/peers.sql:25`
 **Class:** Improper handling of exceptional conditions / availability (CWE-703)
+**Status:** ✅ FIXED (`647cf39`, `3c1776a`) — `peer_insert`/`peer_update` catch the strict-mode exception; the `left` column is signed (migration) so the `-1` sentinel round-trips; the sibling `port` field is now range-validated. Regression tests added.
 
 `peer_parse_announce_optional()` uses `left = -1` as its "missing/unknown" sentinel when an
 announce omits the `left` parameter. The `left` column is `bigint(20) unsigned NOT NULL`,
@@ -182,6 +237,7 @@ future strict-mode surprise.
 ### 5. [Low] API keys and TOTP secret stored in plaintext at rest
 **Where:** `src/functions/api.authenticate.key.php:18-19`, `config/phoenix.custom.php` (`api_keys`, `admin_totp_secret`)
 **Class:** Cleartext storage of sensitive information (CWE-312)
+**Status:** ⬜ OPEN — API keys / TOTP are still plaintext at rest (hashing not implemented). Related hardening since: admin-password rehash-on-login (`e4cfd1f`) and a new error-reporting facility that surfaces failures — but this storage is unchanged.
 
 Unlike the admin password (bcrypt), API keys and the TOTP secret are stored verbatim in
 `phoenix.custom.php` and compared raw (`hash_equals($stored, $input)`). Any exposure of the
@@ -201,6 +257,7 @@ filesystem permissions (`chmod 600`).
 ### 6. [Low] Open redirect via `REQUEST_URI` in admin login redirect
 **Where:** `src/controller/admin.login.php:48`
 **Class:** Open redirect (CWE-601) — Semgrep `redirect-to-request-uri`
+**Status:** ✅ FIXED (`2671e33`) — `auth_safe_redirect_path()` permits only same-origin absolute paths (rejects `//host`, `/\host`, absolute URLs) with an `admin.php` fallback; applied to the login and logout redirects. Tests added.
 
 `header('Location: '.$_SERVER['REQUEST_URI'])` after a **successful** login will follow a
 protocol-relative target: a request path of `//evil.com` yields `Location: //evil.com`,
@@ -217,6 +274,7 @@ same-origin absolute path (starts with a single `/`). The logout path already tr
 ### 7. [Low] Missing HTTP security headers
 **Where:** all endpoints; most important on `public/admin.php`
 **Class:** Security misconfiguration (CWE-1021, CWE-693)
+**Status:** ✅ FIXED (`aadcca0`) — `http_security_headers()` emits `nosniff` universally + per-group `X-Frame-Options` / `Referrer-Policy` / `Cache-Control: no-store` / CSP; independently reviewed. Strong-CSP (nonces + self-hosting the CDN assets + SRI) tracked as a follow-up.
 
 Responses carry no `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`,
 or `Referrer-Policy`. The admin panel is therefore framable (clickjacking) and its responses
@@ -233,6 +291,7 @@ the Apache/Nginx config.
 ### 8. [Low] Empty `admin_password` disables admin authentication entirely
 **Where:** `src/controller/admin.login.php:12-15`
 **Class:** Missing authentication (CWE-306) — documented operator choice
+**Status:** ✅ FIXED — `admin.php` now forces a one-time "set admin password" gate (shared `auth_password_valid` policy: ≥12 chars, ≤72 bytes; optional TOTP enrolment) when `admin_password` is empty, unless the new `admin_auth_optional` setting is deliberately enabled to run unauthenticated. Tested + live-verified.
 
 With `admin_password` empty, `admin_login_controller` returns `null` and the whole panel is
 served unauthenticated. The installer now *requires* a password (good), so a fresh install

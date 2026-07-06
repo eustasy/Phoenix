@@ -61,12 +61,29 @@ class AdminLoginControllerTest extends PhoenixTestCase
         parent::tearDown();
     }
 
-    public function testReturnsNullWhenNoAdminPasswordSet(): void
+    public function testShowsSetPasswordGateWhenNoPassword(): void
     {
-        // Empty admin_password disables auth entirely; the controller short-
-        // circuits before session_start, so this branch is safe to run
-        // directly under PHPUnit and is visible to coverage instrumentation.
-        $result = \admin_login_controller(['admin_password' => '']);
+        // Empty admin_password now forces a one-time set-password gate (finding
+        // #8) instead of serving the panel unauthenticated. The controller
+        // short-circuits before session_start, so this runs safely in-process.
+        $result = \admin_login_controller([
+            'admin_password' => '',
+            'phoenix_version' => 'Phoenix Test v.0',
+        ]);
+        $this->assertIsString($result);
+        $this->assertStringContainsString('name="process" value="setup_password"', $result);
+        $this->assertStringContainsString('Set an admin password', $result);
+    }
+
+    public function testReturnsNullWhenAuthOptionalAndNoPassword(): void
+    {
+        // The documented opt-out: an operator deliberately running the panel
+        // unauthenticated (protected by other means) sets admin_auth_optional,
+        // which restores the old skip-auth behaviour.
+        $result = \admin_login_controller([
+            'admin_password' => '',
+            'admin_auth_optional' => true,
+        ]);
         $this->assertNull($result);
     }
 

@@ -100,9 +100,14 @@ $settings['debug'] = false;
 $settings['report_errors'] = false;
 
 ////	Admin Options
-/* bcrypt hash of the admin password; empty = no auth */
-/* WARNING: set this or delete public/admin.php when you're up and running */
+/* bcrypt hash of the admin password. Empty makes admin.php force a one-time */
+/* "set admin password" step on first access (see admin_auth_optional below). */
 $settings['admin_password'] = '';
+/* when admin_password is empty, run the panel with NO password instead of */
+/* forcing the set-password step. Only enable if admin.php is protected by */
+/* other means (reverse-proxy auth / IP allowlist) — better still, delete */
+/* public/admin.php once you're up and running. */
+$settings['admin_auth_optional'] = false;
 /* seconds to delay after a failed admin login (brute-force throttle); 0 disables */
 $settings['admin_login_delay'] = 2;
 /* cap on the escalating per-session login delay */

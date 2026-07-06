@@ -82,6 +82,17 @@ function admin_install_controller(string $config_path): string
         return view_install_html($settings_writable, $install_error, $form, $totp_secret, $totp_qr, $totp_url);
     }
 
+    // Enforce the shared password policy on the raw plaintext (install_sanitize_post
+    // has already hashed the accepted value into $values['admin_password']).
+    require_once __DIR__.'/../functions/auth.password.valid.php';
+    $raw_password = isset($_POST['admin_password']) && is_string($_POST['admin_password']) ? $_POST['admin_password'] : '';
+    $password_error = auth_password_valid($raw_password);
+    if ($password_error !== null) {
+        $install_error = $password_error;
+
+        return view_install_html($settings_writable, $install_error, $form, $totp_secret, $totp_qr, $totp_url);
+    }
+
     if (! $settings_writable) {
         $install_error = 'The <code>config/</code> directory is not writable. Please make it writable and try again.';
 

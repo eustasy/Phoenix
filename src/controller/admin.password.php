@@ -16,6 +16,12 @@ function admin_password_action(string $config_path): string
         return 'The new password cannot be empty.';
     }
 
+    require_once __DIR__.'/../functions/auth.password.valid.php';
+    $invalid = auth_password_valid($new);
+    if ($invalid !== null) {
+        return $invalid;
+    }
+
     require_once __DIR__.'/../functions/config.write.php';
     $hash = password_hash($new, PASSWORD_DEFAULT);
 
