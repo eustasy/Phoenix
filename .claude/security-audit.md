@@ -8,10 +8,10 @@ instance. `public/`, `src/`, `config/`, `sql/`, deployment guides.
 `p/security-audit`, 117 rules × 244 files); live adversarial testing against a `php -S`
 instance backed by a throwaway MariaDB 11; `composer audit`.
 **Deliverable:** Findings only — no code changed *(original engagement, 2026-07-04)*.
-**Remediation status (updated 2026-07-06):** #4, #6, #7, #8 fixed, plus related hardening (admin
-password rehash-on-login, an error-reporting/monitoring facility, and an XML/JSON content-type
-& charset fix). #1–#3 and #5 remain open. See the Status column, the per-finding Status lines,
-and the Remediation Log below.
+**Remediation status (updated 2026-07-06):** #3, #4, #6, #7, #8 fixed, plus related hardening
+(admin password rehash-on-login, an error-reporting/monitoring facility, and an XML/JSON
+content-type & charset fix). #1, #2 and #5 remain open. See the Status column, the per-finding
+Status lines, and the Remediation Log below.
 
 ---
 
@@ -35,7 +35,7 @@ data-exfiltration-by-default.
 |---|----------|---------|---------------|--------|
 | 1 | High     | Unauthenticated first-run installer takeover | none (pre-install) | ⬜ Open |
 | 2 | Medium   | Unauthenticated SSRF + error disclosure via installer DB test | none (pre-install) | ⬜ Open |
-| 3 | Medium   | X-Forwarded-For IP spoofing (honor_xff + empty trusted_proxies) | none | ⬜ Open |
+| 3 | Medium   | X-Forwarded-For IP spoofing (honor_xff + empty trusted_proxies) | none | ✅ Fixed |
 | 4 | Medium   | Uncaught DB exception → HTTP 500 on announce (`left` omitted/negative) | none | ✅ Fixed (`647cf39`) |
 | 5 | Low      | API keys / TOTP secret stored plaintext at rest | n/a | ⬜ Open |
 | 6 | Low      | Open redirect via `REQUEST_URI` in admin login redirect | post-login | ✅ Fixed (`2671e33`) |
@@ -50,6 +50,13 @@ Plus informational hardening notes and a summary of the (substantial) things don
 
 Fixes applied since this report (newest first; git history has the full diffs):
 
+- **#3 — X-Forwarded-For / forwarded-header IP spoofing** — FIXED. Replaced `honor_xff` (bool)
+  with `forwarded_headers` (an ordered list of headers to trust; empty by default = use
+  `REMOTE_ADDR` only), added `allow_any_proxy` (default false) so an empty `trusted_proxies`
+  fails **closed** instead of trusting everyone, and resolve the chain headers (X-Forwarded-For,
+  RFC 7239 Forwarded) with a rightmost-untrusted-hop walk so an appending proxy can't be
+  spoofed. Adds X-Real-IP, CF-Connecting-IP, True-Client-IP and the legacy Client-IP as
+  selectable headers; all IPv4/IPv6-aware. APACHE.md / NGINX.md updated.
 - **#8 — Empty `admin_password` disables admin auth** — FIXED. When `admin_password` is empty,
   `admin.php` now serves a one-time "set admin password" gate (shared `auth_password_valid`
   policy: ≥12 characters, ≤72 bytes; optional TOTP enrolment mirroring the installer) and
@@ -88,8 +95,8 @@ Fixes applied since this report (newest first; git history has the full diffs):
   Regression tests added.
 
 **Still open:** **#1** (installer takeover) & **#2** (installer SSRF) — both need the installer
-gated behind a one-time setup token / CLI; **#3** (XFF spoofing) — a fail-safe when
-`trusted_proxies` is empty; **#5** (plaintext API keys / TOTP at rest) — hash keys at rest.
+gated behind a one-time setup token / CLI; **#5** (plaintext API keys / TOTP at rest) — hash
+keys at rest.
 
 ---
 
@@ -162,7 +169,7 @@ string.
 ### 3. [Medium] X-Forwarded-For IP spoofing (honor_xff + empty trusted_proxies)
 **Where:** `src/functions/peer.proxy.trusted.php:17-19`, `peer.address.candidates.php:37-55`
 **Class:** IP spoofing / trust boundary (CWE-348, CWE-290)
-**Status:** ⬜ OPEN — a fail-safe when `trusted_proxies` is empty is not yet added; the deployment docs already steer operators to `honor_xff=false` + proxy-level RemoteIP.
+**Status:** ✅ FIXED — `honor_xff` replaced by `forwarded_headers` (empty by default = trust nothing); a new `allow_any_proxy` (default false) gates the empty-`trusted_proxies` case, so it now fails **closed**. Chain headers use a rightmost-untrusted-hop walk (append-proxy safe), and the recognised set (XFF, Forwarded, X-Real-IP, CF-Connecting-IP, True-Client-IP, Client-IP) is operator-selectable and v4/v6-aware. Unit-tested + live-verified.
 
 When `honor_xff = true` and `trusted_proxies = []` (empty), `peer_proxy_trusted()` returns
 `true` for **every** connection, so the leftmost `X-Forwarded-For` / `Client-IP` entry is

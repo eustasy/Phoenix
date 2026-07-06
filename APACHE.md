@@ -76,37 +76,51 @@ without any of this.
 After initial setup, consider removing `public/admin.php` from the server entirely — see
 the install guide in [README.md](./README.md).
 
-## Running behind a proxy (`X-Forwarded-For` / `honor_xff`)
+## Running behind a proxy (`forwarded_headers` / `trusted_proxies`)
 
 By default Phoenix uses the connection's source address (`REMOTE_ADDR`) as the peer IP.
 Behind a reverse proxy or load balancer that address is the proxy, not the client — the
-real client IP arrives in the `X-Forwarded-For` header instead.
+real client IP arrives in a forwarded header (`X-Forwarded-For`, `Forwarded`, `X-Real-IP`,
+`CF-Connecting-IP`, …) instead.
 
 **Preferred:** let Apache rewrite the source address from a trusted proxy using
 [`mod_remoteip`](https://httpd.apache.org/docs/2.4/mod/mod_remoteip.html), and leave
-`honor_xff = false`:
+`forwarded_headers = []` (empty, the default):
 
 ```apache
 RemoteIPHeader X-Forwarded-For
 RemoteIPTrustedProxy 10.0.0.0/8   # your proxy's address(es) — never 0.0.0.0/0
 ```
 
-`REMOTE_ADDR` then holds the real client, so Phoenix needs no special setting.
+`REMOTE_ADDR` then holds the real client, so Phoenix needs no proxy settings at all. This
+keeps all forwarded-header handling in one place (the web server) and is the most robust
+option.
 
-**Alternative:** set `honor_xff = true` in `config/phoenix.custom.php`, which trusts the
-leftmost `X-Forwarded-For` entry. Only do this if your proxy **overwrites** the header so
-a client cannot supply it:
+**Alternative:** have Phoenix read the header itself. List the header(s) your proxy sets in
+`forwarded_headers` and pin `trusted_proxies` to the proxy's CIDR range(s):
 
-```apache
-RequestHeader set X-Forwarded-For "%{REMOTE_ADDR}s"
+```php
+$settings['forwarded_headers'] = ['x-forwarded-for']; // or ['cf-connecting-ip'], etc.
+$settings['trusted_proxies']   = ['10.0.0.0/8'];       // your proxy's address(es)
 ```
 
-If Phoenix trusts an unsanitized header, any client can spoof its IP — poisoning swarms
-with arbitrary peer addresses (reflective DDoS) and evading the per-IP rate limiter. To
-restrict trust, set `trusted_proxies` in `config/phoenix.custom.php` to your proxy's CIDR
-range(s); `X-Forwarded-For` is then honored only from connections within those ranges
-(leave empty to honor it from any peer). If this server is reachable directly (not only
-through the proxy), set `trusted_proxies` or keep `honor_xff = false`.
+A forwarded header is honored only when the direct connection (`REMOTE_ADDR`) falls inside
+`trusted_proxies`, so a client connecting straight to the origin cannot spoof. For the chain
+headers (`X-Forwarded-For`, `Forwarded`) Phoenix walks the chain from the right, skipping
+your `trusted_proxies`, to find the real client — so it is safe whether your proxy appends
+or overwrites the header (the old `RequestHeader set X-Forwarded-For` trick is no longer
+needed).
+
+Recognised `forwarded_headers` values: `x-forwarded-for`, `forwarded` (RFC 7239),
+`x-real-ip`, `cf-connecting-ip`, `true-client-ip`, and the legacy `client-ip`. List **only**
+the header(s) your proxy actually sets — every extra header you trust is one a misconfigured
+proxy might pass through from the client. `client-ip` in particular is rarely stripped by
+proxies; avoid it unless you specifically need it.
+
+If your proxy has no stable IP range to pin (`trusted_proxies = []`), forwarded headers are
+**ignored** unless you also set `allow_any_proxy = true` — an explicit, deliberately
+insecure opt-in that trusts any connecting peer's header. Only use it when you fully control
+who can reach the tracker.
 
 ## Rate limiting
 

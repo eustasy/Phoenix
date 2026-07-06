@@ -44,10 +44,16 @@ Full list with comments is in `config/phoenix.default.php`. Highlights:
 - `task_retention`, `stats_retention`, `backup_rotate` — pruning windows.
 
 **Proxy / IP resolution**
-- `honor_xff` — trust `X-Forwarded-For` (only behind a properly-filtering proxy,
-  else trivial IP spoofing).
-- `trusted_proxies` — CIDR ranges XFF is honored from when `honor_xff` is on.
-- `external_ip` — allow clients to specify their IP.
+- `forwarded_headers` — ordered list of forwarded-address headers to trust
+  (`x-forwarded-for`, `forwarded`, `x-real-ip`, `cf-connecting-ip`,
+  `true-client-ip`, `client-ip`); empty (default) trusts none, using `REMOTE_ADDR`
+  only. Chain headers are walked right-to-left, skipping `trusted_proxies`, so an
+  appending proxy can't be spoofed. Handles IPv4 and IPv6 (incl. bracketed forms).
+- `trusted_proxies` — CIDR ranges a forwarded header is honored from (the direct
+  `REMOTE_ADDR` must fall inside one).
+- `allow_any_proxy` — let an empty `trusted_proxies` still trust forwarded headers
+  from *any* peer (insecure opt-in; default false — closes the old fail-open).
+- `external_ip` — allow clients to specify their IP (`?ip` / `?ipv4` / `?ipv6`).
 - `reject_private_ips` — drop RFC 1918 / reserved addresses from the swarm.
 
 **Public index**

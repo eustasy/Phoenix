@@ -62,16 +62,25 @@ $settings['clean_with_cron'] = false;
 /* days of maintenance-task run history to keep in the task_runs log; */
 /* 0 = keep forever. pruned during the regular cleanup (announce or cron) */
 $settings['task_retention'] = 0;
-/* If this server is behind a frontend proxy, the client IP */
-/* will come in the form of a X-Forwarded-For. This option */
-/* should only be set if your frontend proxy properly handles */
-/* and filters XFF, else it allows for trivial IP spoofing */
-$settings['honor_xff'] = false;
-/* CIDR ranges of trusted reverse proxies. When honor_xff is on, an */
-/* X-Forwarded-For header is honored only from these ranges; leave */
-/* empty to honor it from any peer (for proxies without a stable IP */
-/* range). See APACHE.md / NGINX.md. */
+/* Which forwarded-address headers to trust, in priority order. Empty = trust */
+/* none and use the direct connection (REMOTE_ADDR) only — the safe default. */
+/* Only list headers your reverse proxy actually SETS and strips from client */
+/* input, else you allow trivial IP spoofing. Recognised: x-forwarded-for, */
+/* forwarded (RFC 7239), x-real-ip, cf-connecting-ip, true-client-ip, and the */
+/* legacy client-ip. e.g. ['x-forwarded-for'] or ['cf-connecting-ip']. Often */
+/* better to have the web server rewrite REMOTE_ADDR instead — see APACHE.md */
+/* / NGINX.md. */
+$settings['forwarded_headers'] = [];
+/* CIDR ranges of trusted reverse proxies. A forwarded header is honored only */
+/* when the direct connection (REMOTE_ADDR) falls inside one of these ranges, */
+/* and chain headers (X-Forwarded-For / Forwarded) are walked from the right, */
+/* skipping these ranges, to find the real client. See APACHE.md / NGINX.md. */
 $settings['trusted_proxies'] = [];
+/* Permit an EMPTY trusted_proxies to still trust forwarded headers — i.e. */
+/* from ANY connecting peer. Insecure: anyone reaching the tracker directly */
+/* can then spoof their address. Leave false unless you fully control who can */
+/* connect and understand the risk. */
+$settings['allow_any_proxy'] = false;
 /* drop private (RFC 1918) and reserved addresses when */
 /* resolving peers, so they are never handed out to the swarm. */
 /* Lets a private REMOTE_ADDR (NAT/proxy) fall through to a */
