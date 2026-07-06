@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 ////	view_setup_password_html
-// The first-run "set admin password" gate (finding #8), rendered in the shared
+// The first-run "set admin password" gate, rendered in the shared
 // auth chrome. A required password + confirmation, plus an OPTIONAL TOTP
 // enrolment section shown only when a candidate secret is supplied (the
 // authenticatron library is present). $writable=false swaps the form for a

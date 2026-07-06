@@ -66,7 +66,7 @@ class PeerAddressCandidatesTest extends PhoenixTestCase
         $this->assertSame(['10.0.0.1'], peer_address_candidates($this->settings(), [], $server));
     }
 
-    ////	Trust gate — empty trusted_proxies now fails closed (finding #3)
+    ////	Trust gate — empty trusted_proxies fails closed
 
     public function testEmptyTrustedProxiesFailsClosedByDefault(): void
     {

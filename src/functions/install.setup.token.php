@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ////	install_setup_token
 // Returns the first-run setup token, creating and persisting it on first call.
-// This token gates the otherwise-unauthenticated installer (findings #1 / #2):
+// This token gates the otherwise-unauthenticated installer:
 // it is written to a server-only file in config/ (which lives outside the
 // docroot), so only someone with filesystem access — the real operator — can
 // read it and complete setup. A network attacker who reaches admin.php in the

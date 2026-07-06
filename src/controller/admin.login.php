@@ -10,9 +10,10 @@ declare(strict_types=1);
 function admin_login_controller(array $settings): ?string
 {
     if (empty($settings['admin_password'])) {
-        // No admin password set. Force a one-time "set password" step (finding
-        // #8) unless the operator has explicitly opted into an unauthenticated
-        // panel (e.g. it is protected by the reverse proxy).
+        // No admin password set — which would otherwise leave the panel fully
+        // unauthenticated. Force a one-time "set password" step unless the
+        // operator has explicitly opted into an unauthenticated panel (e.g. it
+        // is protected by the reverse proxy).
         if (! empty($settings['admin_auth_optional'])) {
             return null;
         }

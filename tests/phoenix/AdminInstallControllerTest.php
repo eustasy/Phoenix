@@ -103,7 +103,7 @@ class AdminInstallControllerTest extends PhoenixTestCase
 
     public function testRejectsInstallWithoutSetupToken(): void
     {
-        // No token → refused before any DB probe or config write (finding #1/#2).
+        // No token → refused before any DB probe or config write.
         $_POST = ['process' => 'install', 'admin_password' => 'test-admin-pw'];
         $html = \admin_install_controller($this->configPath);
 

@@ -18,7 +18,7 @@ function admin_install_controller(string $config_path): string
     $settings_writable = is_writable(dirname($config_path));
     $install_error = null;
 
-    // Setup-token gate (findings #1 / #2): the token file lives in config/ (out
+    // Setup-token gate: the token file lives in config/ (out
     // of the docroot), so completing setup requires filesystem access — proving
     // the requester is the operator, not a stranger who reached admin.php first.
     // Created on first load; verified below before any DB probe or config write.

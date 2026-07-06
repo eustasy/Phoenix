@@ -50,7 +50,7 @@ class EndpointSmokeTest extends SmokeTestCase
     public function testInstallRejectsWrongSetupToken(): void
     {
         // A wrong token is refused before any DB work — the installer takeover
-        // and SSRF (findings #1 / #2) are gated on filesystem access.
+        // and SSRF are gated on filesystem access.
         $r = $this->post('/admin.php', [
             'process' => 'install',
             'setup_token' => 'not-the-real-token',
@@ -85,7 +85,7 @@ class EndpointSmokeTest extends SmokeTestCase
     #[Depends('testInstallSucceeds')]
     public function testSecurityHeadersPerEndpointGroup(): void
     {
-        // Finding #7: every response carries X-Content-Type-Options: nosniff, and
+        // Every response carries X-Content-Type-Options: nosniff, and
         // each endpoint group layers on the headers appropriate to it. Guards
         // against a regression that drops or mis-scopes the set. Runs before the
         // closed-tracker test (which flips open_tracker off), so announce works.

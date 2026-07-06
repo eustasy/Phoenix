@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 ////	admin_setup_password_controller
-// First-run "set admin password" gate (finding #8). Reached from
+// First-run "set admin password" gate. Reached from
 // admin_login_controller when admin_password is empty and the operator has NOT
 // set admin_auth_optional. Forces a password (auth_password_valid policy) with
 // an OPTIONAL TOTP enrolment mirroring the installer, persists them via

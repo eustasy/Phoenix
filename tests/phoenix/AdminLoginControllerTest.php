@@ -63,9 +63,9 @@ class AdminLoginControllerTest extends PhoenixTestCase
 
     public function testShowsSetPasswordGateWhenNoPassword(): void
     {
-        // Empty admin_password now forces a one-time set-password gate (finding
-        // #8) instead of serving the panel unauthenticated. The controller
-        // short-circuits before session_start, so this runs safely in-process.
+        // Empty admin_password forces a one-time set-password gate instead of
+        // serving the panel unauthenticated. The controller short-circuits
+        // before session_start, so this runs safely in-process.
         $result = \admin_login_controller([
             'admin_password' => '',
             'phoenix_version' => 'Phoenix Test v.0',
