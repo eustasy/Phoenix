@@ -91,6 +91,11 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
 
             return admin_settings_controller($settings);
 
+        case 'apikeys':
+            require_once __DIR__.'/admin.apikeys.php';
+
+            return admin_apikeys_controller($settings);
+
         case 'dashboard':
         default:
             require_once __DIR__.'/admin.dashboard.php';

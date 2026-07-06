@@ -12,11 +12,21 @@ class ApiAuthenticateKeyTest extends PhoenixTestCase
         require_once __DIR__.'/../../src/functions/api.authenticate.key.php';
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * Stored api_keys are SHA-256 hashes of the issued key, so hash the given
+     * plaintext keys here; the tests still present the plaintext.
+     *
+     * @param array<string, string> $api_keys
+     * @return array<string, mixed>
+     */
     private function settingsWithKeys(array $api_keys): array
     {
+        $hashed = [];
+        foreach ($api_keys as $user => $key) {
+            $hashed[$user] = hash('sha256', $key);
+        }
         $settings = self::$settings;
-        $settings['api_keys'] = $api_keys;
+        $settings['api_keys'] = $hashed;
 
         return $settings;
     }

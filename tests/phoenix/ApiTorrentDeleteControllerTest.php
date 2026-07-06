@@ -59,7 +59,7 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
     private function settingsWithKeys(bool $allowDelete): array
     {
         $settings = self::$settings;
-        $settings['api_keys'] = ['tester' => self::API_KEY, '*' => self::ADMIN_KEY];
+        $settings['api_keys'] = ['tester' => hash('sha256', self::API_KEY), '*' => hash('sha256', self::ADMIN_KEY)];
         $settings['api_allow_delete'] = $allowDelete;
 
         return $settings;
@@ -196,7 +196,7 @@ class ApiTorrentDeleteControllerTest extends PhoenixTestCase
     private function runErrorSubprocess(array $params, bool $allowDelete, string $method = 'POST'): array
     {
         $params['json'] = '1';
-        $api_keys = ['tester' => self::API_KEY, '*' => self::ADMIN_KEY];
+        $api_keys = ['tester' => hash('sha256', self::API_KEY), '*' => hash('sha256', self::ADMIN_KEY)];
 
         return $this->runPhpSubprocess(
             '<?php

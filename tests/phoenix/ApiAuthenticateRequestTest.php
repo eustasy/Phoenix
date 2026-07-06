@@ -31,7 +31,7 @@ class ApiAuthenticateRequestTest extends PhoenixTestCase
     private function settingsWithKeys(): array
     {
         $settings = self::$settings;
-        $settings['api_keys'] = ['tester' => self::API_KEY];
+        $settings['api_keys'] = ['tester' => hash('sha256', self::API_KEY)];
 
         return $settings;
     }
@@ -49,7 +49,7 @@ class ApiAuthenticateRequestTest extends PhoenixTestCase
     {
         $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer __TEST_admin_key__';
         $settings = self::$settings;
-        $settings['api_keys'] = ['tester' => self::API_KEY, '*' => '__TEST_admin_key__'];
+        $settings['api_keys'] = ['tester' => hash('sha256', self::API_KEY), '*' => hash('sha256', '__TEST_admin_key__')];
 
         $this->assertSame('*', \api_authenticate_request($settings));
     }
@@ -91,7 +91,7 @@ class ApiAuthenticateRequestTest extends PhoenixTestCase
      */
     private function runErrorSubprocess(?string $authHeader, bool $api_enabled = true): array
     {
-        $api_keys = $api_enabled ? ['tester' => self::API_KEY] : [];
+        $api_keys = $api_enabled ? ['tester' => hash('sha256', self::API_KEY)] : [];
         $server_setup = $authHeader === null
             ? ''
             : '$_SERVER[\'HTTP_AUTHORIZATION\'] = '.var_export($authHeader, true).';';

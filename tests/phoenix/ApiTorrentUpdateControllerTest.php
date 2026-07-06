@@ -56,7 +56,7 @@ class ApiTorrentUpdateControllerTest extends PhoenixTestCase
     private function settingsWithKeys(): array
     {
         $settings = self::$settings;
-        $settings['api_keys'] = ['tester' => self::API_KEY, '*' => self::ADMIN_KEY];
+        $settings['api_keys'] = ['tester' => hash('sha256', self::API_KEY), '*' => hash('sha256', self::ADMIN_KEY)];
 
         return $settings;
     }
@@ -179,7 +179,7 @@ class ApiTorrentUpdateControllerTest extends PhoenixTestCase
     private function runErrorSubprocess(array $params, string $key, string $method = 'POST'): array
     {
         $params['json'] = '1';
-        $api_keys = ['tester' => self::API_KEY, '*' => self::ADMIN_KEY];
+        $api_keys = ['tester' => hash('sha256', self::API_KEY), '*' => hash('sha256', self::ADMIN_KEY)];
 
         return $this->runPhpSubprocess(
             '<?php

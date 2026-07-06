@@ -72,7 +72,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
     private function settingsWithKeys(): array
     {
         $settings = self::$settings;
-        $settings['api_keys'] = ['tester' => self::API_KEY];
+        $settings['api_keys'] = ['tester' => hash('sha256', self::API_KEY)];
 
         return $settings;
     }
@@ -441,7 +441,7 @@ class ApiTorrentAddControllerTest extends PhoenixTestCase
         string $method = 'POST',
     ): array {
         $params['json'] = '1';
-        $api_keys = ['tester' => self::API_KEY];
+        $api_keys = ['tester' => hash('sha256', self::API_KEY)];
 
         $files_setup = '';
         if ($upload !== null) {

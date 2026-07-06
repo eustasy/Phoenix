@@ -71,10 +71,12 @@ Two helpers, both returning the **user to act as** or exiting via
 Each accepts two credential types:
 
 1. **`Authorization: Bearer <key>`** — validated against `$settings['api_keys']`
-   (`'user' => 'key'` pairs). **No CSRF** on either path: a bearer key isn't an
-   ambient browser credential, so it can't be forged cross-site. The user may be
-   a normal owner (scoped to its own torrents) or the reserved `'*'` admin (acts
-   on any torrent, sees the full list).
+   (`'user' => sha256-hash` pairs; `api_authenticate_key()` hashes the presented
+   key and compares). Keys are created on the admin **API Keys** page, which shows
+   each key once and stores only its hash. **No CSRF** on either path: a bearer
+   key isn't an ambient browser credential, so it can't be forged cross-site. The
+   user may be a normal owner (scoped to its own torrents) or the reserved `'*'`
+   admin (acts on any torrent, sees the full list).
 2. **A logged-in `admin.php` session** → resolves to the `'*'` admin. The read
    path needs **no CSRF** (the response can't be read cross-origin, so a forged
    request leaks nothing); the **write path requires a valid CSRF token** (the

@@ -452,7 +452,7 @@ class EndpointSmokeTest extends SmokeTestCase
         // and confirm it shows up on the public index — exercises
         // public/api/torrent/add.php end-to-end in both serialisations. Auth is
         // the Authorization: Bearer header; the endpoint is POST only.
-        $this->appendConfigOverride("\$settings['api_keys'] = ['smoke' => 'smoke-api-key'];");
+        $this->appendConfigOverride("\$settings['api_keys'] = ['smoke' => '".hash('sha256', 'smoke-api-key')."'];");
 
         $hash = str_repeat('d', 40);
         $r = $this->post('/api/torrent/add.php', [
@@ -601,7 +601,7 @@ class EndpointSmokeTest extends SmokeTestCase
         // and the '*' admin. The latest api_keys assignment wins, so 'smoke'
         // keeps working alongside the new owners.
         $this->appendConfigOverride(
-            "\$settings['api_keys'] = ['smoke' => 'smoke-api-key', 'other' => 'other-api-key', '*' => 'admin-api-key'];",
+            "\$settings['api_keys'] = ['smoke' => '".hash('sha256', 'smoke-api-key')."', 'other' => '".hash('sha256', 'other-api-key')."', '*' => '".hash('sha256', 'admin-api-key')."'];",
         );
 
         $hash = str_repeat('d', 40);

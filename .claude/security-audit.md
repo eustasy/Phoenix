@@ -10,8 +10,8 @@ instance backed by a throwaway MariaDB 11; `composer audit`.
 **Deliverable:** Findings only — no code changed *(original engagement, 2026-07-04)*.
 **Remediation status (updated 2026-07-06):** #3, #4, #6, #7, #8 fixed, plus related hardening
 (admin password rehash-on-login, an error-reporting/monitoring facility, and an XML/JSON
-content-type & charset fix). #1, #2 and #5 remain open. See the Status column, the per-finding
-Status lines, and the Remediation Log below.
+content-type & charset fix), plus #5 in part (API keys now hashed at rest). #1 and #2 remain
+open. See the Status column, the per-finding Status lines, and the Remediation Log below.
 
 ---
 
@@ -37,7 +37,7 @@ data-exfiltration-by-default.
 | 2 | Medium   | Unauthenticated SSRF + error disclosure via installer DB test | none (pre-install) | ⬜ Open |
 | 3 | Medium   | X-Forwarded-For IP spoofing (honor_xff + empty trusted_proxies) | none | ✅ Fixed |
 | 4 | Medium   | Uncaught DB exception → HTTP 500 on announce (`left` omitted/negative) | none | ✅ Fixed (`647cf39`) |
-| 5 | Low      | API keys / TOTP secret stored plaintext at rest | n/a | ⬜ Open |
+| 5 | Low      | API keys / TOTP secret stored plaintext at rest | n/a | ◐ Partial |
 | 6 | Low      | Open redirect via `REQUEST_URI` in admin login redirect | post-login | ✅ Fixed (`2671e33`) |
 | 7 | Low      | Missing HTTP security headers (CSP / XFO / nosniff) | n/a | ✅ Fixed (`aadcca0`) |
 | 8 | Low      | Empty `admin_password` disables admin auth entirely | n/a | ✅ Fixed |
@@ -50,6 +50,12 @@ Plus informational hardening notes and a summary of the (substantial) things don
 
 Fixes applied since this report (newest first; git history has the full diffs):
 
+- **#5 — API keys stored in plaintext at rest** — FIXED (the hashable half). API keys are now
+  stored as SHA-256 hashes: `api_authenticate_key()` hashes the presented key and compares with
+  `hash_equals`. A new admin **API Keys** page (create / rotate / revoke) generates a key, shows
+  it once, and persists only its hash via `config_write` — no plaintext ever lands in the config.
+  The TOTP secret and `db_pass` inherently must stay reversible, so they remain plaintext
+  (mitigate with `chmod 600`). Breaking: existing plaintext `api_keys` must be re-issued.
 - **#3 — X-Forwarded-For / forwarded-header IP spoofing** — FIXED. Replaced `honor_xff` (bool)
   with `forwarded_headers` (an ordered list of headers to trust; empty by default = use
   `REMOTE_ADDR` only), added `allow_any_proxy` (default false) so an empty `trusted_proxies`
@@ -95,8 +101,8 @@ Fixes applied since this report (newest first; git history has the full diffs):
   Regression tests added.
 
 **Still open:** **#1** (installer takeover) & **#2** (installer SSRF) — both need the installer
-gated behind a one-time setup token / CLI; **#5** (plaintext API keys / TOTP at rest) — hash
-keys at rest.
+gated behind a one-time setup token / CLI. **#5** is now **partial** — API keys are hashed at
+rest; the TOTP secret and `db_pass` inherently can't be (mitigate with file permissions).
 
 ---
 
@@ -244,7 +250,7 @@ future strict-mode surprise.
 ### 5. [Low] API keys and TOTP secret stored in plaintext at rest
 **Where:** `src/functions/api.authenticate.key.php:18-19`, `config/phoenix.custom.php` (`api_keys`, `admin_totp_secret`)
 **Class:** Cleartext storage of sensitive information (CWE-312)
-**Status:** ⬜ OPEN — API keys / TOTP are still plaintext at rest (hashing not implemented). Related hardening since: admin-password rehash-on-login (`e4cfd1f`) and a new error-reporting facility that surfaces failures — but this storage is unchanged.
+**Status:** ◐ PARTIAL — **API keys are now hashed at rest** (SHA-256; `api_authenticate_key()` hashes the presented key and compares with `hash_equals`), created on the admin API Keys page which stores only the hash and shows each key once. The TOTP secret and `db_pass` inherently must stay reversible (they are reproduced to verify codes / to connect), so they remain plaintext — mitigate with `chmod 600` on the config and keeping it out of the docroot.
 
 Unlike the admin password (bcrypt), API keys and the TOTP secret are stored verbatim in
 `phoenix.custom.php` and compared raw (`hash_equals($stored, $input)`). Any exposure of the

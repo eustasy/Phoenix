@@ -70,7 +70,7 @@ class ApiTorrentsControllerTest extends PhoenixTestCase
     private function settingsWithKeys(): array
     {
         $settings = self::$settings;
-        $settings['api_keys'] = ['tester' => self::API_KEY, '*' => self::ADMIN_KEY];
+        $settings['api_keys'] = ['tester' => hash('sha256', self::API_KEY), '*' => hash('sha256', self::ADMIN_KEY)];
 
         return $settings;
     }
@@ -131,7 +131,7 @@ class ApiTorrentsControllerTest extends PhoenixTestCase
      */
     private function runErrorSubprocess(string $method, ?string $authHeader): array
     {
-        $api_keys = ['tester' => self::API_KEY, '*' => self::ADMIN_KEY];
+        $api_keys = ['tester' => hash('sha256', self::API_KEY), '*' => hash('sha256', self::ADMIN_KEY)];
         $hdr = $authHeader === null
             ? ''
             : '$_SERVER[\'HTTP_AUTHORIZATION\'] = '.var_export($authHeader, true).';';

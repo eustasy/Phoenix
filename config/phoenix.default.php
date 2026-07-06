@@ -131,6 +131,10 @@ $settings['admin_peers_limit'] = 200;
 ////	API Options
 /* API keys permitted to use the management API under public/api/, as */
 /* 'user' => 'key' pairs. Sent as an `Authorization: Bearer <key>` header. */
+/* API keys for the management REST API, keyed by user. Each value is the */
+/* SHA-256 hash of the issued key — manage these on the admin panel's API Keys */
+/* page, which shows a new key once and stores only its hash (a lost key can't */
+/* be recovered from here — re-issue it). */
 /* The user a key belongs to is recorded on each torrent it adds, and scopes */
 /* the torrent list and the list/delist/delete actions to that user's own */
 /* torrents. Empty array disables the API. The reserved owner '*' is the */
