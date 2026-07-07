@@ -3,7 +3,7 @@
 ////	peer_changed
 // Returns true if any of the announce-relevant fields differ between the
 // new peer state and the previous row, or if there is no previous row.
-function peer_changed(array $peer, array|false|null $old): bool {
+function peer_changed(array $peer, $old): bool {
 	return
 		!$old ||
 		$peer['ipv4']   != $old['ipv4'] ||

@@ -2,7 +2,7 @@
 
 ////	peer_access
 // Updates the timestamp and transfer counters for a re-announcing peer whose address and state are unchanged.
-function peer_access(mysqli $connection, array $settings, int $time, array $peer): true {
+function peer_access(mysqli $connection, array $settings, int $time, array $peer): bool {
 	$peer_access = mysqli_query(
 		$connection,
 		'UPDATE `'.$settings['db_prefix'].'peers` '.

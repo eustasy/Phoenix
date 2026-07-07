@@ -1,6 +1,6 @@
 <?php
 
-function task_optimize(mysqli $connection, array $settings, int $time, string|false $table = false, bool $and_default = true): bool {
+function task_optimize(mysqli $connection, array $settings, int $time, $table = false, bool $and_default = true): bool {
 	require_once $settings['functions'].'function.task.log.php';
 
 	$tables = array();

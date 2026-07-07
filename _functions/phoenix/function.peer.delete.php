@@ -2,7 +2,7 @@
 
 ////	peer_delete
 // Removes a single peer row identified by info_hash and peer_id; exits via tracker_error on failure.
-function peer_delete(mysqli $connection, array $settings, array $peer): true {
+function peer_delete(mysqli $connection, array $settings, array $peer): bool {
 	$peer_delete = mysqli_query(
 		$connection,
 		'DELETE FROM `'.$settings['db_prefix'].'peers` '.

@@ -1,6 +1,6 @@
 <?php
 
-function peer_new(mysqli $connection, array $settings, int $time, array $peer): true {
+function peer_new(mysqli $connection, array $settings, int $time, array $peer): bool {
 
 	$compactv4 = '';
 	$compactv6 = '';

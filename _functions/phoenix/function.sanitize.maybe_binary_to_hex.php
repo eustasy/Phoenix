@@ -10,7 +10,7 @@
 // strtolower() below normalises pre-encoded uppercase hashes to the same lowercase
 // form bin2hex() yields, so one torrent can't split into two swarms / miss the
 // closed-tracker allowlist depending on how the client encoded the hash.
-function maybe_binary_to_hex(string $binary): string|false {
+function maybe_binary_to_hex(string $binary) {
 	$binary = urldecode($binary);
 	// BEP 3: info_hash and peer_id are 20-byte SHA-1 values, URL-encoded as raw binary.
 	// Some clients send them pre-encoded as 40-char hex strings; both forms are valid.

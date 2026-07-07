@@ -3,7 +3,7 @@
 ////	parse_ipv6
 // Attempts to parse an address string as IPv6, optionally bracketed with `[ip]:port`.
 // Returns array('ip' => string, 'port' => int|false) on success, or false if the address is not valid IPv6.
-function parse_ipv6(string $address): array|false {
+function parse_ipv6(string $address) {
 	$candidate = $address;
 	$port      = false;
 	if ( strpos($candidate, ']:') !== false ) {

@@ -2,7 +2,7 @@
 
 ////	peer_completed
 // Inserts or increments the download counter when a peer sends event=completed.
-function peer_completed(mysqli $connection, array $settings, array $peer): true {
+function peer_completed(mysqli $connection, array $settings, array $peer): bool {
 	mysqli_query(
 		$connection,
 		'INSERT INTO `'.$settings['db_prefix'].'torrents` '.

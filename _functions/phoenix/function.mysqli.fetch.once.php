@@ -2,7 +2,7 @@
 
 ////	mysqli_fetch_once
 // Executes $sql and returns the first row as an associative array, or false if no rows match.
-function mysqli_fetch_once(mysqli $connection, string $sql): array|false|null {
+function mysqli_fetch_once(mysqli $connection, string $sql) {
 	$result = mysqli_query($connection, $sql);
 	if (
 		$result &&

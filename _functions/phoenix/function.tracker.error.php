@@ -2,7 +2,7 @@
 
 ////	Fatal Error
 // Exits with a tracker-format error.
-function tracker_error(string $error): never {
+function tracker_error(string $error): void {
 	echo 'd14:failure reason'.strlen($error).':'.$error.'e';
 	exit(2);
 }
