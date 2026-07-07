@@ -1,5 +1,12 @@
 # Phoenix Changelog
 
+## v.3.2.1 - 07/07/2026 - Haggard
+* BUGFIX: Restore PHP 7.1 compatibility — 3.2 unintentionally required PHP 8.1+ via `never`/`true` return types, union types, and `str_starts_with()`.
+* BUGFIX: Only delete a peer and fire the `stopped` hook when that peer was actually being tracked.
+* BUGFIX: Normalize uppercase `info_hash` and `peer_id` to lowercase so a torrent is not split across two swarms.
+* IMPROVES: Update README backup and cron instructions to match the PHP backup script.
+* IMPROVES: Correct `parse_ipv4` and `peer_format_bencode` unit tests to match intended behavior.
+
 ## v.3.2 - 09/05/2026 - Haggard
 
 - BREAKING: Requires at least PHP 7.1
