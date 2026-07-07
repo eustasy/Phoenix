@@ -16,10 +16,10 @@ if ( $r === false || $r['ip'] !== '101.45.75.219' || $r['port'] !== 12345 ) {
 	$failure = true;
 }
 
-// Non-numeric port should not be accepted
+// Non-numeric port is ignored; the IPv4 address is still accepted with no port.
 $r = parse_ipv4('101.45.75.219:abc');
-if ( $r !== false ) {
-	echo 'Error: parse_ipv4 should reject non-numeric port (since the resulting candidate is not a valid IPv4).'.PHP_EOL;
+if ( $r === false || $r['ip'] !== '101.45.75.219' || $r['port'] !== false ) {
+	echo 'Error: parse_ipv4 should accept the IPv4 and ignore a non-numeric port.'.PHP_EOL;
 	$failure = true;
 }
 

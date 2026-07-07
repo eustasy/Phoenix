@@ -11,7 +11,7 @@ $row = array(
 	'peer_id' => str_repeat('00', 20),
 );
 $out = peer_format_bencode($row, true);
-$expected = 'd2:ip7:1.2.3.44:porti12345e7:peer id20:'.hex2bin(str_repeat('00', 20)).'e';
+$expected = 'd2:ip7:1.2.3.47:peer id20:'.hex2bin(str_repeat('00', 20)).'4:porti12345ee';
 if ( $out !== $expected ) {
 	echo 'Error: peer_format_bencode IPv4 with peer_id mismatch.'.PHP_EOL;
 	echo '  Expected (hex): '.bin2hex($expected).PHP_EOL;
