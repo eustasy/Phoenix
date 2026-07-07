@@ -9,6 +9,8 @@ php-cs-fixer, `ConventionsTest` checks the structural rules).
 
 - [Local development environment](#local-development-environment)
   - [Docker (recommended)](#docker-recommended)
+    - [Completing setup (the setup token)](#completing-setup-the-setup-token)
+    - [Database credentials](#database-credentials)
     - [Reloading code without wiping the database](#reloading-code-without-wiping-the-database)
     - [Keeping your config across reloads](#keeping-your-config-across-reloads)
   - [Without Docker](#without-docker)
@@ -34,11 +36,13 @@ smoke-test CI. It starts with no configuration, so it lands in the installer.
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-Then open <http://localhost:8000/admin.php> and run **Setup**, entering database
-host `db`, name `phoenix`, user `phoenix`, password `phoenix_pass`. After
-install you can log in and exercise every admin page (dashboard, torrents,
-backups, settings), enrol 2FA from the installer's QR, and run an on-demand
-backup.
+Then open <http://localhost:8000/admin.php> and run **Setup**. The installer is
+gated behind a one-time setup token (see
+[Completing setup](#completing-setup-the-setup-token) below); for the database,
+enter host `db`, name `phoenix`, user `phoenix`, password `phoenix_pass` (see
+[Database credentials](#database-credentials)). After install you can log in and
+exercise every admin page (dashboard, torrents, backups, settings), enrol 2FA
+from the installer's QR, and run an on-demand backup.
 
 Leave **Persistent connections** unchecked here. The container serves with PHP's
 built-in `php -S` — a single long-lived process — and a persistent (`p:`)
@@ -55,6 +59,50 @@ The working tree is mounted read-only and copied into the container by
 `docker/entrypoint.sh`, so nothing the installer writes — config, tables,
 `vendor/` — touches your checkout; the environment is throwaway. The first
 build compiles the PHP extensions; later starts reuse the cached image.
+
+#### Completing setup (the setup token)
+
+The installer is gated behind a one-time **setup token**, so a stray open port
+can't let someone else run Setup before you do. Phoenix writes it to a
+server-only file the first time `/admin.php` renders the installer. Because the
+working tree is mounted read-only and copied into the container, that file lands
+**inside the `web` container** at `/app/config/.phoenix-setup-token`, not in your
+host checkout — so read it out of the container and paste it into the installer's
+token field:
+
+```bash
+# Load http://localhost:8000/admin.php once first (the token is created lazily),
+# then read it from the running web container:
+docker compose -f docker-compose.dev.yml exec web cat config/.phoenix-setup-token
+```
+
+The token is deleted once Setup succeeds; a fresh `up` after `down -v` mints a
+new one.
+
+#### Database credentials
+
+`docker-compose.dev.yml` hardcodes these throwaway dev-only credentials (also
+echoed in the container's startup banner):
+
+| Field         | Value          |
+| ------------- | -------------- |
+| Host          | `db`           |
+| Database      | `phoenix`      |
+| User          | `phoenix`      |
+| Password      | `phoenix_pass` |
+| Root password | `phoenix_root` |
+
+The host is the Compose service name `db`, not `localhost` — the containers talk
+over the Compose network by service name. To open a shell against the database
+directly:
+
+```bash
+# As the phoenix user:
+docker compose -f docker-compose.dev.yml exec db mariadb -uphoenix -pphoenix_pass phoenix
+
+# As root (e.g. to GRANT or inspect):
+docker compose -f docker-compose.dev.yml exec db mariadb -uroot -pphoenix_root
+```
 
 #### Reloading code without wiping the database
 

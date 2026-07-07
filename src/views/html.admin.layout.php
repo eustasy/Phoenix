@@ -56,8 +56,8 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
             'support' => ['server', 'Server Support'],
             'utilities' => ['wrench', 'Utilities'],
             'backups' => ['archive', 'Backups'],
-            'settings' => ['settings', 'Settings'],
             'apikeys' => ['key-round', 'API Keys'],
+            'settings' => ['settings', 'Settings'],
         ],
     ];
     // Nav badge counts are injected into $settings by admin_panel_controller()
