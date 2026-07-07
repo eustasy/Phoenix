@@ -21,14 +21,14 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 ### Install Guide
 1. Copy `_settings/phoenix.default.php` to `_settings/phoenix.custom.php`
 2. Edit the variables in `_settings/phoenix.custom.php`
-2. Upload all the `.php` and `.sh` files to your server.
+3. Upload all the `.php` files to your server.
 4. Load `admin.php` in your browser and run the `Setup` option.
 
 ## Configuration
 Configuration should take place in `_settings/phoenix.custom.php`, NOT `_settings/phoenix.default.php`. Phoenix _will_ attempt to use the default configuration if yours is missing.
 
 ### Cron (Automating Maintenance)
-1. Configure `_cron/hourly/backup-database.sh` by changing the path in the second line, and the username, password, database, and file in the last three.
+1. The `_cron/hourly/backup-database.php` script reads its database credentials from `_settings/phoenix.custom.php`, so it needs no editing — it only requires the `mysqldump` binary to be available on the server. Optionally set `$settings['backup_dir']` to an absolute path **outside the web root** (the default, `_backups/` in the project root, is web-accessible) and `$settings['backup_rotate']` (days of backups to keep; default 30).
 2. Edit `_settings/phoenix.custom.php` and set `$settings['clean_with_cron']` to `true` instead of `false`. You can also set `$settings['clean_with_requests']` to `0` to save processing time.
 3. Edit your crontab with `crontab -e`, and add a crontab like the following. You can edit the times, and should make sure the paths are correct by running the commands after the asterisks.
 ```

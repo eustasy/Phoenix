@@ -15,7 +15,7 @@ $peer['old'] = mysqli_fetch_once(
 if ( isset($_GET['event']) ) {
 	// IF Peer Exited
 	if ( $_GET['event'] == 'stopped' ) {
-		if ( $peer ) {
+		if ( $peer['old'] ) {
 			require_once $settings['functions'].'function.peer.delete.php';
 			peer_delete($connection, $settings, $peer);
 			// HOOK PEER STOPPED
