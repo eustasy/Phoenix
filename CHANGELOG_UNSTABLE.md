@@ -95,7 +95,29 @@ ALTER TABLE `your_db`.`your_prefix_torrents`
 
 ## v4.0beta3 - 04/06/2026
 
-The 4.0 line is a ground-up refactor of the 3.x codebase: a new on-disk layout, an MVC-inspired split of the old "puff" files, a full PHPUnit suite, CI with static analysis, and a security-review pass. The tracker protocol behaviour is unchanged. **Operators upgrading from 3.x should read the [3.x → 4.0 Migration Guide](MIGRATING.md) first** — the document root, configuration, and cron paths have all moved.
+A security-review pass over the refactored 4.0 codebase, plus the CI static-analysis and formatting toolchain, endpoint smoke tests, and this changelog and the migration guide themselves. The tracker protocol and database schema are unchanged — **no DB migration is required.** The 4.0 layout, configuration, and cron changes that affect a 3.x upgrade all landed in v4.0beta1 (below); operators upgrading from 3.x should read its notes and the [3.x → 4.0 Migration Guide](MIGRATING.md) first.
+
+- IMPROVES: Add CSRF tokens to admin panel state-changing forms ([#59](https://github.com/eustasy/phoenix/issues/59)).
+- IMPROVES: Add a brute-force throttle to admin login (session hardening landed in beta1).
+- IMPROVES: Use prepared statements for client-data queries.
+- IMPROVES: Tighten the `Access-Control-Allow-Origin` scope and route source-IP handling through `reject_private_ips`, parsing multi-hop `X-Forwarded-For` correctly.
+- IMPROVES: Add an XML-escape helper for stats/scrape XML output.
+- IMPROVES: Add CI static analysis and formatting via qlty (phpstan + php-cs-fixer), sqlfluff, and markdownlint, and split the single CI workflow into per-concern workflows (markdown, PHP, security, smoke, SQL, tests).
+- IMPROVES: Add endpoint smoke tests to the suite, exercising announce/scrape/admin end to end in CI.
+- DOCS: Add this changelog and the 3.x → 4.0 migration guide ([#61](https://github.com/eustasy/phoenix/issues/61)).
+
+## v4.0beta2 - 30/05/2026
+
+A structural-refinement cut on the way to 4.0: finalise the file-naming convention, extract the single bencode emitter into its own function, and reorganise the test suite. No behaviour change — **no DB migration is required.**
+
+- IMPROVES: Finalise the one-function-per-file naming — drop the `function.` prefix so each file is named for the function it defines (`parse.ipv4.php`, `sanitize.tracker.php`, …), the convention `ConventionsTest` now enforces.
+- IMPROVES: Funnel all bencode output through a single `bencode_encode()` emitter (`src/functions/bencode.encode.php`) that owns length prefixes, container tokens, and BEP-3 dict-key ordering; rename `peer.format.bencode` → `peer.format.dict` so a view builds a PHP structure and hands it to the one emitter.
+- IMPROVES: Reorganise the PHPUnit suite — rename test classes to match the renamed functions and split combined cases.
+- IMPROVES: Configure Dependabot for GitHub Actions and Composer, and bump `shivammathur/setup-php` ([#51](https://github.com/eustasy/phoenix/issues/51)).
+
+## v4.0beta1 - 09/05/2026
+
+The 4.0 line is a ground-up refactor of the 3.x codebase: a new on-disk layout, an MVC-inspired split of the old "puff" files, a full PHPUnit suite, JSON/XML announce responses, and an initial security and correctness pass. The tracker protocol behaviour is unchanged. **Operators upgrading from 3.x should read the [3.x → 4.0 Migration Guide](MIGRATING.md) first** — the document root, configuration, and cron paths have all moved.
 
 - BREAKING: Adopt a Public Document Standard layout — only `public/` is web-served, with `src/`, `bin/`, `config/`, and `tests/` above the web root ([#48](https://github.com/eustasy/phoenix/issues/48)). **The web server document root must be re-pointed at `public/`.** See [APACHE.md](APACHE.md) / [NGINX.md](NGINX.md).
 - BREAKING: Maintenance scripts moved from `_cron/hourly/` to `bin/` (`bin/backup-database.php`, `bin/clean-and-optimize.php`). **Cron jobs must be updated.**
@@ -104,17 +126,13 @@ The 4.0 line is a ground-up refactor of the 3.x codebase: a new on-disk layout, 
 - FEATURE: Tables are now defined in standalone `sql/*.sql` files (importable with `mysql <database> < sql/peers.sql`), loaded automatically by `db_create()`. Same schema as 3.2 — **no DB migration is required.**
 - FEATURE: Announce responses can be requested as JSON (`?json`) or XML (`?xml`), matching scrape's alternative formats.
 - IMPROVES: Reorganise the "puff" files into an MVC-inspired split — thin `public/` entry points delegating to `src/controller/`, `src/model/`, `src/views/`, and `src/functions/`.
-- IMPROVES: Funnel all bencode output through a single `bencode_encode()` emitter that owns length prefixes, container tokens, and BEP-3 dict-key ordering.
-- IMPROVES: Replace the bespoke test harness with a PHPUnit suite, plus endpoint smoke tests, run in CI across PHP 8.2–8.6 against a MariaDB service container.
-- IMPROVES: Add CI static analysis and formatting via qlty (phpstan + php-cs-fixer), sqlfluff, and markdownlint; configure Dependabot for Actions and Composer.
+- IMPROVES: Replace the bespoke test harness with a PHPUnit suite, run in CI across PHP 8.2–8.6 against a MariaDB service container.
 - IMPROVES: Apply `declare(strict_types=1)` across the project and add PHP type declarations throughout.
-- IMPROVES: Add CSRF tokens to admin panel state-changing forms ([#59](https://github.com/eustasy/phoenix/issues/59)).
-- IMPROVES: Add a brute-force throttle to admin login, harden the session cookie, regenerate the session id on login, and make logout POST-only.
-- IMPROVES: Use prepared statements for client-data queries.
-- IMPROVES: Tighten the `Access-Control-Allow-Origin` scope and route source-IP handling through `reject_private_ips`, parsing multi-hop `X-Forwarded-For` correctly.
+- IMPROVES: Harden the admin session — a secure, host-only session cookie, session-id regeneration on login, and POST-only logout.
 - IMPROVES: Reject non-hex `info_hash` and `peer_id` values at the boundary.
-- IMPROVES: Add an XML-escape helper for stats/scrape XML output; pin `normalize.css` and `Colors.css` with SRI integrity and drop the jQuery dependency from the admin panel.
 - IMPROVES: Send a `Content-Type` header on bencode announce and scrape responses, and content-negotiate `tracker_error` output.
+- IMPROVES: Pin `normalize.css` and `Colors.css` with SRI integrity, and drop the jQuery dependency from the admin panel.
+- IMPROVES: Document server-level security expectations ([#47](https://github.com/eustasy/phoenix/issues/47)).
 - BUGFIX: Filter rejected `info_hash`es out of multi-torrent scrape so a closed tracker never leaks disallowed torrents ([#49](https://github.com/eustasy/phoenix/issues/49)).
 - BUGFIX: Wrap the XML scrape response in a `<scrape>` root element.
 - BUGFIX: Default the `ipv4`/`ipv6` peer columns to an empty-string sentinel rather than `'0'`.
