@@ -102,7 +102,7 @@ class PeerResolveAddressesTest extends PhoenixTestCase
     {
         // The BEP 3 NAT/proxy case: candidate order (already reversed by
         // peer_address_candidates) puts the private REMOTE_ADDR first and a
-        // public client-declared external_ip after it. With rejection on,
+        // public client-declared IP (allow_client_ip) after it. With rejection on,
         // the private address is skipped and the public one is used.
         $result = peer_resolve_addresses(['10.0.0.1:6881', '8.8.8.8:51413'], true);
         $this->assertSame('8.8.8.8', $result['ipv4']);

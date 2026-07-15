@@ -116,7 +116,7 @@ Phoenix identifies each peer by its connecting IP, so behind a reverse proxy or 
 - `$settings['forwarded_headers']` — an ordered list of headers to trust, e.g. `['x-forwarded-for']` or `['cf-connecting-ip']`. Recognised: `x-forwarded-for`, `forwarded` (RFC 7239), `x-real-ip`, `cf-connecting-ip`, `true-client-ip`, and the legacy `client-ip`. List **only** headers your proxy sets and strips from client input.
 - `$settings['trusted_proxies']` — CIDR ranges of your proxies. A forwarded header is honoured only when `REMOTE_ADDR` falls inside one of these ranges; chain headers (`X-Forwarded-For` / `Forwarded`) are walked from the right, skipping these ranges, to find the real client.
 
-If `trusted_proxies` is empty, forwarded headers are **not** trusted unless you explicitly set `$settings['allow_any_proxy'] = true` — which trusts the header from any direct connection and so lets anyone reaching the tracker spoof their address. Leave it off unless you fully control who can connect. Often it is cleaner to let the web server rewrite `REMOTE_ADDR` itself (Apache `mod_remoteip`, Nginx `real_ip`) and leave these empty — see [APACHE.md](./APACHE.md) / [NGINX.md](./NGINX.md).
+If `trusted_proxies` is empty, forwarded headers are **not** trusted unless you explicitly set `$settings['trust_any_forwarded'] = true` — which trusts the header from any direct connection and so lets anyone reaching the tracker spoof their address. Leave it off unless you fully control who can connect. Often it is cleaner to let the web server rewrite `REMOTE_ADDR` itself (Apache `mod_remoteip`, Nginx `real_ip`) and leave these empty — see [APACHE.md](./APACHE.md) / [NGINX.md](./NGINX.md).
 
 ## Server Configuration
 

@@ -9,7 +9,7 @@ Schema lives in `sql/<table>.sql`, one `CREATE TABLE` per file using the literal
 default prefix `phoenix_`. The actual prefix is `$settings['db_prefix']`.
 
 - **`<prefix>peers`** — active peers, ephemeral. PK `(info_hash, peer_id)`.
-  Cleanup deletes rows where `updated < time - 3 * announce_interval`.
+  Cleanup deletes rows where `updated < time - 3 * announce_rec_interval`.
 - **`<prefix>torrents`** — tracked torrents. PK `info_hash`. Holds `name`,
   `size`, `listed`, `downloads`, torrent meta (filename, files,
   trackers, webseeds) and `user` (owner; the API key that created it).

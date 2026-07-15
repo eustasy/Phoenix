@@ -223,7 +223,7 @@ class BencodeRoundTripTest extends PhoenixTestCase
     public function testAnnounceBencodeNonCompact(): void
     {
         $counts = ['complete' => 5, 'incomplete' => 3];
-        $cfg = ['announce_interval' => 1800, 'min_interval' => 900];
+        $cfg = ['announce_rec_interval' => 1800, 'announce_min_interval' => 900];
         $row_v4 = ['ipv4' => '1.2.3.4', 'ipv6' => null, 'portv4' => 6881, 'portv6' => 0, 'peer_id' => str_repeat('aa', 20)];
         $row_v6 = ['ipv4' => null, 'ipv6' => '2001:db8::1', 'portv4' => 0, 'portv6' => 6882, 'peer_id' => str_repeat('bb', 20)];
         $row_no = ['ipv4' => null, 'ipv6' => null, 'portv4' => 0, 'portv6' => 0, 'peer_id' => str_repeat('00', 20)];
@@ -248,7 +248,7 @@ class BencodeRoundTripTest extends PhoenixTestCase
     public function testAnnounceBencodeCompact(): void
     {
         $counts = ['complete' => 5, 'incomplete' => 3];
-        $cfg = ['announce_interval' => 1800, 'min_interval' => 900];
+        $cfg = ['announce_rec_interval' => 1800, 'announce_min_interval' => 900];
         $compact_v4 = ['compactv4' => 'c0a80101aabb', 'compactv6' => null];
         $compact_v6 = ['compactv4' => null,           'compactv6' => '20010db8000000000000000000000001ccdd'];
         $compact_no = ['compactv4' => null,           'compactv6' => null];

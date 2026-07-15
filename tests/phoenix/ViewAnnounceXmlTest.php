@@ -20,8 +20,8 @@ class ViewAnnounceXmlTest extends PhoenixTestCase
     private function defaultSettings(): array
     {
         return [
-            'announce_interval' => 1800,
-            'min_interval' => 900,
+            'announce_rec_interval' => 1800,
+            'announce_min_interval' => 900,
         ];
     }
 

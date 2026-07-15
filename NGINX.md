@@ -105,7 +105,7 @@ the header(s) your proxy actually sets. `client-ip` in particular is rarely stri
 proxies; avoid it unless you specifically need it.
 
 If your proxy has no stable IP range to pin (`trusted_proxies = []`), forwarded headers are
-**ignored** unless you also set `allow_any_proxy = true` — an explicit, deliberately
+**ignored** unless you also set `trust_any_forwarded = true` — an explicit, deliberately
 insecure opt-in that trusts any connecting peer's header. Only use it when you fully control
 who can reach the tracker.
 

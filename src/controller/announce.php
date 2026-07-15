@@ -83,7 +83,7 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
     // can't be stored or connected to, so DROP that family (address + port)
     // rather than failing the whole announce: the two families are independent,
     // so a valid pair in the other still stands. Ports diverge per family only
-    // via a client-supplied ip:port (external_ip); ?port= applies to both
+    // via a client-supplied ip:port (allow_client_ip); ?port= applies to both
     // equally. $bad_port marks a range rejection so a client whose only problem
     // is the port still gets a "port" error below, not a generic "no IP" one.
     $bad_port = false;
@@ -147,7 +147,7 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
     ////	Cleanup (probabilistic)
     if (
         ! $settings['clean_with_cron'] &&
-        mt_rand(1, 100) <= $settings['clean_with_requests']
+        mt_rand(1, 100) <= $settings['clean_request_percent']
     ) {
         require_once __DIR__.'/../functions/task.clean.php';
         task_clean($connection, $settings, $time, 'auto');
@@ -158,7 +158,7 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
     require_once __DIR__.'/../functions/peer.select.strategy.php';
     require_once __DIR__.'/../model/peers.select.active.php';
 
-    $stale_threshold = $time - ($settings['announce_interval'] + $settings['min_interval']);
+    $stale_threshold = $time - ($settings['announce_rec_interval'] + $settings['announce_min_interval']);
     $counts = peers_count_swarm($connection, $settings, $peer['info_hash'], $stale_threshold);
     $strategy = peer_select_strategy($peer, $counts['complete'], $counts['incomplete'], $settings);
     $rows = peers_select_active($connection, $settings, $peer, $stale_threshold, $strategy);

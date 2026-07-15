@@ -9,7 +9,7 @@ class PeerSelectStrategyTest extends PhoenixTestCase
     /** @var array<string, mixed> */
     private array $defaultSettings = [
         'random_peers' => true,
-        'random_limit' => 500,
+        'random_peers_threshold' => 500,
     ];
 
     public static function setUpBeforeClass(): void
@@ -55,7 +55,7 @@ class PeerSelectStrategyTest extends PhoenixTestCase
             $peer,
             1000,
             1000,
-            ['random_peers' => false, 'random_limit' => 500],
+            ['random_peers' => false, 'random_peers_threshold' => 500],
         );
         $this->assertStringNotContainsString('RAND()', $r['order']);
     }

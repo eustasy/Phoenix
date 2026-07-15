@@ -33,7 +33,7 @@ function peer_select_strategy(array $peer, int $complete, int $incomplete, array
     }
     if ($peer['left'] > 0) {
         $randomise = $settings['random_peers']
-            && ($complete + $incomplete) > $settings['random_limit'];
+            && ($complete + $incomplete) > $settings['random_peers_threshold'];
 
         return [
             'where' => '',

@@ -8,17 +8,17 @@ declare(strict_types=1);
 // trusted_proxies listed, the headers are honored only when the connecting
 // REMOTE_ADDR falls inside one of the ranges, so a client connecting straight to
 // the origin cannot spoof. With trusted_proxies EMPTY the answer is
-// $allow_any_proxy: false (the default) fails safe and trusts nothing; true is
+// $trust_any_forwarded: false (the default) fails safe and trusts nothing; true is
 // the explicit, documented opt-in to "trust any peer" for proxies that have no
 // stable IP range to pin to.
 /**
  * @param array<string, mixed> $server
  * @param array<int, string> $trusted_proxies
  */
-function peer_proxy_trusted(array $server, array $trusted_proxies, bool $allow_any_proxy): bool
+function peer_proxy_trusted(array $server, array $trusted_proxies, bool $trust_any_forwarded): bool
 {
     if ($trusted_proxies === []) {
-        return $allow_any_proxy;
+        return $trust_any_forwarded;
     }
     if (! isset($server['REMOTE_ADDR']) || ! is_string($server['REMOTE_ADDR'])) {
         return false;

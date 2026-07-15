@@ -46,7 +46,7 @@ class PeerProxyTrustedTest extends TestCase
 
     public function testAllowAnyProxyIgnoredWhenRangesListed(): void
     {
-        // allow_any_proxy only governs the empty-list case; a listed range still
+        // trust_any_forwarded only governs the empty-list case; a listed range still
         // requires REMOTE_ADDR to fall inside it.
         $this->assertFalse(peer_proxy_trusted(['REMOTE_ADDR' => '203.0.113.9'], ['10.0.0.0/8'], true));
     }

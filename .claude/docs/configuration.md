@@ -28,20 +28,20 @@ Full list with comments is in `config/phoenix.default.php`. Highlights:
 **Tracker behavior**
 - `open_tracker` — off = closed/private tracker (BEP 27); only registered
   `info_hash`es may announce/scrape.
-- `announce_interval` / `min_interval` — client request cadence.
+- `announce_rec_interval` / `announce_min_interval` — client request cadence.
 - `default_peers` / `max_peers` — peer-list sizing.
 - `default_compact`, `announce_external_ip` (BEP 24).
 - `full_scrape` — allow info_hash-less scrapes returning every torrent. **Set
   false on a closed tracker** — full scrape ignores the allowed-torrents filter
   and would expose the whole list.
 - `scrape_min_interval` — advertised as BEP 48 `min_request_interval`.
-- `random_peers` / `random_limit` — peer-selection randomization.
+- `random_peers` / `random_peers_threshold` — peer-selection randomization.
 
 **Cleanup**
-- `clean_with_requests` — % of announces that trigger idle-peer cleanup.
+- `clean_request_percent` — % of announces that trigger idle-peer cleanup.
 - `clean_with_cron` — move cleanup to cron (`bin/clean-and-optimize.php`) for
   faster responses.
-- `task_retention`, `stats_retention`, `backup_rotate` — pruning windows.
+- `task_retention`, `stats_retention`, `backup_retention` — pruning windows.
 
 **Proxy / IP resolution**
 - `forwarded_headers` — ordered list of forwarded-address headers to trust
@@ -51,9 +51,9 @@ Full list with comments is in `config/phoenix.default.php`. Highlights:
   appending proxy can't be spoofed. Handles IPv4 and IPv6 (incl. bracketed forms).
 - `trusted_proxies` — CIDR ranges a forwarded header is honored from (the direct
   `REMOTE_ADDR` must fall inside one).
-- `allow_any_proxy` — let an empty `trusted_proxies` still trust forwarded headers
+- `trust_any_forwarded` — let an empty `trusted_proxies` still trust forwarded headers
   from *any* peer (insecure opt-in; default false — closes the old fail-open).
-- `external_ip` — allow clients to specify their IP (`?ip` / `?ipv4` / `?ipv6`).
+- `allow_client_ip` — allow clients to specify their IP (`?ip` / `?ipv4` / `?ipv6`).
 - `reject_private_ips` — drop RFC 1918 / reserved addresses from the swarm.
 
 **Public index**

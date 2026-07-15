@@ -20,10 +20,10 @@ class PeerAddressCandidatesTest extends PhoenixTestCase
     private function settings(array $overrides = []): array
     {
         return array_merge([
-            'external_ip' => false,
+            'allow_client_ip' => false,
             'forwarded_headers' => [],
             'trusted_proxies' => [],
-            'allow_any_proxy' => false,
+            'trust_any_forwarded' => false,
         ], $overrides);
     }
 
@@ -52,7 +52,7 @@ class PeerAddressCandidatesTest extends PhoenixTestCase
         // REMOTE_ADDR outranks the client-supplied values (lowest priority).
         $this->assertSame(
             ['10.0.0.1', '::1', '2.2.2.2', '1.1.1.1'],
-            peer_address_candidates($this->settings(['external_ip' => true]), $get, $server),
+            peer_address_candidates($this->settings(['allow_client_ip' => true]), $get, $server),
         );
     }
 
@@ -70,7 +70,7 @@ class PeerAddressCandidatesTest extends PhoenixTestCase
 
     public function testEmptyTrustedProxiesFailsClosedByDefault(): void
     {
-        // forwarded_headers set but trusted_proxies empty and allow_any_proxy off:
+        // forwarded_headers set but trusted_proxies empty and trust_any_forwarded off:
         // the header is NOT trusted, so a direct client cannot spoof its address.
         $settings = $this->settings(['forwarded_headers' => ['x-forwarded-for']]);
         $server = ['REMOTE_ADDR' => '10.0.0.1', 'HTTP_X_FORWARDED_FOR' => '6.6.6.6'];
@@ -79,7 +79,7 @@ class PeerAddressCandidatesTest extends PhoenixTestCase
 
     public function testEmptyTrustedProxiesHonoredOnlyWithAllowAnyProxy(): void
     {
-        $settings = $this->settings(['forwarded_headers' => ['x-forwarded-for'], 'allow_any_proxy' => true]);
+        $settings = $this->settings(['forwarded_headers' => ['x-forwarded-for'], 'trust_any_forwarded' => true]);
         $server = ['REMOTE_ADDR' => '198.51.100.9', 'HTTP_X_FORWARDED_FOR' => '6.6.6.6'];
         $this->assertSame(['6.6.6.6', '198.51.100.9'], peer_address_candidates($settings, [], $server));
     }

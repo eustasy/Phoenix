@@ -14,10 +14,10 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase
         // Pin the rate-limit tunables so these cases stay deterministic
         // regardless of the shipped defaults: a limit of 1 makes a single
         // co-located peer trip the check (the original count > 0 behaviour
-        // these tests assert), and the window keeps the min_interval/5 value
+        // these tests assert), and the window keeps the announce_min_interval/5 value
         // the fixtures compute below.
         self::$settings['announce_rate_limit'] = 1;
-        self::$settings['announce_rate_window'] = intval(self::$settings['min_interval'] / 5);
+        self::$settings['announce_rate_window'] = intval(self::$settings['announce_min_interval'] / 5);
     }
 
     public function testNoRateLimitWhenNoPeersExist()

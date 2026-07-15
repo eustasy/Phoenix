@@ -4,6 +4,9 @@
 // Copy to `phoenix.custom.php` and modify there.
 
 ////	General Database Options
+// db_host, db_user, and db_name are required: the tracker treats them as "not
+// configured" while empty (the installer fills them in for you). db_pass may be
+// empty for passwordless local auth.
 /* ip or hostname to mysql server */
 $settings['db_host'] = '';
 /* username used to connect to mysql */
@@ -12,7 +15,8 @@ $settings['db_user'] = '';
 $settings['db_pass'] = '';
 /* name of the Phoenix database */
 $settings['db_name'] = '';
-/* allow database to be reset in admin */
+/* allow the admin Utilities page to DROP and recreate all Phoenix tables */
+/* (destructive — wipes every torrent, peer, and event). Off by default. */
 $settings['db_reset'] = false;
 
 ////	Advanced Database Options
@@ -25,17 +29,21 @@ $settings['db_persist'] = true;
 /* track anything announced to it; off = closed/private tracker (BEP 27) */
 $settings['open_tracker'] = false;
 /* how often client will send requests */
-$settings['announce_interval'] = 1800; // 30 minutes
+$settings['announce_rec_interval'] = 1800; // 30 minutes
 /* how often client can force requests */
-$settings['min_interval'] = 60; // 1 minute
+$settings['announce_min_interval'] = 60; // 1 minute
 /* default # of peers to announce */
 $settings['default_peers'] = 50;
 /* max # of peers to announce */
 $settings['max_peers'] = 100;
 
 ////	Advanced Tracker Options
-/* allow client to specify ip address */
-$settings['external_ip'] = false;
+/* let a client declare its own address via ?ip / ?ipv4 / ?ipv6 (for a NATed */
+/* peer that knows its public IP). Lowest priority — behind REMOTE_ADDR and */
+/* still subject to reject_private_ips — but a client can then claim ANY public */
+/* address, so leave off unless you need it. NOT announce_external_ip, which */
+/* instead echoes the client's address back to it (BEP 24). */
+$settings['allow_client_ip'] = false;
 /* default to compact announces when not specified */
 $settings['default_compact'] = true;
 /* echo the client's own public IP back in announce responses (BEP 24) */
@@ -56,19 +64,19 @@ $settings['scrape_min_interval'] = 900; // 15 minutes
 /* fronted by a proxy/CDN, prefer per-IP rate limiting there (see APACHE.md / */
 /* NGINX.md) and set this to 0. 0 = disable the check entirely. */
 $settings['announce_rate_limit'] = 10;
-/* Window in seconds for announce_rate_limit. Independent of min_interval so */
-/* tuning the announce cadence never widens the anti-abuse window. */
+/* Window in seconds for announce_rate_limit. Independent of the announce */
+/* cadence, so tuning announce_rec_interval never widens the anti-abuse window. */
 $settings['announce_rate_window'] = 120; // 2 minutes
 /* randomise peer selection to spread load */
 $settings['random_peers'] = true;
-/* minimum swarm size before RAND() is used */
-$settings['random_limit'] = 500;
+/* minimum swarm size before random_peers randomises peer selection */
+$settings['random_peers_threshold'] = 500;
 /* tweaks % of time tracker attempts idle peer removal */
 /* if you have a busy tracker, you may adjust this */
 /* example: 1 = 1%, 10 = 10%, 50 = 50%, 100 = every time */
-$settings['clean_with_requests'] = 1;
+$settings['clean_request_percent'] = 1;
 /* should your tracker clean with cron */
-/* means clean_with_requests can be disabled for faster responses */
+/* means clean_request_percent can be disabled for faster responses */
 $settings['clean_with_cron'] = false;
 /* days of maintenance-task run history to keep in the task_runs log; */
 /* 0 = keep forever. pruned during the regular cleanup (announce or cron) */
@@ -91,12 +99,14 @@ $settings['trusted_proxies'] = [];
 /* from ANY connecting peer. Insecure: anyone reaching the tracker directly */
 /* can then spoof their address. Leave false unless you fully control who can */
 /* connect and understand the risk. */
-$settings['allow_any_proxy'] = false;
-/* drop private (RFC 1918) and reserved addresses when */
-/* resolving peers, so they are never handed out to the swarm. */
-/* Lets a private REMOTE_ADDR (NAT/proxy) fall through to a */
-/* public external_ip, per BEP 3. Set false for LAN/same-NAT */
-/* trackers, where peers legitimately have private addresses. */
+$settings['trust_any_forwarded'] = false;
+/* drop private (RFC 1918) and reserved addresses when resolving peers, so they */
+/* are never handed out to the swarm. Lets a private REMOTE_ADDR (NAT/proxy) */
+/* fall through to a public client-declared IP (allow_client_ip), per BEP 3. A */
+/* peer left with no routable */
+/* address after this is rejected outright, not stored — so set false for LAN, */
+/* same-NAT, or loopback trackers, where peers legitimately have private */
+/* addresses (announcing from 127.0.0.1 needs this off). */
 $settings['reject_private_ips'] = true;
 /* serve a public index of listed torrents */
 $settings['public_index'] = false;
@@ -186,4 +196,4 @@ $settings['stats_retention'] = 0;
 /* absolute path to backup directory; empty = backups/ in the project root */
 $settings['backup_dir'] = '';
 /* delete backups older than this many days */
-$settings['backup_rotate'] = 30;
+$settings['backup_retention'] = 30;

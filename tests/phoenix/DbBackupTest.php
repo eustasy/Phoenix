@@ -55,7 +55,7 @@ class DbBackupTest extends PhoenixTestCase
         mkdir($dir);
         $settings = self::$settings;
         $settings['backup_dir'] = $dir;
-        $settings['backup_rotate'] = 0; // don't rotate the dump we just wrote
+        $settings['backup_retention'] = 0; // don't rotate the dump we just wrote
 
         try {
             $result = db_backup($settings, self::$time);

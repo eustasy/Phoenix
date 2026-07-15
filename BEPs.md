@@ -244,7 +244,7 @@ from the already-resolved `$peer['ipv4']`/`$peer['ipv6']`, and
 carry the same value as a human-readable string. Gated by the
 `announce_external_ip` setting (default on). Implemented in #68.
 
-Not to be confused with the existing `external_ip` setting, which governs the
+Not to be confused with the existing `allow_client_ip` setting, which governs the
 *opposite* direction — whether the tracker accepts a client-declared address as
 an input candidate.
 
@@ -263,7 +263,7 @@ views mirroring it. Call sites are classified:
   invalid.`, `Peer ID is invalid.`, `Torrent is not allowed.` (announce and
   scrape), `Tracker scraping is not allowed.`.
 - **Seconds** — the rate-limit rejection (`announce.check.rate.limit.php`) hints
-  `min_interval / 5`, the window after which the limit clears.
+  `announce_min_interval / 5`, the window after which the limit clears.
 
 Ambiguous failures (scrape/DB errors) deliberately omit the key. Implemented
 in #69.
@@ -322,13 +322,13 @@ consumer; this tracks both sides so the gaps are deliberate, not forgotten.
 
 | Item | BEP | Notes |
 | --- | --- | --- |
-| `min interval` | 3 | `min_interval` setting (600s default) |
+| `min interval` | 3 | `announce_min_interval` setting (600s default) |
 | `complete` / `incomplete` | 3 | swarm counts in the announce reply |
 | Compact peer lists | 23 | `compact=` request flag + `default_compact` |
 | `peers6` / IPv6 peers | 7 | dual-stack |
 | Honour `no_peer_id` | 3 | omits `peer id` in non-compact replies |
 | Honour `numwant` | — (unofficial spec, not a BEP) | clamped to `[0, max_peers]`; `numwant=0` returns no peers |
-| Consume client `ip=` | 3 | gated by `external_ip` |
+| Consume client `ip=` | 3 | gated by `allow_client_ip` |
 | `external ip` (returned) | 24 | gated by `announce_external_ip` |
 | `retry in` on errors | 31 | `"never"` or seconds |
 | scrape `min_request_interval` | 48 | `scrape_min_interval` setting (1800s default) |

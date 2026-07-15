@@ -12,7 +12,7 @@ declare(strict_types=1);
 // value it injects sits to the LEFT of the real address and the walk stops
 // before reaching it.
 //
-// With an empty trusted_proxies list (only reachable when allow_any_proxy is on)
+// With an empty trusted_proxies list (only reachable when trust_any_forwarded is on)
 // nothing is skippable, so the rightmost entry — the nearest hop the direct peer
 // forwarded — is returned. Returns null when the chain is empty or every entry is
 // a trusted proxy.

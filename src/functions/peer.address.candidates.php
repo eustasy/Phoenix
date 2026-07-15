@@ -13,7 +13,7 @@ declare(strict_types=1);
 //      pre-seeding them; single-value headers (X-Real-IP, CF-Connecting-IP,
 //      True-Client-IP, Client-IP) are taken as the proxy set them.
 //   2. REMOTE_ADDR — the direct TCP peer, always a candidate.
-//   3. client-declared external_ip params (?ip / ?ipv4 / ?ipv6), lowest priority.
+//   3. client-declared IP params, allow_client_ip (?ip / ?ipv4 / ?ipv6), lowest priority.
 // Families mix freely: peer_resolve_addresses() picks the first valid address of
 // each family independently, so a header supplying one family and REMOTE_ADDR the
 // other both land.
@@ -41,11 +41,11 @@ function peer_address_candidates(array $settings, array $get, array $server): ar
         'client-ip' => ['key' => 'HTTP_CLIENT_IP', 'chain' => false, 'rfc7239' => false],
     ];
 
-    // Built lowest-priority first, then reversed at the end — so external_ip sinks
+    // Built lowest-priority first, then reversed at the end — so allow_client_ip sinks
     // to the bottom and the forwarded headers rise to the top.
     $addresses = [];
 
-    if ($settings['external_ip']) {
+    if ($settings['allow_client_ip']) {
         foreach (['ip', 'ipv4', 'ipv6'] as $param) {
             if (isset($get[$param]) && is_string($get[$param])) {
                 $addresses[] = $get[$param];
@@ -59,7 +59,7 @@ function peer_address_candidates(array $settings, array $get, array $server): ar
 
     if (
         $settings['forwarded_headers'] !== []
-        && peer_proxy_trusted($server, $settings['trusted_proxies'], $settings['allow_any_proxy'])
+        && peer_proxy_trusted($server, $settings['trusted_proxies'], $settings['trust_any_forwarded'])
     ) {
         // Reverse the operator's list so its FIRST entry ends up highest priority
         // after the final array_reverse below.

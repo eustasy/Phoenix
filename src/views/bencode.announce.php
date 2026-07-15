@@ -7,7 +7,7 @@ declare(strict_types=1);
 //
 // Arguments:
 //   $counts: array{complete: int, incomplete: int} — swarm counts
-//   $settings: config array (needs announce_interval, min_interval)
+//   $settings: config array (needs announce_rec_interval, announce_min_interval)
 //   $rows: array of peer rows from peers_select_active()
 //   $compact: bool — whether client requested compact mode (BEP 23)
 //   $no_peer_id: bool — whether client requested peer_id omission
@@ -44,8 +44,8 @@ function view_announce_bencode(
     $response = [
         'complete' => (int) $counts['complete'],
         'incomplete' => (int) $counts['incomplete'],
-        'interval' => $settings['announce_interval'],
-        'min interval' => $settings['min_interval'],
+        'interval' => $settings['announce_rec_interval'],
+        'min interval' => $settings['announce_min_interval'],
     ];
 
     // BEP 24: echo the client's own public address back so a NATed peer can

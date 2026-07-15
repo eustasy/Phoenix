@@ -96,7 +96,7 @@ class AnnounceControllerTest extends PhoenixTestCase
         // mutations during the response build).
         $s = self::$settings;
         $s['clean_with_cron'] = true;
-        $s['clean_with_requests'] = $cleanWithRequests;
+        $s['clean_request_percent'] = $cleanWithRequests;
 
         return $s;
     }
@@ -151,8 +151,8 @@ class AnnounceControllerTest extends PhoenixTestCase
         $this->assertStringStartsWith('d', $body);
         $this->assertStringContainsString('8:completei', $body);
         $this->assertStringContainsString('10:incompletei', $body);
-        $this->assertStringContainsString('8:intervali'.self::$settings['announce_interval'].'e', $body);
-        $this->assertStringContainsString('12:min intervali'.self::$settings['min_interval'].'e', $body);
+        $this->assertStringContainsString('8:intervali'.self::$settings['announce_rec_interval'].'e', $body);
+        $this->assertStringContainsString('12:min intervali'.self::$settings['announce_min_interval'].'e', $body);
         $this->assertStringContainsString('5:peers', $body);
     }
 
@@ -331,12 +331,12 @@ class AnnounceControllerTest extends PhoenixTestCase
 
     public function testCleanWithRequests100AlwaysCleans(): void
     {
-        // clean_with_cron=false + clean_with_requests=100 → mt_rand(1,100)
+        // clean_with_cron=false + clean_request_percent=100 → mt_rand(1,100)
         // is always <=100 → task_clean fires. Hard to verify directly, so
         // we just confirm the announce still completes successfully.
         $settings = self::$settings;
         $settings['clean_with_cron'] = false;
-        $settings['clean_with_requests'] = 100;
+        $settings['clean_request_percent'] = 100;
 
         $this->makeRequest();
         $body = \announce_controller(self::$connection, $settings, self::$time, [self::HASH]);
@@ -346,11 +346,11 @@ class AnnounceControllerTest extends PhoenixTestCase
 
     public function testCleanWithRequests0NeverCleans(): void
     {
-        // clean_with_cron=false + clean_with_requests=0 → mt_rand(1,100)
+        // clean_with_cron=false + clean_request_percent=0 → mt_rand(1,100)
         // is always >0 → task_clean is skipped.
         $settings = self::$settings;
         $settings['clean_with_cron'] = false;
-        $settings['clean_with_requests'] = 0;
+        $settings['clean_request_percent'] = 0;
 
         $this->makeRequest();
         $body = \announce_controller(self::$connection, $settings, self::$time, [self::HASH]);
@@ -360,12 +360,12 @@ class AnnounceControllerTest extends PhoenixTestCase
 
     public function testOutOfRangeIpv6PortDropsFamilyButKeepsIpv4(): void
     {
-        // With external_ip on, a client can supply a per-family port via
+        // With allow_client_ip on, a client can supply a per-family port via
         // ?ipv6=[host]:port. An out-of-range IPv6 port must drop only the IPv6
         // family, not reject the whole announce — the valid IPv4 pair (from
         // ?port + REMOTE_ADDR) still registers.
         $settings = $this->settingsForTest();
-        $settings['external_ip'] = true;
+        $settings['allow_client_ip'] = true;
 
         $this->makeRequest(['ipv6' => '[2606:4700:4700::1111]:99999']);
         $body = \announce_controller(self::$connection, $settings, self::$time, [self::HASH]);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ////	db_backup
 // Dump the database to a timestamped .sql file in backup_dir, then rotate out
-// dumps older than backup_rotate days. The engine for both bin/backup-database.php
+// dumps older than backup_retention days. The engine for both bin/backup-database.php
 // (cron) and the admin Backups page, so it returns a result array rather than
 // echoing/exiting:
 //   ['ok' => bool, 'file' => ?string (path on success), 'error' => ?string]
@@ -111,9 +111,9 @@ function db_backup(array $settings, int $time): array
     }
     @unlink($errfile);
 
-    // Rotate: delete backups older than backup_rotate days.
-    if (intval($settings['backup_rotate']) > 0) {
-        $cutoff = $time - (intval($settings['backup_rotate']) * 86400);
+    // Rotate: delete backups older than backup_retention days.
+    if (intval($settings['backup_retention']) > 0) {
+        $cutoff = $time - (intval($settings['backup_retention']) * 86400);
         foreach (glob($backup_dir.$settings['db_name'].'.*.sql') ?: [] as $old) {
             $mtime = filemtime($old);
             if ($mtime === false || $mtime >= $cutoff) {

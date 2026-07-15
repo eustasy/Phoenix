@@ -26,7 +26,7 @@ class ViewAdminSettingsHtmlTest extends TestCase
             'public_index' => false,
             'full_scrape' => false,
             'db_reset' => false,
-            'announce_interval' => 1800,
+            'announce_rec_interval' => 1800,
             'trusted_proxies' => [],
         ], $overrides);
     }

@@ -369,7 +369,7 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->enableCleanWithCron();
         $this->appendConfigOverride("\$settings['stats_retention'] = 30;");
 
-        // Seed a stale peer (older than 3x announce_interval = 5400s) and a
+        // Seed a stale peer (older than 3x announce_rec_interval = 5400s) and a
         // fresh one, under a distinct info_hash with plain-hex peer_ids (so the
         // __TEST_ sentinel purge doesn't catch the one we expect to survive).
         $hash = str_repeat('c', 40);
@@ -416,7 +416,7 @@ class EndpointSmokeTest extends SmokeTestCase
         $root = dirname(__DIR__, 2);
         @mkdir($root.'/backups');
 
-        // Seed a backup old enough to be rotated out (backup_rotate defaults to
+        // Seed a backup old enough to be rotated out (backup_retention defaults to
         // 30 days) so the rotation pass actually deletes something.
         $oldBackup = $root.'/backups/'.$this->dbCreds()['db_name'].'.20000101_0000.sql';
         file_put_contents($oldBackup, "-- stale backup\n");
@@ -454,7 +454,7 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertStringContainsString(self::HASH, $dump);
         $this->assertStringNotContainsString($completePeer, $dump);
 
-        // Rotation deleted the stale backup (older than backup_rotate days).
+        // Rotation deleted the stale backup (older than backup_retention days).
         $this->assertFileDoesNotExist($oldBackup);
     }
 

@@ -51,7 +51,7 @@ class SettingsLoadTest extends PhoenixTestCase
         // ships empty DB credentials (db_is_configured() reads those as "not
         // configured").
         $default = $this->makeConfigFile([
-            'announce_interval' => 1800,
+            'announce_rec_interval' => 1800,
             'db_host' => '',
             'db_user' => '',
             'db_name' => '',
@@ -61,7 +61,7 @@ class SettingsLoadTest extends PhoenixTestCase
         $result = \settings_load($default, $custom);
 
         // Default values preserved verbatim.
-        $this->assertSame(1800, $result['announce_interval']);
+        $this->assertSame(1800, $result['announce_rec_interval']);
         $this->assertSame('', $result['db_host']);
         $this->assertSame('', $result['db_user']);
         $this->assertSame('', $result['db_name']);
@@ -79,7 +79,7 @@ class SettingsLoadTest extends PhoenixTestCase
         $default = $this->makeConfigFile([
             'db_host' => '', // the real default ships these empty
             'db_name' => '',
-            'announce_interval' => 1800,
+            'announce_rec_interval' => 1800,
         ]);
         $custom = $this->makeConfigFile([
             'db_host' => 'real.example.com',
@@ -91,7 +91,7 @@ class SettingsLoadTest extends PhoenixTestCase
         $this->assertSame('real.example.com', $result['db_host']);
         $this->assertSame('phoenix_prod', $result['db_name']);
         // Non-overridden default key survived.
-        $this->assertSame(1800, $result['announce_interval']);
+        $this->assertSame(1800, $result['announce_rec_interval']);
         // Missing-file fallbacks should not have been applied.
         $this->assertArrayNotHasKey('db_user', $result);
     }

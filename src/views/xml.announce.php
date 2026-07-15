@@ -8,7 +8,7 @@ declare(strict_types=1);
 //
 // Arguments:
 //   $counts: array{complete: int, incomplete: int} — swarm counts
-//   $settings: config array (needs announce_interval, min_interval)
+//   $settings: config array (needs announce_rec_interval, announce_min_interval)
 //   $rows: array of peer rows from peers_select_active()
 //
 // Returns: XML string.
@@ -29,8 +29,8 @@ function view_announce_xml(array $counts, array $settings, array $rows, string|f
         '<announce>'.
         '<complete>'.$counts['complete'].'</complete>'.
         '<incomplete>'.$counts['incomplete'].'</incomplete>'.
-        '<interval>'.$settings['announce_interval'].'</interval>'.
-        '<min_interval>'.$settings['min_interval'].'</min_interval>'.
+        '<interval>'.$settings['announce_rec_interval'].'</interval>'.
+        '<min_interval>'.$settings['announce_min_interval'].'</min_interval>'.
         $external.
         '<peers>';
 

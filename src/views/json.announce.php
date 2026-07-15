@@ -8,7 +8,7 @@ declare(strict_types=1);
 //
 // Arguments:
 //   $counts: array{complete: int, incomplete: int} — swarm counts
-//   $settings: config array (needs announce_interval, min_interval)
+//   $settings: config array (needs announce_rec_interval, announce_min_interval)
 //   $rows: array of peer rows from peers_select_active()
 //
 // Returns: JSON string.
@@ -40,8 +40,8 @@ function view_announce_json(array $counts, array $settings, array $rows, string|
     $response = [
         'complete' => $counts['complete'],
         'incomplete' => $counts['incomplete'],
-        'interval' => $settings['announce_interval'],
-        'min_interval' => $settings['min_interval'],
+        'interval' => $settings['announce_rec_interval'],
+        'min_interval' => $settings['announce_min_interval'],
         'peers' => $peers,
     ];
 

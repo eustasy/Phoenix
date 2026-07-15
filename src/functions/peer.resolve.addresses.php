@@ -7,7 +7,7 @@ declare(strict_types=1);
 // the first valid IPv6 found, plus their associated ports (or false when no
 // port could be parsed). When $reject_private is true, private/reserved
 // addresses are skipped — so a private REMOTE_ADDR (NAT/proxy) falls through
-// to a lower-priority public candidate (e.g. a client-declared external_ip),
+// to a lower-priority public candidate (e.g. a client-declared IP via allow_client_ip),
 // which is exactly the case BEP 3's `ip` parameter exists for.
 
 /**
