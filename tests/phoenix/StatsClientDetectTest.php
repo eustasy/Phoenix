@@ -75,6 +75,28 @@ class StatsClientDetectTest extends PhoenixTestCase
         );
     }
 
+    public function testAzureusNonPrintableCodeIsUnknown(): void
+    {
+        // Raw, non-printable code bytes (a malformed/spoofed peer_id) must not
+        // surface into the label — they could be non-UTF-8 (blanking the escaped
+        // cell) or otherwise garbage, so collapse to 'Unknown'.
+        $this->assertSame(
+            'Unknown',
+            stats_client_detect($this->hex("-\xff\xfe0000-".str_repeat('x', 12))),
+        );
+    }
+
+    public function testAzureusMetacharCodeIsUnknown(): void
+    {
+        // HTML metacharacters aren't alphanumeric, so a code containing them is
+        // never surfaced (the views escape too, but this stops it at the source
+        // and keeps the stored events.client label clean).
+        $this->assertSame(
+            'Unknown',
+            stats_client_detect($this->hex('-<>0000-'.str_repeat('x', 12))),
+        );
+    }
+
     public function testShadowsStyle(): void
     {
         // 'T03I-...' -> BitTornado (Shadow's encoding, single leading letter).

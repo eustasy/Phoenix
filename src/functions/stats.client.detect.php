@@ -63,7 +63,19 @@ function stats_client_detect(string $peer_id): string
     ////	Azureus-style: '-XX####-...'
     if ($raw[0] === '-' && $raw[7] === '-') {
         $code = substr($raw, 1, 2);
-        $name = $azureus[$code] ?? $code;
+        // A recognised code maps to a friendly name; an unrecognised but plain
+        // alphanumeric code (a real client simply missing from the table) is
+        // shown as-is. Anything else is a malformed/spoofed peer_id — the two
+        // code bytes are raw and may be non-printable, non-UTF-8, or HTML
+        // metacharacters — so collapse to 'Unknown' rather than surface those
+        // bytes into the admin views or the stored events.client label.
+        if (isset($azureus[$code])) {
+            $name = $azureus[$code];
+        } elseif (ctype_alnum($code)) {
+            $name = $code;
+        } else {
+            return 'Unknown';
+        }
         $version = stats_client_version(substr($raw, 3, 4));
 
         return $version === '' ? $name : $name.' '.$version;

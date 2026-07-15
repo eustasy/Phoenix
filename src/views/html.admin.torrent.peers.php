@@ -59,7 +59,7 @@ function view_admin_torrent_peers_html(array $settings, string $info_hash, ?stri
                 : '<span class="listed is-leeching">Leeching</span>';
 
             $rows .= '<tr>'.
-                '<td>'.htmlspecialchars($peer['client'], ENT_QUOTES, 'UTF-8').'</td>'.
+                '<td>'.htmlspecialchars($peer['client'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'</td>'.
                 '<td class="mono">'.$address.'</td>'.
                 '<td>'.$state.'</td>'.
                 '<td class="table-col-numeric mono">'.format_bytes($peer['uploaded']).'</td>'.

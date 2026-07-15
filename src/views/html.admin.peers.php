@@ -47,7 +47,7 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
 
     $rows = '';
     foreach ($peers as $peer) {
-        $client = '<span class="badge">'.htmlspecialchars($peer['client'], ENT_QUOTES, 'UTF-8').'</span>';
+        $client = '<span class="badge">'.htmlspecialchars($peer['client'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'</span>';
 
         // Registry name, or the truncated hash for an unregistered swarm.
         if ($peer['name'] !== null && $peer['name'] !== '') {
