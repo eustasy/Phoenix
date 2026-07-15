@@ -1,5 +1,9 @@
 <?php
 
+// This bootstrap checks mysqli calls for false returns; PHP 8.1+ defaults
+// to throwing mysqli_sql_exception instead.
+mysqli_report(MYSQLI_REPORT_OFF);
+
 ////	Settings
 // Import the settings.
 require_once __DIR__.'/../../_settings/phoenix.default.php';

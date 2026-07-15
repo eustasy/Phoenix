@@ -20,6 +20,13 @@ $config_exists = is_readable($config_path);
 if ( !$config_exists ) {
 
 	error_reporting(0);
+	// install-do.php tests the submitted credentials with mysqli_connect and
+	// reports failure inline; mysqli must return false rather than throw
+	// (PHP 8.1+ defaults to exceptions). Guarded because this page also has
+	// to render when the mysqli extension is missing entirely.
+	if ( function_exists('mysqli_report') ) {
+		mysqli_report(MYSQLI_REPORT_OFF);
+	}
 
 	$settings_writable = is_writable($settings['settings']);
 	$install_error     = null;

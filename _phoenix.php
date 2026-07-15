@@ -16,6 +16,12 @@ $settings['settings']  = $settings['root'].'_settings/';
 // error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
 error_reporting(0);
 
+// Every mysqli call site tests for a false return and routes failures to
+// tracker_error(). PHP 8.1 changed the default report mode to throw
+// mysqli_sql_exception instead, which would bypass all of those handlers
+// and turn any database failure into an uncaught exception (HTTP 500).
+mysqli_report(MYSQLI_REPORT_OFF);
+
 // Ignore Disconnects
 ignore_user_abort(true);
 ini_set('default_charset', 'iso-8859-1');
