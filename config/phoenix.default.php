@@ -27,7 +27,7 @@ $settings['open_tracker'] = '%open_tracker%';
 /* how often client will send requests */
 $settings['announce_interval'] = 1800; // 30 minutes
 /* how often client can force requests */
-$settings['min_interval'] = 600; // 10 minutes
+$settings['min_interval'] = 60; // 1 minute
 /* default # of peers to announce */
 $settings['default_peers'] = 50;
 /* max # of peers to announce */
@@ -47,7 +47,7 @@ $settings['announce_external_ip'] = true;
 $settings['full_scrape'] = true;
 /* minimum seconds between scrape requests, advertised to clients as BEP 48's */
 /* `min_request_interval` in the scrape response. 0 = do not advertise it */
-$settings['scrape_min_interval'] = 1800; // 30 minutes
+$settings['scrape_min_interval'] = 900; // 15 minutes
 /* Throttle rapid fake-peer injection: reject an announce when this IP already */
 /* has announce_rate_limit OTHER active peer_ids for the same torrent within */
 /* announce_rate_window seconds. The check is keyed on IP alone, so co-located */
