@@ -1,7 +1,11 @@
 <?php
 
 ////	DO NOT MODIFY `phoenix.default.php`
-// Copy to `phoenix.custom.php` and modify there.
+// Prefer the installer: load `admin.php` with no custom config present and
+// it writes `phoenix.custom.php` for you. If you copy this file by hand
+// instead, replace EVERY `%placeholder%` value you keep — an unreplaced
+// placeholder is a non-empty string, which PHP treats as true (leaving
+// `%open_tracker%` behind silently runs the tracker as an open tracker).
 
 ////	General Database Options
 $settings['db_host']             = '%db_host%';      /* ip or hostname to mysql server */
