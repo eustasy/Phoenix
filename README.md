@@ -1,4 +1,4 @@
-# Phoenix v3.2.1
+# Phoenix v3.2.2
 
 > **New installs should use Phoenix 4.0, on the [`main`](https://github.com/eustasy/Phoenix/tree/main) branch.** It raises the minimum to PHP >= 8.2 and reorganises the on-disk layout — the web document root, configuration, and cron paths have all moved — so upgrading is not a drop-in replacement. The database schema is unchanged from 3.2, so no DB migration is required. This `3.x` branch is maintenance-only, kept for existing installs; to upgrade, follow the [3.x → 4.0 Migration Guide](https://github.com/eustasy/Phoenix/blob/main/MIGRATING.md).
 
