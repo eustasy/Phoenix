@@ -7,8 +7,17 @@ $backup_dir = !empty($settings['backup_dir'])
 	? rtrim($settings['backup_dir'], '/') . '/'
 	: $settings['root'] . '_backups/';
 
-if ( !is_dir($backup_dir) ) {
-	echo 'BACKUP_DIR_NOT_FOUND' . PHP_EOL;
+// Create the backup directory on first run. 0700 because the dumps contain
+// the full database: only the user running the cron job should read them.
+if (
+	!is_dir($backup_dir) &&
+	!mkdir($backup_dir, 0700, true)
+) {
+	echo 'Backup failed: could not create backup directory "' . $backup_dir . '".' . PHP_EOL;
+	exit(1);
+}
+if ( !is_writable($backup_dir) ) {
+	echo 'Backup failed: backup directory "' . $backup_dir . '" is not writable.' . PHP_EOL;
 	exit(1);
 }
 
