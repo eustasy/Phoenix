@@ -78,6 +78,13 @@ class EndpointSmokeTest extends SmokeTestCase
 
         $this->assertSame(302, $r['status']);
         $this->assertStringContainsString('installed=1', (string) $this->headerValue($r, 'Location'));
+
+        // The smoke server runs on 127.0.0.1 (loopback), which the default
+        // reject_private_ips drops as a reserved address — leaving the announce
+        // with no routable IP, which the tracker now rejects outright. Loopback
+        // and LAN deployments set reject_private_ips=false (see README); do the
+        // same here so the post-install announce tests can register a peer.
+        $this->appendConfigOverride("\$settings['reject_private_ips'] = false;");
     }
 
     //// Post-config (config + tables now exist)

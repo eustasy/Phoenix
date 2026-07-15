@@ -46,8 +46,13 @@ function peer_insert(mysqli $connection, array $settings, int $time, array $peer
                 $compactv6,
                 $peer['ipv4'],        // dotted-decimal / colon-hex IP strings
                 $peer['ipv6'],
-                $peer['portv4'],      // integer ports
-                $peer['portv6'],
+                // A family with no address carries a `false` port (e.g. the
+                // other family was dropped for an out-of-range port). The port
+                // columns are NOT NULL smallint, and mysqli would bind `false`
+                // as '' — which a strict-mode server rejects — so normalise an
+                // absent port to 0 here.
+                is_int($peer['portv4']) ? $peer['portv4'] : 0,
+                is_int($peer['portv6']) ? $peer['portv6'] : 0,
                 $peer['uploaded'],    // transfer counters
                 $peer['downloaded'],
                 $peer['left'],        // integer left (may be the -1 "unknown" sentinel)
