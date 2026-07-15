@@ -31,12 +31,21 @@ if ( isset($_GET['event']) ) {
 	} else if ( $_GET['event'] == 'completed' ) {
 		// Force Seeding Status
 		$peer['state'] = 1;
-		// Increment downloads
-		require_once $settings['functions'].'function.peer.completed.php';
-		peer_completed($connection, $settings, $peer);
-		// HOOK DOWNLOAD COMPLETE
-		if ( is_readable($settings['hooks'].'phoenix.download.complete.php') ) {
-			include $settings['hooks'].'phoenix.download.complete.php';
+		// Increment downloads, unless this peer is already recorded as
+		// seeding: some clients (e.g. Transmission) send the same announce
+		// twice, and the first copy already counted the download when it
+		// set state to 1. A completed event from an untracked peer still
+		// counts — the swarm may simply have forgotten the row.
+		if (
+			!$peer['old'] ||
+			intval($peer['old']['state']) != 1
+		) {
+			require_once $settings['functions'].'function.peer.completed.php';
+			peer_completed($connection, $settings, $peer);
+			// HOOK DOWNLOAD COMPLETE
+			if ( is_readable($settings['hooks'].'phoenix.download.complete.php') ) {
+				include $settings['hooks'].'phoenix.download.complete.php';
+			}
 		}
 	} // END IF Peer Completed
 
