@@ -327,7 +327,7 @@ consumer; this tracks both sides so the gaps are deliberate, not forgotten.
 | Compact peer lists | 23 | `compact=` request flag + `default_compact` |
 | `peers6` / IPv6 peers | 7 | dual-stack |
 | Honour `no_peer_id` | 3 | omits `peer id` in non-compact replies |
-| Honour `numwant` | 3 | clamped to `max_peers` |
+| Honour `numwant` | — (unofficial spec, not a BEP) | clamped to `[0, max_peers]`; `numwant=0` returns no peers |
 | Consume client `ip=` | 3 | gated by `external_ip` |
 | `external ip` (returned) | 24 | gated by `announce_external_ip` |
 | `retry in` on errors | 31 | `"never"` or seconds |

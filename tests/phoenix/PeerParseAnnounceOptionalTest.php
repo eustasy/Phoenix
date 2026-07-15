@@ -149,16 +149,21 @@ class PeerParseAnnounceOptionalTest extends PhoenixTestCase
         $this->assertSame(200, $result['numwant']);
     }
 
-    public function testNumwantZeroClampsToMax(): void
+    public function testNumwantZeroYieldsZero(): void
     {
+        // numwant=0 is a valid "send me no peers" request (a seed, or a
+        // stopped/completed announce), so it must clamp DOWN to 0, not up to
+        // max_peers.
         $result = peer_parse_announce_optional(['numwant' => '0'], $this->settingsFor());
-        $this->assertSame(200, $result['numwant']);
+        $this->assertSame(0, $result['numwant']);
     }
 
-    public function testNumwantNegativeClampsToMax(): void
+    public function testNumwantNegativeYieldsZero(): void
     {
+        // Negative numwant is garbage input; floor it to 0 rather than treating
+        // it as a request for the maximum.
         $result = peer_parse_announce_optional(['numwant' => '-1'], $this->settingsFor());
-        $this->assertSame(200, $result['numwant']);
+        $this->assertSame(0, $result['numwant']);
     }
 
 }

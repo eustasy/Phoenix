@@ -43,14 +43,15 @@ function peer_parse_announce_optional(array $get, array $settings): array
     $uploaded = (isset($get['uploaded']) && intval($get['uploaded']) >= 0) ? intval($get['uploaded']) : 0;
     $downloaded = (isset($get['downloaded']) && intval($get['downloaded']) >= 0) ? intval($get['downloaded']) : 0;
 
-    // numwant — default_peers when missing; otherwise clamp to [1, max_peers].
+    // numwant — default_peers when the client is silent. Otherwise honour the
+    // request, clamped to [0, max_peers]: numwant=0 is a valid "send me no
+    // peers" (a seed, or a stopped/completed announce) per the de-facto tracker
+    // spec, so it clamps DOWN to 0 rather than up to the cap; negatives are
+    // garbage and likewise floor to 0.
     if (! isset($get['numwant'])) {
         $numwant = $settings['default_peers'];
     } else {
-        $numwant = intval($get['numwant']);
-        if ($numwant > $settings['max_peers'] || $numwant < 1) {
-            $numwant = $settings['max_peers'];
-        }
+        $numwant = max(0, min(intval($get['numwant']), $settings['max_peers']));
     }
 
     return [
