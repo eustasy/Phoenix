@@ -48,6 +48,17 @@ $settings['full_scrape'] = true;
 /* minimum seconds between scrape requests, advertised to clients as BEP 48's */
 /* `min_request_interval` in the scrape response. 0 = do not advertise it */
 $settings['scrape_min_interval'] = 1800; // 30 minutes
+/* Throttle rapid fake-peer injection: reject an announce when this IP already */
+/* has announce_rate_limit OTHER active peer_ids for the same torrent within */
+/* announce_rate_window seconds. The check is keyed on IP alone, so co-located */
+/* clients — a shared home NAT, or many unrelated subscribers behind one CGNAT */
+/* IPv4 — count together. Keep it high enough for a busy household; on a tracker */
+/* fronted by a proxy/CDN, prefer per-IP rate limiting there (see APACHE.md / */
+/* NGINX.md) and set this to 0. 0 = disable the check entirely. */
+$settings['announce_rate_limit'] = 10;
+/* Window in seconds for announce_rate_limit. Independent of min_interval so */
+/* tuning the announce cadence never widens the anti-abuse window. */
+$settings['announce_rate_window'] = 120; // 2 minutes
 /* randomise peer selection to spread load */
 $settings['random_peers'] = true;
 /* minimum swarm size before RAND() is used */

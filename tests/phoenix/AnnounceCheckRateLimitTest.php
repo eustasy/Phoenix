@@ -10,6 +10,14 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase
     {
         parent::setUpBeforeClass();
         require_once __DIR__.'/../../src/functions/announce.check.rate.limit.php';
+
+        // Pin the rate-limit tunables so these cases stay deterministic
+        // regardless of the shipped defaults: a limit of 1 makes a single
+        // co-located peer trip the check (the original count > 0 behaviour
+        // these tests assert), and the window keeps the min_interval/5 value
+        // the fixtures compute below.
+        self::$settings['announce_rate_limit'] = 1;
+        self::$settings['announce_rate_window'] = intval(self::$settings['min_interval'] / 5);
     }
 
     public function testNoRateLimitWhenNoPeersExist()
@@ -56,8 +64,8 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase
         $peer_id_1 = str_repeat('1', 40);
         $peer_id_2 = str_repeat('2', 40);
 
-        // Insert peer updated outside the time window (min_interval/5 ago)
-        $threshold = self::$time - intval(self::$settings['min_interval'] / 5);
+        // Insert peer updated outside the time window (announce_rate_window ago)
+        $threshold = self::$time - self::$settings['announce_rate_window'];
         $old_time = $threshold - 100; // Well outside the window
 
         $sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
@@ -247,7 +255,7 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase
         // threshold timestamp must NOT count, while threshold+1 must count.
         $info_hash = str_repeat('a', 40);
         $peer_id_1 = str_repeat('1', 40);
-        $threshold = self::$time - intval(self::$settings['min_interval'] / 5);
+        $threshold = self::$time - self::$settings['announce_rate_window'];
 
         // Boundary: updated == threshold → excluded by '>' comparison.
         $sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
@@ -295,6 +303,62 @@ class AnnounceCheckRateLimitTest extends PhoenixTestCase
         ];
 
         $this->assertRateLimitErrorInSubprocess($peer);
+    }
+
+    public function testWithinLimitToleratesColocatedPeers()
+    {
+        // Two recent co-located peers (different peer_ids, same IP + torrent).
+        // With a limit of 3 the announcer is the third distinct peer_id, and a
+        // count of 2 is below the limit, so it must NOT be throttled — this is
+        // the shared-NAT case the tunable exists to accommodate.
+        $info_hash = str_repeat('a', 40);
+        for ($i = 1; $i <= 2; $i++) {
+            $pid = str_repeat((string) $i, 40);
+            $sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
+                '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+                "('".$info_hash."', '".$pid."', '192.0.2.1', '', '', '', 6881, 0, '1', ".self::$time.');';
+            mysqli_query(self::$connection, $sql);
+        }
+
+        $settings = self::$settings;
+        $settings['announce_rate_limit'] = 3;
+
+        $peer = [
+            'info_hash' => $info_hash,
+            'peer_id' => str_repeat('9', 40),
+            'ipv4' => '192.0.2.1',
+            'ipv6' => null,
+        ];
+
+        announce_check_rate_limit(self::$connection, $settings, $peer, self::$time);
+        $this->assertTrue(true);
+    }
+
+    public function testZeroLimitDisablesCheck()
+    {
+        // Several recent co-located peers that would trip a limit of 1, but
+        // announce_rate_limit = 0 disables the check entirely, so no throttle.
+        $info_hash = str_repeat('a', 40);
+        for ($i = 1; $i <= 3; $i++) {
+            $pid = str_repeat((string) $i, 40);
+            $sql = 'INSERT INTO `'.self::$settings['db_prefix'].'peers` '.
+                '(`info_hash`, `peer_id`, `ipv4`, `ipv6`, `compactv4`, `compactv6`, `portv4`, `portv6`, `state`, `updated`) VALUES '.
+                "('".$info_hash."', '".$pid."', '192.0.2.1', '', '', '', 6881, 0, '1', ".self::$time.');';
+            mysqli_query(self::$connection, $sql);
+        }
+
+        $settings = self::$settings;
+        $settings['announce_rate_limit'] = 0;
+
+        $peer = [
+            'info_hash' => $info_hash,
+            'peer_id' => str_repeat('9', 40),
+            'ipv4' => '192.0.2.1',
+            'ipv6' => null,
+        ];
+
+        announce_check_rate_limit(self::$connection, $settings, $peer, self::$time);
+        $this->assertTrue(true);
     }
 
     /**
