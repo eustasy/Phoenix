@@ -44,24 +44,31 @@ class SettingsLoadTest extends PhoenixTestCase
         return $tmp;
     }
 
-    public function testLoadsDefaultsWhenCustomMissing(): void
+    public function testReturnsDefaultsUntouchedWhenCustomMissing(): void
     {
-        // Custom path that doesn't exist forces the fallback branch and
-        // should still merge in whatever the default file provided.
-        $default = $this->makeConfigFile(['announce_interval' => 1800]);
+        // A custom path that doesn't exist takes the fallback branch, which now
+        // returns the defaults as-is — no invented credentials. The default file
+        // ships empty DB credentials (db_is_configured() reads those as "not
+        // configured").
+        $default = $this->makeConfigFile([
+            'announce_interval' => 1800,
+            'db_host' => '',
+            'db_user' => '',
+            'db_name' => '',
+        ]);
         $custom = sys_get_temp_dir().'/phoenix_custom_does_not_exist_'.bin2hex(random_bytes(4)).'.php';
 
         $result = \settings_load($default, $custom);
 
-        // Default value preserved.
+        // Default values preserved verbatim.
         $this->assertSame(1800, $result['announce_interval']);
-        // Hard-coded fallbacks applied.
-        $this->assertSame('localhost', $result['db_host']);
-        $this->assertSame('root', $result['db_user']);
-        $this->assertSame('Password1', $result['db_pass']);
-        $this->assertSame('phoenix', $result['db_name']);
-        $this->assertTrue($result['db_persist']);
-        $this->assertTrue($result['open_tracker']);
+        $this->assertSame('', $result['db_host']);
+        $this->assertSame('', $result['db_user']);
+        $this->assertSame('', $result['db_name']);
+        // No demo credentials are injected (the old fallback set these).
+        $this->assertArrayNotHasKey('db_pass', $result);
+        $this->assertArrayNotHasKey('db_persist', $result);
+        $this->assertArrayNotHasKey('open_tracker', $result);
     }
 
     public function testCustomOverridesDefault(): void
@@ -70,8 +77,8 @@ class SettingsLoadTest extends PhoenixTestCase
         // for any shared key, while non-shared keys from the default
         // survive and the missing-file fallbacks do NOT fire.
         $default = $this->makeConfigFile([
-            'db_host' => '%db_host%', // matches the real default file's placeholder style
-            'db_name' => '%db_name%',
+            'db_host' => '', // the real default ships these empty
+            'db_name' => '',
             'announce_interval' => 1800,
         ]);
         $custom = $this->makeConfigFile([

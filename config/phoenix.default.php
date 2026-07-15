@@ -5,25 +5,25 @@
 
 ////	General Database Options
 /* ip or hostname to mysql server */
-$settings['db_host'] = '%db_host%';
+$settings['db_host'] = '';
 /* username used to connect to mysql */
-$settings['db_user'] = '%db_user%';
+$settings['db_user'] = '';
 /* password used to connect to mysql */
-$settings['db_pass'] = '%db_pass%';
+$settings['db_pass'] = '';
 /* name of the Phoenix database */
-$settings['db_name'] = '%db_name%';
+$settings['db_name'] = '';
 /* allow database to be reset in admin */
 $settings['db_reset'] = false;
 
 ////	Advanced Database Options
 /* name prefixes for the Phoenix tables */
-$settings['db_prefix'] = '%db_prefix%';
+$settings['db_prefix'] = 'phoenix_';
 /* use persistent connections if available. */
-$settings['db_persist'] = '%db_persist%';
+$settings['db_persist'] = true;
 
 ////	General Tracker Options
 /* track anything announced to it; off = closed/private tracker (BEP 27) */
-$settings['open_tracker'] = '%open_tracker%';
+$settings['open_tracker'] = false;
 /* how often client will send requests */
 $settings['announce_interval'] = 1800; // 30 minutes
 /* how often client can force requests */
