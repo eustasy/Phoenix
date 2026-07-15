@@ -358,6 +358,30 @@ class AnnounceControllerTest extends PhoenixTestCase
         $this->assertStringStartsWith('d', $body);
     }
 
+    public function testOutOfRangeIpv6PortDropsFamilyButKeepsIpv4(): void
+    {
+        // With external_ip on, a client can supply a per-family port via
+        // ?ipv6=[host]:port. An out-of-range IPv6 port must drop only the IPv6
+        // family, not reject the whole announce — the valid IPv4 pair (from
+        // ?port + REMOTE_ADDR) still registers.
+        $settings = $this->settingsForTest();
+        $settings['external_ip'] = true;
+
+        $this->makeRequest(['ipv6' => '[2606:4700:4700::1111]:99999']);
+        $body = \announce_controller(self::$connection, $settings, self::$time, [self::HASH]);
+
+        // A bencode dict, not an error exit.
+        $this->assertStringStartsWith('d', $body);
+
+        $peer = $this->fetchPeer(self::PEER_ID_A);
+        $this->assertNotNull($peer);
+        $this->assertSame('192.0.2.1', $peer['ipv4']);
+        $this->assertSame('6881', $peer['portv4']);
+        // The IPv6 family was dropped for its out-of-range port, so it's the
+        // empty sentinel rather than the supplied address.
+        $this->assertSame('', $peer['ipv6']);
+    }
+
     ////	Validation failures (subprocess: tracker_error exits)
 
     /**
@@ -429,7 +453,7 @@ class AnnounceControllerTest extends PhoenixTestCase
             [self::HASH],
         );
         $this->assertSame(2, $result['exit']);
-        $this->assertStringContainsString('Invalid port', $result['stdout']);
+        $this->assertStringContainsString('Missing or invalid port', $result['stdout']);
     }
 
     public function testRejectsNegativePort(): void
@@ -444,7 +468,43 @@ class AnnounceControllerTest extends PhoenixTestCase
             [self::HASH],
         );
         $this->assertSame(2, $result['exit']);
-        $this->assertStringContainsString('Invalid port', $result['stdout']);
+        $this->assertStringContainsString('Missing or invalid port', $result['stdout']);
+    }
+
+    public function testRejectsMissingPort(): void
+    {
+        // A resolvable IP but no port — ?port omitted and REMOTE_ADDR carries
+        // none — can't be connected to. The controller rejects it as a client
+        // fault ("Missing or invalid port.") rather than letting the insert bind
+        // a false port into the NOT NULL column.
+        $result = $this->runControllerSubprocess(
+            [
+                'info_hash' => self::HASH,
+                'peer_id' => self::PEER_ID_A,
+                // no 'port'
+            ],
+            ['open_tracker' => true],
+            [self::HASH],
+        );
+        $this->assertSame(2, $result['exit']);
+        $this->assertStringContainsString('Missing port', $result['stdout']);
+    }
+
+    public function testRejectsZeroPort(): void
+    {
+        // ?port=0 is falsy, so no port is set and no ip:port fallback fires —
+        // the same "no usable port" case as omitting it entirely.
+        $result = $this->runControllerSubprocess(
+            [
+                'info_hash' => self::HASH,
+                'peer_id' => self::PEER_ID_A,
+                'port' => '0',
+            ],
+            ['open_tracker' => true],
+            [self::HASH],
+        );
+        $this->assertSame(2, $result['exit']);
+        $this->assertStringContainsString('Missing port', $result['stdout']);
     }
 
     public function testClosedTrackerRejectsUnlistedHash(): void

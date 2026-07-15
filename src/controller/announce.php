@@ -60,7 +60,7 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
 
     $candidates = peer_address_candidates($settings, $_GET, $_SERVER);
     if (! count($candidates)) {
-        tracker_error('Unable to obtain client IP');
+        tracker_error('Unable to obtain client IP.');
     }
 
     $resolved = peer_resolve_addresses($candidates, (bool)$settings['reject_private_ips']);
@@ -77,30 +77,53 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
         $peer['portv6'] = $peer['port'];
     }
 
-    // Ports must fit the smallint(5) unsigned peers columns and be a valid
-    // listening port (1-65535). A value outside that range — from ?port= or a
+    // Validate each family's port independently against the smallint(5) unsigned
+    // listening-port range (1-65535). A value outside it — from ?port= or a
     // client-supplied ip:port, which parse_ipv4()/parse_ipv6() do not bound —
-    // would overflow the column, so reject the announce with a clear error
-    // rather than letting the insert throw and silently drop the peer.
-    if (
-        (is_int($peer['portv4']) && ($peer['portv4'] < 1 || $peer['portv4'] > 65535)) ||
-        (is_int($peer['portv6']) && ($peer['portv6'] < 1 || $peer['portv6'] > 65535))
-    ) {
-        tracker_error('Invalid port.', 'never');
+    // can't be stored or connected to, so DROP that family (address + port)
+    // rather than failing the whole announce: the two families are independent,
+    // so a valid pair in the other still stands. Ports diverge per family only
+    // via a client-supplied ip:port (external_ip); ?port= applies to both
+    // equally. $bad_port marks a range rejection so a client whose only problem
+    // is the port still gets a "port" error below, not a generic "no IP" one.
+    $bad_port = false;
+    if (is_int($peer['portv4']) && ($peer['portv4'] < 1 || $peer['portv4'] > 65535)) {
+        $peer['ipv4'] = false;
+        $peer['portv4'] = false;
+        $bad_port = true;
+    }
+    if (is_int($peer['portv6']) && ($peer['portv6'] < 1 || $peer['portv6'] > 65535)) {
+        $peer['ipv6'] = false;
+        $peer['portv6'] = false;
+        $bad_port = true;
     }
 
-    // Validate we got at least one valid IP+port pair
-    if (
-        (
-            ! $peer['ipv4'] &&
-            ! $peer['portv4']
-        ) &&
-        (
-            ! $peer['ipv6'] &&
-            ! $peer['portv6']
-        )
-    ) {
-        tracker_error('Unable to get IP and Port');
+    // A family counts only when BOTH its address and its port are present.
+    $has_v4 = $peer['ipv4'] && $peer['portv4'];
+    $has_v6 = $peer['ipv6'] && $peer['portv6'];
+
+    // Every out-of-range port was dropped and nothing usable is left → the port
+    // was the fault, so report it as such rather than falling through to the
+    // address / missing-port guards below (which would misattribute it).
+    if ($bad_port && ! $has_v4 && ! $has_v6) {
+        tracker_error('Missing or invalid port.', 'never');
+    }
+
+    // Require a usable client address. With neither family resolved — e.g. a
+    // private REMOTE_ADDR dropped by reject_private_ips and no public fallback —
+    // there is nothing to register.
+    if (! $peer['ipv4'] && ! $peer['ipv6']) {
+        tracker_error('Missing or invalid IP address.');
+    }
+
+    // Require a listening port. BitTorrent's `port` is mandatory, and a peer
+    // with an address but no port (port omitted, ?port=0, or a bare address
+    // carrying no ip:port) can't be connected to. Reject it here as a client
+    // fault rather than binding a false/0 port into the NOT NULL peers column,
+    // which would otherwise store an unreachable peer or fail the insert with a
+    // server-fault message (and, with report_errors on, spurious monitor noise).
+    if (! $has_v4 && ! $has_v6) {
+        tracker_error('Missing port.', 'never');
     }
 
     ////	Parse Optional Parameters
