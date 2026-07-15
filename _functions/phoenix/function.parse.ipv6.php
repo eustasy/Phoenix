@@ -9,7 +9,11 @@ function parse_ipv6(string $address) {
 	if ( strpos($candidate, ']:') !== false ) {
 		$parts     = explode(']:', $candidate, 2);
 		$candidate = $parts[0];
-		if ( ctype_digit($parts[1]) ) {
+		// ctype_digit excludes a sign, so only the upper port bound needs checking.
+		if (
+			ctype_digit($parts[1]) &&
+			intval($parts[1]) <= 65535
+		) {
 			$port = intval($parts[1]);
 		}
 	}

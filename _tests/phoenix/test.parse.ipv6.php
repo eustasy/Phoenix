@@ -23,6 +23,13 @@ if ( $r === false || $r['ip'] !== 'dead:beef::1234' || $r['port'] !== false ) {
 	$failure = true;
 }
 
+// Out-of-range port is ignored; the IPv6 address is still accepted with no port.
+$r = parse_ipv6('[dead:beef::1234]:99999');
+if ( $r === false || $r['ip'] !== 'dead:beef::1234' || $r['port'] !== false ) {
+	echo 'Error: parse_ipv6 should accept the IPv6 and ignore a port above 65535.'.PHP_EOL;
+	$failure = true;
+}
+
 // IPv4 input rejected
 if ( parse_ipv6('101.45.75.219') !== false ) {
 	echo 'Error: parse_ipv6 should reject IPv4.'.PHP_EOL;

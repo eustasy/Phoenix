@@ -19,8 +19,16 @@ $peer['portv6'] = false;
 
 ////	Port
 // Set the port if it's that easy.
+// Only accept a usable port: the port columns are SMALLINT UNSIGNED, so a
+// negative or >65535 value is a whole-statement error on strict-mode servers.
 if ( isset($_GET['port']) ) {
-	$peer['port'] = intval($_GET['port']);
+	$port = intval($_GET['port']);
+	if (
+		$port >= 1 &&
+		$port <= 65535
+	) {
+		$peer['port'] = $port;
+	}
 }
 
 ////	Find Possibles

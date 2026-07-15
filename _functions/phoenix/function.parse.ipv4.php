@@ -13,8 +13,12 @@ function parse_ipv4(string $address) {
 		$parts     = explode(':', $candidate, 2);
 		$candidate = $parts[0];
 		// ctype_digit catches the bug in the original: explode() returns strings,
-		// so the previous is_int() check would never match.
-		if ( ctype_digit($parts[1]) ) {
+		// so the previous is_int() check would never match. It also excludes a
+		// sign, so only the upper port bound needs checking.
+		if (
+			ctype_digit($parts[1]) &&
+			intval($parts[1]) <= 65535
+		) {
 			$port = intval($parts[1]);
 		}
 	}

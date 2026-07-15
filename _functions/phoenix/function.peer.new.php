@@ -35,8 +35,11 @@ function peer_new(mysqli $connection, array $settings, int $time, array $peer): 
 			// transfer counters
 			'\''.$peer['uploaded'].'\', '.
 			'\''.$peer['downloaded'].'\', '.
-			// integer left
-			'\''.$peer['left'].'\', '.
+			// integer left; -1 is the in-memory "not reported" sentinel, but the
+			// column is BIGINT UNSIGNED: non-strict servers clamped it to 0
+			// silently, strict-mode servers (MySQL 5.7+/MariaDB 10.2.4+ default)
+			// reject the whole statement, so clamp explicitly.
+			'\''.max(0, $peer['left']).'\', '.
 			// integer state
 			'\''.$peer['state'].'\', '.
 			// unix timestamp
