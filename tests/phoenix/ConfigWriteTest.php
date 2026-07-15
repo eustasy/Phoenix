@@ -85,4 +85,32 @@ class ConfigWriteTest extends TestCase
         // Re-including must not fatal and must round-trip the value.
         $this->assertSame('h', $this->readBack()['admin_password']);
     }
+
+    public function testPreservesFilePermissions(): void
+    {
+        file_put_contents($this->path, "<?php\n\$settings['db_name'] = 'phoenix';\n");
+        // tempnam() creates the file 0600; widen it so a preserved (not reset)
+        // mode is observable after the atomic rename swaps the inode.
+        chmod($this->path, 0o644);
+
+        \config_write($this->path, ['admin_password' => 'h']);
+
+        $this->assertSame(0o644, fileperms($this->path) & 0o777);
+    }
+
+    public function testLeavesNoTempArtifacts(): void
+    {
+        file_put_contents($this->path, "<?php\n\$settings['db_name'] = 'phoenix';\n");
+
+        // The atomic publish writes a sibling .phxcfg_* temp and renames it over
+        // the target; on success nothing new is left behind. Snapshot before/
+        // after so a stale artifact from another run can't fail this.
+        $dir = dirname($this->path);
+        $before = glob($dir.'/.phxcfg_*') ?: [];
+
+        \config_write($this->path, ['admin_password' => 'h']);
+
+        $after = glob($dir.'/.phxcfg_*') ?: [];
+        $this->assertSame($before, $after);
+    }
 }
