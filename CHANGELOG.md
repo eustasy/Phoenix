@@ -2,18 +2,18 @@
 
 ## v3.2.2 - 15/07/2026 - Haggard
 
-* BUGFIX: Full and multi-hash scrapes emitted malformed bencode whenever more or fewer than exactly one torrent matched; all torrents now share a single sorted `files` dictionary.
-* BUGFIX: XML scrapes had no root element and JSON scrapes returned `null` for an empty result set.
-* BUGFIX: The clean task could delete real torrents whose name matched the unescaped test-residue pattern (e.g. "untested"); the purge now only runs against `TESTING_`-prefixed tables and escapes its `LIKE` wildcards.
-* BUGFIX: Announces without `left`, or with an out-of-range port, failed against strict-mode MySQL/MariaDB (the default since MySQL 5.7 / MariaDB 10.2.4). The `left` sentinel is clamped at the SQL boundary and ports are validated to 1–65535.
-* BUGFIX: Duplicate `completed` announces (Transmission sends every announce twice) double-counted downloads; the counter and `download.complete` hook now only fire when the peer was not already seeding.
-* BUGFIX: On PHP 8.1+ any database failure surfaced as an uncaught `mysqli_sql_exception` (HTTP 500) instead of a bencoded tracker error; mysqli error reporting is pinned to return-value mode everywhere.
-* BUGFIX: The connection-failure diagnostic never worked (`mysqli_connect_error()` takes no arguments — fatal on PHP 8.0); the driver detail now goes to the server error log while clients receive a generic failure.
-* BUGFIX: The `tracker_error` test relied on overriding the exit code from a shutdown function, which PHP 7.x ignores for scripts run from a file; it now checks a child process, and the test runner's aggregate exit code finally works.
-* IMPROVES: The backup script creates its backup directory on first run (mode `0700`) and reports unwritable or uncreatable directories with clear messages and a non-zero exit for cron to capture.
-* IMPROVES: Document Nginx and Apache rules denying `.` and `_` prefixed paths, so settings, backups, tests, and internals cannot be fetched over HTTP ([README](README.md#securing-the-web-root)).
-* IMPROVES: The install guide now leads with the `admin.php` installer; hand-written configs get an explicit warning that unreplaced `%placeholder%` values are truthy (a leftover `%open_tracker%` silently opened the tracker).
-* IMPROVES: Document admin authentication: bcrypt hash storage, empty password meaning no authentication, and how to reset or recover the password.
+- BUGFIX: Full and multi-hash scrapes emitted malformed bencode whenever more or fewer than exactly one torrent matched; all torrents now share a single sorted `files` dictionary.
+- BUGFIX: XML scrapes had no root element and JSON scrapes returned `null` for an empty result set.
+- BUGFIX: The clean task could delete real torrents whose name matched the unescaped test-residue pattern (e.g. "untested"); the purge now only runs against `TESTING_`-prefixed tables and escapes its `LIKE` wildcards.
+- BUGFIX: Announces without `left`, or with an out-of-range port, failed against strict-mode MySQL/MariaDB (the default since MySQL 5.7 / MariaDB 10.2.4). The `left` sentinel is clamped at the SQL boundary and ports are validated to 1–65535.
+- BUGFIX: Duplicate `completed` announces (Transmission sends every announce twice) double-counted downloads; the counter and `download.complete` hook now only fire when the peer was not already seeding.
+- BUGFIX: On PHP 8.1+ any database failure surfaced as an uncaught `mysqli_sql_exception` (HTTP 500) instead of a bencoded tracker error; mysqli error reporting is pinned to return-value mode everywhere.
+- BUGFIX: The connection-failure diagnostic never worked (`mysqli_connect_error()` takes no arguments — fatal on PHP 8.0); the driver detail now goes to the server error log while clients receive a generic failure.
+- BUGFIX: The `tracker_error` test relied on overriding the exit code from a shutdown function, which PHP 7.x ignores for scripts run from a file; it now checks a child process, and the test runner's aggregate exit code finally works.
+- IMPROVES: The backup script creates its backup directory on first run (mode `0700`) and reports unwritable or uncreatable directories with clear messages and a non-zero exit for cron to capture.
+- IMPROVES: Document Nginx and Apache rules denying `.` and `_` prefixed paths, so settings, backups, tests, and internals cannot be fetched over HTTP ([README](README.md#securing-the-web-root)).
+- IMPROVES: The install guide now leads with the `admin.php` installer; hand-written configs get an explicit warning that unreplaced `%placeholder%` values are truthy (a leftover `%open_tracker%` silently opened the tracker).
+- IMPROVES: Document admin authentication: bcrypt hash storage, empty password meaning no authentication, and how to reset or recover the password.
 
 ## v3.2.1 - 07/07/2026 - Haggard
 
