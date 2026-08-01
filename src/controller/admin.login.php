@@ -22,20 +22,27 @@ function admin_login_controller(array $settings): ?string
         return admin_setup_password_controller($settings, __DIR__.'/../../config/phoenix.custom.php');
     }
 
-    // Harden the session cookie before session_start() — params apply to the
-    // cookie that is about to be sent. Secure is conditional on the request
-    // arriving over HTTPS so local-dev plain-HTTP setups still work.
-    session_set_cookie_params([
-        'httponly' => true,
-        'samesite' => 'Lax',
-        'secure' => ! empty($_SERVER['HTTPS']),
-    ]);
-    session_start();
+    // Only touch the session when the request actually presents one. PHP's
+    // files handler creates a session file on session_start() whether or not
+    // anything is ever stored in it, so starting one for every anonymous hit
+    // lets a scanner fill the session directory with a file per request. A
+    // request with no session has no logout to process and no auth state to
+    // read, so the start is deferred to the one branch that needs somewhere to
+    // record a result: a successful login.
+    require_once __DIR__.'/../functions/auth.session.start.php';
+    $has_session = session_status() === PHP_SESSION_ACTIVE
+        || isset($_COOKIE[session_name()])
+        // A pre-set id (session.use_only_cookies off, or a caller that set one)
+        // is still a presented session.
+        || session_id() !== '';
+    if ($has_session) {
+        auth_session_start();
 
-    ////	Handle logout
+        ////	Handle logout
 
-    require_once __DIR__.'/../functions/auth.handle.logout.php';
-    auth_handle_logout();
+        require_once __DIR__.'/../functions/auth.handle.logout.php';
+        auth_handle_logout();
+    }
 
     ////	Check authentication
 
@@ -54,6 +61,10 @@ function admin_login_controller(array $settings): ?string
                     isset($_POST['password']) && is_string($_POST['password']) ? $_POST['password'] : '',
                     __DIR__.'/../../config/phoenix.custom.php',
                 );
+                // A successful login is the first point that needs somewhere to
+                // record state, so start the session here when the request did
+                // not already carry one.
+                auth_session_start();
                 // Successful login clears the brute-force counter and retires
                 // any pre-login session id (anti session-fixation) so an
                 // attacker who planted one cannot resume the authed session.
@@ -71,24 +82,35 @@ function admin_login_controller(array $settings): ?string
                 exit;
             }
 
-            // Failed login: escalating per-session delay to throttle brute
-            // force. A client that keeps its session cookie is slowed
-            // progressively; a cookie-less attacker still pays the base delay on
-            // each request. Complements — does not replace — the per-IP proxy
-            // rate-limiting documented in APACHE.md / NGINX.md.
-            $fails = (isset($_SESSION['login_fails']) && is_int($_SESSION['login_fails']))
-                ? $_SESSION['login_fails'] + 1
-                : 1;
-            $_SESSION['login_fails'] = $fails;
+            // Failed login: escalating backoff for a client that carries a
+            // session, ADVERTISED rather than enforced. Nothing is tracked for a
+            // request that presented no session — there is no state to escalate
+            // against, and starting one here would let a scanner spend our disk.
+            // Real per-IP rate limiting belongs at the proxy: see APACHE.md /
+            // NGINX.md.
+            if ($has_session) {
+                $fails = (isset($_SESSION['login_fails']) && is_int($_SESSION['login_fails']))
+                    ? $_SESSION['login_fails'] + 1
+                    : 1;
+                $_SESSION['login_fails'] = $fails;
 
-            require_once __DIR__.'/../functions/auth.login.throttle.delay.php';
-            $delay = auth_login_throttle_delay(
-                $fails,
-                $settings['admin_login_delay'],
-                $settings['admin_login_delay_max'],
-            );
-            if ($delay > 0) {
-                sleep($delay);
+                require_once __DIR__.'/../functions/auth.login.throttle.delay.php';
+                $delay = auth_login_throttle_delay(
+                    $fails,
+                    $settings['admin_login_delay'],
+                    $settings['admin_login_delay_max'],
+                );
+                if ($delay > 0) {
+                    // Advertise the backoff instead of sleeping through it. A
+                    // blocking sleep() holds the PHP worker for its whole
+                    // duration, so a burst of failed logins could exhaust the
+                    // pool — the request costs us more than it costs the
+                    // attacker. 429 + Retry-After asks a well-behaved client to
+                    // wait while the worker is freed immediately. The form is
+                    // still rendered below, so a browser shows the error.
+                    http_response_code(429);
+                    header('Retry-After: '.$delay);
+                }
             }
         }
 

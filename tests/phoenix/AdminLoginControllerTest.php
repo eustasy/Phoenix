@@ -22,6 +22,9 @@ class AdminLoginControllerTest extends PhoenixTestCase
     private string $useCookiesBackup;
     private string $useOnlyCookiesBackup;
 
+    /** @var list<string> Isolated session save_paths to remove on teardown. */
+    private array $sessionDirs = [];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -57,6 +60,14 @@ class AdminLoginControllerTest extends PhoenixTestCase
         $_SERVER = $this->serverBackup;
         ini_set('session.use_cookies', $this->useCookiesBackup);
         ini_set('session.use_only_cookies', $this->useOnlyCookiesBackup);
+
+        foreach ($this->sessionDirs as $dir) {
+            foreach (glob($dir.'/sess_*') ?: [] as $file) {
+                @unlink($file);
+            }
+            @rmdir($dir);
+        }
+        $this->sessionDirs = [];
 
         parent::tearDown();
     }
@@ -142,6 +153,75 @@ class AdminLoginControllerTest extends PhoenixTestCase
         ]);
         $this->assertIsString($result);
         $this->assertStringContainsString('Incorrect password.', $result);
+    }
+
+    ////	Session handling on failed logins
+
+    /**
+     * Build a subprocess that runs one failed login against an isolated session
+     * save_path, and reports the resulting status code and session-file count.
+     */
+    private function failedLoginScript(string $savePath, bool $withSession): string
+    {
+        $settings = [
+            'admin_password' => password_hash('secret', PASSWORD_DEFAULT),
+            'admin_totp_secret' => '',
+            'admin_login_delay' => 2,
+            'admin_login_delay_max' => 8,
+            'phoenix_version' => 'Phoenix Test v.0',
+        ];
+
+        return '<?php '.
+            'ini_set("session.save_path", '.var_export($savePath, true).'); '.
+            'ini_set("session.use_cookies", "0"); '.
+            '$_SERVER["REQUEST_METHOD"] = "POST"; '.
+            '$_SERVER["REQUEST_URI"]   = "/admin.php"; '.
+            '$_POST = ["process" => "login", "password" => "wrong"]; '.
+            ($withSession ? 'session_id(str_repeat("a", 26)); ' : '').
+            'require '.var_export(self::CONTROLLER_PATH, true).'; '.
+            '$out = admin_login_controller('.var_export($settings, true).'); '.
+            'echo "STATUS:".intval(http_response_code())."\n"; '.
+            'echo "FILES:".count(glob('.var_export($savePath, true).'."/sess_*") ?: [])."\n"; '.
+            'echo "BANNER:".intval(strpos((string)$out, "Incorrect password.") !== false)."\n";';
+    }
+
+    public function testFailedLoginWithoutASessionStartsNoneAndDoesNotThrottle(): void
+    {
+        // A session file is created by session_start() whether or not anything
+        // is stored in it, so an anonymous scanner POSTing at admin.php must not
+        // cause one — otherwise a brute-force run fills the session directory.
+        // With nothing to escalate against there is also no backoff to advertise.
+        $dir = $this->makeSessionDir();
+        $result = $this->runPhpSubprocess($this->failedLoginScript($dir, false));
+
+        $this->assertSame(0, $result['exit'], $result['stderr']);
+        $this->assertStringContainsString('FILES:0', $result['stdout']);
+        $this->assertStringContainsString('STATUS:0', $result['stdout']);
+        // The login form still renders with its error banner.
+        $this->assertStringContainsString('BANNER:1', $result['stdout']);
+    }
+
+    public function testFailedLoginWithASessionAdvertisesBackoff(): void
+    {
+        // A client that carries a session IS tracked, and the escalating delay
+        // is advertised as 429 + Retry-After rather than slept through, so the
+        // worker is released immediately.
+        $dir = $this->makeSessionDir();
+        $result = $this->runPhpSubprocess($this->failedLoginScript($dir, true));
+
+        $this->assertSame(0, $result['exit'], $result['stderr']);
+        $this->assertStringContainsString('STATUS:429', $result['stdout']);
+        $this->assertStringContainsString('FILES:1', $result['stdout']);
+        $this->assertStringContainsString('BANNER:1', $result['stdout']);
+    }
+
+    private function makeSessionDir(): string
+    {
+        $dir = sys_get_temp_dir().'/phx_sess_'.bin2hex(random_bytes(6));
+        mkdir($dir, 0o700);
+        $this->sessionDirs[] = $dir;
+
+        return $dir;
     }
 
     public function testRedirectsOnSuccessfulLogin(): void

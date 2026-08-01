@@ -11,8 +11,9 @@ declare(strict_types=1);
 //
 // A session is started only when the request actually presents the session
 // cookie, so cookieless (programmatic) callers never spin up a session here.
-// The cookie params mirror admin_login_controller() so we read the same
-// hardened session rather than minting a divergent one.
+// The start goes through auth_session_start(), shared with
+// admin_login_controller(), so we read the same hardened session rather than
+// minting a divergent one.
 
 function api_admin_session_active(): bool
 {
@@ -21,12 +22,8 @@ function api_admin_session_active(): bool
             return false;
         }
 
-        session_set_cookie_params([
-            'httponly' => true,
-            'samesite' => 'Lax',
-            'secure' => ! empty($_SERVER['HTTPS']),
-        ]);
-        session_start();
+        require_once __DIR__.'/auth.session.start.php';
+        auth_session_start();
     }
 
     require_once __DIR__.'/auth.is.authenticated.php';

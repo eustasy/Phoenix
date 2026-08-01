@@ -138,9 +138,12 @@ $settings['admin_password'] = '';
 /* other means (reverse-proxy auth / IP allowlist) — better still, delete */
 /* public/admin.php once you're up and running. */
 $settings['admin_auth_optional'] = false;
-/* seconds to delay after a failed admin login (brute-force throttle); 0 disables */
+/* seconds of backoff advertised (429 + Retry-After) after a failed admin */
+/* login; 0 disables. Applies only to a client that carries a session — one */
+/* that discards its cookie is not tracked, so use per-IP rate limiting at the */
+/* proxy (see APACHE.md / NGINX.md) for actual brute-force protection. */
 $settings['admin_login_delay'] = 2;
-/* cap on the escalating per-session login delay */
+/* cap on the escalating per-session login backoff */
 $settings['admin_login_delay_max'] = 8;
 /* base32 TOTP secret for optional admin two-factor auth; empty = no 2FA. */
 /* Set during install (needs the eustasy/authenticatron package + ext-gd for */
