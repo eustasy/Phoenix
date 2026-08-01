@@ -22,7 +22,7 @@ function admin_torrents_controller(mysqli $connection, array $settings): string
     $csrf_enabled = ! empty($settings['admin_password']);
 
     $process = '';
-    if (! empty($_POST['process'])) {
+    if (! empty($_POST['process']) && is_string($_POST['process'])) {
         $process = htmlentities($_POST['process'], ENT_QUOTES, 'UTF-8');
     }
 

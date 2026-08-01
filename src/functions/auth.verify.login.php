@@ -15,6 +15,7 @@ function auth_verify_login(array $settings): bool
     // password check fails we return false before ever looking at the code.
     if (
         ! isset($_POST['password']) ||
+        ! is_string($_POST['password']) ||
         ! password_verify($_POST['password'], $settings['admin_password'])
     ) {
         return false;

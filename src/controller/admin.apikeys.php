@@ -22,7 +22,7 @@ function admin_apikeys_controller(array $settings, ?string $config_path = null):
     $writable = is_writable(dirname($config_path));
 
     $process = '';
-    if (! empty($_POST['process'])) {
+    if (! empty($_POST['process']) && is_string($_POST['process'])) {
         $process = htmlentities($_POST['process'], ENT_QUOTES, 'UTF-8');
     }
 

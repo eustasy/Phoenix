@@ -134,4 +134,33 @@ class AuthVerifyLoginTest extends TestCase
         $this->assertFalse(auth_verify_login($settings));
     }
 
+    ////	Malformed input
+
+    public function testReturnsFalseWhenPasswordIsAnArray()
+    {
+        // `password[]=x` is routine scanner fuzzing. Without the is_string
+        // guard password_verify() raises a TypeError under strict_types,
+        // turning the unauthenticated login endpoint into a 500.
+        $_POST['password'] = ['correct_password'];
+        $settings = [
+            'admin_password' => password_hash('correct_password', PASSWORD_DEFAULT),
+            'admin_totp_secret' => '',
+        ];
+
+        $this->assertFalse(auth_verify_login($settings));
+    }
+
+    public function testReturnsFalseWhenCodeIsAnArray()
+    {
+        $secret = \eustasy\Authenticatron::makeSecret();
+        $_POST['password'] = 'correct_password';
+        $_POST['code'] = [\eustasy\Authenticatron::getCode($secret)];
+        $settings = [
+            'admin_password' => password_hash('correct_password', PASSWORD_DEFAULT),
+            'admin_totp_secret' => $secret,
+        ];
+
+        $this->assertFalse(auth_verify_login($settings));
+    }
+
 }

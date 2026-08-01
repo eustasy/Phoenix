@@ -20,7 +20,7 @@ function admin_utilities_controller(mysqli $connection, array $settings, int $ti
     $csrf_enabled = ! empty($settings['admin_password']);
 
     $process = '';
-    if (! empty($_POST['process'])) {
+    if (! empty($_POST['process']) && is_string($_POST['process'])) {
         // $process is only ever compared against literal action names below,
         // but htmlentities-ing it keeps any reflection of the value into HTML
         // safe should a future render path emit it.

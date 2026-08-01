@@ -29,7 +29,7 @@ function admin_edit_controller(mysqli $connection, array $settings): string
     }
 
     $process = '';
-    if (! empty($_POST['process'])) {
+    if (! empty($_POST['process']) && is_string($_POST['process'])) {
         $process = htmlentities($_POST['process'], ENT_QUOTES, 'UTF-8');
     }
 
