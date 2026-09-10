@@ -23,6 +23,28 @@ class ViewLoginHtmlTest extends TestCase
         $this->assertStringNotContainsString('Incorrect password.', $html);
     }
 
+    public function testCarriesAUsernameFieldForPasswordManagers(): void
+    {
+        // Without one, Chrome treats the authentication-code box as the username
+        // — autofilling into it and offering to save the code as the username.
+        // It must come before the password field and be a real input, not
+        // display:none, which the heuristics skip.
+        $html = view_login_html(false, true);
+
+        $this->assertStringContainsString('autocomplete="username"', $html);
+        $this->assertLessThan(
+            strpos($html, 'type="password"'),
+            strpos($html, 'autocomplete="username"'),
+            'the username field must precede the password field',
+        );
+        // Visually hidden, not display:none / [hidden] — Chrome skips those.
+        $this->assertStringContainsString('class="ph-visually-hidden"', $html);
+        preg_match('/<input[^>]*autocomplete="username"[^>]*>/', $html, $m);
+        $this->assertNotEmpty($m, 'username input should render');
+        // The standalone hidden attribute, not the aria-hidden it does carry.
+        $this->assertDoesNotMatchRegularExpression('/\shidden[\s>]/', $m[0]);
+    }
+
     public function testShowsErrorBannerWhenFlagged(): void
     {
         // The controller passes true here after a failed POST so the next

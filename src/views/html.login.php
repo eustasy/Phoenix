@@ -31,6 +31,16 @@ function view_login_html(bool $show_error = false, bool $totp_required = false, 
 			'.$error_html.'
 			<form method="POST" action="">
 				<input type="hidden" name="process" value="login">
+				<!-- Chrome will decide SOMETHING in this form is the username, and
+				     autocomplete="one-time-code" does not stop it: with no username
+				     field it picks the authentication-code box, offers to save the
+				     code as the username, and autofills into it on the next visit.
+				     Giving it a real username field to bind to fixes both. Phoenix
+				     has no user accounts, so the value is a constant; it is
+				     visually hidden rather than display:none, which Chrome skips,
+				     and kept out of the tab order and the accessibility tree. The
+				     field is ignored server-side. -->
+				<input type="text" name="username" value="admin" autocomplete="username" readonly tabindex="-1" aria-hidden="true" class="ph-visually-hidden">
 				<div class="ph-field"><label for="login-password">Password</label>
 					<input type="password" id="login-password" name="password" autocomplete="current-password" autofocus placeholder="••••••••">
 				</div>
