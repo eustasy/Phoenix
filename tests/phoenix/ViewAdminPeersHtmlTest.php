@@ -17,7 +17,7 @@ class ViewAdminPeersHtmlTest extends TestCase
     /** @return array<string, mixed> */
     private function settings(): array
     {
-        return ['phoenix_version' => 'Phoenix Test v.0', 'admin_password' => 'hash'];
+        return ['phoenix_version' => 'Phoenix Test v.0', 'admin_password' => 'hash', 'stats_geo' => false];
     }
 
     /**
@@ -41,6 +41,36 @@ class ViewAdminPeersHtmlTest extends TestCase
             'name' => 'Ubuntu 24.04.1 LTS',
             'client' => 'Transmission 4.1.1.0',
         ], $overrides);
+    }
+
+    public function testCountryColumnHiddenWhenGeoOff(): void
+    {
+        $html = view_admin_peers_html($this->settings(), [$this->peer()], 1, 1, 0, 200, 'tok');
+        $this->assertStringNotContainsString('<th>Country</th>', $html);
+        $this->assertStringNotContainsString('ph-cc', $html);
+    }
+
+    public function testCountryColumnShowsCodeWithNameOnHover(): void
+    {
+        $settings = $this->settings();
+        $settings['stats_geo'] = true;
+        $peer = $this->peer(['country' => 'GB', 'country_name' => 'United Kingdom']);
+
+        $html = view_admin_peers_html($settings, [$peer], 1, 1, 0, 200, 'tok');
+        $this->assertStringContainsString('<th>Country</th>', $html);
+        $this->assertStringContainsString('<abbr class="ph-cc" title="United Kingdom">GB</abbr>', $html);
+    }
+
+    public function testCountryColumnDashesAnUnresolvedAddress(): void
+    {
+        // Geo on but this address is not in the database — the column still
+        // renders, so the row keeps its column count.
+        $settings = $this->settings();
+        $settings['stats_geo'] = true;
+
+        $html = view_admin_peers_html($settings, [$this->peer(['country' => '', 'country_name' => ''])], 1, 1, 0, 200, 'tok');
+        $this->assertStringContainsString('<th>Country</th>', $html);
+        $this->assertStringNotContainsString('ph-cc', $html);
     }
 
     public function testRendersBaseDocument(): void

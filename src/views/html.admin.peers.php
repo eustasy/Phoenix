@@ -41,8 +41,8 @@ declare(strict_types=1);
  *     updated: int,
  *     name: string|null,
  *     client: string,
- *     country: string,
- *     country_name: string,
+ *     country?: string,
+ *     country_name?: string,
  * }> $peers
  */
 function view_admin_peers_html(array $settings, array $peers, int $total, int $swarms, int $offset, int $limit, string $csrf_token): string
@@ -93,11 +93,15 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
 
         // ISO code, full name on hover. Deliberately not a flag: Phoenix ships
         // no flag artwork, and emoji flags render as bare letters on Windows,
-        // which is the worst of both.
-        $country = $peer['country'] === ''
-            ? '<span class="dim">&mdash;</span>'
-            : '<abbr class="ph-cc" title="'.htmlspecialchars($peer['country_name'], ENT_QUOTES, 'UTF-8').'">'.
-                htmlspecialchars($peer['country'], ENT_QUOTES, 'UTF-8').'</abbr>';
+        // which is the worst of both. Built only when the column is shown, so
+        // the geo keys are required only when geo is actually on.
+        $country = '';
+        if ($show_geo) {
+            $country = ($peer['country'] ?? '') === ''
+                ? '<span class="dim">&mdash;</span>'
+                : '<abbr class="ph-cc" title="'.htmlspecialchars((string) ($peer['country_name'] ?? ''), ENT_QUOTES, 'UTF-8').'">'.
+                    htmlspecialchars((string) $peer['country'], ENT_QUOTES, 'UTF-8').'</abbr>';
+        }
 
         $state = $peer['state'] === 1
             ? '<span class="listed">Seeding</span>'
