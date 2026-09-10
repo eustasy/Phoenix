@@ -28,7 +28,7 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
 			<p class="dim geo-empty-note">Enable the privacy-preserving events ledger and geo enrichment to populate this map: turn on <code>stats_enabled</code> and <code>stats_geo</code>, run <code>composer require geoip2/geoip2</code>, and point <code>stats_geo_database</code> at a GeoLite2 country <code>.mmdb</code>.</p>
 		</div>';
 
-        return view_admin_layout_html($settings, 'Geography', $body, 'geography', $csrf_token, 'Tracker', '', true);
+        return view_admin_layout_html($settings, 'Geography', $body, 'geography', $csrf_token, 'Tracker', '', 'narrow');
     }
 
     ////	Presentation for each known metric (the controller decides which to
@@ -122,5 +122,5 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
     $inline_js = 'var GEO = '.$geo_json.";\nvar GEO_DEFAULT = ".json_encode($default).";\n"
         .(string) file_get_contents(__DIR__.'/../../public/assets/_geography.js');
 
-    return view_admin_layout_html($settings, 'Geography', $body, 'geography', $csrf_token, 'Tracker', $actions, false, '', $inline_js, $extra_srcs, $head_pre);
+    return view_admin_layout_html($settings, 'Geography', $body, 'geography', $csrf_token, 'Tracker', $actions, '', '', $inline_js, $extra_srcs, $head_pre);
 }

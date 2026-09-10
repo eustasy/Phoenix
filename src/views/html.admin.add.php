@@ -32,7 +32,7 @@ function view_admin_add_html(array $settings, bool $tables_installed, string|fal
     if (! $tables_installed) {
         $body .= '<div class="alert alert-danger"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a> before adding torrents.</div></div>';
 
-        return view_admin_layout_html($settings, 'Add a Torrent', $body, 'add', $csrf_token, 'Tracker', '', true);
+        return view_admin_layout_html($settings, 'Add a Torrent', $body, 'add', $csrf_token, 'Tracker', '', 'narrow');
     }
 
     // Static page body — self-contained markup in src/partials/admin.add.body.html
@@ -46,5 +46,5 @@ function view_admin_add_html(array $settings, bool $tables_installed, string|fal
     // PhoenixTorrent (assets/torrent-parse.js); both load as page sources.
     $actions = '<a class="btn btn-secondary btn-sm" href="?page=upload"><span class="ph-ico" data-lucide="upload"></span>Bulk upload</a>';
 
-    return view_admin_layout_html($settings, 'Add a Torrent', $body, 'add', $csrf_token, 'Tracker', $actions, true, '', '', ['/assets/torrent-parse.js', '/assets/add.js']);
+    return view_admin_layout_html($settings, 'Add a Torrent', $body, 'add', $csrf_token, 'Tracker', $actions, 'narrow', '', '', ['/assets/torrent-parse.js', '/assets/add.js']);
 }

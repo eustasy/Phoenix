@@ -20,7 +20,9 @@ declare(strict_types=1);
 //                  admin_password is set, since CSRF is not enforced then)
 //   $crumb       - small label above the title (e.g. "Tracker" / "Server")
 //   $actions     - trusted HTML for the topbar action area (buttons), or ''
-//   $narrow      - narrow the body column (forms/diagnostics opt in)
+//   $width       - body column measure: '' (default 1200px reading measure),
+//                  'narrow' (760px, forms/diagnostics) or 'wide' (uncapped, for
+//                  pages whose tables need every pixel). Anything else is ignored.
 //   $extra_head  - per-page <style>/<link> injected after phoenix.css
 //   $inline_js   - inline JS for the rare page that must receive PHP data
 //                  (emitted in a <script> only when non-empty)
@@ -33,7 +35,7 @@ declare(strict_types=1);
  * @param PhoenixSettings $settings
  * @param list<string> $extra_srcs
  */
-function view_admin_layout_html(array $settings, string $title, string $body, string $active, string $csrf_token = '', string $crumb = 'Tracker', string $actions = '', bool $narrow = false, string $extra_head = '', string $inline_js = '', array $extra_srcs = [], string $head_pre = ''): string
+function view_admin_layout_html(array $settings, string $title, string $body, string $active, string $csrf_token = '', string $crumb = 'Tracker', string $actions = '', string $width = '', string $extra_head = '', string $inline_js = '', array $extra_srcs = [], string $head_pre = ''): string
 {
     require_once __DIR__.'/html.head.php';
     require_once __DIR__.'/html.mark.php';
@@ -103,7 +105,8 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
 
     $crumb_html = $crumb !== '' ? '<p class="ph-crumb">'.htmlspecialchars($crumb, ENT_QUOTES, 'UTF-8').'</p>' : '';
     $actions_html = $actions !== '' ? '<div class="ph-topbar-actions">'.$actions.'</div>' : '';
-    $body_class = 'ph-body'.($narrow ? ' narrow' : '');
+    // Whitelisted so an unexpected value can never reach the class attribute.
+    $body_class = 'ph-body'.(in_array($width, ['narrow', 'wide'], true) ? ' '.$width : '');
 
     // assets/admin.js (the form double-submit guard) loads on every admin page,
     // ahead of any page-specific sources.

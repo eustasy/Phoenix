@@ -52,7 +52,7 @@ class ViewAdminTorrentsHtmlTest extends TestCase
         $this->assertStringContainsString('>Name ', $html);
         $this->assertStringContainsString('Test Torrent', $html);
         // The hash cell carries the full info hash for click-to-copy.
-        $this->assertStringContainsString('data-hash="'.str_repeat('a', 40).'"', $html);
+        $this->assertStringContainsString('data-copy="'.str_repeat('a', 40).'"', $html);
         $this->assertStringContainsString('alice', $html);
         // Size renders human-readable (1024 bytes -> 1.0 KB).
         $this->assertStringContainsString('1.0 KB', $html);
@@ -138,7 +138,7 @@ class ViewAdminTorrentsHtmlTest extends TestCase
         $html = view_admin_torrents_html($this->settings(), [], false, 'tok', $swarms);
 
         $this->assertStringContainsString('Unregistered swarms', $html);
-        $this->assertStringContainsString('data-hash="'.str_repeat('e', 40).'"', $html);
+        $this->assertStringContainsString('data-copy="'.str_repeat('e', 40).'"', $html);
         $this->assertStringContainsString('href="?page=peers&amp;info_hash='.str_repeat('e', 40).'"', $html);
     }
 

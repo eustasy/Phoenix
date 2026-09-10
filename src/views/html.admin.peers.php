@@ -63,7 +63,21 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
         if ($peer['ipv6'] !== '') {
             $addrs[] = htmlspecialchars('['.$peer['ipv6'].']:'.$peer['portv6'], ENT_QUOTES, 'UTF-8');
         }
-        $address = $addrs === [] ? '<span class="dim">&mdash;</span>' : implode('<br>', $addrs);
+        // One row per address rather than <br>-joined, so each truncates on its
+        // own and carries its own copy button — the displayed form is elided, so
+        // copying is the only way to get the whole value back out. The entries
+        // are already escaped, so they are safe in the attributes too.
+        $address = $addrs === []
+            ? '<span class="dim">&mdash;</span>'
+            : implode('', array_map(
+                static fn (string $addr): string => '<span class="ph-addr-row">'.
+                    '<span class="ph-addr" title="'.$addr.'">'.$addr.'</span>'.
+                    '<button class="ph-copy" type="button" title="Copy address" aria-label="Copy address" data-copy="'.$addr.'">'.
+                    '<span class="ph-ico" data-lucide="copy"></span>'.
+                    '</button>'.
+                    '</span>',
+                $addrs,
+            ));
 
         $state = $peer['state'] === 1
             ? '<span class="listed">Seeding</span>'
@@ -106,7 +120,7 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
 			<span class="dim text-sm">'.$window.'</span>
 		</div>
 
-		<div class="ph-card-table wide">
+		<div class="ph-card-table wide ph-nowrap">
 			<table id="tbl-peers">
 				<thead><tr><th>Client</th><th>Torrent</th><th>Address</th><th>State</th><th class="table-col-numeric">Up</th><th class="table-col-numeric">Down</th><th class="table-col-numeric">Left</th><th>Last seen</th></tr></thead>
 				<tbody>'.$rows.'</tbody>
@@ -118,5 +132,5 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
 		</div>
 		'.$pager;
 
-    return view_admin_layout_html($settings, 'Peers', $body, 'peers', $csrf_token, 'Tracker', $actions, false, '', '', ['/assets/tables.js']);
+    return view_admin_layout_html($settings, 'Peers', $body, 'peers', $csrf_token, 'Tracker', $actions, 'wide', '', '', ['/assets/copy.js', '/assets/tables.js']);
 }

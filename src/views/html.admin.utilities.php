@@ -60,5 +60,5 @@ function view_admin_utilities_html(array $settings, bool $tables_installed, stri
 
     $body .= '<div class="ph-card-table"><table><tbody>'.$rows.'</tbody></table></div>';
 
-    return view_admin_layout_html($settings, 'Utilities', $body, 'utilities', $csrf_token, 'Server', '', true);
+    return view_admin_layout_html($settings, 'Utilities', $body, 'utilities', $csrf_token, 'Server', '', 'narrow');
 }

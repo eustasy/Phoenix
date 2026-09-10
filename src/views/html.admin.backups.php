@@ -52,5 +52,5 @@ function view_admin_backups_html(array $settings, array $backups, string|false $
             '<tbody>'.$rows.'</tbody></table></div>';
     }
 
-    return view_admin_layout_html($settings, 'Backups', $body, 'backups', $csrf_token, 'Server', $actions, true);
+    return view_admin_layout_html($settings, 'Backups', $body, 'backups', $csrf_token, 'Server', $actions, 'narrow');
 }

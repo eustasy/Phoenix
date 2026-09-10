@@ -65,7 +65,7 @@ class ViewIndexHtmlTest extends PhoenixTestCase
         $this->assertStringContainsString('<span class="ph-name">Test Torrent</span>', $html);
         // The hash cell truncates and carries the full hash for click-to-copy.
         $this->assertStringContainsString('<span class="hash-text">aaaaaaaaaaaa</span>', $html);
-        $this->assertStringContainsString('data-hash="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"', $html);
+        $this->assertStringContainsString('data-copy="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"', $html);
         $this->assertStringContainsString('<td class="table-col-numeric">2</td>', $html);
         $this->assertStringContainsString('<td class="table-col-numeric">1</td>', $html);
         $this->assertStringContainsString('<td class="table-col-numeric">7</td>', $html);

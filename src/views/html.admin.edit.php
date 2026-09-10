@@ -44,7 +44,7 @@ function view_admin_edit_html(array $settings, string $info_hash, array|false $t
     if ($torrent === false) {
         $body = $message_html.'<div class="alert alert-danger alert-center" role="alert"><span class="ph-ico" data-lucide="circle-alert"></span>Torrent not found.</div>';
 
-        return view_admin_layout_html($settings, 'Edit Torrent', $body, 'torrents', $csrf_token, 'Tracker', $back, true);
+        return view_admin_layout_html($settings, 'Edit Torrent', $body, 'torrents', $csrf_token, 'Tracker', $back, 'narrow');
     }
 
     // Render the stored meta back into the request shape the form submits.
@@ -93,5 +93,5 @@ function view_admin_edit_html(array $settings, string $info_hash, array|false $t
 			</form>
 		</div>';
 
-    return view_admin_layout_html($settings, 'Edit Torrent', $body, 'torrents', $csrf_token, 'Tracker', $back, true);
+    return view_admin_layout_html($settings, 'Edit Torrent', $body, 'torrents', $csrf_token, 'Tracker', $back, 'narrow');
 }

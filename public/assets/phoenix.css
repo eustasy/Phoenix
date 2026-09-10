@@ -163,6 +163,7 @@ body { background-color: var(--color-bg); color: var(--color-text); }
 .ph-topbar-actions { display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
 .ph-body { padding: var(--space-6) var(--space-8) var(--space-12); max-width: 1200px; width: 100%; }
 .ph-body.narrow { max-width: 760px; }
+.ph-body.wide { max-width: none; }
 
 /* Section heading inside body */
 .ph-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); margin-block: var(--space-6) var(--space-3); }
@@ -262,7 +263,9 @@ body { background-color: var(--color-bg); color: var(--color-text); }
   color: var(--color-text-secondary);
 }
 .hash-text { max-width: 13ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hash-copy {
+/* Click-to-copy button. Copies whatever its data-copy holds — an info hash on
+   the index and Torrents, a peer address on Peers. */
+.ph-copy {
   display: inline-flex; align-items: center; justify-content: center;
   width: 22px; height: 22px;
   border: none; background: none; cursor: pointer;
@@ -270,9 +273,9 @@ body { background-color: var(--color-bg); color: var(--color-text); }
   flex-shrink: 0;
   transition: background-color var(--duration-fast) var(--easing), color var(--duration-fast) var(--easing);
 }
-.hash-copy:hover { background-color: var(--color-surface-overlay); color: var(--color-text); }
-.hash-copy .ph-ico { width: 14px; height: 14px; }
-.hash-copy.is-copied { color: var(--color-success); }
+.ph-copy:hover { background-color: var(--color-surface-overlay); color: var(--color-text); }
+.ph-copy .ph-ico { width: 14px; height: 14px; }
+.ph-copy.is-copied { color: var(--color-success); }
 /* Read-only full-hash box (Edit Torrent) — the hash sits in a code-style well
    and shows in full rather than truncating. */
 .hash-box { width: 100%; padding: var(--space-2) var(--space-3); background-color: var(--color-code-bg); border: var(--border-width) solid var(--color-code-border); border-radius: var(--radius-md); }
@@ -297,6 +300,25 @@ body { background-color: var(--color-bg); color: var(--color-text); }
 .ph-card-table tbody td { vertical-align: middle; }
 .ph-card-table tbody tr:last-child td { border-bottom: none; }
 .ph-card-table tbody tr:hover { background-color: var(--color-surface-raised); }
+/* Single-line rows. Byte counts ("1.5 GB") and timestamps read badly broken
+   across two lines, and wrapping them buys no width back — the unbreakable
+   columns still set the table's minimum. Instead nothing wraps and the one
+   genuinely variable-width column truncates, which is what actually keeps the
+   table inside its container. */
+.ph-card-table.ph-nowrap tbody td { white-space: nowrap; }
+/* A peer address. Each is its own block, so a dual-stack peer's v4 and v6
+   truncate independently rather than one long line eliding the other. An
+   IPv4 address with port fits inside the cap; a bracketed IPv6 does not, and
+   ellipsis is preferable to that column dictating the table's width. The full
+   value stays in the title attribute. */
+.ph-addr-row { display: flex; align-items: center; gap: var(--space-1-5); }
+.ph-addr {
+  min-width: 0;
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .ph-name { color: var(--color-text); font-weight: var(--font-weight-medium); }
 
 /* Sortable headers */

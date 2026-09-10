@@ -162,5 +162,5 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
 
     $actions = '<a class="btn btn-primary btn-sm" href="?page=add"><span class="ph-ico" data-lucide="plus"></span>Add Torrent</a>';
 
-    return view_admin_layout_html($settings, 'Torrents', $body, 'torrents', $csrf_token, 'Tracker', $actions, false, '', '', ['/assets/hash.js', '/assets/tables.js']);
+    return view_admin_layout_html($settings, 'Torrents', $body, 'torrents', $csrf_token, 'Tracker', $actions, '', '', '', ['/assets/copy.js', '/assets/tables.js']);
 }

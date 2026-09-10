@@ -74,5 +74,5 @@ function view_admin_torrent_peers_html(array $settings, string $info_hash, ?stri
             '<tbody>'.$rows.'</tbody></table></div>';
     }
 
-    return view_admin_layout_html($settings, 'Peers', $body, 'torrents', $csrf_token, 'Tracker', $back, false);
+    return view_admin_layout_html($settings, 'Peers', $body, 'torrents', $csrf_token, 'Tracker', $back, '');
 }

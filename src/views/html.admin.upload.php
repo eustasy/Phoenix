@@ -26,7 +26,7 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
     if (! $tables_installed) {
         $body = '<div class="alert alert-danger"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a> before adding torrents.</div></div>';
 
-        return view_admin_layout_html($settings, 'Bulk Upload', $body, 'add', $csrf_token, 'Tracker', $back, true);
+        return view_admin_layout_html($settings, 'Bulk Upload', $body, 'add', $csrf_token, 'Tracker', $back, 'narrow');
     }
 
     // The uploads post to the authenticated add API, which accepts an admin
@@ -35,7 +35,7 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
     if ($csrf_token === '') {
         $body = '<div class="alert alert-warning"><span class="ph-ico" data-lucide="shield-alert"></span><div>Bulk upload sends each file to the authenticated add API, which needs a session token. Set an <strong>admin password</strong> on the <a href="?page=settings">Settings</a> page to enable it &mdash; or script <code>POST /api/torrent/add</code> with an API key instead.</div></div>';
 
-        return view_admin_layout_html($settings, 'Bulk Upload', $body, 'add', $csrf_token, 'Tracker', $back, true);
+        return view_admin_layout_html($settings, 'Bulk Upload', $body, 'add', $csrf_token, 'Tracker', $back, 'narrow');
     }
 
     // Static page body — self-contained markup in src/partials/admin.upload.body.html
@@ -47,5 +47,5 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
 
     // The bulk-upload queue lives in assets/upload.js; it reads the CSRF token
     // from #bulk[data-csrf], so no PHP data needs inlining.
-    return view_admin_layout_html($settings, 'Bulk Upload', $body, 'add', $csrf_token, 'Tracker', $back, true, '', '', ['/assets/upload.js']);
+    return view_admin_layout_html($settings, 'Bulk Upload', $body, 'add', $csrf_token, 'Tracker', $back, 'narrow', '', '', ['/assets/upload.js']);
 }

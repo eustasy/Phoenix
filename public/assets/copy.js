@@ -1,10 +1,11 @@
-/* Phoenix — click-to-copy info hashes (assets/hash.js).
- * Used on any page rendering the .hash component (view_hash_html): the index
- * and the admin Torrents table. The full hash rides on the button's data-hash;
- * the cell shows a truncated form. Falls back silently without a clipboard. */
+/* Phoenix — click-to-copy values (assets/copy.js).
+ * Wires every .ph-copy button: the full value rides on its data-copy while the
+ * cell shows a truncated form. Used for info hashes by the .hash component
+ * (view_hash_html, on the index and admin Torrents) and for peer addresses on
+ * admin Peers. Falls back silently without a clipboard. */
 
-function phCopyHash(btn) {
-  var value = btn.getAttribute("data-hash") || ""
+function phCopy(btn) {
+  var value = btn.getAttribute("data-copy") || ""
   // Re-query the icon on every swap: lucide.createIcons() REPLACES the node, so
   // a reference captured earlier goes stale and the revert would no-op.
   var setIcon = function (name) {
@@ -30,8 +31,8 @@ function phCopyHash(btn) {
   }
 }
 
-document.querySelectorAll(".hash-copy").forEach(function (btn) {
+document.querySelectorAll(".ph-copy").forEach(function (btn) {
   btn.addEventListener("click", function () {
-    phCopyHash(btn)
+    phCopy(btn)
   })
 })

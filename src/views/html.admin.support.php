@@ -71,5 +71,5 @@ function view_admin_support_html(array $settings, bool $tables_installed, array|
     $body = $php_compat_html.$mysql_html.
         '<p class="muted text-sm">Read-only diagnostics. Phoenix requires PHP &ge; 8.2 and a MySQL-compatible database.</p>';
 
-    return view_admin_layout_html($settings, 'Server Support', $body, 'support', $csrf_token, 'Server', '', true);
+    return view_admin_layout_html($settings, 'Server Support', $body, 'support', $csrf_token, 'Server', '', 'narrow');
 }

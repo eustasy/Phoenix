@@ -69,5 +69,5 @@ function view_admin_apikeys_html(array $settings, bool $writable, string|false $
 		<div class="ph-section-head"><h3>Existing keys</h3></div>
 		'.$list_html;
 
-    return view_admin_layout_html($settings, 'API Keys', $body, 'apikeys', $csrf_token, 'Server', '', true);
+    return view_admin_layout_html($settings, 'API Keys', $body, 'apikeys', $csrf_token, 'Server', '', 'narrow');
 }
