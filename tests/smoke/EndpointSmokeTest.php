@@ -440,10 +440,20 @@ class EndpointSmokeTest extends SmokeTestCase
         $r = $this->runCli('backup-database.php');
         $this->assertSame(0, $r['exit'], $r['stdout'].$r['stderr']);
 
-        $dumps = glob($root.'/backups/'.$this->dbCreds()['db_name'].'.*.sql');
-        $this->assertNotEmpty($dumps, 'backup-database should write a .sql dump');
+        // backup_compress is on by default, so the dump lands as .sql.gz; glob
+        // both so this still passes with compression turned off.
+        $pattern = $root.'/backups/'.$this->dbCreds()['db_name'].'.*.sql';
+        $dumps = array_merge(glob($pattern) ?: [], glob($pattern.'.gz') ?: []);
+        $this->assertNotEmpty($dumps, 'backup-database should write a dump');
 
-        $dump = (string) file_get_contents($dumps[0]);
+        $raw = (string) file_get_contents($dumps[0]);
+        if (str_ends_with($dumps[0], '.gz')) {
+            // Both mysqldump passes must be readable from the one gzip stream,
+            // not just the first — pass 2 appends the peers structure.
+            $raw = (string) gzdecode($raw);
+            $this->assertNotSame('', $raw, 'compressed dump should decompress');
+        }
+        $dump = $raw;
         $prefix = $this->dbCreds()['db_prefix'];
         // torrents + tasks + the peers structure are all present...
         $this->assertStringContainsString($prefix.'torrents', $dump);

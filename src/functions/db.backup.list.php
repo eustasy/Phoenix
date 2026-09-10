@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 ////	db_backup_list
 // List the existing database backups in backup_dir, newest first, so the admin
-// Backups page can show them. Matches the same glob db_backup() rotates over
-// (<backup_dir><db_name>.*.sql). Returns one entry per file:
+// Backups page can show them. Matches the same globs db_backup() rotates over
+// (<backup_dir><db_name>.*.sql and .sql.gz — both, so dumps written before
+// backup_compress was enabled stay listed and downloadable). One entry per
+// file:
 //   ['name' => basename, 'size' => bytes, 'mtime' => Unix timestamp]
 // Returns an empty array when the directory or pattern matches nothing.
 
@@ -20,7 +22,8 @@ function db_backup_list(array $settings): array
         : __DIR__.'/../../backups/';
 
     $backups = [];
-    foreach (glob($backup_dir.$settings['db_name'].'.*.sql') ?: [] as $path) {
+    $pattern = $backup_dir.$settings['db_name'].'.*.sql';
+    foreach (array_merge(glob($pattern) ?: [], glob($pattern.'.gz') ?: []) as $path) {
         $size = filesize($path);
         $mtime = filemtime($path);
         $backups[] = [

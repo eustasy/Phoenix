@@ -200,3 +200,7 @@ $settings['stats_retention'] = 0;
 $settings['backup_dir'] = '';
 /* delete backups older than this many days */
 $settings['backup_retention'] = 30;
+/* gzip the dump as it is written, to <name>.sql.gz. Uses PHP's zlib */
+/* (no external binary), at level 1 — a SQL dump compresses ~10x there, */
+/* and the higher levels cost several times the CPU for a few percent */
+$settings['backup_compress'] = true;

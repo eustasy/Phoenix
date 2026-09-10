@@ -34,7 +34,7 @@ function view_admin_backups_html(array $settings, array $backups, string|false $
     }
 
     // Environment caveat (the run fails with a clear message when unmet).
-    $body .= '<p class="muted mt-0 text-sm">Backups require the <code>mysqldump</code> binary, <code>proc_open</code>, and a writable backup directory available to the web-server user.</p>';
+    $body .= '<p class="muted mt-0 text-sm">Backups require the <code>mysqldump</code> binary, <code>proc_open</code>, and a writable backup directory available to the web-server user. Dumps are gzipped as they are written unless <code>backup_compress</code> is off; restore one with <code>gunzip -c &lt;file&gt; | mysql &lt;database&gt;</code>.</p>';
 
     if ($backups === []) {
         $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="archive"></span><p>No backups yet.</p></div>';
