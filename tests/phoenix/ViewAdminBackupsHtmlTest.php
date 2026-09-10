@@ -44,7 +44,9 @@ class ViewAdminBackupsHtmlTest extends TestCase
 
         $this->assertStringContainsString('ph-card-table', $html);
         $this->assertStringContainsString('phoenix.20240102_0000.sql', $html);
-        $this->assertStringContainsString('2,048 bytes', $html);
+        // Rendered as a size, with the raw count kept for sorting.
+        $this->assertStringContainsString('2.0 KB', $html);
+        $this->assertStringContainsString('data-sort="2048"', $html);
     }
 
     public function testEmptyShowsMessage(): void

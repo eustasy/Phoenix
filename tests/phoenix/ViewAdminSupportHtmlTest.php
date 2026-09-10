@@ -76,7 +76,8 @@ class ViewAdminSupportHtmlTest extends TestCase
             ['Data' => 100, 'Indexes' => 50, 'Total' => 1234567, 'Free' => 0],
         );
         $this->assertStringContainsString('All your tables are installed.', $html);
-        $this->assertStringContainsString('1,234,567 bytes', $html);
+        // Rendered as a size, not a raw byte count.
+        $this->assertStringContainsString('1.2 MB', $html);
     }
 
     public function testShowsTablesMissingWarningWhenNotInstalled(): void
