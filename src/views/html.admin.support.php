@@ -27,6 +27,7 @@ declare(strict_types=1);
 function view_admin_support_html(array $settings, bool $tables_installed, array|false $database_size, string $csrf_token = '', ?string $php_version = null, ?bool $has_mysqli = null): string
 {
     require_once __DIR__.'/html.admin.layout.php';
+    require_once __DIR__.'/../functions/format.bytes.php';
 
     // Composer enforces ^8.2 and ext-mysqli, but the project supports manual
     // installs that bypass composer, so the runtime checks below stay in place;
@@ -60,7 +61,7 @@ function view_admin_support_html(array $settings, bool $tables_installed, array|
         if ($tables_installed) {
             $size_note = '';
             if ($database_size) {
-                $size_note = ' <span class="dim">Their current size is '.number_format((float) ($database_size['Total'] ?? 0)).' bytes.</span>';
+                $size_note = ' <span class="dim">Their current size is '.format_bytes((int) ($database_size['Total'] ?? 0)).'.</span>';
             }
             $mysql_html .= '<div class="alert alert-success alert-center"><span class="ph-ico" data-lucide="database"></span>All your tables are installed.'.$size_note.'</div>';
         } else {

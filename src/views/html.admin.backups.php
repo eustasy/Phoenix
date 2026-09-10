@@ -16,6 +16,7 @@ declare(strict_types=1);
 function view_admin_backups_html(array $settings, array $backups, string|false $message, string $csrf_token): string
 {
     require_once __DIR__.'/html.admin.layout.php';
+    require_once __DIR__.'/../functions/format.bytes.php';
 
     $csrf_field = '<input type="hidden" name="csrf" value="'.htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8').'">';
 
@@ -42,7 +43,7 @@ function view_admin_backups_html(array $settings, array $backups, string|false $
         foreach ($backups as $backup) {
             $rows .= '<tr>'.
                 '<td class="mono text-xs">'.htmlspecialchars($backup['name']).'</td>'.
-                '<td class="table-col-numeric mono">'.number_format($backup['size']).' bytes</td>'.
+                '<td class="table-col-numeric mono" data-sort="'.$backup['size'].'">'.format_bytes($backup['size']).'</td>'.
                 '<td class="mono muted">'.date('Y-m-d H:i', $backup['mtime']).'</td>'.
                 '<td><div class="row-actions"><a class="btn btn-ghost btn-xs" href="?page=backups&amp;download='.urlencode($backup['name']).'"><span class="ph-ico" data-lucide="download"></span>Download</a></div></td>'.
                 '</tr>';
