@@ -41,6 +41,22 @@ class ViewAdminTorrentPeersHtmlTest extends TestCase
         ], $overrides);
     }
 
+    public function testFilterAndSortAreClientSideBecauseThisViewIsNotPaged(): void
+    {
+        // peers_select_by_torrent() has no LIMIT — every peer in the swarm is
+        // rendered — so a browser-side filter and sort see every row. The global
+        // Peers listing is paged and therefore does both in SQL instead.
+        $html = view_admin_torrent_peers_html($this->settings(), str_repeat('a', 40), 'My Torrent', [$this->peer()], 'tok');
+
+        $this->assertStringContainsString('data-filter-table="#tbl-torrent-peers"', $html);
+        $this->assertStringContainsString('class="ph-sort"', $html);
+        $this->assertStringContainsString('/assets/tables.js', $html);
+        // The count reports peers, not torrents, when the filter rewrites it.
+        $this->assertStringContainsString('data-noun="peer"', $html);
+        // Byte columns sort on the raw value, or "395 MB" outranks "1.5 GB".
+        $this->assertMatchesRegularExpression('/<td class="table-col-numeric mono" data-sort="\d+"/', $html);
+    }
+
     public function testRendersPeerRowWithClientStateAndAddress(): void
     {
         $html = view_admin_torrent_peers_html($this->settings(), str_repeat('a', 40), 'My Torrent', [$this->peer()], 'tok');

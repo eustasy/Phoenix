@@ -62,17 +62,36 @@ function view_admin_torrent_peers_html(array $settings, string $info_hash, ?stri
                 '<td>'.htmlspecialchars($peer['client'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'</td>'.
                 '<td class="mono">'.$address.'</td>'.
                 '<td>'.$state.'</td>'.
-                '<td class="table-col-numeric mono">'.format_bytes($peer['uploaded']).'</td>'.
-                '<td class="table-col-numeric mono">'.format_bytes($peer['downloaded']).'</td>'.
-                '<td class="table-col-numeric mono">'.format_bytes($peer['left']).'</td>'.
-                '<td class="mono muted">'.date('Y-m-d H:i', $peer['updated']).'</td>'.
+                '<td class="table-col-numeric mono" data-sort="'.$peer['uploaded'].'">'.format_bytes($peer['uploaded']).'</td>'.
+                '<td class="table-col-numeric mono" data-sort="'.$peer['downloaded'].'">'.format_bytes($peer['downloaded']).'</td>'.
+                '<td class="table-col-numeric mono" data-sort="'.$peer['left'].'">'.format_bytes($peer['left']).'</td>'.
+                '<td class="mono muted" data-sort="'.$peer['updated'].'">'.date('Y-m-d H:i', $peer['updated']).'</td>'.
                 '</tr>';
         }
 
-        $body .= '<div class="ph-card-table wide"><table>'.
-            '<thead><tr><th>Client</th><th>Address</th><th>State</th><th class="table-col-numeric">Up</th><th class="table-col-numeric">Down</th><th class="table-col-numeric">Left</th><th>Last seen</th></tr></thead>'.
+        // Unlike the global Peers listing, this view is not paged — every peer
+        // in the swarm is rendered — so the filter and sort can stay in the
+        // browser and still see every row.
+        $sort_ico = '<span class="ph-sort-ico"><span class="ph-sort-asc ph-ico" data-lucide="chevron-up"></span><span class="ph-sort-desc ph-ico" data-lucide="chevron-down"></span></span>';
+        $count = count($peers);
+
+        $body .= '<div class="ph-toolbar">
+			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search peers" placeholder="Search client, address&hellip;" data-filter-table="#tbl-torrent-peers" data-filter-count="#torrent-peers-count"></span>
+			<span class="ph-spacer"></span>
+			<span class="ph-count" id="torrent-peers-count" data-noun="peer">'.$count.' '.($count === 1 ? 'peer' : 'peers').'</span>
+		</div>
+		<div class="ph-card-table wide"><table id="tbl-torrent-peers">'.
+            '<thead><tr>'.
+                '<th class="ph-sort" data-type="text">Client '.$sort_ico.'</th>'.
+                '<th>Address</th>'.
+                '<th class="ph-sort" data-type="text">State '.$sort_ico.'</th>'.
+                '<th class="ph-sort table-col-numeric" data-type="num">Up '.$sort_ico.'</th>'.
+                '<th class="ph-sort table-col-numeric" data-type="num">Down '.$sort_ico.'</th>'.
+                '<th class="ph-sort table-col-numeric" data-type="num">Left '.$sort_ico.'</th>'.
+                '<th class="ph-sort" data-type="num" data-sort-default="desc">Last seen '.$sort_ico.'</th>'.
+            '</tr></thead>'.
             '<tbody>'.$rows.'</tbody></table></div>';
     }
 
-    return view_admin_layout_html($settings, 'Peers', $body, 'torrents', $csrf_token, 'Tracker', $back, '');
+    return view_admin_layout_html($settings, 'Peers', $body, 'torrents', $csrf_token, 'Tracker', $back, '', '', '', ['/assets/tables.js']);
 }

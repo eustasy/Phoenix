@@ -43,7 +43,12 @@ function phFilterTable(input, tableSel, countSel) {
   }
   if (countSel) {
     var c = document.querySelector(countSel)
-    if (c) c.textContent = shown + (shown === 1 ? " torrent" : " torrents")
+    if (c) {
+      // The counted thing varies by table — data-noun says what, so a peers
+      // table does not report its matches as torrents.
+      var noun = c.getAttribute("data-noun") || "torrent"
+      c.textContent = shown + " " + noun + (shown === 1 ? "" : "s")
+    }
   }
   var empty = table.parentNode.querySelector(".ph-empty")
   if (empty) empty.hidden = shown !== 0
