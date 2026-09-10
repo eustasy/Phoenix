@@ -311,6 +311,16 @@ body { background-color: var(--color-bg); color: var(--color-text); }
    IPv4 address with port fits inside the cap; a bracketed IPv6 does not, and
    ellipsis is preferable to that column dictating the table's width. The full
    value stays in the title attribute. */
+/* Two-letter country code. <abbr> for the full name on hover, without the
+   default dotted underline. */
+.ph-cc {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-bottom: none;
+  cursor: help;
+}
 .ph-addr-row { display: flex; align-items: center; gap: var(--space-1-5); }
 .ph-addr {
   min-width: 0;

@@ -28,12 +28,30 @@ function admin_peers_controller(mysqli $connection, array $settings): string
     require_once __DIR__.'/../model/peers.select.all.php';
     $peers = peers_select_all($connection, $settings, $limit, $offset);
 
+    // Resolve this page's addresses to countries in one batch, so the reader is
+    // opened once rather than per row. Like the client label below, the result
+    // is derived transiently for display and never stored.
+    require_once __DIR__.'/../functions/stats.geo.lookup.batch.php';
+    $ips = [];
+    foreach ($peers as $peer) {
+        $ip = $peer['ipv4'] !== '' ? $peer['ipv4'] : $peer['ipv6'];
+        if ($ip !== '') {
+            $ips[] = $ip;
+        }
+    }
+    $geo = stats_geo_lookup_batch($settings, $ips);
+
     // Tag each peer with a client label derived transiently from peer_id — it is
     // never stored, matching stats_client_detect's privacy contract.
     require_once __DIR__.'/../functions/stats.client.detect.php';
     $tagged = [];
     foreach ($peers as $peer) {
-        $tagged[] = $peer + ['client' => stats_client_detect($peer['peer_id'])];
+        $ip = $peer['ipv4'] !== '' ? $peer['ipv4'] : $peer['ipv6'];
+        $tagged[] = $peer + [
+            'client' => stats_client_detect($peer['peer_id']),
+            'country' => $geo[$ip]['country'] ?? '',
+            'country_name' => $geo[$ip]['name'] ?? '',
+        ];
     }
 
     require_once __DIR__.'/../functions/auth.csrf.token.php';

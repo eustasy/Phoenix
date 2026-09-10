@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 ////	view_admin_peers_html
 // Render the admin global Peers page: a paged, swarm-wide table of peers
-// (client, torrent, address, state, transfer totals, last seen) with a
-// client-side filter. The torrent column shows the registry name, or the
+// (client, torrent, country, address, state, transfer totals, last seen) with a
+// client-side filter. The Country column appears only when stats_geo is on —
+// the code is resolved transiently from the peer's IP by the controller and,
+// like the client label, never stored.
+//
+// The torrent column shows the registry name, or the
 // (truncated) info_hash for an unregistered swarm. The header reports the
 // swarm-wide totals and the current page window, with prev/next paging. The
 // per-torrent drill-down (?page=peers&info_hash=…) is a separate view. Marks
@@ -13,7 +17,8 @@ declare(strict_types=1);
 //
 // Parameters:
 //   $settings - settings array
-//   $peers - this page's peer rows (peers_select_all() shape + a 'client' label)
+//   $peers - this page's peer rows (peers_select_all() shape + the transient
+//            'client' label and 'country'/'country_name' codes)
 //   $total - total active peers across all swarms
 //   $swarms - distinct swarm count
 //   $offset - the page's starting offset into the full listing
@@ -36,12 +41,19 @@ declare(strict_types=1);
  *     updated: int,
  *     name: string|null,
  *     client: string,
+ *     country: string,
+ *     country_name: string,
  * }> $peers
  */
 function view_admin_peers_html(array $settings, array $peers, int $total, int $swarms, int $offset, int $limit, string $csrf_token): string
 {
     require_once __DIR__.'/html.admin.layout.php';
     require_once __DIR__.'/../functions/format.bytes.php';
+
+    // The column is shown whenever geo is switched on. If it is on but the
+    // library or database is missing, every row reads as a dash — which is a
+    // truer signal than hiding the column would be.
+    $show_geo = $settings['stats_geo'] === true;
 
     $actions = '<span class="ph-count"><b>'.number_format($total).'</b> active peers &middot; '.number_format($swarms).' swarm'.($swarms === 1 ? '' : 's').'</span>';
 
@@ -79,6 +91,14 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
                 $addrs,
             ));
 
+        // ISO code, full name on hover. Deliberately not a flag: Phoenix ships
+        // no flag artwork, and emoji flags render as bare letters on Windows,
+        // which is the worst of both.
+        $country = $peer['country'] === ''
+            ? '<span class="dim">&mdash;</span>'
+            : '<abbr class="ph-cc" title="'.htmlspecialchars($peer['country_name'], ENT_QUOTES, 'UTF-8').'">'.
+                htmlspecialchars($peer['country'], ENT_QUOTES, 'UTF-8').'</abbr>';
+
         $state = $peer['state'] === 1
             ? '<span class="listed">Seeding</span>'
             : '<span class="listed is-leeching">Leeching</span>';
@@ -86,6 +106,7 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
         $rows .= '<tr>'.
             '<td><span class="flex items-center gap-2">'.$client.'</span></td>'.
             '<td>'.$torrent.'</td>'.
+            ($show_geo ? '<td>'.$country.'</td>' : '').
             '<td class="mono">'.$address.'</td>'.
             '<td>'.$state.'</td>'.
             '<td class="table-col-numeric mono">'.format_bytes($peer['uploaded']).'</td>'.
@@ -115,14 +136,14 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
     }
 
     $body = '<div class="ph-toolbar">
-			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search peers" placeholder="Search client, address, torrent&hellip;" data-filter-table="#tbl-peers"></span>
+			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search peers" placeholder="Search client, address, torrent, country&hellip;" data-filter-table="#tbl-peers"></span>
 			<span class="ph-spacer"></span>
 			<span class="dim text-sm">'.$window.'</span>
 		</div>
 
 		<div class="ph-card-table wide ph-nowrap">
 			<table id="tbl-peers">
-				<thead><tr><th>Client</th><th>Torrent</th><th>Address</th><th>State</th><th class="table-col-numeric">Up</th><th class="table-col-numeric">Down</th><th class="table-col-numeric">Left</th><th>Last seen</th></tr></thead>
+				<thead><tr><th>Client</th><th>Torrent</th>'.($show_geo ? '<th>Country</th>' : '').'<th>Address</th><th>State</th><th class="table-col-numeric">Up</th><th class="table-col-numeric">Down</th><th class="table-col-numeric">Left</th><th>Last seen</th></tr></thead>
 				<tbody>'.$rows.'</tbody>
 			</table>
 			<div class="ph-empty"'.($peers === [] ? '' : ' hidden').'>
