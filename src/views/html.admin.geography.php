@@ -122,5 +122,5 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
     $inline_js = 'var GEO = '.$geo_json.";\nvar GEO_DEFAULT = ".json_encode($default).";\n"
         .(string) file_get_contents(__DIR__.'/../../public/assets/_geography.js');
 
-    return view_admin_layout_html($settings, 'Geography', $body, 'geography', $csrf_token, 'Tracker', $actions, '', '', $inline_js, $extra_srcs, $head_pre);
+    return view_admin_layout_html($settings, 'Geography', $body, 'geography', $csrf_token, 'Tracker', $actions, 'wide', '', $inline_js, $extra_srcs, $head_pre);
 }

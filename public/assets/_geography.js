@@ -155,12 +155,21 @@ function geoBuildMap(d) {
       initial: { fill: dark ? "#282726" : "#dad8ce", stroke: dark ? "#100f0f" : "#b3b1a8", strokeWidth: 0.3 },
       hover: { fillOpacity: 0.85 },
     },
+    // Hand the fills to the library rather than only painting the paths after
+    // construction: a series is part of the map's own model, so it survives any
+    // internal re-render that re-applies regionStyle.initial. Painting alone was
+    // being wiped by the settling pass after first paint, which left the initial
+    // load grey until a metric click rebuilt the map.
+    series: { regions: [{ attribute: "fill", values: geoColors }] },
     onRegionTooltipShow: function (event, tooltip, code) {
       var v = d.values[code]
       tooltip.text((COUNTRY[code] || tooltip.text()) + (v != null ? " — " + v.toLocaleString() + d.unit : " — no data"), true)
     },
   })
+  // Belt and braces for versions that ignore an initial series: paint now, and
+  // again on the next frame once the map has settled.
   geoApplyFills()
+  requestAnimationFrame(geoApplyFills)
 }
 function geoApplyFills() {
   document.querySelectorAll("#geo-map svg path").forEach(function (p) {
