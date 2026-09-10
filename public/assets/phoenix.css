@@ -401,7 +401,9 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
   background-color: var(--color-surface);
 }
 .magnet-link:hover { border-color: var(--color-action); color: var(--color-action); background-color: var(--color-info-bg); }
-.magnet-link .ph-ico { width: 14px; height: 14px; }
+/* flex-shrink:0 or the icon collapses to nothing when the column is squeezed —
+   the label can wrap, the icon must not disappear. */
+.magnet-link .ph-ico { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* Empty state */
 .ph-empty { text-align: center; padding: var(--space-16) var(--space-6); color: var(--color-text-tertiary); }

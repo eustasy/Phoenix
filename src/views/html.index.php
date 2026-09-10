@@ -5,13 +5,15 @@ declare(strict_types=1);
 ////	view_index_html
 // Renders a normalized $index array as the public Torrent Index: a dense,
 // client-filterable/sortable table of explicitly-listed torrents wrapped in the
-// public page chrome. Columns: Title, File*, Hash, Trackers*, Webseeds*,
-// Seeders, Leechers, Downloads, Health, Magnet — the starred meta columns
-// appear only when $show_meta is set (mirroring the JSON/XML views'
-// index_show_meta gating); the magnet link (built by public/index.php) renders
-// either way. Health is the seeder share of the swarm; an empty swarm shows a
-// dash. Filtering and sorting are progressive enhancements (assets/app.js) — the
-// table is complete and readable without JavaScript.
+// public page chrome. Columns: Title, Hash, Seeders, Leechers, Downloads,
+// Health, Magnet. When $show_meta is set (mirroring the JSON/XML views'
+// index_show_meta gating) each torrent gains a second, full-width row carrying
+// its filename, file count, trackers and webseeds — meta is far wider than the
+// figures beside it, so it gets a row rather than columns. Each torrent is its
+// own <tbody> so the pair sorts and filters as one unit. The magnet link (built
+// by public/index.php) renders either way. Health is the seeder share of the
+// swarm; an empty swarm shows a dash. Filtering and sorting are progressive
+// enhancements (assets/tables.js) — the table is complete without JavaScript.
 // Returns HTML string. Caller is responsible for setting Content-Type header.
 
 /** @param list<array{info_hash: string|null, name: string|null, size: int, downloads: int, seeders: int, leechers: int, peers: int, traffic: int, filename?: string|null, files?: list<array{path: string, length: int}>|null, trackers?: list<string>|null, webseeds?: list<string>|null, magnet?: string|null}> $index */
@@ -38,18 +40,16 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
     $sort_ico = '<span class="ph-sort-ico"><span class="ph-sort-asc ph-ico" data-lucide="chevron-up"></span><span class="ph-sort-desc ph-ico" data-lucide="chevron-down"></span></span>';
 
     ////	Header row
-    $head = '<th class="ph-sort" data-type="text">Title '.$sort_ico.'</th>';
-    if ($show_meta) {
-        $head .= '<th>File</th>';
-    }
-    $head .= '<th>Hash</th>';
-    if ($show_meta) {
-        $head .= '<th>Trackers</th><th>Webseeds</th>';
-    }
-    $head .= '<th class="ph-sort table-col-numeric" data-type="num">Seeders '.$sort_ico.'</th>'.
+    // Meta gets no columns of its own — filenames and URL lists are far wider
+    // than the figures beside them, and giving each a column squeezed the rest
+    // of the table to nothing. It goes on a second row per torrent instead, so
+    // the column count is the same either way.
+    $head = '<th class="ph-sort" data-type="text">Title '.$sort_ico.'</th>'.
+        '<th>Hash</th>'.
+        '<th class="ph-sort table-col-numeric" data-type="num" data-sort-default="desc">Seeders '.$sort_ico.'</th>'.
         '<th class="ph-sort table-col-numeric" data-type="num">Leechers</th>'.
         '<th class="ph-sort table-col-numeric" data-type="num">Downloads</th>'.
-        '<th class="ph-sort col-health" data-type="num" data-sort-default="desc">Health '.$sort_ico.'</th>'.
+        '<th class="ph-sort col-health" data-type="num">Health '.$sort_ico.'</th>'.
         '<th class="tar">Magnet</th>';
 
     ////	Body rows
@@ -59,14 +59,7 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
         $health_sort = $swarm === 0 ? -1 : (int) round($torrent['seeders'] / $swarm * 100);
 
         $cells = '<td><span class="ph-name">'.htmlspecialchars($torrent['name'] ?? '').'</span></td>';
-        if ($show_meta) {
-            $cells .= '<td>'.(htmlspecialchars($torrent['filename'] ?? '') ?: '&mdash;').'</td>';
-        }
         $cells .= '<td>'.view_hash_html($torrent['info_hash'] ?? '').'</td>';
-        if ($show_meta) {
-            $cells .= '<td>'.$url_list($torrent['trackers'] ?? null).'</td>';
-            $cells .= '<td>'.$url_list($torrent['webseeds'] ?? null).'</td>';
-        }
         $cells .= '<td class="table-col-numeric">'.number_format($torrent['seeders']).'</td>';
         $cells .= '<td class="table-col-numeric">'.number_format($torrent['leechers']).'</td>';
         $cells .= '<td class="table-col-numeric">'.number_format($torrent['downloads']).'</td>';
@@ -78,7 +71,49 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
             ? '<a class="magnet-link" href="'.htmlspecialchars($magnet).'"><span class="ph-ico" data-lucide="magnet"></span>magnet</a>'
             : '&mdash;').'</td>';
 
-        $rows .= '<tr>'.$cells.'</tr>';
+        ////	Meta row
+        // A second row beneath the torrent, spanning the full width, carrying
+        // the fields that have no column. Gated on $show_meta exactly as the
+        // old columns were, so nothing the operator withholds is emitted.
+        // Individual file paths stay out of the visible row — a large torrent
+        // has hundreds — but ride along in data-search so they stay findable.
+        $meta_row = '';
+        $search_attr = '';
+        if ($show_meta) {
+            $parts = '';
+            if (! empty($torrent['filename'])) {
+                $parts .= '<span class="idx-meta-item"><span class="idx-meta-key">File</span>'.
+                    '<span class="mono">'.htmlspecialchars($torrent['filename']).'</span></span>';
+            }
+            $files = $torrent['files'] ?? [];
+            if ($files !== []) {
+                $parts .= '<span class="idx-meta-item"><span class="idx-meta-key">Files</span>'.
+                    '<span>'.number_format(count($files)).'</span></span>';
+            }
+            foreach (['trackers' => 'Trackers', 'webseeds' => 'Webseeds'] as $key => $label) {
+                if (empty($torrent[$key])) {
+                    continue;
+                }
+                $parts .= '<span class="idx-meta-item"><span class="idx-meta-key">'.$label.'</span>'.
+                    '<span class="idx-meta-urls">'.$url_list($torrent[$key]).'</span></span>';
+            }
+            if ($parts !== '') {
+                $meta_row = '<tr class="idx-meta"><td colspan="7">'.$parts.'</td></tr>';
+            }
+
+            $haystack = [];
+            foreach ($files as $file) {
+                $haystack[] = $file['path'];
+            }
+            if ($haystack !== []) {
+                $search_attr = ' data-search="'.htmlspecialchars(implode(' ', $haystack), ENT_QUOTES, 'UTF-8').'"';
+            }
+        }
+
+        // One <tbody> per torrent so tables.js treats the pair as a single unit
+        // — sorting can never separate a torrent from its meta, and filtering
+        // hides both together.
+        $rows .= '<tbody'.$search_attr.'><tr>'.$cells.'</tr>'.$meta_row.'</tbody>';
     }
 
     $count = count($index);
@@ -94,16 +129,16 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
 	<div class="ph-toolbar">
 		<span class="ph-search">
 			<span class="ph-ico" data-lucide="search"></span>
-			<input type="search" aria-label="Filter torrents" placeholder="Filter by title or hash&hellip;" data-filter-table="#tbl-index" data-filter-count="#idx-count">
+			<input type="search" aria-label="Filter torrents" placeholder="Filter by title, hash, file, tracker&hellip;" data-filter-table="#tbl-index" data-filter-count="#idx-count">
 		</span>
 		<span class="ph-spacer"></span>
 		<span class="ph-count"><b id="idx-count">'.$count_label.'</b></span>
 	</div>
 
 	<div class="ph-card-table wide">
-		<table id="tbl-index">
+		<table id="tbl-index" class="idx-table">
 			<thead><tr>'.$head.'</tr></thead>
-			<tbody>'.$rows.'</tbody>
+			'.$rows.'
 		</table>
 		<div class="ph-empty" hidden>
 			<span class="ph-ico" data-lucide="search-x"></span>

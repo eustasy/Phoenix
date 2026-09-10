@@ -7,15 +7,31 @@
  *     phFilterTable over that table; data-filter-count is optional.
  *   - any table whose <thead> has a <th class="ph-sort"> is made sortable. */
 
+// The unit the filter hides and the sort reorders. Normally one <tr>, but a
+// table that renders a record across several rows groups them in a <tbody> each
+// (the public index puts a torrent's meta on a second row) — so a record's rows
+// can never be split apart by sorting, nor half-hidden by filtering.
+function phRowGroups(table) {
+  if (table.tBodies.length > 1) return Array.prototype.slice.call(table.tBodies)
+  return table.tBodies[0] ? Array.prototype.slice.call(table.tBodies[0].rows) : []
+}
+
+// The cell a sort compares. For a multi-row group that is the first row's cell,
+// the record's own row; the trailing meta row has a single spanning cell.
+function phGroupCell(group, idx) {
+  var row = group.tagName === "TBODY" ? group.rows[0] : group
+  return row ? row.cells[idx] : null
+}
+
 // Live row filter over a table body. Matches text content of every column, plus
 // a row's optional data-search attribute — fields worth searching by that the
-// table does not render as columns (a torrent's filename, file paths, trackers
-// and webseeds), so they stay findable without widening the table.
+// table does not render as columns (a torrent's file paths), so they stay
+// findable without widening the table.
 function phFilterTable(input, tableSel, countSel) {
   var table = document.querySelector(tableSel)
   if (!table) return
   var q = input.value.trim().toLowerCase()
-  var rows = table.tBodies[0] ? table.tBodies[0].rows : []
+  var rows = phRowGroups(table)
   var shown = 0
   for (var i = 0; i < rows.length; i++) {
     var hay = rows[i].textContent
@@ -44,21 +60,23 @@ function phMakeSortable(tableRef) {
   // chevron reflect it. Shared by the click handler and the optional initial
   // sort below.
   function sortBy(th, idx, asc) {
-    var body = table.tBodies[0]
-    if (!body) return
+    var rows = phRowGroups(table)
+    if (!rows.length) return
+    // Groups are <tbody> elements reordered within the table; plain rows are
+    // reordered within their body.
+    var container = table.tBodies.length > 1 ? table : table.tBodies[0]
     for (var j = 0; j < ths.length; j++) ths[j].removeAttribute("aria-sort")
     th.setAttribute("aria-sort", asc ? "ascending" : "descending")
     var type = th.getAttribute("data-type") || "text"
-    var rows = Array.prototype.slice.call(body.rows)
     rows.sort(function (a, b) {
-      var av = cellVal(a.cells[idx], type),
-        bv = cellVal(b.cells[idx], type)
+      var av = cellVal(phGroupCell(a, idx), type),
+        bv = cellVal(phGroupCell(b, idx), type)
       if (av < bv) return asc ? -1 : 1
       if (av > bv) return asc ? 1 : -1
       return 0
     })
     rows.forEach(function (r) {
-      body.appendChild(r)
+      container.appendChild(r)
     })
   }
 

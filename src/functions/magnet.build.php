@@ -10,7 +10,7 @@ declare(strict_types=1);
 // gating in the index views so the magnet can't bypass the meta gate.
 // Returns null when the row carries no info_hash.
 
-/** @param array{info_hash: string|null, name: string|null, size: int, trackers?: list<string>|null, webseeds?: list<string>|null} $torrent */
+/** @param array{info_hash: string|null, name: string|null, size: int, filename?: string|null, trackers?: list<string>|null, webseeds?: list<string>|null} $torrent */
 function magnet_build(array $torrent, string $announce_url, bool $include_meta = false): ?string
 {
     if (empty($torrent['info_hash'])) {
@@ -19,8 +19,16 @@ function magnet_build(array $torrent, string $announce_url, bool $include_meta =
 
     $magnet = 'magnet:?xt=urn:btih:'.$torrent['info_hash'];
 
-    if (! empty($torrent['name'])) {
-        $magnet .= '&dn='.rawurlencode($torrent['name']);
+    // dn is the name a client shows — and often the name it saves under — before
+    // any metadata arrives, so the torrent's own filename beats the registry
+    // title when it is available ("…-amd64.20260219.iso" over "elementary OS
+    // Circe"). filename is gated meta, so fall back to the title when it is not
+    // being published.
+    $display = $include_meta && ! empty($torrent['filename'])
+        ? $torrent['filename']
+        : ($torrent['name'] ?? '');
+    if ($display !== '') {
+        $magnet .= '&dn='.rawurlencode($display);
     }
     if ($torrent['size'] > 0) {
         $magnet .= '&xl='.$torrent['size'];
@@ -36,8 +44,10 @@ function magnet_build(array $torrent, string $announce_url, bool $include_meta =
         $magnet .= '&tr='.rawurlencode($tracker);
     }
 
+    // Deduped like the trackers above — a repeated ws is wasted URI length and
+    // some clients will queue the same source twice.
     if ($include_meta && ! empty($torrent['webseeds'])) {
-        foreach ($torrent['webseeds'] as $webseed) {
+        foreach (array_values(array_unique($torrent['webseeds'])) as $webseed) {
             $magnet .= '&ws='.rawurlencode($webseed);
         }
     }

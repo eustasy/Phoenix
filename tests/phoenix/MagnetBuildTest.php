@@ -138,4 +138,46 @@ class MagnetBuildTest extends PhoenixTestCase
             $magnet,
         );
     }
+
+    public function testPrefersFilenameForDisplayNameWhenMetaIncluded(): void
+    {
+        // dn is what a client shows, and often saves as, before metadata
+        // arrives — the torrent's own filename is more use than the title.
+        $magnet = \magnet_build(
+            $this->torrent(['filename' => 'test-torrent.20260219.iso', 'size' => 0]),
+            '',
+            true,
+        );
+
+        $this->assertSame('magnet:?xt=urn:btih:'.self::HASH.'&dn=test-torrent.20260219.iso', $magnet);
+    }
+
+    public function testFallsBackToNameForDisplayNameWhenMetaWithheld(): void
+    {
+        // filename is gated meta, so a withheld filename must not leak via dn.
+        $magnet = \magnet_build(
+            $this->torrent(['filename' => 'test-torrent.20260219.iso', 'size' => 0]),
+            '',
+        );
+
+        $this->assertSame('magnet:?xt=urn:btih:'.self::HASH.'&dn=Test%20Torrent', $magnet);
+    }
+
+    public function testDeduplicatesWebseeds(): void
+    {
+        $magnet = \magnet_build(
+            $this->torrent([
+                'size' => 0,
+                'name' => null,
+                'webseeds' => ['https://seed.example/f.iso', 'https://seed.example/f.iso'],
+            ]),
+            '',
+            true,
+        );
+
+        $this->assertSame(
+            'magnet:?xt=urn:btih:'.self::HASH.'&ws='.rawurlencode('https://seed.example/f.iso'),
+            $magnet,
+        );
+    }
 }

@@ -34,10 +34,11 @@ class ViewIndexHtmlTest extends PhoenixTestCase
         ], $overrides)];
     }
 
-    public function testEmptyIndexProducesEmptyTableBody(): void
+    public function testEmptyIndexProducesNoTorrentRows(): void
     {
+        // Each torrent is its own <tbody>, so an empty index emits none at all.
         $html = view_index_html([]);
-        $this->assertStringContainsString('<tbody></tbody>', $html);
+        $this->assertStringNotContainsString('<tbody', $html);
         // The empty-state panel ships with the table, hidden until JS filters.
         $this->assertStringContainsString('class="ph-empty"', $html);
     }
@@ -77,28 +78,39 @@ class ViewIndexHtmlTest extends PhoenixTestCase
         $this->assertStringContainsString('<td class="table-col-numeric">1,337</td>', $html);
     }
 
-    public function testMetaColumnsHiddenByDefault(): void
+    public function testMetaHiddenByDefault(): void
     {
         $html = view_index_html($this->fixture());
 
-        $this->assertStringNotContainsString('<th>File</th>', $html);
-        $this->assertStringNotContainsString('<th>Trackers</th>', $html);
-        $this->assertStringNotContainsString('<th>Webseeds</th>', $html);
+        // No meta row, and none of its content leaks into the markup — the
+        // filter haystack included, which is why data-search is gated too.
+        $this->assertStringNotContainsString('idx-meta', $html);
+        $this->assertStringNotContainsString('data-search', $html);
         $this->assertStringNotContainsString('test.iso', $html);
         $this->assertStringNotContainsString('tracker.example.com', $html);
     }
 
-    public function testMetaColumnsRenderWhenEnabled(): void
+    public function testMetaRendersOnASecondRowWhenEnabled(): void
     {
         $html = view_index_html($this->fixture(), true);
 
-        foreach (['<th>File</th>', '<th>Trackers</th>', '<th>Webseeds</th>'] as $header) {
-            $this->assertStringContainsString($header, $html);
-        }
-        $this->assertStringContainsString('<td>test.iso</td>', $html);
+        // Meta has no columns of its own; it spans the full width beneath the
+        // torrent, inside the same <tbody> so the pair sorts and filters as one.
+        $this->assertStringNotContainsString('<th>File</th>', $html);
+        $this->assertStringContainsString('<tr class="idx-meta"><td colspan="7">', $html);
+        $this->assertStringContainsString('>File</span><span class="mono">test.iso</span>', $html);
         $this->assertStringContainsString('https://tracker.example.com/announce', $html);
-        // Null webseeds render as a dash.
-        $this->assertStringContainsString('<td>&mdash;</td>', $html);
+        // File paths stay out of the visible row but remain searchable.
+        $this->assertStringContainsString('data-search="test.iso"', $html);
+    }
+
+    public function testMetaOmitsFieldsTheTorrentDoesNotCarry(): void
+    {
+        // Null webseeds get no label at all, rather than a dash with no value.
+        $html = view_index_html($this->fixture(), true);
+
+        $this->assertStringContainsString('>Trackers</span>', $html);
+        $this->assertStringNotContainsString('>Webseeds</span>', $html);
     }
 
     public function testMultipleTrackersJoinWithLineBreaks(): void
