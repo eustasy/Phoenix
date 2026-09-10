@@ -82,7 +82,28 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
                 ? '<span class="listed">Listed</span>'
                 : '<span class="listed is-no">Unlisted</span>';
 
-            $rows .= '<tr>'.
+            // Extra filter haystack. These four meta fields are searched far more
+            // often than they are read, and rendering them as columns would make
+            // the table unreadable, so they ride along in data-search for
+            // tables.js to match on. Empty when the torrent carries no meta.
+            $haystack = [];
+            if ($torrent['filename'] !== null && $torrent['filename'] !== '') {
+                $haystack[] = $torrent['filename'];
+            }
+            foreach ($torrent['files'] ?? [] as $file) {
+                $haystack[] = $file['path'];
+            }
+            foreach ($torrent['trackers'] ?? [] as $tracker) {
+                $haystack[] = $tracker;
+            }
+            foreach ($torrent['webseeds'] ?? [] as $webseed) {
+                $haystack[] = $webseed;
+            }
+            $search_attr = $haystack === []
+                ? ''
+                : ' data-search="'.htmlspecialchars(implode(' ', $haystack), ENT_QUOTES, 'UTF-8').'"';
+
+            $rows .= '<tr'.$search_attr.'>'.
                 '<td><span class="ph-name">'.$name.'</span></td>'.
                 '<td>'.$owner.'</td>'.
                 '<td>'.view_hash_html($info_hash).'</td>'.
@@ -97,7 +118,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
 
         $count = count($torrents);
         $body .= '<div class="ph-toolbar">
-			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search torrents" placeholder="Search name, owner, hash&hellip;" data-filter-table="#tbl-torrents" data-filter-count="#torrents-count"></span>
+			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search torrents" placeholder="Search name, owner, hash, file, tracker&hellip;" data-filter-table="#tbl-torrents" data-filter-count="#torrents-count"></span>
 			<span class="ph-spacer"></span>
 			<span class="ph-count" id="torrents-count">'.$count.' '.($count === 1 ? 'torrent' : 'torrents').'</span>
 		</div>
@@ -108,7 +129,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
                     '<th class="ph-sort" data-type="text">Owner</th>'.
                     '<th>Info hash</th>'.
                     '<th class="ph-sort table-col-numeric" data-type="num">Size</th>'.
-                    '<th class="ph-sort table-col-numeric" data-type="num">Seed</th>'.
+                    '<th class="ph-sort table-col-numeric" data-type="num" data-sort-default="desc">Seed</th>'.
                     '<th class="ph-sort table-col-numeric" data-type="num">Leech</th>'.
                     '<th class="ph-sort table-col-numeric" data-type="num">DL</th>'.
                     '<th>Listed</th>'.

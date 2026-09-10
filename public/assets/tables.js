@@ -7,7 +7,10 @@
  *     phFilterTable over that table; data-filter-count is optional.
  *   - any table whose <thead> has a <th class="ph-sort"> is made sortable. */
 
-// Live row filter over a table body. Matches text content of every column.
+// Live row filter over a table body. Matches text content of every column, plus
+// a row's optional data-search attribute — fields worth searching by that the
+// table does not render as columns (a torrent's filename, file paths, trackers
+// and webseeds), so they stay findable without widening the table.
 function phFilterTable(input, tableSel, countSel) {
   var table = document.querySelector(tableSel)
   if (!table) return
@@ -15,7 +18,10 @@ function phFilterTable(input, tableSel, countSel) {
   var rows = table.tBodies[0] ? table.tBodies[0].rows : []
   var shown = 0
   for (var i = 0; i < rows.length; i++) {
-    var hit = !q || rows[i].textContent.toLowerCase().indexOf(q) !== -1
+    var hay = rows[i].textContent
+    var extra = rows[i].getAttribute("data-search")
+    if (extra) hay += " " + extra
+    var hit = !q || hay.toLowerCase().indexOf(q) !== -1
     rows[i].hidden = !hit
     if (hit) shown++
   }
