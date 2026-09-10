@@ -345,6 +345,30 @@ body { background-color: var(--color-bg); color: var(--color-text); }
 }
 .ph-name { color: var(--color-text); font-weight: var(--font-weight-medium); }
 
+/* Server-side sort links. Unlike th.ph-sort (client-side, whole-table
+   sorting), these are real links carrying the query state, for tables that are
+   paged and must therefore sort in SQL. */
+.ph-sort-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: inherit;
+  text-decoration: none;
+}
+.ph-sort-link:hover { color: var(--color-text-secondary); }
+.ph-sort-link.is-on { color: var(--color-text); }
+.ph-sort-link .ph-ico { width: 13px; height: 13px; }
+
+/* Filter select in a toolbar, matching the search field's height. */
+.ph-select {
+  padding: var(--space-1-5) var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
 /* Sortable headers */
 th.ph-sort { cursor: pointer; user-select: none; }
 th.ph-sort:hover { color: var(--color-text-secondary); }

@@ -6,7 +6,8 @@ declare(strict_types=1);
 // Renders the admin global Peers page: a page of peers across every swarm, each
 // tagged with a detected client label, newest-seen first. The swarm-wide totals
 // (active peers, distinct swarms) come from the same aggregation the dashboard
-// uses; the rows are paged via admin_peers_limit and an ?offset. Dispatched by
+// uses; the rows are paged via admin_peers_limit and an ?offset, and searched,
+// filtered and sorted server-side via ?q / ?state / ?sort / ?dir. Dispatched by
 // admin_panel_controller() for page=peers when no info_hash is present (with
 // one, the router routes to the live per-torrent drill-down instead).
 
@@ -17,7 +18,6 @@ function admin_peers_controller(mysqli $connection, array $settings): string
     // swarm count, reusing the dashboard/scrape aggregation.
     require_once __DIR__.'/../model/stats.peers.php';
     $counts = stats_fetch_peer_counts($connection, $settings);
-    $total = $counts === false ? 0 : intval($counts['seeders']) + intval($counts['leechers']);
     $swarms = $counts === false ? 0 : intval($counts['torrents']);
 
     // Page window. Offset arrives from the query string; a non-numeric value
@@ -25,8 +25,19 @@ function admin_peers_controller(mysqli $connection, array $settings): string
     $limit = max(1, intval($settings['admin_peers_limit']));
     $offset = max(0, (int) ($_GET['offset'] ?? 0));
 
+    // Search, filter and sort are applied in SQL rather than in the browser, so
+    // they see every peer and not just the rendered page. All four values are
+    // untrusted: the model binds $search and whitelists $sort/$dir, and $state
+    // is narrowed to the two valid flags here.
+    $search = is_string($_GET['q'] ?? null) ? trim((string) $_GET['q']) : '';
+    $state = isset($_GET['state']) && ($_GET['state'] === '0' || $_GET['state'] === '1')
+        ? (int) $_GET['state']
+        : -1;
+    $sort = is_string($_GET['sort'] ?? null) ? (string) $_GET['sort'] : 'updated';
+    $dir = ($_GET['dir'] ?? '') === 'asc' ? 'asc' : 'desc';
+
     require_once __DIR__.'/../model/peers.select.all.php';
-    $peers = peers_select_all($connection, $settings, $limit, $offset);
+    $peers = peers_select_all($connection, $settings, $limit, $offset, $search, $state, $sort, $dir);
 
     // Resolve this page's addresses to countries in one batch, so the reader is
     // opened once rather than per row. Like the client label below, the result
@@ -54,10 +65,16 @@ function admin_peers_controller(mysqli $connection, array $settings): string
         ];
     }
 
+    // The pager counts what the filter matched, not the whole table, or a
+    // filtered list would page against an unfiltered total and trail off into
+    // empty pages.
+    require_once __DIR__.'/../model/peers.count.php';
+    $total = peers_count($connection, $settings, $search, $state);
+
     require_once __DIR__.'/../functions/auth.csrf.token.php';
     $csrf_token = ! empty($settings['admin_password']) ? auth_csrf_token() : '';
 
     require_once __DIR__.'/../views/html.admin.peers.php';
 
-    return view_admin_peers_html($settings, $tagged, $total, $swarms, $offset, $limit, $csrf_token);
+    return view_admin_peers_html($settings, $tagged, $total, $swarms, $offset, $limit, $csrf_token, $search, $state, $sort, $dir);
 }

@@ -45,10 +45,55 @@ declare(strict_types=1);
  *     country_name?: string,
  * }> $peers
  */
-function view_admin_peers_html(array $settings, array $peers, int $total, int $swarms, int $offset, int $limit, string $csrf_token): string
-{
+function view_admin_peers_html(
+    array $settings,
+    array $peers,
+    int $total,
+    int $swarms,
+    int $offset,
+    int $limit,
+    string $csrf_token,
+    string $search = '',
+    int $state = -1,
+    string $sort = 'updated',
+    string $dir = 'desc',
+): string {
     require_once __DIR__.'/html.admin.layout.php';
     require_once __DIR__.'/../functions/format.bytes.php';
+
+    // Every link on the page has to carry the current query state, or paging
+    // would silently drop the filter and sorting would reset it.
+    $query = static function (array $overrides) use ($search, $state, $sort, $dir): string {
+        $params = ['page' => 'peers'];
+        if ($search !== '') {
+            $params['q'] = $search;
+        }
+        if ($state === 0 || $state === 1) {
+            $params['state'] = (string) $state;
+        }
+        if ($sort !== 'updated' || $dir !== 'desc') {
+            $params['sort'] = $sort;
+            $params['dir'] = $dir;
+        }
+
+        return '?'.htmlspecialchars(http_build_query(array_filter(
+            array_merge($params, $overrides),
+            static fn (mixed $v): bool => $v !== null && $v !== '',
+        )), ENT_QUOTES, 'UTF-8');
+    };
+
+    // A sortable header: clicking the active column flips direction, any other
+    // column starts descending — the useful default for figures.
+    $sort_link = static function (string $key, string $label) use ($sort, $dir, $query): string {
+        $active = $sort === $key;
+        $next = $active && $dir === 'desc' ? 'asc' : 'desc';
+        $ico = $active
+            ? '<span class="ph-sort-ico"><span class="ph-ico" data-lucide="chevron-'.($dir === 'asc' ? 'up' : 'down').'"></span></span>'
+            : '';
+
+        return '<a class="ph-sort-link'.($active ? ' is-on' : '').'" href="'.
+            $query(['sort' => $key, 'dir' => $next, 'offset' => null]).'">'.$label.$ico.'</a>';
+    };
 
     // The column is shown whenever geo is switched on. If it is on but the
     // library or database is missing, every row reads as a dash — which is a
@@ -103,7 +148,8 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
                     htmlspecialchars((string) $peer['country'], ENT_QUOTES, 'UTF-8').'</abbr>';
         }
 
-        $state = $peer['state'] === 1
+        // Not $state — that is the filter parameter, and the loop would clobber it.
+        $state_cell = $peer['state'] === 1
             ? '<span class="listed">Seeding</span>'
             : '<span class="listed is-leeching">Leeching</span>';
 
@@ -112,7 +158,7 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
             '<td>'.$torrent.'</td>'.
             ($show_geo ? '<td>'.$country.'</td>' : '').
             '<td class="mono">'.$address.'</td>'.
-            '<td>'.$state.'</td>'.
+            '<td>'.$state_cell.'</td>'.
             '<td class="table-col-numeric mono">'.format_bytes($peer['uploaded']).'</td>'.
             '<td class="table-col-numeric mono">'.format_bytes($peer['downloaded']).'</td>'.
             '<td class="table-col-numeric mono">'.format_bytes($peer['left']).'</td>'.
@@ -131,23 +177,54 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
     $pager = '';
     if ($offset > 0 || $last < $total) {
         $prev = $offset > 0
-            ? '<a class="btn btn-ghost btn-sm" href="?page=peers&amp;offset='.max(0, $offset - $limit).'"><span class="ph-ico" data-lucide="arrow-left"></span>Previous</a>'
+            ? '<a class="btn btn-ghost btn-sm" href="'.$query(['offset' => max(0, $offset - $limit)]).'"><span class="ph-ico" data-lucide="arrow-left"></span>Previous</a>'
             : '<span class="btn btn-ghost btn-sm" aria-disabled="true"><span class="ph-ico" data-lucide="arrow-left"></span>Previous</span>';
         $next = $last < $total
-            ? '<a class="btn btn-ghost btn-sm" href="?page=peers&amp;offset='.($offset + $limit).'">Next<span class="ph-ico" data-lucide="arrow-right"></span></a>'
+            ? '<a class="btn btn-ghost btn-sm" href="'.$query(['offset' => $offset + $limit]).'">Next<span class="ph-ico" data-lucide="arrow-right"></span></a>'
             : '<span class="btn btn-ghost btn-sm" aria-disabled="true">Next<span class="ph-ico" data-lucide="arrow-right"></span></span>';
         $pager = '<div class="flex items-center gap-2 justify-end mt-4">'.$prev.$next.'</div>';
     }
 
-    $body = '<div class="ph-toolbar">
-			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search peers" placeholder="Search client, address, torrent, country&hellip;" data-filter-table="#tbl-peers"></span>
+    // A GET form, not a client-side filter: the table is paged, so filtering in
+    // the browser would only ever search the rendered page.
+    $state_options = '';
+    foreach ([-1 => 'All peers', 1 => 'Seeding', 0 => 'Leeching'] as $value => $label) {
+        $state_options .= '<option value="'.($value === -1 ? '' : $value).'"'.
+            ($state === $value ? ' selected' : '').'>'.$label.'</option>';
+    }
+
+    $sort_state = '';
+    if ($sort !== 'updated' || $dir !== 'desc') {
+        $sort_state = '<input type="hidden" name="sort" value="'.htmlspecialchars($sort, ENT_QUOTES, 'UTF-8').'">'.
+            '<input type="hidden" name="dir" value="'.htmlspecialchars($dir, ENT_QUOTES, 'UTF-8').'">';
+    }
+
+    $body = '<form method="GET" action="" class="ph-toolbar">
+			<input type="hidden" name="page" value="peers">
+			'.$sort_state.'
+			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" name="q" value="'.htmlspecialchars($search, ENT_QUOTES, 'UTF-8').'" aria-label="Search peers" placeholder="Search address, torrent, hash&hellip;"></span>
+			<select name="state" aria-label="Filter by state" class="ph-select">'.$state_options.'</select>
+			<button class="btn btn-sm" type="submit">Search</button>'.
+            ($search !== '' || $state !== -1
+                ? '<a class="btn btn-ghost btn-sm" href="?page=peers">Clear</a>'
+                : '').'
 			<span class="ph-spacer"></span>
 			<span class="dim text-sm">'.$window.'</span>
-		</div>
+		</form>
 
 		<div class="ph-card-table wide ph-nowrap">
 			<table id="tbl-peers">
-				<thead><tr><th>Client</th><th>Torrent</th>'.($show_geo ? '<th>Country</th>' : '').'<th>Address</th><th>State</th><th class="table-col-numeric">Up</th><th class="table-col-numeric">Down</th><th class="table-col-numeric">Left</th><th>Last seen</th></tr></thead>
+				<thead><tr>'.
+                    '<th>Client</th>'.
+                    '<th>'.$sort_link('torrent', 'Torrent').'</th>'.
+                    ($show_geo ? '<th>Country</th>' : '').
+                    '<th>'.$sort_link('address', 'Address').'</th>'.
+                    '<th>'.$sort_link('state', 'State').'</th>'.
+                    '<th class="table-col-numeric">'.$sort_link('uploaded', 'Up').'</th>'.
+                    '<th class="table-col-numeric">'.$sort_link('downloaded', 'Down').'</th>'.
+                    '<th class="table-col-numeric">'.$sort_link('left', 'Left').'</th>'.
+                    '<th>'.$sort_link('updated', 'Last seen').'</th>'.
+                '</tr></thead>
 				<tbody>'.$rows.'</tbody>
 			</table>
 			<div class="ph-empty"'.($peers === [] ? '' : ' hidden').'>
@@ -157,5 +234,5 @@ function view_admin_peers_html(array $settings, array $peers, int $total, int $s
 		</div>
 		'.$pager;
 
-    return view_admin_layout_html($settings, 'Peers', $body, 'peers', $csrf_token, 'Tracker', $actions, 'wide', '', '', ['/assets/copy.js', '/assets/tables.js']);
+    return view_admin_layout_html($settings, 'Peers', $body, 'peers', $csrf_token, 'Tracker', $actions, 'wide', '', '', ['/assets/copy.js']);
 }

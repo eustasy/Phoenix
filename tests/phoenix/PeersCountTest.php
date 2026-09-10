@@ -30,5 +30,15 @@ class PeersCountTest extends PhoenixTestCase
         $this->insertPeer(self::HASH, str_repeat('2', 40), 0, self::$time);
 
         $this->assertSame($before + 2, \peers_count(self::$connection, self::$settings));
+
+        // The filtered count must agree with what the filtered listing returns,
+        // or the pager trails off into empty pages.
+        require_once __DIR__.'/../../src/model/peers.select.all.php';
+        foreach ([['', 1], ['', 0]] as [$search, $state]) {
+            $this->assertSame(
+                count(\peers_select_all(self::$connection, self::$settings, 100000, 0, $search, $state)),
+                \peers_count(self::$connection, self::$settings, $search, $state),
+            );
+        }
     }
 }

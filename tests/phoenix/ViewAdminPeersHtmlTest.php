@@ -43,6 +43,54 @@ class ViewAdminPeersHtmlTest extends TestCase
         ], $overrides);
     }
 
+    public function testSearchIsAGetFormNotAClientSideFilter(): void
+    {
+        // The table is paged, so a browser-side filter could only ever search
+        // the rendered page — search has to reach the server.
+        $html = view_admin_peers_html($this->settings(), [$this->peer()], 1, 1, 0, 200, 'tok');
+
+        $this->assertStringContainsString('<form method="GET"', $html);
+        $this->assertStringContainsString('name="q"', $html);
+        $this->assertStringNotContainsString('data-filter-table', $html);
+        $this->assertStringNotContainsString('/assets/tables.js', $html);
+    }
+
+    public function testQueryStateSurvivesSortLinksAndPager(): void
+    {
+        // Two pages' worth, so the pager renders.
+        $html = view_admin_peers_html(
+            $this->settings(),
+            [$this->peer()],
+            500,
+            1,
+            0,
+            200,
+            'tok',
+            '81.78',
+            1,
+            'uploaded',
+            'asc',
+        );
+
+        // Search and state are echoed back into the form...
+        $this->assertStringContainsString('value="81.78"', $html);
+        $this->assertStringContainsString('value="1" selected', $html);
+        // ...and carried by both the sort links and the pager, or paging would
+        // silently drop the filter.
+        $this->assertStringContainsString('q=81.78', $html);
+        $this->assertStringContainsString('offset=200', $html);
+        $this->assertStringContainsString('sort=uploaded', $html);
+    }
+
+    public function testClearAppearsOnlyWhenAFilterIsSet(): void
+    {
+        $plain = view_admin_peers_html($this->settings(), [$this->peer()], 1, 1, 0, 200, 'tok');
+        $filtered = view_admin_peers_html($this->settings(), [$this->peer()], 1, 1, 0, 200, 'tok', 'abc');
+
+        $this->assertStringNotContainsString('>Clear<', $plain);
+        $this->assertStringContainsString('>Clear<', $filtered);
+    }
+
     public function testCountryColumnHiddenWhenGeoOff(): void
     {
         $html = view_admin_peers_html($this->settings(), [$this->peer()], 1, 1, 0, 200, 'tok');

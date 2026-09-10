@@ -56,6 +56,56 @@ class PeersSelectAllTest extends PhoenixTestCase
         return null;
     }
 
+    public function testSearchMatchesTorrentNameAcrossTheWholeTable(): void
+    {
+        // The name lives on the joined torrents row, not on peers — searching it
+        // is the reason the filter has to know about the join.
+        $rows = \peers_select_all(self::$connection, self::$settings, 1000, 0, '__TEST_PeersAll__');
+
+        $this->assertNotNull($this->findByPeer($rows, self::PEER_A));
+        $this->assertNull($this->findByPeer($rows, self::PEER_B), 'unregistered swarm has no name to match');
+    }
+
+    public function testSearchMatchesInfoHash(): void
+    {
+        $rows = \peers_select_all(self::$connection, self::$settings, 1000, 0, self::UNREGISTERED);
+
+        $this->assertNotNull($this->findByPeer($rows, self::PEER_B));
+        $this->assertNull($this->findByPeer($rows, self::PEER_A));
+    }
+
+    public function testStateFilterSelectsSeedersOrLeechers(): void
+    {
+        // PEER_A was inserted seeding (state 1), PEER_B leeching (state 0).
+        $seeding = \peers_select_all(self::$connection, self::$settings, 1000, 0, '', 1);
+        $leeching = \peers_select_all(self::$connection, self::$settings, 1000, 0, '', 0);
+
+        $this->assertNotNull($this->findByPeer($seeding, self::PEER_A));
+        $this->assertNull($this->findByPeer($seeding, self::PEER_B));
+        $this->assertNotNull($this->findByPeer($leeching, self::PEER_B));
+        $this->assertNull($this->findByPeer($leeching, self::PEER_A));
+    }
+
+    public function testSortDirectionIsHonoured(): void
+    {
+        // PEER_B is newer (updated 2000 vs 1000), so it leads descending and
+        // trails ascending.
+        $desc = \peers_select_all(self::$connection, self::$settings, 1000, 0, '__TEST_', -1, 'updated', 'desc');
+        $asc = \peers_select_all(self::$connection, self::$settings, 1000, 0, '__TEST_', -1, 'updated', 'asc');
+
+        $this->assertNotSame([], $desc);
+        $this->assertSame(array_reverse(array_column($asc, 'peer_id')), array_column($desc, 'peer_id'));
+    }
+
+    public function testUnknownSortColumnFallsBackInsteadOfReachingSql(): void
+    {
+        // The sort key comes off the query string; anything not whitelisted must
+        // degrade to the default rather than be interpolated.
+        $rows = \peers_select_all(self::$connection, self::$settings, 1000, 0, '', -1, 'peer_id`; DROP TABLE x; --', 'desc');
+
+        $this->assertNotSame([], $rows);
+    }
+
     public function testJoinsTorrentNameAndKeepsNullForUnregistered(): void
     {
         $rows = \peers_select_all(self::$connection, self::$settings, 1000, 0);
