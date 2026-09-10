@@ -38,7 +38,17 @@ var COUNTRY = {
 }
 var geoMap = null,
   geoMetric = GEO_DEFAULT,
-  geoColors = {}
+  geoColors = {},
+  // The metric currently rendered, read by the tooltip so a recolour does not
+  // need the map rebuilt just to refresh the closure.
+  geoData = null,
+  // Theme the regions were last painted for.
+  geoPaintedDark = null,
+  // No-data region fill and stroke for that theme. Every region is painted from
+  // these, so a theme change is a recolour like any other — the map is built
+  // once and never rebuilt, which is what kept breaking.
+  geoBaseFill = "",
+  geoBaseStroke = ""
 function geoIsDark() {
   return document.documentElement.classList.contains("theme-dark")
 }
@@ -117,34 +127,36 @@ function geoRenderPanel(d) {
   document.getElementById("geo-list").innerHTML = html || '<p class="dim text-sm">No data for this metric yet.</p>'
   phInitIcons()
 }
-function geoBuildMap(d) {
-  if (geoMap) {
-    try {
-      geoMap.destroy()
-    } catch {
-      /* ignore */
-    }
-    geoMap = null
-  }
-  var el = document.getElementById("geo-map")
-  el.innerHTML = ""
-  if (typeof jsVectorMap === "undefined") return
+// Resolve the theme-dependent colours once per render, so every path below
+// paints from the same pair.
+function geoSetThemeColors() {
   var dark = geoIsDark()
+  geoPaintedDark = dark
+  geoBaseFill = dark ? "#282726" : "#dad8ce"
+  geoBaseStroke = dark ? "#100f0f" : "#b3b1a8"
+}
+function geoComputeColors(d) {
   var sc = geoScale(d),
     keys = Object.keys(d.values)
   geoColors = {}
-  if (keys.length) {
-    var vals = keys.map(function (k) {
-      return d.values[k]
-    })
-    var max = Math.max.apply(null, vals),
-      min = Math.min.apply(null, vals)
-    keys.forEach(function (k) {
-      var t = max > min ? (d.values[k] - min) / (max - min) : 1
-      t = 0.18 + 0.82 * Math.sqrt(t)
-      geoColors[k] = lerpHex(sc[0], sc[1], t)
-    })
-  }
+  if (!keys.length) return
+  var vals = keys.map(function (k) {
+    return d.values[k]
+  })
+  var max = Math.max.apply(null, vals),
+    min = Math.min.apply(null, vals)
+  keys.forEach(function (k) {
+    var t = max > min ? (d.values[k] - min) / (max - min) : 1
+    t = 0.18 + 0.82 * Math.sqrt(t)
+    geoColors[k] = lerpHex(sc[0], sc[1], t)
+  })
+}
+// Called once, on the first render. Everything after that is a recolour, so
+// there is no destroy/reconstruct path to get wrong.
+function geoBuildMap() {
+  var el = document.getElementById("geo-map")
+  el.innerHTML = ""
+  if (typeof jsVectorMap === "undefined") return
   geoMap = new jsVectorMap({
     selector: "#geo-map",
     map: "world",
@@ -152,32 +164,48 @@ function geoBuildMap(d) {
     zoomOnScroll: false,
     backgroundColor: "transparent",
     regionStyle: {
-      initial: { fill: dark ? "#282726" : "#dad8ce", stroke: dark ? "#100f0f" : "#b3b1a8", strokeWidth: 0.3 },
+      initial: { fill: geoBaseFill, stroke: geoBaseStroke, strokeWidth: 0.3 },
       hover: { fillOpacity: 0.85 },
     },
-    // Hand the fills to the library rather than only painting the paths after
-    // construction: a series is part of the map's own model, so it survives any
-    // internal re-render that re-applies regionStyle.initial. Painting alone was
-    // being wiped by the settling pass after first paint, which left the initial
-    // load grey until a metric click rebuilt the map.
+    // Hand the fills to the library rather than only painting paths after
+    // construction: a series is part of the map's own model, so it survives the
+    // settling pass that re-applies regionStyle.initial after first paint.
     series: { regions: [{ attribute: "fill", values: geoColors }] },
+    // Reads the module-level metric, not a captured one, so switching metric
+    // does not need the map rebuilt for the tooltip to stay correct.
     onRegionTooltipShow: function (event, tooltip, code) {
-      var v = d.values[code]
-      tooltip.text((COUNTRY[code] || tooltip.text()) + (v != null ? " — " + v.toLocaleString() + d.unit : " — no data"), true)
+      var v = geoData ? geoData.values[code] : null
+      tooltip.text((COUNTRY[code] || tooltip.text()) + (v != null ? " — " + v.toLocaleString() + geoData.unit : " — no data"), true)
     },
   })
-  // Belt and braces for versions that ignore an initial series: paint now, and
-  // again on the next frame once the map has settled.
-  geoApplyFills()
-  requestAnimationFrame(geoApplyFills)
+  geoSchedulePaint()
 }
+// jsVectorMap re-applies regionStyle.initial once the map has laid out, which
+// wipes both the series and any paint that ran before it. That pass lands a
+// frame later on a first build and later still on a rebuild (a theme flip), so
+// repaint over the next two frames and once more shortly after rather than
+// betting on a single deferred call. Painting a region that is already the
+// right colour costs nothing.
+function geoSchedulePaint() {
+  geoApplyFills()
+  requestAnimationFrame(function () {
+    geoApplyFills()
+    requestAnimationFrame(geoApplyFills)
+  })
+  setTimeout(geoApplyFills, 150)
+}
+// Paints every region, not just the ones with a value: a region the new metric
+// does not cover has to be reset to the base fill, or it keeps the colour the
+// previous metric gave it and the two readings appear overlaid.
 function geoApplyFills() {
   document.querySelectorAll("#geo-map svg path").forEach(function (p) {
-    var c = geoColors[p.getAttribute("data-code")]
-    if (c) {
-      p.setAttribute("fill", c)
-      p.style.fill = c
-    }
+    var c = geoColors[p.getAttribute("data-code")] || geoBaseFill
+    if (!c) return
+    p.setAttribute("fill", c)
+    p.style.fill = c
+    // Stroke is theme-dependent too, and is why a theme change used to need the
+    // map rebuilt. Setting it here removes the last reason to.
+    if (geoBaseStroke) p.style.stroke = geoBaseStroke
   })
 }
 function phGeoSet(metric) {
@@ -188,15 +216,36 @@ function phGeoSet(metric) {
     b.classList.toggle("is-on", on)
     b.setAttribute("aria-selected", on ? "true" : "false")
   })
-  geoRenderPanel(GEO[metric])
-  geoBuildMap(GEO[metric])
+  geoData = GEO[metric]
+  geoRenderPanel(geoData)
+  geoSetThemeColors()
+  geoComputeColors(geoData)
+
+  // Built once, then only ever recoloured — metric change and theme change take
+  // the same path. Destroying and reconstructing the map was the source of the
+  // toggle and theme-switch breakage.
+  if (!geoMap) {
+    geoBuildMap()
+    return
+  }
+  try {
+    geoMap.series.regions[0].setValues(geoColors)
+  } catch {
+    /* older builds: fall through to painting the paths directly */
+  }
+  geoSchedulePaint()
 }
+
 document.querySelectorAll(".seg-btn[data-metric]").forEach(function (b) {
   b.addEventListener("click", function () {
     phGeoSet(b.dataset.metric)
   })
 })
 phGeoSet(GEO_DEFAULT)
+// The theme toggle flips two classes on <html>; other code may touch them too.
+// Only react when the theme actually differs from the one last painted, so an
+// unrelated class change cannot trigger a needless repaint.
 new MutationObserver(function () {
+  if (geoPaintedDark === geoIsDark()) return
   phGeoSet(geoMetric)
 }).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] })

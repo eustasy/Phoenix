@@ -45,7 +45,10 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
             'accent' => '#205ea6',
             'bg' => 'var(--color-info-bg)',
             'scaleL' => ['#c6dde8', '#205ea6'],
-            'scaleD' => ['#4385be', '#abcfe2'],
+            // Same direction of travel as the light scale — pale at the low end,
+            // saturated at the high end. Running dark the other way made a
+            // high-value country the palest on the map, which reads inverted.
+            'scaleD' => ['#abcfe2', '#4385be'],
         ],
         'downloads' => [
             'short' => 'Completed downloads',
@@ -58,7 +61,7 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
             'accent' => '#66800b',
             'bg' => 'var(--color-success-bg)',
             'scaleL' => ['#dde2b2', '#66800b'],
-            'scaleD' => ['#879a39', '#bec97e'],
+            'scaleD' => ['#bec97e', '#879a39'],
         ],
     ];
 
