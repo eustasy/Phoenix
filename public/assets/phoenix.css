@@ -519,9 +519,6 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-sidebar .dim { color: var(--flexoki-red-200); }
 .ph-sidebar .btn-ghost { color: var(--flexoki-red-100); }
 .ph-sidebar .btn-ghost:hover { background-color: rgba(255, 252, 240, 0.10); color: var(--flexoki-paper); }
-/* Cream disc so the flame reads on red */
-.ph-sidebar .ph-mark-disc { fill: var(--flexoki-paper); }
-.ph-sidebar .ph-mark-core { fill: #942822; }
 
 /* --------------------------------------------------------------------------
    Geography — segmented toggle, choropleth map, legend, top-countries
