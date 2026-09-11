@@ -11,11 +11,10 @@ declare(strict_types=1);
 // The two sources answer different questions and are not interchangeable:
 //   * live   — the clients currently in the swarm, derived from peer_id per
 //              request and never stored, broken down by version.
-//   * events — every completed download ever logged, by client FAMILY only.
-//              The ledger stores whatever label was written at the time, so a
-//              tracker running a while carries both "Transmission" and
-//              "Transmission 4.1.3.0"; the model folds them together, which is
-//              why history has no version axis.
+//   * events — every completed download ever logged, also by version where the
+//              label recorded one. A tracker running a while carries labels
+//              from more than one era of its own detector, so a family's bar
+//              has a versioned part and an unversioned remainder.
 //
 // Only the selected metric is computed — the ledger aggregation reads the whole
 // events table, and there is no reason to pay for it to render the live view.
@@ -32,12 +31,10 @@ function admin_clients_controller(mysqli $connection, array $settings): string
     $total = 0;
     if ($tables_installed) {
         if ($metric === 'events') {
-            require_once __DIR__.'/../model/events.client.counts.php';
-            // One '' version per family: the chart draws a solid bar, since the
-            // ledger cannot supply a version breakdown across its whole history.
-            foreach (events_client_counts($connection, $settings) as $family => $count) {
-                $families[$family] = ['' => $count];
-                $total += $count;
+            require_once __DIR__.'/../model/events.client.breakdown.php';
+            $families = events_client_breakdown($connection, $settings);
+            foreach ($families as $versions) {
+                $total += array_sum($versions);
             }
         } else {
             require_once __DIR__.'/../model/peers.client.breakdown.php';

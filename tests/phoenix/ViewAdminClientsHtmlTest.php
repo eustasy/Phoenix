@@ -31,18 +31,25 @@ class ViewAdminClientsHtmlTest extends TestCase
         $this->assertStringContainsString('metric=events', $html);
     }
 
-    public function testHistoricalMetricHasNoVersionAxis(): void
+    public function testHistoricalMetricShowsVersionsWhereRecorded(): void
     {
-        // The ledger stores the label written at the time, so a long-running
-        // tracker carries both "Transmission" and "Transmission 4.1.3.0" for the
-        // same client; the model folds them to family, so no version detail is
-        // rendered here and the count column counts downloads, not peers.
-        $families = ['Transmission' => ['' => 364237], 'qBittorrent' => ['' => 357158]];
-        $html = view_admin_clients_html($this->settings(), 'events', $families, 721395, 'tok');
+        // A long-running tracker carries labels from more than one era of its
+        // detector, so a family has a versioned part and an unversioned
+        // remainder — both belong to the one client.
+        $families = ['Transmission' => ['' => 364237, '4.1.3.0' => 2]];
+        $html = view_admin_clients_html($this->settings(), 'events', $families, 364239, 'tok');
 
         $this->assertStringContainsString('>Downloads ', $html);
-        $this->assertStringNotContainsString('4.1.3.0', $html);
+        $this->assertStringContainsString('4.1.3.0', $html);
         $this->assertStringContainsString('metric=live', $html);
+    }
+
+    public function testFamilyWithNoRecordedVersionsListsNone(): void
+    {
+        $html = view_admin_clients_html($this->settings(), 'events', ['BBtor' => ['' => 32163]], 32163, 'tok');
+
+        $this->assertStringContainsString('BBtor', $html);
+        $this->assertStringContainsString('&mdash;', $html);
     }
 
     public function testChartHeightScalesWithTheNumberOfClients(): void

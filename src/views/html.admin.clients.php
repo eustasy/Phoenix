@@ -10,11 +10,10 @@ declare(strict_types=1);
 // The toggle is links, not buttons: each metric is a separate query, so each is
 // its own URL — shareable, and the back button works.
 //
-// History has no version axis. The ledger stores whatever label was written at
-// the time, so a long-running tracker carries both "Transmission" and
-// "Transmission 4.1.3.0"; the model folds them to family, and the chart draws
-// one solid bar each. The live view keeps versions, which is said plainly under
-// the chart rather than left for the reader to notice.
+// Both metrics break down by version. The ledger's versions are only as good as
+// what was recorded — a long-running tracker carries labels from more than one
+// era of its own detector — so a family's bar may have a versioned part and an
+// unversioned remainder rather than a clean split.
 //
 // Marks the Clients nav active. Returns HTML string.
 
@@ -77,20 +76,17 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
         $share = $total > 0 ? round($family_total / $total * 100, 1) : 0.0;
 
         // Versions listed inline, since a column each would be mostly empty —
-        // clients do not share version numbers.
-        $detail = '<span class="dim">&mdash;</span>';
-        if (! $historical) {
-            $parts = [];
-            foreach ($versions as $version => $count) {
-                if ($version === '') {
-                    continue;
-                }
-                $parts[] = htmlspecialchars($version, ENT_QUOTES, 'UTF-8').' <span class="dim">&times;'.number_format($count).'</span>';
+        // clients do not share version numbers. A family whose rows carry no
+        // version (older ledger entries) simply has none to list.
+        $parts = [];
+        foreach ($versions as $version => $count) {
+            if ($version === '') {
+                continue;
             }
-            if ($parts !== []) {
-                $detail = implode(', ', $parts);
-            }
+            $parts[] = htmlspecialchars((string) $version, ENT_QUOTES, 'UTF-8').
+                ' <span class="dim">&times;'.number_format($count).'</span>';
         }
+        $detail = $parts === [] ? '<span class="dim">&mdash;</span>' : implode(', ', $parts);
 
         $rows .= '<tr>'.
             '<td><span class="ph-name">'.htmlspecialchars((string) $family, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'</span></td>'.
