@@ -107,7 +107,7 @@ function view_admin_traffic_html(
     $toggle = '';
     foreach ([
         'peers' => ['share-2', 'Active peers'],
-        'events' => ['clock-fading', 'All time'],
+        'events' => ['clock-fading', 'Historical'],
     ] as $key => [$icon, $label]) {
         $on = $metric === $key;
         $toggle .= '<a class="seg-btn'.($on ? ' is-on' : '').'" role="tab" aria-selected="'.($on ? 'true' : 'false').'"'.
