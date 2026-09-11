@@ -21,6 +21,33 @@ class StatsClientDetectTest extends PhoenixTestCase
         return bin2hex($rawPeerId);
     }
 
+    public function testCorrectsCodesThatWereMappedToTheWrongClient(): void
+    {
+        // Checked against the BEP 20 / BitTorrentSpecification registry after
+        // the ledger showed this tracker had seen clients the table named
+        // differently. A wrong name is worse than a bare code: it is believed.
+        $this->assertSame('BitWombat', \stats_client_detect($this->hex('-BW160M-aaaaaaaaaaaa')));
+        $this->assertSame('BiglyBT 1.6.0.0', \stats_client_detect($this->hex('-BI1600-aaaaaaaaaaaa')));
+        $this->assertSame('Retriever', \stats_client_detect($this->hex('-RT160M-aaaaaaaaaaaa')));
+    }
+
+    public function testNamesMatchTheRegistrySoLabelsMerge(): void
+    {
+        // These names are the registry's, not the friendlier modern ones, so a
+        // label written here folds into the same family as one written by
+        // another implementation of the same table — which is what lets the
+        // live and all-time client views line up.
+        $this->assertSame('DelugeTorrent', \stats_client_detect($this->hex('-DE205z-aaaaaaaaaaaa')));
+        $this->assertSame('µTorrent for Mac 2.2.1.0', \stats_client_detect($this->hex('-UM2210-aaaaaaaaaaaa')));
+    }
+
+    public function testUnregisteredCodeStaysABareCode(): void
+    {
+        // -FL is not in the registry. Surfacing "FL" is honest; guessing a name
+        // for it would not be.
+        $this->assertSame('FL', \stats_client_detect($this->hex('-FL56FF-aaaaaaaaaaaa')));
+    }
+
     public function testAzureusKnownCodeWithVersion(): void
     {
         $this->assertSame(
