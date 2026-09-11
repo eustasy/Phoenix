@@ -32,6 +32,48 @@ class ViewAdminHtmlTest extends TestCase
         ];
     }
 
+    /**
+     * @return list<array{info_hash: string, name: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>
+     */
+    private function topTorrents(): array
+    {
+        return [
+            ['info_hash' => str_repeat('a', 40), 'name' => 'Alpha', 'seeders' => 50, 'leechers' => 1, 'downloads' => 10, 'traffic' => 0],
+            ['info_hash' => str_repeat('b', 40), 'name' => null, 'seeders' => 20, 'leechers' => 0, 'downloads' => 10, 'traffic' => 0],
+        ];
+    }
+
+    public function testMiniTableCardsLinkIntoTheListingTheySummarise(): void
+    {
+        $html = view_admin_html(
+            $this->settings(),
+            true,
+            false,
+            'tok',
+            false,
+            [],
+            ['seeded' => $this->topTorrents()],
+            ['clients' => ['qBittorrent 5.2.3.0' => 52]],
+        );
+
+        $this->assertStringContainsString('At a glance', $html);
+        $this->assertStringContainsString('>Most seeded<', $html);
+        $this->assertStringContainsString('>Top clients<', $html);
+        // A card is a way in, not a dead end.
+        $this->assertStringContainsString('?page=peers&amp;info_hash='.str_repeat('a', 40), $html);
+        // An unregistered swarm falls back to a truncated hash.
+        $this->assertStringContainsString('bbbbbbbbbbbb', $html);
+    }
+
+    public function testEmptyCardsAreDroppedRatherThanShownEmpty(): void
+    {
+        // A tracker with no unhealthy swarms should not be told so every visit.
+        $html = view_admin_html($this->settings(), true, false, 'tok', false, [], ['trouble' => []], []);
+
+        $this->assertStringNotContainsString('Torrents in trouble', $html);
+        $this->assertStringNotContainsString('ph-toplist-grid', $html);
+    }
+
     public function testRendersBaseDocument(): void
     {
         $html = view_admin_html($this->settings(), true);

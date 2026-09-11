@@ -26,8 +26,10 @@ declare(strict_types=1);
  * @param PhoenixSettings $settings
  * @param array<string, int>|false $stats
  * @param array<string, array{value: int, source: string}> $tasks
+ * @param array<string, list<array{info_hash: string, name: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>> $torrent_cards
+ * @param array<string, array<string, int>> $count_cards
  */
-function view_admin_html(array $settings, bool $tables_installed, bool $show_installed = false, string $csrf_token = '', array|false $stats = false, array $tasks = []): string
+function view_admin_html(array $settings, bool $tables_installed, bool $show_installed = false, string $csrf_token = '', array|false $stats = false, array $tasks = [], array $torrent_cards = [], array $count_cards = []): string
 {
     require_once __DIR__.'/html.admin.layout.php';
     require_once __DIR__.'/../functions/format.bytes.php';
@@ -99,6 +101,106 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
         $body .= '<div class="alert alert-danger"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a>, and check <a href="?page=support">Server Support</a> for diagnostics.</div></div>';
     } else {
         $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="bar-chart-3"></span><p>No tracker statistics yet.</p></div>';
+    }
+
+    ////	Mini-tables
+    // Ranked cards, three columns each, linking into the listing they
+    // summarise. A card with no rows is dropped rather than shown empty — a
+    // tracker with no unhealthy swarms should not be told about it every visit.
+    if ($torrent_cards !== [] || $count_cards !== []) {
+        require_once __DIR__.'/html.toplist.php';
+
+        $hash_link = static fn (string $hash): string => '?page=peers&amp;info_hash='.htmlspecialchars($hash, ENT_QUOTES, 'UTF-8');
+        $torrent_label = static fn (array $t): string => $t['name'] !== null && $t['name'] !== ''
+            ? $t['name']
+            : substr($t['info_hash'], 0, 12).'…';
+
+        // Bars are proportional to the leader of each card, so a card is read
+        // against itself rather than against the tracker's busiest swarm.
+        $rows_from = static function (array $torrents, string $key, callable $format) use ($hash_link, $torrent_label): array {
+            $max = 0;
+            foreach ($torrents as $t) {
+                $max = max($max, (int) $t[$key]);
+            }
+            $rows = [];
+            foreach ($torrents as $t) {
+                $rows[] = [
+                    'label' => $torrent_label($t),
+                    'value' => $format($t),
+                    'bar' => $max > 0 ? (int) round((int) $t[$key] / $max * 100) : 0,
+                    'href' => $hash_link($t['info_hash']),
+                ];
+            }
+
+            return $rows;
+        };
+
+        // A label => count map (clients, countries) as ranked rows, top 5.
+        $rank_rows = static function (array $counts, ?string $href): array {
+            $counts = array_slice($counts, 0, 5, true);
+            $max = $counts === [] ? 0 : max($counts);
+            $rows = [];
+            foreach ($counts as $label => $n) {
+                $rows[] = [
+                    'label' => (string) $label,
+                    'value' => number_format((int) $n),
+                    'bar' => $max > 0 ? (int) round((int) $n / $max * 100) : 0,
+                    'href' => $href,
+                ];
+            }
+
+            return $rows;
+        };
+
+        $panels = [];
+        if (! empty($torrent_cards['seeded'])) {
+            $panels[] = view_toplist_html(
+                'Most seeded',
+                $rows_from($torrent_cards['seeded'], 'seeders', static fn (array $t): string => number_format($t['seeders']).' seeders'),
+                '#66800b',
+                ['label' => 'All torrents', 'href' => '?page=torrents'],
+            );
+        }
+        if (! empty($torrent_cards['leeched'])) {
+            $panels[] = view_toplist_html(
+                'Most leeched',
+                $rows_from($torrent_cards['leeched'], 'leechers', static fn (array $t): string => number_format($t['leechers']).' leechers'),
+                '#205ea6',
+                ['label' => 'All peers', 'href' => '?page=peers&amp;state=0'],
+            );
+        }
+        if (! empty($torrent_cards['trouble'])) {
+            $panels[] = view_toplist_html(
+                'Torrents in trouble',
+                $rows_from($torrent_cards['trouble'], 'leechers', static fn (array $t): string => number_format($t['seeders']).'S / '.number_format($t['leechers']).'L'),
+                '#af3029',
+                null,
+            );
+        }
+        if (! empty($torrent_cards['traffic'])) {
+            $panels[] = view_toplist_html(
+                'Most traffic served',
+                $rows_from($torrent_cards['traffic'], 'traffic', static fn (array $t): string => format_bytes($t['traffic'])),
+                '#bc5215',
+                null,
+            );
+        }
+        if (! empty($count_cards['clients'])) {
+            $panels[] = view_toplist_html('Top clients', $rank_rows($count_cards['clients'], null), '#5e409d');
+        }
+        if (! empty($count_cards['countries'])) {
+            $panels[] = view_toplist_html(
+                'Top countries',
+                $rank_rows($count_cards['countries'], '?page=geography'),
+                '#24837b',
+                ['label' => 'Geography', 'href' => '?page=geography'],
+            );
+        }
+
+        if ($panels !== []) {
+            $body .= '<div class="ph-section-head"><h3>At a glance</h3></div>'.
+                '<div class="ph-toplist-grid">'.implode('', $panels).'</div>';
+        }
     }
 
     $actions = '<a class="btn btn-secondary btn-sm" href="?page=support"><span class="ph-ico" data-lucide="stethoscope"></span>Diagnostics</a>'.

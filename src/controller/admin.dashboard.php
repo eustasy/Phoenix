@@ -17,6 +17,8 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
 
     $stats = false;
     $tasks = [];
+    $torrent_cards = [];
+    $count_cards = [];
     if ($tables_installed) {
         // Surface the already-computed tracker stats (same aggregation the
         // ?stats scrape uses) plus the total registered-torrent count and the
@@ -35,6 +37,25 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
 
         require_once __DIR__.'/../model/tasks.select.php';
         $tasks = tasks_select($connection, $settings);
+
+        // Mini-table cards. Each is a short ranked list that links into the
+        // listing it summarises, so the dashboard is a way in rather than a
+        // dead end. All are cheap aggregates over the same two tables.
+        require_once __DIR__.'/../model/torrents.top.php';
+        require_once __DIR__.'/../model/peers.client.counts.php';
+        $torrent_cards = [
+            'seeded' => torrents_top($connection, $settings, 'seeders'),
+            'leeched' => torrents_top($connection, $settings, 'leechers'),
+            'trouble' => torrents_top($connection, $settings, 'trouble'),
+            'traffic' => torrents_top($connection, $settings, 'traffic'),
+        ];
+        $count_cards = ['clients' => peers_client_counts($connection, $settings)];
+
+        // Countries reuse the Geography page's aggregation rather than a second
+        // copy of it; it returns [] when geo is not configured, and the card
+        // then simply does not render.
+        require_once __DIR__.'/../model/peers.geo.counts.php';
+        $count_cards['countries'] = peers_geo_counts($connection, $settings);
     }
 
     require_once __DIR__.'/../functions/auth.csrf.token.php';
@@ -49,5 +70,7 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
         $csrf_token,
         $stats,
         $tasks,
+        $torrent_cards,
+        $count_cards,
     );
 }
