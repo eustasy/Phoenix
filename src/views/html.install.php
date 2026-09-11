@@ -121,7 +121,7 @@ function view_install_html(
 			<fieldset class="setup-fieldset">
 				<div class="setup-legend"><span class="ph-ico" data-lucide="radio"></span>Tracker</div>
 				<div class="flex flex-col gap-3">
-					<label class="checkbox"><input type="checkbox" name="open_tracker" value="1"'.$checked($form['open_tracker']).'><span class="checkbox-label">Open tracker <span class="dim">&mdash; accept announces for any info hash</span></span></label>
+					<label class="checkbox"><input type="checkbox" name="open_tracker" value="1"'.$checked($form['open_tracker']).'><span class="checkbox-label">Open tracker <span class="text-warning">&mdash; warning: tracks any info hash announced to it, by anyone. Open trackers are routinely found and abused.</span></span></label>
 					<label class="checkbox"><input type="checkbox" name="public_index" value="1"'.$checked($form['public_index']).'><span class="checkbox-label">Public index <span class="dim">&mdash; expose the public torrent listing</span></span></label>
 				</div>
 			</fieldset>

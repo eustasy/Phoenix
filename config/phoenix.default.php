@@ -26,7 +26,9 @@ $settings['db_prefix'] = 'phoenix_';
 $settings['db_persist'] = true;
 
 ////	General Tracker Options
-/* track anything announced to it; off = closed/private tracker (BEP 27) */
+/* WARNING: tracks anything announced to it, by anyone — an open tracker is */
+/* routinely found and used to carry swarms you know nothing about. Off = */
+/* closed/private tracker (BEP 27): only registered info_hashes may announce. */
 $settings['open_tracker'] = false;
 /* how often client will send requests */
 $settings['announce_rec_interval'] = 1800; // 30 minutes
@@ -48,10 +50,11 @@ $settings['allow_client_ip'] = false;
 $settings['default_compact'] = true;
 /* echo the client's own public IP back in announce responses (BEP 24) */
 $settings['announce_external_ip'] = true;
-/* allow scrapes with no info_hash, which return EVERY torrent's stats. */
-/* Conventional for open trackers. Set false on a closed/private tracker: */
-/* a full scrape ignores the allowed-torrents filter, so leaving it on */
-/* exposes your whole torrent list to anyone who scrapes. */
+/* allow scrapes with no info_hash, which return EVERY torrent's stats — it */
+/* lets a torrent client list the whole tracker, the same reach public_index */
+/* gives a browser. Conventional for open trackers. Turn it off alongside */
+/* public_index if the torrent list is meant to be private; on its own it */
+/* ignores the allowed-torrents filter, so it does not respect a closed one. */
 $settings['full_scrape'] = true;
 /* minimum seconds between scrape requests, advertised to clients as BEP 48's */
 /* `min_request_interval` in the scrape response. 0 = do not advertise it */

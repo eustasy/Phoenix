@@ -26,14 +26,17 @@ admin Settings page write it.
 Full list with comments is in `config/phoenix.default.php`. Highlights:
 
 **Tracker behavior**
-- `open_tracker` — off = closed/private tracker (BEP 27); only registered
-  `info_hash`es may announce/scrape.
+- `open_tracker` — **tracks anything announced to it, by anyone**, and open
+  trackers are routinely found and abused. Off = closed/private tracker
+  (BEP 27); only registered `info_hash`es may announce/scrape.
 - `announce_rec_interval` / `announce_min_interval` — client request cadence.
 - `default_peers` / `max_peers` — peer-list sizing.
 - `default_compact`, `announce_external_ip` (BEP 24).
-- `full_scrape` — allow info_hash-less scrapes returning every torrent. **Set
-  false on a closed tracker** — full scrape ignores the allowed-torrents filter
-  and would expose the whole list.
+- `full_scrape` — allow info_hash-less scrapes returning every torrent: it lets
+  a torrent client list the whole tracker, the same reach `public_index` gives a
+  browser. Turn it off alongside `public_index` when the list is meant to be
+  private — on its own it ignores the allowed-torrents filter, so it does not
+  respect a closed tracker.
 - `scrape_min_interval` — advertised as BEP 48 `min_request_interval`.
 - `random_peers` / `random_peers_threshold` — peer-selection randomization.
 

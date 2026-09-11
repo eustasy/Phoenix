@@ -109,7 +109,12 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
         return '<label class="switch'.$label_class.'"><input type="checkbox" name="'.$flag.'" value="1" role="switch"'.$checked.$attrs.'><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label">'.htmlspecialchars($label).$note.'</span></label>';
     };
 
-    $full_scrape_note = ' <span class="text-warning">&mdash; warning: on a closed tracker this exposes every tracked info_hash to anyone who scrapes.</span>';
+    // open_tracker is the one switch here that invites abuse rather than merely
+    // widening what is shown: anything announced gets tracked, by anyone.
+    $open_tracker_note = ' <span class="text-warning">&mdash; warning: tracks any info hash announced to it, by anyone. Open trackers are routinely found and abused.</span>';
+    // full_scrape is not a warning. It lets a torrent client list every tracked
+    // torrent — the same reach the public index gives a browser.
+    $full_scrape_note = ' <span class="dim">&mdash; lets torrent clients list every tracked torrent, as the public index does for browsers</span>';
     $geo_note = $geo_available
         ? ' <span class="dim">&mdash; tag events &amp; map peers by country (coarse; the IP is never stored)</span>'
         : ' <span class="dim">&mdash; needs the geoip2 library and a GeoLite2 database</span>';
@@ -119,7 +124,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
 			<form class="mysql" method="POST">
 				<input type="hidden" name="process" value="settings">'.$csrf_field.'
 				<div class="flex flex-col gap-4">'.
-                    $switch($settings, 'open_tracker', 'open_tracker', ' <span class="dim">&mdash; accept announces for any info hash</span>').
+                    $switch($settings, 'open_tracker', 'open_tracker', $open_tracker_note).
                     $switch($settings, 'public_index', 'public_index', ' <span class="dim">&mdash; expose the public torrent listing</span>').
                     $switch($settings, 'full_scrape', 'full_scrape', $full_scrape_note).
                     $switch($settings, 'stats_enabled', 'stats_enabled', ' <span class="dim">&mdash; log torrent events to the events ledger</span>').
