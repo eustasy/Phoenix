@@ -102,8 +102,10 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
             foreach ($group['versions'] as $version => $version_count) {
                 $detail_parts[] = $version.' ×'.number_format($version_count);
             }
+            // One build per line: a family with a dozen point releases runs off
+            // the screen as a single comma-separated run.
             $parts[] = '<abbr class="ph-plain" title="'.
-                htmlspecialchars(implode(', ', $detail_parts), ENT_QUOTES, 'UTF-8').'">'.
+                htmlspecialchars(implode("\n", $detail_parts), ENT_QUOTES, 'UTF-8').'">'.
                 $label.'</abbr>'.$count;
         }
         $detail = $parts === [] ? '<span class="dim">&mdash;</span>' : implode(', ', $parts);

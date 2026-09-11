@@ -108,7 +108,9 @@ class ViewAdminClientsHtmlTest extends TestCase
         // The major answers "how much of the swarm is on 4"; the tooltip
         // answers "which 4" without spending a line on it.
         $this->assertStringContainsString('>Major versions<', $html);
-        $this->assertStringContainsString('title="4.1.3.0 ×49, 4.0.6 ×12">4</abbr>', $html);
+        // One build per line, so a family with a dozen point releases stays
+        // readable instead of running off the screen.
+        $this->assertStringContainsString("title=\"4.1.3.0 ×49\n4.0.6 ×12\">4</abbr>", $html);
         $this->assertStringContainsString('&times;61', $html);
     }
 
