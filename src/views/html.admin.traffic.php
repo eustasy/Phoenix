@@ -135,12 +135,11 @@ function view_admin_traffic_html(
 
             // The filename is what the torrent actually delivers, and routinely
             // what distinguishes two rows sharing a display name. Truncated by
-            // CSS with the full value on hover, so it costs a column, not the
-            // row height.
+            // CSS, so it costs a column and not the row height. No tooltip: it
+            // would only repeat the cell.
             $file = $t['filename'] === null || $t['filename'] === ''
                 ? '<span class="dim">&mdash;</span>'
-                : '<abbr class="ph-plain mono text-sm ph-file" title="'.htmlspecialchars($t['filename'], ENT_QUOTES, 'UTF-8').'">'.
-                    htmlspecialchars($t['filename'], ENT_QUOTES, 'UTF-8').'</abbr>';
+                : '<span class="mono text-sm ph-file">'.htmlspecialchars($t['filename'], ENT_QUOTES, 'UTF-8').'</span>';
 
             $owner = $t['user'] === null || $t['user'] === ''
                 ? '<span class="dim">&mdash;</span>'

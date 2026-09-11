@@ -367,7 +367,7 @@ a.ph-addr:hover { color: var(--color-action); text-decoration: underline; }
 .ph-name { color: var(--color-text); font-weight: var(--font-weight-medium); }
 
 /* Torrent filename. Often longer than the display name and rarely needed in
-   full, so it truncates and keeps the whole value on hover. */
+   full, so it truncates rather than wrapping the row. */
 .ph-file {
   display: inline-block;
   min-width: 0;
