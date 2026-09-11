@@ -161,6 +161,11 @@ body { background-color: var(--color-bg); color: var(--color-text); }
 .ph-topbar h1 { font-size: var(--font-size-2xl); margin: 0; letter-spacing: var(--letter-spacing-tight); }
 .ph-topbar .ph-crumb { font-size: var(--font-size-sm); color: var(--color-text-tertiary); margin: 0 0 2px; }
 .ph-topbar-actions { display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
+/* A count is prose, not a control: it needs more air against the button beside
+   it than two buttons need against each other. Only when something follows —
+   on a page whose topbar is the count alone, a trailing margin would just pull
+   it off the edge. */
+.ph-topbar-actions .ph-count:not(:last-child) { margin-inline-end: var(--space-2); }
 .ph-body { padding: var(--space-6) var(--space-8) var(--space-12); max-width: 1200px; width: 100%; }
 .ph-body.narrow { max-width: 760px; }
 .ph-body.wide { max-width: none; }
@@ -465,8 +470,26 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-page-title p { margin: var(--space-1) 0 0; color: var(--color-text-secondary); max-width: none; }
 
 /* Toolbar (search + filters above a table) */
-.ph-toolbar { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-4); }
+.ph-toolbar { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-4); --ph-control-h: 2.25rem; }
 .ph-toolbar .ph-spacer { flex: 1; }
+
+/* One control height across the toolbar row. ds.css sizes each control from a
+   different scale — an input from font-base and --space-2, .ph-select from
+   font-sm and --space-1-5, .btn-sm from font-xs and --space-1 — so a search
+   box, a filter and a button sitting in one row come out 42px, 35px and 28px
+   tall. Height is set here rather than by matching paddings, so the row stays
+   level whatever type size a control carries. */
+.ph-toolbar .ph-search input,
+.ph-toolbar .ph-select,
+.ph-toolbar .btn {
+  height: var(--ph-control-h);
+  padding-block: 0;
+  font-size: var(--font-size-sm);
+}
+/* Buttons centre their own label (inline-flex); the input and select rely on
+   the browser centring a single line in a fixed height, which needs the
+   inherited 1.5 line-height out of the way. */
+.ph-toolbar .btn { line-height: 1; }
 .ph-search { position: relative; display: inline-flex; align-items: center; min-width: 240px; flex: 1; max-width: 360px; }
 .ph-search .ph-ico { position: absolute; inset-inline-start: var(--space-3); width: 16px; height: 16px; color: var(--color-text-tertiary); pointer-events: none; }
 .ph-search input { width: 100%; max-width: none; padding-inline-start: calc(var(--space-3) + 16px + var(--space-2)); }
