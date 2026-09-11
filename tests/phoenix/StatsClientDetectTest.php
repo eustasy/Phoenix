@@ -215,4 +215,32 @@ class StatsClientDetectTest extends PhoenixTestCase
         $this->assertSame('ZZ 0.0.0.0', stats_client_detect($this->hex('-ZZ0000-abcdefghijkl')));
         $this->assertSame('Unknown', stats_client_detect(str_repeat('7a', 20)));
     }
+
+    public function testIdentifiesCodesCorroboratedByTwoImplementations(): void
+    {
+        // Absent from BEP 20, but each is named identically by at least two of
+        // libtorrent, Transmission and bittorrent-peerid. FlashGet in
+        // particular settles an old question: it is FG, never FL.
+        $this->assertSame('FlashGet 1.0.0.0', stats_client_detect($this->hex('-FG1000-aaaaaaaaaaaa')));
+        $this->assertSame('GetRight 1.0.0.0', stats_client_detect($this->hex('-GR1000-aaaaaaaaaaaa')));
+        $this->assertSame('µTorrent Embedded 1.0.0.0', stats_client_detect($this->hex('-UE1000-aaaaaaaaaaaa')));
+        // A lowercase code is a distinct code, not a case variant.
+        $this->assertSame('pHoeniX 1.0.0.0', stats_client_detect($this->hex('-pX1000-aaaaaaaaaaaa')));
+        $this->assertSame('BitKitten (libtorrent) 1.0.0.0', stats_client_detect($this->hex('-bk1000-aaaaaaaaaaaa')));
+    }
+
+    public function testSingleSourcedCodesAreDeliberatelyAbsent(): void
+    {
+        // bittorrent-peerid lists these and nothing corroborates them. It is
+        // also the table that puts FileCroc on FL, where three other sources
+        // put it on FC — so one source alone does not earn an entry, and a
+        // bare code is the honest answer until something else agrees.
+        foreach (['AN', 'CB', 'PC', 'PE', 'RM', 'SG', 'TG'] as $code) {
+            $this->assertSame(
+                $code.' 1.0.0.0',
+                stats_client_detect($this->hex('-'.$code.'1000-aaaaaaaaaaaa')),
+                $code.' must stay a bare code',
+            );
+        }
+    }
 }

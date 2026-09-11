@@ -27,11 +27,18 @@ function stats_client_detect(string $peer_id): string
     // "DelugeTorrent" and "UM" is "µTorrent for Mac" for that reason, not
     // because those read better.
     //
-    // A few codes are NOT in BEP 20 and are marked as such below. They are here
-    // because real peers announce them and a bare two-letter code tells an
-    // operator nothing. Each is sourced from a client's own identification
-    // table rather than a wiki — do not prune one for being absent from the
-    // registry without checking that source first.
+    // A few codes are NOT in BEP 20. They are here because real peers announce
+    // them and a bare two-letter code tells an operator nothing. Each is
+    // sourced from a client's own identification table rather than a wiki — do
+    // not prune one for being absent from the registry without checking that
+    // source first.
+    //
+    // The bar for adding one is TWO independent implementations agreeing
+    // (libtorrent's name_map, Transmission's clients.cc, bittorrent-peerid).
+    // One source is not enough: bittorrent-peerid alone lists 'FL' as FileCroc,
+    // where the other two and BEP 20 put FileCroc on 'FC' and Transmission puts
+    // Folx on 'FL'. Codes it lists alone — AN, CB, PC, PE, RM, SG, TG — are
+    // deliberately absent until something corroborates them.
     static $azureus = [
         '7T' => 'aTorrent for Android',
         'AB' => 'AnyEvent::BitTorrent',
@@ -55,6 +62,7 @@ function stats_client_detect(string $peer_id): string
         'BT' => 'BitTorrent',
         'BW' => 'BitWombat',
         'BX' => 'Bittorrent X',
+        'bk' => 'BitKitten (libtorrent)',
         'CD' => 'Enhanced CTorrent',
         'CT' => 'CTorrent',
         'DE' => 'DelugeTorrent',
@@ -63,6 +71,7 @@ function stats_client_detect(string $peer_id): string
         'ES' => 'electric sheep',
         'FC' => 'FileCroc',
         'FD' => 'Free Download Manager',
+        'FG' => 'FlashGet',
         // Not in BEP 20. Transmission's libtransmission/clients.cc maps '-FL'
         // to Folx (with its own base-62 version formatter, which is why Folx
         // peer ids are not all the same length). FileCroc is 'FC', above —
@@ -70,6 +79,7 @@ function stats_client_detect(string $peer_id): string
         'FL' => 'Folx',
         'FT' => 'FoxTorrent',
         'FX' => 'Freebox BitTorrent',
+        'GR' => 'GetRight',
         'GS' => 'GSTorrent',
         'HK' => 'Hekate',
         'HL' => 'Halite',
@@ -82,6 +92,7 @@ function stats_client_detect(string $peer_id): string
         'KT' => 'KTorrent',
         'LC' => 'LeechCraft',
         'LH' => 'LH-ABC',
+        'LK' => 'Linkage',
         'LP' => 'Lphant',
         'LT' => 'libtorrent',
         'lt' => 'libTorrent',
@@ -92,6 +103,7 @@ function stats_client_detect(string $peer_id): string
         'MR' => 'Miro',
         'MT' => 'MoonlightTorrent',
         'NB' => 'Net::BitTorrent',
+        'NE' => 'BT Next Evolution',
         'NX' => 'Net Transport',
         'OS' => 'OneSwarm',
         'OT' => 'OmegaTorrent',
@@ -99,6 +111,7 @@ function stats_client_detect(string $peer_id): string
         'PD' => 'Pando',
         'PI' => 'PicoTorrent',
         'PT' => 'PHPTracker',
+        'pX' => 'pHoeniX',
         'qB' => 'qBittorrent',
         'QD' => 'QQDownload',
         'QT' => 'Qt 4 Torrent example',
@@ -108,6 +121,7 @@ function stats_client_detect(string $peer_id): string
         'SB' => 'Swiftbit',
         'SD' => 'Thunder',
         'SM' => 'SoMud',
+        'SN' => 'ShareNet',
         'SP' => 'BitSpirit',
         'SS' => 'SwarmScope',
         'ST' => 'SymTorrent',
@@ -121,6 +135,7 @@ function stats_client_detect(string $peer_id): string
         'TS' => 'Torrentstorm',
         'TT' => 'TuoTu',
         'UL' => 'uLeecher!',
+        'UE' => 'µTorrent Embedded',
         'UM' => 'µTorrent for Mac',
         'UT' => 'µTorrent',
         'UW' => 'µTorrent Web',
@@ -130,6 +145,7 @@ function stats_client_detect(string $peer_id): string
         'WW' => 'WebTorrent',
         'WY' => 'FireTorrent',
         'XF' => 'Xfplay',
+        'XC' => 'Xtorrent',
         'XL' => 'Xunlei',
         'XS' => 'XSwifter',
         'XT' => 'XanTorrent',
