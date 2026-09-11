@@ -52,13 +52,28 @@ function view_admin_apikeys_html(array $settings, bool $writable, string|false $
         foreach ($keys as $user => $hash) {
             $user_disp = htmlspecialchars((string) $user, ENT_QUOTES, 'UTF-8');
             $admin_badge = ((string) $user === '*') ? ' <span class="badge">admin</span>' : '';
-            $fingerprint = htmlspecialchars(substr($hash, 0, 16), ENT_QUOTES, 'UTF-8').'&hellip;';
+            // Sixteen characters is enough to tell two keys apart at a glance
+            // and not enough to check one against a hash you hold, so the whole
+            // digest goes in the tooltip. It is a fingerprint of a stored hash,
+            // not a secret — the key itself is never stored.
+            $full = htmlspecialchars('sha256:'.$hash, ENT_QUOTES, 'UTF-8');
+            $fingerprint = '<abbr class="ph-plain" title="'.$full.'">sha256:'.
+                htmlspecialchars(substr($hash, 0, 16), ENT_QUOTES, 'UTF-8').'&hellip;</abbr>';
+
+            // Revoking a key breaks whatever is authenticating with it and
+            // cannot be undone — the same shape as deleting a torrent, so it
+            // reads the same way: destructive colouring and a confirm.
             $revoke = $writable
-                ? '<form method="POST">'.$csrf_field.'<input type="hidden" name="process" value="apikey_revoke"><input type="hidden" name="api_user" value="'.$user_disp.'"><button type="submit" class="btn btn-secondary btn-sm">Revoke</button></form>'
+                ? '<form method="POST" class="d-inline" data-confirm="Revoke the key for &quot;'.$user_disp.'&quot;? Anything using it will stop working.">'.$csrf_field.
+                    '<input type="hidden" name="process" value="apikey_revoke">'.
+                    '<input type="hidden" name="api_user" value="'.$user_disp.'">'.
+                    '<button type="submit" class="btn btn-ghost btn-sm is-danger">Revoke</button></form>'
                 : '';
-            $rows .= '<tr><td class="mono">'.$user_disp.$admin_badge.'</td><td class="mono muted">sha256:'.$fingerprint.'</td><td>'.$revoke.'</td></tr>';
+            $rows .= '<tr><td class="mono">'.$user_disp.$admin_badge.'</td>'.
+                '<td class="mono muted">'.$fingerprint.'</td>'.
+                '<td class="tar">'.$revoke.'</td></tr>';
         }
-        $list_html = '<div class="ph-card-table"><table><thead><tr><th>User</th><th>Key hash</th><th></th></tr></thead><tbody>'.$rows.'</tbody></table></div>';
+        $list_html = '<div class="ph-card-table"><table><thead><tr><th>User</th><th>Key hash</th><th class="tar"></th></tr></thead><tbody>'.$rows.'</tbody></table></div>';
     }
 
     $body = '<div class="ph-section-head"><h3 class="mt-0">Create a key</h3></div>

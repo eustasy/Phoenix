@@ -61,4 +61,26 @@ class ViewAdminApikeysHtmlTest extends TestCase
         $html = \view_admin_apikeys_html($this->settings(), true, false, 'tok');
         $this->assertStringContainsString('No API keys yet', $html);
     }
+
+    public function testRevokeIsRightAlignedAndDestructive(): void
+    {
+        $html = \view_admin_apikeys_html($this->settings(['alice' => str_repeat('a', 64)]), true, false, 'tok');
+
+        $this->assertStringContainsString('<td class="tar">', $html);
+        $this->assertStringContainsString('is-danger', $html);
+        // Revoking breaks whatever authenticates with the key and cannot be
+        // undone, so it asks first — as deleting a torrent does.
+        $this->assertStringContainsString('data-confirm=', $html);
+    }
+
+    public function testTruncatedHashCarriesTheFullDigestOnHover(): void
+    {
+        $hash = str_repeat('a', 64);
+        $html = \view_admin_apikeys_html($this->settings(['alice' => $hash]), true, false, 'tok');
+
+        // Sixteen characters tell two keys apart; the whole digest is the only
+        // way to check one against a hash you hold.
+        $this->assertStringContainsString('title="sha256:'.$hash.'"', $html);
+        $this->assertStringContainsString('sha256:'.substr($hash, 0, 16).'&hellip;</abbr>', $html);
+    }
 }

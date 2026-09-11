@@ -638,17 +638,17 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .seg-btn:hover { color: var(--color-text); }
 /* The selected segment. Background alone cannot carry this: in light mode the
    raised pill (#fffcf0) sits on a #f2f0e5 track, a 3% difference that left the
-   shadow doing all the work. So the state is also an edge and a colour — an
-   inset ring for a defined boundary at any luminance, and the action colour
-   against the muted label of an unselected segment. */
+   shadow doing all the work. The inset ring is what fixes that — a defined
+   boundary at any luminance. The label stays plain text: against an unselected
+   segment's muted grey it is already the brighter of the two, and an accent
+   colour on top read as a link rather than a state. */
 .seg-btn.is-on {
   background-color: var(--color-surface);
-  color: var(--color-action);
+  color: var(--color-text);
   box-shadow:
     inset 0 0 0 var(--border-width) var(--color-border),
     var(--shadow-sm);
 }
-.seg-btn.is-on:hover { color: var(--color-action); }
 
 .geo-wrap { display: grid; grid-template-columns: 1fr 320px; gap: var(--space-5); align-items: start; }
 @media (max-width: 980px) { .geo-wrap { grid-template-columns: 1fr; } }
@@ -680,8 +680,9 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-chart { position: relative; height: 240px; }
 .ph-chart-tall { height: 320px; }
 .ph-traffic-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4); }
-/* The Traffic page's window picker: the same selected state as .seg-btn, so
-   the two toggle idioms on one page agree about what "selected" looks like. */
+/* The Traffic page's window picker. Unlike .seg-btn these are loose buttons
+   with no track behind them and no pill to sit in, so the accent carries the
+   selection where the segmented control uses its ring. */
 .btn.is-on { background-color: var(--color-bg-tertiary); color: var(--color-action); }
 .btn-ghost.is-on:hover { color: var(--color-action); }
 
