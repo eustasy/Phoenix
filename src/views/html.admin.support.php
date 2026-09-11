@@ -82,9 +82,35 @@ function view_admin_support_html(array $settings, bool $tables_installed, array|
     $extras_html = '';
     if ($extras !== null) {
         $alert = static function (string $level, string $icon, string $text, string $note = ''): string {
-            return '<div class="alert alert-'.$level.' alert-center"><span class="ph-ico" data-lucide="'.$icon.'"></span>'.
-                $text.($note === '' ? '' : ' <span class="dim">'.$note.'</span>').'</div>';
+            return '<div class="alert alert-'.$level.' alert-center"><span class="ph-ico" data-lucide="'.$icon.'"></span><div>'.
+                $text.($note === '' ? '' : ' <span class="dim">'.$note.'</span>').'</div></div>';
         };
+
+        ////	Two-factor
+        $totp = $extras['totp'];
+        if (! $totp['password']) {
+            $extras_html .= $alert('warning', 'triangle-alert', 'The admin panel has no password.', 'Anyone who can reach this page can use it. Set <code>admin_password</code>.');
+        } elseif ($totp['enabled']) {
+            $extras_html .= $alert('success', 'shield-check', 'Two-factor authentication is enabled.');
+        } elseif (! $totp['installed']) {
+            $extras_html .= $alert('warning', 'triangle-alert', 'Two-factor authentication is not available.', 'The admin panel is password-only. Run <code>composer require eustasy/authenticatron</code> to add a second factor.');
+        } else {
+            $extras_html .= $alert('warning', 'triangle-alert', 'Two-factor authentication is off.', 'The admin panel is password-only. Enable it from <a href="?page=settings">Settings</a>.');
+        }
+
+        ////	Backup compression
+        $backups = $extras['backups'];
+        if (! $backups['available']) {
+            $level = $backups['requested'] ? 'danger' : 'info';
+            $note = $backups['requested']
+                ? '<code>backup_compress</code> is on, but backups will be written as plain SQL.'
+                : 'Backups are written as plain SQL.';
+            $extras_html .= $alert($level, $backups['requested'] ? 'circle-alert' : 'file-archive', 'PHP has no zlib support.', $note);
+        } elseif ($backups['requested']) {
+            $extras_html .= $alert('success', 'file-archive', 'Backups are compressed with gzip.', 'Roughly 10&times; smaller, via PHP&rsquo;s zlib.');
+        } else {
+            $extras_html .= $alert('info', 'file-archive', 'Backups are written as plain SQL.', 'Set <code>backup_compress</code> to gzip them.');
+        }
 
         ////	Geo
         $geo = $extras['geo'];
@@ -113,32 +139,6 @@ function view_admin_support_html(array $settings, bool $tables_installed, array|
             $extras_html .= $alert('info', 'bug', 'Sentry is installed but not reporting.', 'Set '.$missing.' to turn it on.');
         } else {
             $extras_html .= $alert('success', 'bug', 'Errors are being reported to Sentry.');
-        }
-
-        ////	Two-factor
-        $totp = $extras['totp'];
-        if (! $totp['password']) {
-            $extras_html .= $alert('warning', 'triangle-alert', 'The admin panel has no password.', 'Anyone who can reach this page can use it. Set <code>admin_password</code>.');
-        } elseif ($totp['enabled']) {
-            $extras_html .= $alert('success', 'shield-check', 'Two-factor authentication is enabled.');
-        } elseif (! $totp['installed']) {
-            $extras_html .= $alert('warning', 'triangle-alert', 'Two-factor authentication is not available.', 'The admin panel is password-only. Run <code>composer require eustasy/authenticatron</code> to add a second factor.');
-        } else {
-            $extras_html .= $alert('warning', 'triangle-alert', 'Two-factor authentication is off.', 'The admin panel is password-only. Enable it from <a href="?page=settings">Settings</a>.');
-        }
-
-        ////	Backup compression
-        $backups = $extras['backups'];
-        if (! $backups['available']) {
-            $level = $backups['requested'] ? 'danger' : 'info';
-            $note = $backups['requested']
-                ? '<code>backup_compress</code> is on, but backups will be written as plain SQL.'
-                : 'Backups are written as plain SQL.';
-            $extras_html .= $alert($level, $backups['requested'] ? 'circle-alert' : 'file-archive', 'PHP has no zlib support.', $note);
-        } elseif ($backups['requested']) {
-            $extras_html .= $alert('success', 'file-archive', 'Backups are compressed with gzip.', 'Roughly 10&times; smaller, via PHP&rsquo;s zlib &mdash; no external binary needed.');
-        } else {
-            $extras_html .= $alert('info', 'file-archive', 'Backups are written as plain SQL.', 'Set <code>backup_compress</code> to gzip them, for roughly 10&times; less disk.');
         }
 
         $extras_html = '<div class="ph-section-head"><h3>Optional extras</h3>'.
