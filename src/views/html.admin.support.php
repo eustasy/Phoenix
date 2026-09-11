@@ -100,7 +100,7 @@ function view_admin_support_html(array $settings, bool $tables_installed, array|
                 $extras_html .= $alert('success', 'globe', 'Geo enrichment is active, using the <strong>C extension</strong>.', 'Reading '.$where.'.');
             } else {
                 // Works, but slowly, and it is on the announce path.
-                $extras_html .= $alert('warning', 'triangle-alert', 'Geo enrichment is active, but using the <strong>pure-PHP reader</strong>.', 'Around 40&times; slower than <code>ext-maxminddb</code>, on every announce. Install it (Debian/Ubuntu: <code>php'.htmlspecialchars(PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION, ENT_QUOTES, 'UTF-8').'-maxminddb</code>) and it is picked up automatically. Reading '.$where.'.');
+                $extras_html .= $alert('warning', 'triangle-alert', 'Geo enrichment is active, but using the <strong>pure-PHP reader</strong>.', 'Around 40&times; slower than <code>ext-maxminddb</code>, on every announce. Install it (Debian/Ubuntu: <code>php-maxminddb</code>) and it is picked up automatically. Reading '.$where.'.');
             }
         }
 
