@@ -24,6 +24,7 @@ declare(strict_types=1);
 function view_admin_clients_html(array $settings, string $metric, array $families, int $total, string $csrf_token): string
 {
     require_once __DIR__.'/html.admin.layout.php';
+    require_once __DIR__.'/../functions/stats.client.majors.php';
 
     $historical = $metric === 'events';
 
@@ -75,16 +76,35 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
         $family_total = array_sum($versions);
         $share = $total > 0 ? round($family_total / $total * 100, 1) : 0.0;
 
-        // Versions listed inline, since a column each would be mostly empty —
-        // clients do not share version numbers. A family whose rows carry no
-        // version (older ledger entries) simply has none to list.
+        // Majors listed inline, since a column each would be mostly empty —
+        // clients do not share version numbers. Each carries its exact builds
+        // on hover: the major answers "how much of the swarm is on 4", and the
+        // breakout answers "which 4" without spending a line on it. A family
+        // whose rows carry no version (older ledger entries) has none to list.
         $parts = [];
-        foreach ($versions as $version => $count) {
-            if ($version === '') {
+        foreach (stats_client_majors($versions) as $major => $group) {
+            if ($major === '') {
                 continue;
             }
-            $parts[] = htmlspecialchars((string) $version, ENT_QUOTES, 'UTF-8').
-                ' <span class="dim">&times;'.number_format($count).'</span>';
+
+            $count = ' <span class="dim">&times;'.number_format($group['total']).'</span>';
+            $label = htmlspecialchars((string) $major, ENT_QUOTES, 'UTF-8');
+
+            // One build under a major is the major, so a tooltip repeating it
+            // would say nothing.
+            $builds = array_keys($group['versions']);
+            if (count($builds) === 1 && (string) $builds[0] === (string) $major) {
+                $parts[] = $label.$count;
+                continue;
+            }
+
+            $detail_parts = [];
+            foreach ($group['versions'] as $version => $version_count) {
+                $detail_parts[] = $version.' ×'.number_format($version_count);
+            }
+            $parts[] = '<abbr class="ph-plain" title="'.
+                htmlspecialchars(implode(', ', $detail_parts), ENT_QUOTES, 'UTF-8').'">'.
+                $label.'</abbr>'.$count;
         }
         $detail = $parts === [] ? '<span class="dim">&mdash;</span>' : implode(', ', $parts);
 
@@ -110,13 +130,23 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
             '<th class="ph-sort table-col-numeric" data-type="num" data-sort-default="desc">'.
                 ($historical ? 'Downloads' : 'Peers').' '.$sort_ico.'</th>'.
             '<th class="ph-sort table-col-numeric" data-type="num">Share '.$sort_ico.'</th>'.
-            '<th>Versions</th>'.
+            '<th>Major versions</th>'.
         '</tr></thead><tbody>'.$rows.'</tbody></table></div>';
 
     // Same chart script as the dashboard; it draws whatever families it is
-    // given, and a single '' version renders as one solid bar.
+    // given, and a single '' version renders as one solid bar. Charted by major
+    // rather than exact version: a family's bar otherwise fragments into a
+    // sliver per point release and stops being readable.
+    $chart_families = [];
+    foreach ($families as $family => $versions) {
+        $chart_families[$family] = [];
+        foreach (stats_client_majors($versions) as $major => $group) {
+            $chart_families[$family][$major] = $group['total'];
+        }
+    }
+
     $inline_js = 'var CLIENTS = '.
-        (string) json_encode($families, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
+        (string) json_encode($chart_families, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
         (string) file_get_contents(__DIR__.'/../../public/assets/_clients.js');
     $extra_srcs = [
         '/assets/tables.js',

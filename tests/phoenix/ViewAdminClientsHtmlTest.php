@@ -94,4 +94,45 @@ class ViewAdminClientsHtmlTest extends TestCase
         $this->assertStringNotContainsString('clients-chart', $live);
         $this->assertStringNotContainsString('chart.js', $live);
     }
+
+    public function testTableGroupsVersionsByMajorWithBreakouts(): void
+    {
+        $html = view_admin_clients_html(
+            $this->settings(),
+            'live',
+            ['Transmission' => ['4.1.3.0' => 49, '4.0.6' => 12, '3.0.0' => 7]],
+            68,
+            'tok',
+        );
+
+        // The major answers "how much of the swarm is on 4"; the tooltip
+        // answers "which 4" without spending a line on it.
+        $this->assertStringContainsString('>Major versions<', $html);
+        $this->assertStringContainsString('title="4.1.3.0 ×49, 4.0.6 ×12">4</abbr>', $html);
+        $this->assertStringContainsString('&times;61', $html);
+    }
+
+    public function testBareMajorGetsNoRedundantTooltip(): void
+    {
+        // One build under a major, and that build IS the major, so a tooltip
+        // would only repeat what is already on screen.
+        $html = view_admin_clients_html($this->settings(), 'live', ['Deluge' => ['2' => 9]], 9, 'tok');
+
+        $this->assertStringNotContainsString('<abbr', $html);
+    }
+
+    public function testChartIsGroupedByMajor(): void
+    {
+        $html = view_admin_clients_html(
+            $this->settings(),
+            'live',
+            ['Transmission' => ['4.1.3.0' => 49, '4.0.6' => 12, '3.0.0' => 7]],
+            68,
+            'tok',
+        );
+
+        // Charted by exact version, a family's bar fragments into a sliver per
+        // point release.
+        $this->assertStringContainsString('"Transmission":{"4":61,"3":7}', $html);
+    }
 }
