@@ -84,8 +84,12 @@ class ViewAdminTrafficHtmlTest extends TestCase
         $estimate = view_admin_traffic_html($this->settings(), [], $this->torrents(), 'events', '90', $this->windows(), 'tok');
         $live = view_admin_traffic_html($this->settings(), [], $this->torrents(), 'peers', '90', $this->windows(), 'tok', $this->swarm());
 
-        $this->assertStringContainsString('>Traffic ', $estimate);
-        $this->assertStringContainsString('>Uploaded ', $live);
+        // Matched as the header's own sort link: '>Traffic ' alone also matches
+        // the footnote prose, so it passed whatever the header said.
+        $this->assertStringContainsString('sort=traffic&amp;dir=asc">Traffic<', $estimate);
+        $this->assertStringContainsString('sort=traffic&amp;dir=asc">Uploaded<', $live);
+        $this->assertStringNotContainsString('>Uploaded<', $estimate);
+        $this->assertStringNotContainsString('">Traffic<', $live);
     }
 
     public function testTableCarriesFilenameAndOwner(): void
@@ -100,8 +104,10 @@ class ViewAdminTrafficHtmlTest extends TestCase
             'tok',
         );
 
-        $this->assertStringContainsString('>Filename ', $html);
-        $this->assertStringContainsString('>Owner ', $html);
+        // Both are sort links now, so match the header text without assuming
+        // what follows it.
+        $this->assertStringContainsString('>Filename<', $html);
+        $this->assertStringContainsString('>Owner<', $html);
         $this->assertStringContainsString('alpha.iso', $html);
         $this->assertStringContainsString('alice', $html);
     }

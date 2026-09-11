@@ -113,7 +113,11 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
     if ($torrent_cards !== [] || $count_cards !== [] || $peer_cards !== [] || $clients !== [] || $traffic !== []) {
         require_once __DIR__.'/html.toplist.php';
 
-        $hash_link = static fn (string $hash): string => '?page=peers&amp;info_hash='.htmlspecialchars($hash, ENT_QUOTES, 'UTF-8');
+        // A row links into the view that answers the question its card asked.
+        // Most cards rank torrents by their swarm, so they land on the peers
+        // drill-down; the traffic card ranks bytes, so it lands on Traffic's.
+        $hash_link = static fn (string $hash, string $page = 'peers'): string =>
+            '?page='.$page.'&amp;info_hash='.htmlspecialchars($hash, ENT_QUOTES, 'UTF-8');
         $torrent_label = static fn (array $t): string => $t['name'] !== null && $t['name'] !== ''
             ? $t['name']
             : substr($t['info_hash'], 0, 12).'…';
@@ -132,7 +136,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
 
         // Bars are proportional to the leader of each card, so a card is read
         // against itself rather than against the tracker's busiest swarm.
-        $rows_from = static function (array $torrents, string $key, callable $format) use ($hash_link, $torrent_label, $torrent_title): array {
+        $rows_from = static function (array $torrents, string $key, callable $format, string $page = 'peers') use ($hash_link, $torrent_label, $torrent_title): array {
             $max = 0;
             foreach ($torrents as $t) {
                 $max = max($max, (int) $t[$key]);
@@ -143,7 +147,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                     'label' => $torrent_label($t),
                     'value' => $format($t),
                     'bar' => $max > 0 ? (int) round((int) $t[$key] / $max * 100) : 0,
-                    'href' => $hash_link($t['info_hash']),
+                    'href' => $hash_link($t['info_hash'], $page),
                     'title' => $torrent_title($t),
                 ];
             }
@@ -206,7 +210,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
         if (! empty($torrent_cards['traffic'])) {
             $panels[] = view_toplist_html(
                 'Most traffic served',
-                $rows_from($torrent_cards['traffic'], 'traffic', static fn (array $t): string => format_bytes($t['traffic'])),
+                $rows_from($torrent_cards['traffic'], 'traffic', static fn (array $t): string => format_bytes($t['traffic']), 'traffic'),
                 '#bc5215',
                 ['label' => 'All traffic', 'href' => '?page=traffic&amp;metric=events'],
             );

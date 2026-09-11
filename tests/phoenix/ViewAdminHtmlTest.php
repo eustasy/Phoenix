@@ -324,4 +324,22 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertStringContainsString('<h3>Most seeded</h3>', $html);
         $this->assertStringContainsString('<h3>Most leeched</h3>', $html);
     }
+
+    public function testTrafficCardRowsLinkToTheTrafficDrillDown(): void
+    {
+        // A row links into the view that answers the question its card asked:
+        // the swarm cards to Peers, the bytes card to Traffic.
+        $html = view_admin_html(
+            $this->settings(),
+            true,
+            false,
+            'tok',
+            $this->stats(),
+            [],
+            ['seeded' => $this->topTorrents(), 'traffic' => $this->topTorrents()],
+        );
+
+        $this->assertStringContainsString('?page=traffic&amp;info_hash='.str_repeat('a', 40), $html);
+        $this->assertStringContainsString('?page=peers&amp;info_hash='.str_repeat('a', 40), $html);
+    }
 }
