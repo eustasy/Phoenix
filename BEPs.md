@@ -206,7 +206,7 @@ which Phoenix supports:
 
 - With `open_tracker` off, announces are rejected unless the `info_hash` is in
   the allowed list (`announce_controller()`, `src/controller/announce.php`).
-- Scrape filters requested hashes through `tracker_filter_info_hashes()` and
+- Scrape filters requested hashes through `torrents_filter_allowed()` and
   errors out if none are allowed, so a closed tracker never confirms torrents
   the caller isn't entitled to (`public/scrape.php`).
 - Full scrape is separately gated behind `full_scrape`, and the Settings page

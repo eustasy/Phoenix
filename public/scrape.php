@@ -41,8 +41,8 @@ $valid_info_hashes = array_values(array_filter($peer['info_hashes']));
 // who wasn't allowed to see any of the specific ones they requested.
 if (! empty($valid_info_hashes)) {
     if (! $settings['open_tracker']) {
-        require_once __DIR__.'/../src/functions/tracker.filter.info.hashes.php';
-        $valid_info_hashes = tracker_filter_info_hashes($valid_info_hashes, $allowed_torrents);
+        require_once __DIR__.'/../src/model/torrents.filter.allowed.php';
+        $valid_info_hashes = torrents_filter_allowed($connection, $settings, $valid_info_hashes);
         if (empty($valid_info_hashes)) {
             tracker_error('Torrent is not allowed.', 'never');
         }

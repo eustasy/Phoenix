@@ -10,11 +10,8 @@ declare(strict_types=1);
 // client expects no body). Calls tracker_error() on validation failure
 // (which exits, same contract as before).
 
-/**
- * @param PhoenixSettings $settings
- * @param array<int, string> $allowed_torrents
- */
-function announce_controller(mysqli $connection, array $settings, int $time, array $allowed_torrents = []): string
+/** @param PhoenixSettings $settings */
+function announce_controller(mysqli $connection, array $settings, int $time): string
 {
 
     ////	Sanitize & Validate Input
@@ -29,12 +26,14 @@ function announce_controller(mysqli $connection, array $settings, int $time, arr
     }
 
     // Torrent allowed? Closed-tracker check (BEP 27 private torrents): reject
-    // announces for any info_hash not registered on this tracker.
-    if (
-        ! $settings['open_tracker'] &&
-        ! in_array($peer['info_hash'], $allowed_torrents)
-    ) {
-        tracker_error('Torrent is not allowed.', 'never');
+    // announces for any info_hash not registered on this tracker. One indexed
+    // lookup for the one hash being announced, rather than a scan of every
+    // hash the tracker knows.
+    if (! $settings['open_tracker']) {
+        require_once __DIR__.'/../model/torrents.filter.allowed.php';
+        if (torrents_filter_allowed($connection, $settings, [$peer['info_hash']]) === []) {
+            tracker_error('Torrent is not allowed.', 'never');
+        }
     }
 
     // peer_id: required, 40 hex chars (see info_hash note above).

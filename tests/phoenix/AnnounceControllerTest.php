@@ -145,7 +145,7 @@ class AnnounceControllerTest extends PhoenixTestCase
     public function testRendersBencodeByDefault(): void
     {
         $this->makeRequest();
-        $body = \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+        $body = \announce_controller(self::$connection, $this->settingsForTest(), self::$time);
 
         $this->assertIsString($body);
         $this->assertStringStartsWith('d', $body);
@@ -159,7 +159,7 @@ class AnnounceControllerTest extends PhoenixTestCase
     public function testRendersXmlWhenXmlFlagSet(): void
     {
         $this->makeRequest(['xml' => '1']);
-        $body = \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+        $body = \announce_controller(self::$connection, $this->settingsForTest(), self::$time);
 
         $this->assertStringStartsWith('<?xml', $body);
     }
@@ -167,7 +167,7 @@ class AnnounceControllerTest extends PhoenixTestCase
     public function testRendersJsonWhenJsonFlagSet(): void
     {
         $this->makeRequest(['json' => '1']);
-        $body = \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+        $body = \announce_controller(self::$connection, $this->settingsForTest(), self::$time);
 
         $decoded = json_decode($body, true);
         $this->assertIsArray($decoded);
@@ -186,7 +186,7 @@ class AnnounceControllerTest extends PhoenixTestCase
         );
 
         $this->makeRequest(['event' => 'stopped']);
-        $body = \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+        $body = \announce_controller(self::$connection, $this->settingsForTest(), self::$time);
 
         $this->assertSame('', $body);
         $this->assertNull($this->fetchPeer(self::PEER_ID_A));
@@ -197,7 +197,7 @@ class AnnounceControllerTest extends PhoenixTestCase
         $before = $this->fetchTorrentDownloads();
 
         $this->makeRequest(['event' => 'completed']);
-        \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+        \announce_controller(self::$connection, $this->settingsForTest(), self::$time);
 
         $this->assertSame($before + 1, $this->fetchTorrentDownloads());
         // Completed forces seeding state.
@@ -213,8 +213,8 @@ class AnnounceControllerTest extends PhoenixTestCase
         $before = $this->fetchTorrentDownloads();
 
         $this->makeRequest(['event' => 'completed']);
-        \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
-        \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+        \announce_controller(self::$connection, $this->settingsForTest(), self::$time);
+        \announce_controller(self::$connection, $this->settingsForTest(), self::$time);
 
         $this->assertSame($before + 1, $this->fetchTorrentDownloads());
     }
@@ -232,7 +232,7 @@ class AnnounceControllerTest extends PhoenixTestCase
         $before = $this->fetchTorrentDownloads();
 
         $this->makeRequest(['event' => 'completed']);
-        \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+        \announce_controller(self::$connection, $this->settingsForTest(), self::$time);
 
         $this->assertSame($before, $this->fetchTorrentDownloads());
     }
@@ -255,8 +255,8 @@ class AnnounceControllerTest extends PhoenixTestCase
         $settings['stats_geo'] = false;
 
         $this->makeRequest(['event' => 'stopped']);
-        \announce_controller(self::$connection, $settings, self::$time, [self::HASH]);
-        \announce_controller(self::$connection, $settings, self::$time, [self::HASH]);
+        \announce_controller(self::$connection, $settings, self::$time);
+        \announce_controller(self::$connection, $settings, self::$time);
 
         $this->assertNull($this->fetchPeer(self::PEER_ID_A));
         $this->assertSame(1, $this->fetchEventCount('stopped'));
@@ -267,7 +267,7 @@ class AnnounceControllerTest extends PhoenixTestCase
         $this->assertNull($this->fetchPeer(self::PEER_ID_A));
 
         $this->makeRequest();
-        \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+        \announce_controller(self::$connection, $this->settingsForTest(), self::$time);
 
         $row = $this->fetchPeer(self::PEER_ID_A);
         $this->assertNotNull($row);
@@ -287,7 +287,7 @@ class AnnounceControllerTest extends PhoenixTestCase
         );
 
         $this->makeRequest();
-        \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+        \announce_controller(self::$connection, $this->settingsForTest(), self::$time);
 
         $row = $this->fetchPeer(self::PEER_ID_A);
         $this->assertSame('192.0.2.1', $row['ipv4']);
@@ -306,7 +306,7 @@ class AnnounceControllerTest extends PhoenixTestCase
         );
 
         $this->makeRequest();
-        \announce_controller(self::$connection, $this->settingsForTest(), self::$time, [self::HASH]);
+        \announce_controller(self::$connection, $this->settingsForTest(), self::$time);
 
         $row = $this->fetchPeer(self::PEER_ID_A);
         $this->assertNotNull($row);
@@ -317,12 +317,12 @@ class AnnounceControllerTest extends PhoenixTestCase
 
     public function testClosedTrackerAcceptsListedHash(): void
     {
-        // open_tracker=false + hash IS in $allowed_torrents → proceeds.
+        // open_tracker=false + the hash IS registered → proceeds.
         $settings = $this->settingsForTest();
         $settings['open_tracker'] = false;
 
         $this->makeRequest();
-        $body = \announce_controller(self::$connection, $settings, self::$time, [self::HASH]);
+        $body = \announce_controller(self::$connection, $settings, self::$time);
 
         $this->assertStringStartsWith('d', $body);
     }
@@ -339,7 +339,7 @@ class AnnounceControllerTest extends PhoenixTestCase
         $settings['clean_request_percent'] = 100;
 
         $this->makeRequest();
-        $body = \announce_controller(self::$connection, $settings, self::$time, [self::HASH]);
+        $body = \announce_controller(self::$connection, $settings, self::$time);
 
         $this->assertStringStartsWith('d', $body);
     }
@@ -353,7 +353,7 @@ class AnnounceControllerTest extends PhoenixTestCase
         $settings['clean_request_percent'] = 0;
 
         $this->makeRequest();
-        $body = \announce_controller(self::$connection, $settings, self::$time, [self::HASH]);
+        $body = \announce_controller(self::$connection, $settings, self::$time);
 
         $this->assertStringStartsWith('d', $body);
     }
@@ -368,7 +368,7 @@ class AnnounceControllerTest extends PhoenixTestCase
         $settings['allow_client_ip'] = true;
 
         $this->makeRequest(['ipv6' => '[2606:4700:4700::1111]:99999']);
-        $body = \announce_controller(self::$connection, $settings, self::$time, [self::HASH]);
+        $body = \announce_controller(self::$connection, $settings, self::$time);
 
         // A bencode dict, not an error exit.
         $this->assertStringStartsWith('d', $body);
@@ -392,12 +392,10 @@ class AnnounceControllerTest extends PhoenixTestCase
      *
      * @param array<string, string|int> $get
      * @param array<string, mixed>      $settingsOverrides
-     * @param array<int, string>        $allowedTorrents
      */
     private function runControllerSubprocess(
         array $get,
         array $settingsOverrides = [],
-        array $allowedTorrents = [],
     ): array {
         $bootstrap = __DIR__.'/../bootstrap.php';
         $script = '<?php '.
@@ -407,7 +405,7 @@ class AnnounceControllerTest extends PhoenixTestCase
             '$_SERVER["REMOTE_ADDR"]  = "192.0.2.1"; '.
             '$settings = array_merge($GLOBALS["phoenix_settings"], '.var_export($settingsOverrides, true).'); '.
             'require '.var_export(self::CONTROLLER_PATH, true).'; '.
-            'echo announce_controller($GLOBALS["phoenix_connection"], $settings, $GLOBALS["phoenix_time"], '.var_export($allowedTorrents, true).');';
+            'echo announce_controller($GLOBALS["phoenix_connection"], $settings, $GLOBALS["phoenix_time"]);';
 
         return $this->runPhpSubprocess($script);
     }
@@ -432,7 +430,6 @@ class AnnounceControllerTest extends PhoenixTestCase
                 'port' => '6881',
             ],
             ['open_tracker' => true],
-            [self::HASH],
         );
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Peer ID is invalid', $result['stdout']);
@@ -450,7 +447,6 @@ class AnnounceControllerTest extends PhoenixTestCase
                 'port' => '70000',
             ],
             ['open_tracker' => true],
-            [self::HASH],
         );
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Missing or invalid port', $result['stdout']);
@@ -465,7 +461,6 @@ class AnnounceControllerTest extends PhoenixTestCase
                 'port' => '-1',
             ],
             ['open_tracker' => true],
-            [self::HASH],
         );
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Missing or invalid port', $result['stdout']);
@@ -484,7 +479,6 @@ class AnnounceControllerTest extends PhoenixTestCase
                 // no 'port'
             ],
             ['open_tracker' => true],
-            [self::HASH],
         );
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Missing port', $result['stdout']);
@@ -501,7 +495,6 @@ class AnnounceControllerTest extends PhoenixTestCase
                 'port' => '0',
             ],
             ['open_tracker' => true],
-            [self::HASH],
         );
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Missing port', $result['stdout']);
@@ -509,16 +502,20 @@ class AnnounceControllerTest extends PhoenixTestCase
 
     public function testClosedTrackerRejectsUnlistedHash(): void
     {
-        // open_tracker=false + $allowed_torrents empty → "Torrent is not
+        // open_tracker=false and the hash is not registered → "Torrent is not
         // allowed." instead of falling through to peer_id validation.
+        //
+        // A hash the fixture never inserted, because being allowed is a fact
+        // about the torrents table now rather than a list the caller passes in
+        // — the check is an indexed lookup, so an empty list can no longer
+        // stand in for "not registered".
         $result = $this->runControllerSubprocess(
             [
-                'info_hash' => self::HASH,
+                'info_hash' => str_repeat('d', 40),
                 'peer_id' => self::PEER_ID_A,
                 'port' => '6881',
             ],
             ['open_tracker' => false],
-            [],
         );
         $this->assertSame(2, $result['exit']);
         $this->assertStringContainsString('Torrent is not allowed', $result['stdout']);

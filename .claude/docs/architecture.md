@@ -82,7 +82,7 @@ order, it:
 6. `require_once`s `tracker.error.php`.
 7. `db_is_configured` → `db_persist_host` → `db_connect()` (wraps
    `mysqli_connect()` in try/catch so callers always get a `mysqli` or `false`).
-8. For closed trackers, loads `$allowed_torrents` (BEP 27 tracker-side filter).
+8. (Closed trackers no longer preload an allowed list here — `torrents_filter_allowed()` checks the hashes a request names, per request.)
 
 After this, scripts can rely on `$connection`, `$settings`, and `$time`.
 

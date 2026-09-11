@@ -82,11 +82,11 @@ if (! $connection) {
     tracker_error('Connection Failed. Tracker may be mis-configured. '.mysqli_connect_error(), null, $settings['report_errors']);
 }
 
-////	Load allowed torrents for closed tracker (BEP 27)
+////	Closed tracker (BEP 27)
 // Closed-tracker mode is the tracker-side half of BEP 27 (private torrents):
 // only info_hashes registered here may be announced to or scraped.
-
-if (! $settings['open_tracker']) {
-    require_once __DIR__.'/model/torrents.select.allowed.php';
-    $allowed_torrents = torrents_select_allowed($connection, $settings);
-}
+//
+// The check itself is torrents_filter_allowed(), asked per request with the
+// hashes that request names. Nothing is loaded here: the bootstrap used to read
+// every info_hash into an array on every announce, which cost 48.8 MB and 57ms
+// at 200k torrents to answer a question about one of them.

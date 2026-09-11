@@ -20,4 +20,4 @@ http_security_headers('tracker');
 require_once __DIR__.'/../src/phoenix.php';
 require_once __DIR__.'/../src/controller/announce.php';
 
-echo announce_controller($connection, $settings, $time, $allowed_torrents ?? []);
+echo announce_controller($connection, $settings, $time);
