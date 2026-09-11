@@ -59,4 +59,43 @@ class PeersGeoCountsTest extends PhoenixTestCase
         ]);
         $this->assertSame([], \peers_geo_counts(self::$connection, $settings));
     }
+
+    public function testCorruptDatabaseIsCaughtRatherThanThrown(): void
+    {
+        // Readable but not a .mmdb: the Reader constructor throws. The catch
+        // keeps a corrupt geo database from taking down the Geography page,
+        // which is a different failure from "geo is not configured".
+        if (! class_exists(\GeoIp2\Database\Reader::class)) {
+            $this->markTestSkipped('geoip2 library not installed.');
+        }
+
+        $path = (string) tempnam(sys_get_temp_dir(), 'phx_geo_');
+        file_put_contents($path, 'this is not a maxmind database');
+
+        try {
+            $settings = $this->settings(['stats_geo' => true, 'stats_geo_database' => $path]);
+            $this->assertSame([], \peers_geo_counts(self::$connection, $settings));
+        } finally {
+            unlink($path);
+        }
+    }
+
+    public function testCountsByCountryWhenGeoIsConfigured(): void
+    {
+        // The resolving path needs a GeoLite2 database, which MaxMind's licence
+        // forbids shipping, so this skips where one is absent.
+        $mmdb = __DIR__.'/../../config/GeoLite2-Country.mmdb';
+        if (! class_exists(\GeoIp2\Database\Reader::class) || ! is_readable($mmdb)) {
+            $this->markTestSkipped('geoip2 library or GeoLite2 database not available.');
+        }
+
+        $settings = $this->settings(['stats_geo' => true, 'stats_geo_database' => $mmdb]);
+        $counts = \peers_geo_counts(self::$connection, $settings);
+
+        // setUp seeded one peer on a real public address.
+        foreach ($counts as $code => $count) {
+            $this->assertSame(2, strlen((string) $code));
+            $this->assertGreaterThan(0, $count);
+        }
+    }
 }
