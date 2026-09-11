@@ -99,40 +99,31 @@ class ViewScrapeBencodeTest extends PhoenixTestCase
         $this->assertStringContainsString('10:incompletei3e', $out);
     }
 
-    public function testZeroValues(): void
+    /** @return array<string, array{int, int, int}> */
+    public static function countProvider(): array
     {
-        $scrape = [
-            'cccccccccccccccccccccccccccccccccccccccc' => [
-                'info_hash' => 'cccccccccccccccccccccccccccccccccccccccc',
-                'seeders' => 0,
-                'leechers' => 0,
-                'downloads' => 0,
-            ],
+        return [
+            'zeroes' => [0, 0, 0],
+            'large' => [999999, 888888, 777777],
         ];
-
-        $out = view_scrape_bencode($scrape);
-
-        $this->assertStringContainsString('8:completei0e', $out);
-        $this->assertStringContainsString('10:incompletei0e', $out);
-        $this->assertStringContainsString('10:downloadedi0e', $out);
     }
 
-    public function testLargeValues(): void
+    #[\PHPUnit\Framework\Attributes\DataProvider('countProvider')]
+    public function testCountsSerialiseAsBencodeIntegers(int $seeders, int $leechers, int $downloads): void
     {
-        $scrape = [
-            'dddddddddddddddddddddddddddddddddddddddd' => [
-                'info_hash' => 'dddddddddddddddddddddddddddddddddddddddd',
-                'seeders' => 999999,
-                'leechers' => 888888,
-                'downloads' => 777777,
-            ],
-        ];
+        // Bencode integers are unpadded and unbounded, so the boundary cases
+        // are the same assertion with different numbers.
+        $hash = str_repeat('c', 40);
+        $out = view_scrape_bencode([$hash => [
+            'info_hash' => $hash,
+            'seeders' => $seeders,
+            'leechers' => $leechers,
+            'downloads' => $downloads,
+        ]]);
 
-        $out = view_scrape_bencode($scrape);
-
-        $this->assertStringContainsString('8:completei999999e', $out);
-        $this->assertStringContainsString('10:incompletei888888e', $out);
-        $this->assertStringContainsString('10:downloadedi777777e', $out);
+        $this->assertStringContainsString('8:complete'.'i'.$seeders.'e', $out);
+        $this->assertStringContainsString('10:incomplete'.'i'.$leechers.'e', $out);
+        $this->assertStringContainsString('10:downloaded'.'i'.$downloads.'e', $out);
     }
 
     public function testFlagsCarryMinRequestIntervalOnlyWhenNonZero(): void

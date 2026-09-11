@@ -6,133 +6,90 @@ namespace Phoenix\Tests;
 
 class ViewStatsJsonTest extends PhoenixTestCase
 {
+    /** A representative set of figures, reused so each test says only what it checks. */
+    private const SAMPLE = [
+        'peers' => 42,
+        'seeders' => 30,
+        'leechers' => 12,
+        'torrents' => 5,
+        'downloads' => 150,
+        'traffic' => 1073741824, // 1 GB
+    ];
+
+    private const ZEROES = [
+        'peers' => 0,
+        'seeders' => 0,
+        'leechers' => 0,
+        'torrents' => 0,
+        'downloads' => 0,
+        'traffic' => 0,
+    ];
+
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
         require_once __DIR__.'/../../src/views/json.stats.php';
     }
 
+    /**
+     * Render, decode, and return the 'tracker' object every response wraps.
+     *
+     * @param array<string, int> $stats
+     * @return array<string, mixed>
+     */
+    private function tracker(array $stats): array
+    {
+        $decoded = json_decode(view_stats_json($stats, self::$settings), true);
+        $this->assertIsArray($decoded);
+        $this->assertArrayHasKey('tracker', $decoded);
+        $this->assertIsArray($decoded['tracker']);
+
+        return $decoded['tracker'];
+    }
+
     public function testReturnsValidJson()
     {
-        $stats = [
-            'peers' => 42,
-            'seeders' => 30,
-            'leechers' => 12,
-            'torrents' => 5,
-            'downloads' => 150,
-            'traffic' => 1073741824, // 1 GB
-        ];
-
-        $result = view_stats_json($stats, self::$settings);
-
-        $this->assertJson($result, 'Output should be valid JSON');
+        $this->assertJson(view_stats_json(self::SAMPLE, self::$settings), 'Output should be valid JSON');
     }
 
     public function testIncludesTrackerObject()
     {
-        $stats = [
-            'peers' => 42,
-            'seeders' => 30,
-            'leechers' => 12,
-            'torrents' => 5,
-            'downloads' => 150,
-            'traffic' => 1073741824,
-        ];
-
-        $result = view_stats_json($stats, self::$settings);
-        $decoded = json_decode($result, true);
-
-        $this->assertArrayHasKey('tracker', $decoded);
-        $this->assertIsArray($decoded['tracker']);
+        // tracker() asserts the wrapper itself.
+        $this->assertNotSame([], $this->tracker(self::SAMPLE));
     }
 
     public function testIncludesAllStatFields()
     {
-        $stats = [
-            'peers' => 42,
-            'seeders' => 30,
-            'leechers' => 12,
-            'torrents' => 5,
-            'downloads' => 150,
-            'traffic' => 1073741824,
-        ];
+        $tracker = $this->tracker(self::SAMPLE);
 
-        $result = view_stats_json($stats, self::$settings);
-        $decoded = json_decode($result, true);
-        $tracker = $decoded['tracker'];
-
-        $this->assertArrayHasKey('version', $tracker);
-        $this->assertArrayHasKey('peers', $tracker);
-        $this->assertArrayHasKey('seeders', $tracker);
-        $this->assertArrayHasKey('leechers', $tracker);
-        $this->assertArrayHasKey('torrents', $tracker);
-        $this->assertArrayHasKey('downloads', $tracker);
-        $this->assertArrayHasKey('traffic', $tracker);
+        foreach (['version', 'peers', 'seeders', 'leechers', 'torrents', 'downloads', 'traffic'] as $field) {
+            $this->assertArrayHasKey($field, $tracker);
+        }
     }
 
     public function testCorrectStatValues()
     {
-        $stats = [
-            'peers' => 42,
-            'seeders' => 30,
-            'leechers' => 12,
-            'torrents' => 5,
-            'downloads' => 150,
-            'traffic' => 1073741824,
-        ];
+        $tracker = $this->tracker(self::SAMPLE);
 
-        $result = view_stats_json($stats, self::$settings);
-        $decoded = json_decode($result, true);
-        $tracker = $decoded['tracker'];
-
-        $this->assertEquals(42, $tracker['peers']);
-        $this->assertEquals(30, $tracker['seeders']);
-        $this->assertEquals(12, $tracker['leechers']);
-        $this->assertEquals(5, $tracker['torrents']);
-        $this->assertEquals(150, $tracker['downloads']);
-        $this->assertEquals(1073741824, $tracker['traffic']);
+        foreach (self::SAMPLE as $field => $expected) {
+            $this->assertEquals($expected, $tracker[$field], $field);
+        }
     }
 
     public function testVersionIncludesPhoenixVersion()
     {
-        $stats = [
-            'peers' => 0,
-            'seeders' => 0,
-            'leechers' => 0,
-            'torrents' => 0,
-            'downloads' => 0,
-            'traffic' => 0,
-        ];
-
-        $result = view_stats_json($stats, self::$settings);
-        $decoded = json_decode($result, true);
-
         $this->assertStringContainsString(
             self::$settings['phoenix_version'],
-            $decoded['tracker']['version'],
+            $this->tracker(self::ZEROES)['version'],
         );
     }
 
     public function testHandlesZeroStats()
     {
-        $stats = [
-            'peers' => 0,
-            'seeders' => 0,
-            'leechers' => 0,
-            'torrents' => 0,
-            'downloads' => 0,
-            'traffic' => 0,
-        ];
+        $tracker = $this->tracker(self::ZEROES);
 
-        $result = view_stats_json($stats, self::$settings);
-        $decoded = json_decode($result, true);
-        $tracker = $decoded['tracker'];
-
-        $this->assertEquals(0, $tracker['peers']);
-        $this->assertEquals(0, $tracker['seeders']);
-        $this->assertEquals(0, $tracker['leechers']);
-        $this->assertEquals(0, $tracker['torrents']);
-        $this->assertEquals(0, $tracker['downloads']);
-        $this->assertEquals(0, $tracker['traffic']);
+        foreach (self::ZEROES as $field => $expected) {
+            $this->assertEquals($expected, $tracker[$field], $field);
+        }
     }
 }
