@@ -179,7 +179,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                 'Most leeched',
                 $rows_from($torrent_cards['leeched'], 'leechers', static fn (array $t): string => number_format($t['leechers']).' leechers'),
                 '#205ea6',
-                ['label' => 'All peers', 'href' => '?page=peers&amp;state=0'],
+                ['label' => 'All peers', 'href' => '?page=peers&amp;state=0&amp;sort=downloaded'],
             );
         }
         if (! empty($torrent_cards['trouble'])) {
@@ -223,7 +223,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                 'Top seeders',
                 $peer_rows($peer_cards['seeders']),
                 '#66800b',
-                ['label' => 'All seeders', 'href' => '?page=peers&amp;state=1'],
+                ['label' => 'All seeders', 'href' => '?page=peers&amp;state=1&amp;sort=uploaded'],
             );
         }
         if (! empty($peer_cards['leechers'])) {
@@ -231,7 +231,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                 'Top leechers',
                 $peer_rows($peer_cards['leechers']),
                 '#205ea6',
-                ['label' => 'All leechers', 'href' => '?page=peers&amp;state=0'],
+                ['label' => 'All leechers', 'href' => '?page=peers&amp;state=0&amp;sort=downloaded'],
             );
         }
         if (! empty($count_cards['countries'])) {
@@ -248,8 +248,13 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
         // the left half rather than stretching across.
         $charts = '';
         if ($clients !== []) {
-            $charts .= '<div class="geo-toplist ph-chart-card"><h3>Clients</h3>'.
-                '<div class="ph-chart"><canvas id="clients-chart"></canvas></div></div>';
+            $charts .= '<div class="geo-toplist ph-chart-card"><h3>Current clients</h3>'.
+                '<div class="ph-chart"><canvas id="clients-chart"></canvas></div>'.
+                // Metric named rather than left to the default: the chart is
+                // the live swarm, and the link should still land on it if the
+                // page's default ever moves, as Traffic's did.
+                '<div class="ph-toplist-more"><a href="?page=clients&amp;metric=live">All clients</a></div>'.
+                '</div>';
         }
 
         if ($traffic !== []) {
