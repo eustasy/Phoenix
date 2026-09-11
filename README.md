@@ -23,6 +23,7 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
   - [Admin password requirements](#admin-password-requirements)
   - [Recovering admin access](#recovering-admin-access)
   - [Reverse proxies & client IP address](#reverse-proxies--client-ip-address)
+  - [Error reporting (optional)](#error-reporting-optional)
 - [Server Configuration](#server-configuration)
 - [Documentation](#documentation)
 
@@ -76,7 +77,7 @@ Configuration should take place in `config/phoenix.custom.php`, NOT `config/phoe
 
 ### Stat-Tracking
 
-Phoenix can log torrent events (completions by default; optionally started/stopped via `stats_events`) to an `events` table. Enable it with `$settings['stats_enabled'] = true;`, or from the **Statistics** section of the installer or the admin **Settings** flags — the table exists from install, so it's just a flag. The ledger is privacy-preserving by design — a coarse client label and minified location are derived from the peer_id and IP, which are never themselves stored. See the `stats_*` settings (including `stats_retention`, which prunes old rows) in `config/phoenix.default.php`.
+Phoenix can log torrent events (completions by default; optionally started/stopped via `stats_events`) to an `events` table. Enable it with `$settings['stats_enabled'] = true;`, or from the **Statistics** section of the installer or the admin **Settings** flags — the table exists from install, so it's just a flag. The ledger is privacy-preserving by design — a coarse client label and minified location are derived from the peer_id and IP, and the event row keeps only those derived codes, never the address itself. (The `peers` table does store each peer's address: that is the swarm index a tracker exists to serve.) See the `stats_*` settings (including `stats_retention`, which prunes old rows) in `config/phoenix.default.php`.
 
 #### Geo enrichment
 
@@ -129,6 +130,27 @@ Phoenix identifies each peer by its connecting IP, so behind a reverse proxy or 
 - `$settings['trusted_proxies']` — CIDR ranges of your proxies. A forwarded header is honoured only when `REMOTE_ADDR` falls inside one of these ranges; chain headers (`X-Forwarded-For` / `Forwarded`) are walked from the right, skipping these ranges, to find the real client.
 
 If `trusted_proxies` is empty, forwarded headers are **not** trusted unless you explicitly set `$settings['trust_any_forwarded'] = true` — which trusts the header from any direct connection and so lets anyone reaching the tracker spoof their address. Leave it off unless you fully control who can connect. Often it is cleaner to let the web server rewrite `REMOTE_ADDR` itself (Apache `mod_remoteip`, Nginx `real_ip`) and leave these empty — see [APACHE.md](./APACHE.md) / [NGINX.md](./NGINX.md).
+
+### Error reporting (optional)
+
+Phoenix can hand server-side failures and uncaught exceptions to an external monitor. Two hooks drive it — `src/hooks/phoenix.init.php` starts the monitor at the top of each request, before the database connects, so even a connection failure is reported; `src/hooks/phoenix.error.php` sends each error. Both ship wired for [Sentry](https://sentry.io) and inert, so a default install reports nothing and costs nothing.
+
+1. Run `composer require sentry/sentry`.
+2. Set `$settings['report_errors'] = true;` — this is what makes the hooks fire at all.
+3. Set `$settings['sentry_dsn'] = 'https://…';` in `config/phoenix.custom.php`, which is gitignored, so the DSN stays out of your repository and `git pull` upgrades stay clean.
+
+Errors arrive tagged with `phoenix.source` — which part of the tracker failed, e.g. `peer_insert`, `tracker_error`, `shutdown` — and carry the running `phoenix_version` as the release. Reporting is best-effort by design: `phoenix_hook_event()` swallows anything the hooks throw, so a bad DSN or an unreachable Sentry degrades to "no reporting", never a broken tracker.
+
+Optional tuning, all in `config/phoenix.default.php`:
+
+| Setting | Default | Notes |
+| --- | --- | --- |
+| `sentry_environment` | `'production'` | Tags events; use it to separate staging from live. |
+| `sentry_traces_sample_rate` | `0.0` | Performance tracing. See the caveat below. |
+| `sentry_profiles_sample_rate` | `0.0` | Fraction of _traced_ requests profiled. Needs `ext-excimer`; inert without it. |
+| `sentry_enable_logs` | `false` | Forwards log records through Sentry's logging API. |
+
+**Tracing does nothing yet.** Phoenix starts no transactions or spans, and the bare PHP SDK does not instrument requests on its own — that is a framework-SDK feature. So `sentry_traces_sample_rate` has nothing to sample whatever you set it to, and profiling, being a fraction of tracing, has nothing either. Error reporting is unaffected and works on its own. Both settings exist so the wiring is ready if instrumentation is added; leave them at `0.0` until then, and if you do add it, pick a rate well under `1.0` — announce is the hot path and a modest swarm can drive thousands of requests an hour.
 
 ## Server Configuration
 
