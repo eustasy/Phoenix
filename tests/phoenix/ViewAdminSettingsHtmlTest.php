@@ -78,7 +78,7 @@ class ViewAdminSettingsHtmlTest extends TestCase
         // while stats_enabled stays toggleable.
         $html = view_admin_settings_html($this->settings(), true, false, 'tok');
         $this->assertMatchesRegularExpression('/name="stats_geo"[^>]*disabled/', $html);
-        $this->assertStringContainsString('needs the geoip2 library', $html);
+        $this->assertStringContainsString('needs the maxmind-db reader', $html);
         $this->assertDoesNotMatchRegularExpression('/name="stats_enabled"[^>]*disabled/', $html);
     }
 

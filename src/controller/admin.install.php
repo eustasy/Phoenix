@@ -52,11 +52,11 @@ function admin_install_controller(string $config_path): string
     }
 
     ////	Geo availability
-    // stats_geo is only selectable with both the geoip2 library and a
+    // stats_geo is only selectable with both the maxmind-db reader and a
     // discoverable GeoLite2 database; the view greys the checkbox out otherwise.
     // No $settings exists yet, so probe discovery with an empty configured path.
     require_once __DIR__.'/../functions/stats.geo.database.php';
-    $geo_available = class_exists(\GeoIp2\Database\Reader::class) && stats_geo_database(['stats_geo_database' => '']) !== '';
+    $geo_available = class_exists(\MaxMind\Db\Reader::class) && stats_geo_database(['stats_geo_database' => '']) !== '';
 
     ////	Prepare form values (repopulate after failed attempt)
     $form = [

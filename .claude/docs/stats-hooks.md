@@ -42,7 +42,7 @@ Relevant functions: `stats.client.detect.php`, `stats.client.version.php`,
 
 ## Geo enrichment
 
-With a MaxMind GeoLite2-Country database and `geoip2/geoip2`, events are tagged
+With a MaxMind GeoLite2-Country database and `maxmind-db/reader`, events are tagged
 with a coarse country/continent and the admin **Geography** page maps active
 peers and completed downloads by country.
 

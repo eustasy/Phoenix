@@ -13,7 +13,7 @@ declare(strict_types=1);
 // Metrics, each offered only when it has a usable source:
 //   * peers     — Active peers by country: a live geo lookup of the peers
 //                 table, available only when geo is configured (stats_geo on,
-//                 geoip2 present, readable .mmdb). Offered whenever geo is
+//                 reader present, readable .mmdb). Offered whenever geo is
 //                 configured, even with zero current peers.
 //   * downloads — Completed downloads by country, from the events ledger's
 //                 stored coarse codes.
@@ -29,7 +29,7 @@ declare(strict_types=1);
 /** @param PhoenixSettings $settings */
 function admin_geography_controller(mysqli $connection, array $settings): string
 {
-    $geo_ready = class_exists(\GeoIp2\Database\Reader::class)
+    $geo_ready = class_exists(\MaxMind\Db\Reader::class)
         && $settings['stats_geo'] === true
         && is_readable($settings['stats_geo_database']);
 

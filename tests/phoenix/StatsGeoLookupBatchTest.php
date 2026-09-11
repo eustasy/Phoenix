@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 require_once __DIR__.'/../../src/functions/stats.geo.lookup.batch.php';
 
-// The resolving path needs the geoip2 library AND a GeoLite2 .mmdb, which
+// The resolving path needs the maxmind-db reader AND a GeoLite2 .mmdb, which
 // MaxMind's licence forbids shipping, so CI has neither. These cover the gate
 // and the failure paths — which is where the branches are — and the one
 // resolving test skips itself when no database is present.

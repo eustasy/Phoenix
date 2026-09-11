@@ -16,7 +16,7 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 ignore_user_abort(true);
 ini_set('default_charset', 'iso-8859-1');
 
-// Composer autoloader for optional libraries (geoip2 stat-tracking enrichment,
+// Composer autoloader for optional libraries (maxmind-db geo enrichment,
 // authenticatron admin 2FA). Conditional: installs that don't use Composer, or
 // that run before `composer install`, still bootstrap — the features that need
 // these classes guard with class_exists().

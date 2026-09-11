@@ -7,7 +7,7 @@ namespace Phoenix\Tests;
 require_once __DIR__.'/../../src/model/peers.geo.counts.php';
 require_once __DIR__.'/../../src/model/peer.insert.php'; // for insertPeer()
 
-// The live IP→country lookup needs the geoip2 library + a GeoLite2 .mmdb, which
+// The live IP→country lookup needs the maxmind-db reader + a GeoLite2 .mmdb, which
 // CI does not provide, so these cover the gate: when geo isn't configured the
 // model returns an empty map regardless of the peers present. The lookup itself
 // is exercised by StatsGeoLookupTest.

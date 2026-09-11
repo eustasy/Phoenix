@@ -80,13 +80,13 @@ function view_install_html(
 
     $checked = static fn (bool $on): string => $on ? ' checked' : '';
 
-    // Geo enrichment is selectable only with both the geoip2 library and a
+    // Geo enrichment is selectable only with both the maxmind-db reader and a
     // discoverable GeoLite2 database (the controller decides); otherwise the
     // checkbox is greyed out so the operator can't enable a no-op.
     $geo_available = $form['geo_available'];
     $geo_note = $geo_available
         ? '<span class="dim">&mdash; coarse country per event/peer; the event stores the country, not the address</span>'
-        : '<span class="dim">&mdash; needs the geoip2 library and a GeoLite2 database</span>';
+        : '<span class="dim">&mdash; needs the maxmind-db reader and a GeoLite2 database</span>';
 
     $body = $error_html.'
 		<form method="POST" action="" class="ph-form-card">

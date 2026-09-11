@@ -31,7 +31,7 @@ function view_admin_geography_html(array $settings, string $metric, array $value
         $body = '<div class="ph-empty">
 			<span class="ph-ico" data-lucide="globe-2"></span>
 			<p>Geographic data isn\'t available yet.</p>
-			<p class="dim geo-empty-note">Enable the privacy-preserving events ledger and geo enrichment to populate this map: turn on <code>stats_enabled</code> and <code>stats_geo</code>, run <code>composer require geoip2/geoip2</code>, and point <code>stats_geo_database</code> at a GeoLite2 country <code>.mmdb</code>.</p>
+			<p class="dim geo-empty-note">Enable the privacy-preserving events ledger and geo enrichment to populate this map: turn on <code>stats_enabled</code> and <code>stats_geo</code>, run <code>composer require maxmind-db/reader</code>, and point <code>stats_geo_database</code> at a GeoLite2 country <code>.mmdb</code>.</p>
 		</div>';
 
         return view_admin_layout_html($settings, 'Geography', $body, 'geography', $csrf_token, 'Tracker', '', 'narrow');

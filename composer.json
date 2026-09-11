@@ -13,13 +13,13 @@
 	},
 	"require-dev": {
 		"eustasy/authenticatron": "^4.1",
-		"geoip2/geoip2": "^3.3",
+		"maxmind-db/reader": "^1.11",
 		"sentry/sentry": "^4.31",
 		"phpunit/phpunit": "^11.0 || ^12.0"
 	},
 	"suggest": {
 		"eustasy/authenticatron": "Enables optional TOTP two-factor auth on the admin panel (also needs ext-gd for the enrolment QR code).",
-		"geoip2/geoip2": "Enables minified geo enrichment (country/continent) of stat-tracking events; see the stats_geo settings.",
+		"maxmind-db/reader": "Enables minified geo enrichment (country/continent) of stat-tracking events; see the stats_geo settings. Install ext-maxminddb alongside it — the pure-PHP reader is ~40x slower.",
 		"sentry/sentry": "Enables optional error/event reporting to Sentry (or any monitor) via the report_errors setting and the src/hooks/phoenix.init.php + phoenix.error.php hooks."
 	},
 	"autoload-dev": {

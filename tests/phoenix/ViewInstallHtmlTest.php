@@ -108,7 +108,7 @@ class ViewInstallHtmlTest extends TestCase
         // form() defaults geo_available=false → the checkbox is disabled.
         $html = view_install_html(true, null, $this->form());
         $this->assertMatchesRegularExpression('/name="stats_geo"[^>]*disabled/', $html);
-        $this->assertStringContainsString('needs the geoip2 library', $html);
+        $this->assertStringContainsString('needs the maxmind-db reader', $html);
     }
 
     public function testStatsGeoEnabledWhenGeoAvailable(): void

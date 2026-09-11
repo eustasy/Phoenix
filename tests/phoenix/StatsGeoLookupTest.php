@@ -86,8 +86,8 @@ class StatsGeoLookupTest extends PhoenixTestCase
         // A readable-but-invalid .mmdb throws InvalidDatabaseException (not
         // AddressNotFound): with report_errors on it must fire the error hook,
         // so a corrupt geo database is not silently masked as "no geo data".
-        if (! class_exists(\GeoIp2\Database\Reader::class)) {
-            $this->markTestSkipped('geoip2 library not installed.');
+        if (! class_exists(\MaxMind\Db\Reader::class)) {
+            $this->markTestSkipped('maxmind-db reader not installed.');
         }
 
         $path = (string) tempnam(sys_get_temp_dir(), 'phx_geo_');
@@ -115,8 +115,8 @@ class StatsGeoLookupTest extends PhoenixTestCase
         // library faults do. Needs a real GeoLite2 database, which MaxMind's
         // licence forbids shipping, so this skips when it is absent.
         $mmdb = __DIR__.'/../../config/GeoLite2-Country.mmdb';
-        if (! class_exists(\GeoIp2\Database\Reader::class) || ! is_readable($mmdb)) {
-            $this->markTestSkipped('geoip2 library or GeoLite2 database not available.');
+        if (! class_exists(\MaxMind\Db\Reader::class) || ! is_readable($mmdb)) {
+            $this->markTestSkipped('maxmind-db reader or GeoLite2 database not available.');
         }
 
         $settings = $this->settings([

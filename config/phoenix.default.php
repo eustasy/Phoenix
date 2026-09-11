@@ -208,7 +208,7 @@ $settings['stats_enabled'] = false;
 $settings['stats_events'] = ['completed'];
 /* enrich events (and the admin Geography map) with a minified geo */
 /* location (country + continent only). requires the suggested */
-/* geoip2/geoip2 composer library and a GeoLite2-Country database */
+/* maxmind-db/reader composer library and a GeoLite2-Country database */
 $settings['stats_geo'] = false;
 /* path to a MaxMind GeoLite2-Country.mmdb. empty = auto-discover */
 /* /usr/share/GeoIP, /var/lib/GeoIP, then config/. not shipped — */

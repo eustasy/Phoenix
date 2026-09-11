@@ -117,7 +117,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
     $full_scrape_note = ' <span class="dim">&mdash; lets torrent clients list every tracked torrent, as the public index does for browsers</span>';
     $geo_note = $geo_available
         ? ' <span class="dim">&mdash; tag events &amp; map peers by country (coarse; the event stores the country, not the address)</span>'
-        : ' <span class="dim">&mdash; needs the geoip2 library and a GeoLite2 database</span>';
+        : ' <span class="dim">&mdash; needs the maxmind-db reader and a GeoLite2 database</span>';
 
     $body .= '<div class="ph-section-head"><h3>Flags</h3></div>
 		<div class="ph-form-card">

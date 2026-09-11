@@ -116,7 +116,7 @@ class ViewAdminGeographyHtmlTest extends TestCase
 
     public function testDownloadsOnlyWhenPeersUnavailable(): void
     {
-        // geoip2 missing but the ledger has geo data → no peers segment.
+        // the reader missing but the ledger has geo data → no peers segment.
         $html = view_admin_geography_html($this->settings(), 'downloads', ['GB' => 3], ['downloads', 'traffic'], 'tok');
         $this->assertStringNotContainsString('metric=peers', $html);
         $this->assertStringContainsString('GEO_DEFAULT = "downloads"', $html);

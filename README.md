@@ -84,7 +84,7 @@ Phoenix can log torrent events (completions by default; optionally started/stopp
 
 With a GeoLite2 database, events are tagged with a coarse country/continent, and the admin **Geography** page maps active peers and completed downloads by country.
 
-1. Run `composer require geoip2/geoip2`.
+1. Run `composer require maxmind-db/reader`, and install `ext-maxminddb` if your distribution packages it (`apt install php-maxminddb`) — the pure-PHP reader works but is around 40× slower, which matters on a busy tracker.
 2. Get a free [GeoLite2-Country database](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) from MaxMind (their licence forbids Phoenix bundling it). Drop it where Phoenix finds it automatically — `/usr/share/GeoIP/GeoLite2-Country.mmdb` (kept current by MaxMind's `geoipupdate`), `/var/lib/GeoIP/`, or the project's `config/` directory — or set `$settings['stats_geo_database']` to a custom path.
 3. Enable it with `$settings['stats_geo'] = true;`, or tick it in the installer / admin Settings — the toggle is greyed out there until both the library and a database are present.
 
