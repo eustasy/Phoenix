@@ -314,6 +314,16 @@ a.btn-outline:hover { color: var(--color-action); }
 }
 .ph-card-table tbody td { vertical-align: middle; }
 .ph-card-table tbody tr:last-child td { border-bottom: none; }
+/* …and from the last row still SHOWING, which is a different row once the
+   filter has hidden the ones below it. Without this the last visible row keeps
+   its border and doubles against the card's own. Guarded by @supports, so a
+   browser without :has() keeps the rule above — only the filtered case looks
+   slightly off there, never the unfiltered one. Scoped to [hidden], which is
+   what the filter sets: rows hidden by CSS (the index's meta drawer) still
+   count as present, so their borders are unchanged. */
+@supports selector(:has(*)) {
+  .ph-card-table tbody tr:not([hidden]):not(:has(~ tr:not([hidden]))) td { border-bottom: none; }
+}
 .ph-card-table tbody tr:hover { background-color: var(--color-surface-raised); }
 /* Single-line rows. Byte counts ("1.5 GB") and timestamps read badly broken
    across two lines, and wrapping them buys no width back — the unbreakable
