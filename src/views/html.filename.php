@@ -37,7 +37,10 @@ function view_filename_html(?string $filename, string $empty_class = 'muted'): s
 
     $escaped = htmlspecialchars($filename, ENT_QUOTES, 'UTF-8');
 
-    if (mb_strlen($filename) <= $visible_chars) {
+    // Encoding named explicitly: mb_strlen() otherwise follows
+    // mb_internal_encoding(), which is not UTF-8 everywhere, and counting a
+    // multi-byte name as bytes puts a tooltip on a filename that fits.
+    if (mb_strlen($filename, 'UTF-8') <= $visible_chars) {
         return '<span class="mono text-sm ph-file">'.$escaped.'</span>';
     }
 

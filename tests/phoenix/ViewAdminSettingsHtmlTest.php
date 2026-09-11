@@ -82,10 +82,22 @@ class ViewAdminSettingsHtmlTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/name="stats_enabled"[^>]*disabled/', $html);
     }
 
-    public function testFullScrapeWarning(): void
+    public function testOpenTrackerCarriesTheWarningAndFullScrapeDoesNot(): void
     {
+        // open_tracker is the switch that invites abuse; full_scrape only does
+        // for torrent clients what public_index does for browsers. Styling a
+        // documented feature as a hazard trains people to ignore the styling.
         $html = view_admin_settings_html($this->settings(), true, false, 'tok');
-        $this->assertStringContainsString('exposes every', $html);
+
+        $this->assertMatchesRegularExpression(
+            '/name="open_tracker".*?text-warning.*?<\/label>/s',
+            $html,
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/name="full_scrape".*?text-warning.*?<\/label>/s',
+            $html,
+        );
+        $this->assertStringContainsString('as the public index does for browsers', $html);
     }
 
     public function testRendersTwoFactorEnableFormWhenDisabledAndAvailable(): void
