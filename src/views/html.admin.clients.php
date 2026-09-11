@@ -30,7 +30,7 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
     ////	Metric toggle
     $toggle = '';
     foreach ([
-        'live' => ['share-2', 'Live swarm'],
+        'live' => ['share-2', 'Active peers'],
         'events' => ['clock-fading', 'All time'],
     ] as $key => [$icon, $label]) {
         $on = $metric === $key;
@@ -61,7 +61,7 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
     $body = '<div class="geo-toplist ph-chart-card">
 			<div class="ph-traffic-head">
 				<div>
-					<div class="geo-metric-label">'.($historical ? 'Clients, all time' : 'Clients in the swarm').'</div>
+					<div class="geo-metric-label">'.($historical ? 'Clients, all time' : 'Clients, active peers').'</div>
 					<div class="dim geo-sub">'.number_format($total).' '.$unit.($total === 1 ? '' : 's').
                     ' across '.count($families).' client'.(count($families) === 1 ? '' : 's').'</div>
 				</div>

@@ -10,7 +10,7 @@ declare(strict_types=1);
 // traffic figures and neither replaces the other:
 //   * All-time — size x downloads, available for every torrent, but an estimate
 //     that counts no partial and no repeat downloads.
-//   * Live swarm — the uploaded/downloaded counters peers currently report.
+//   * Active peers — the uploaded/downloaded counters peers currently report.
 //     Real bytes, but client-reported, reset on client restart, and gone when a
 //     peer leaves.
 // Both are labelled as what they are, rather than presented as one number.
@@ -52,7 +52,7 @@ function view_admin_traffic_html(
     // uses for its map metric.
     $toggle = '';
     foreach ([
-        'peers' => ['share-2', 'Live swarm'],
+        'peers' => ['share-2', 'Active peers'],
         'events' => ['clock-fading', 'All time'],
     ] as $key => [$icon, $label]) {
         $on = $metric === $key;
@@ -99,7 +99,7 @@ function view_admin_traffic_html(
 					</div>
 				</div>
 				<div class="ph-chart ph-chart-tall"><canvas id="swarm-chart"></canvas></div>
-				<p class="dim geo-foot">Reported by the peers themselves &mdash; cumulative since each client started, reset when it restarts, and gone when the peer leaves. A snapshot of the live swarm, not a total.</p>
+				<p class="dim geo-foot">Reported by the peers themselves &mdash; cumulative since each client started, reset when it restarts, and gone when the peer leaves. A snapshot of the live swarm, not a historical ledger.</p>
 			</div>';
     } else {
         $body = '<div class="geo-toplist ph-chart-card">

@@ -1,4 +1,4 @@
-/* Phoenix — live swarm traffic (admin Traffic page, Live swarm metric).
+/* Phoenix — live swarm traffic (admin Traffic page, Active peers metric).
  * Inlined by PHP inside a <script> tag, prefixed with `var SWARM = […];` — the
  * busiest peers, each { label, client, torrent, uploaded, downloaded }.
  *
@@ -6,7 +6,7 @@
  * directions, and the ratio is the interesting part — a peer pulling hundreds
  * of megabytes while serving nothing reads differently from one doing both.
  *
- * This replaces the time series under the Live swarm metric, because these
+ * This replaces the time series under the Active peers metric, because these
  * counters have no history: they are cumulative-since-client-start and vanish
  * when a peer leaves, so there is nothing to plot over time. */
 /* global SWARM, Chart */

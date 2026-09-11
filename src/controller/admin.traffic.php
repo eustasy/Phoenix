@@ -21,7 +21,7 @@ function admin_traffic_controller(mysqli $connection, array $settings): string
     require_once __DIR__.'/../model/db.tables.installed.php';
     $tables_installed = db_tables_installed($connection, $settings);
 
-    // Live swarm by default, matching the Clients page: what the tracker is
+    // Active peers by default, matching the Clients page: what the tracker is
     // doing now is the more common question, and it is also the cheaper one —
     // the all-time view scans the whole events ledger.
     $metric = ($_GET['metric'] ?? '') === 'events' ? 'events' : 'peers';
@@ -49,7 +49,7 @@ function admin_traffic_controller(mysqli $connection, array $settings): string
         if ($metric === 'peers') {
             // The live counters have no history to plot — they are cumulative
             // since each client started and vanish when a peer leaves — so the
-            // Live swarm metric gets the busiest peers instead of a time series.
+            // Active peers metric gets the busiest peers instead of a time series.
             require_once __DIR__.'/../model/peers.top.php';
             require_once __DIR__.'/../functions/stats.client.detect.php';
             foreach (peers_top($connection, $settings, 'traffic', 10) as $peer) {
