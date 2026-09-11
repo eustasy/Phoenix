@@ -7,9 +7,10 @@ declare(strict_types=1);
 // tagged with a detected client label, newest-seen first. The swarm-wide totals
 // (active peers, distinct swarms) come from the same aggregation the dashboard
 // uses; the rows are paged via admin_peers_limit and an ?offset, and searched,
-// filtered and sorted server-side via ?q / ?state / ?sort / ?dir. Dispatched by
-// admin_panel_controller() for page=peers when no info_hash is present (with
-// one, the router routes to the live per-torrent drill-down instead).
+// filtered and sorted server-side via ?q / ?state / ?sort / ?dir, and narrowed
+// to one swarm by ?info_hash — which is the per-torrent drill-down, served by
+// this same paged view rather than a separate unpaged one. Dispatched by
+// admin_panel_controller() for page=peers.
 
 /** @param PhoenixSettings $settings */
 function admin_peers_controller(mysqli $connection, array $settings): string
@@ -36,8 +37,29 @@ function admin_peers_controller(mysqli $connection, array $settings): string
     $sort = is_string($_GET['sort'] ?? null) ? (string) $_GET['sort'] : 'updated';
     $dir = ($_GET['dir'] ?? '') === 'asc' ? 'asc' : 'desc';
 
+    // ?info_hash narrows the listing to one swarm — the per-torrent drill-down
+    // is this same paged view with a filter, not a separate unpaged one that
+    // would render every peer of a large swarm at once. Validated to 40-char hex
+    // before it is bound, like every other info_hash entering the tracker.
+    $info_hash = '';
+    $torrent_name = null;
+    if (isset($_GET['info_hash']) && $_GET['info_hash'] !== '') {
+        require_once __DIR__.'/../functions/sanitize.maybe_binary_to_hex.php';
+        $raw = $_GET['info_hash'];
+        $hex = maybe_binary_to_hex(is_string($raw) ? $raw : '');
+        if ($hex === false || strlen($hex) !== 40) {
+            tracker_error('Info Hash is invalid.');
+        }
+        $info_hash = $hex;
+
+        // Registry name for the header; null when the swarm has no torrents row.
+        require_once __DIR__.'/../model/torrent.select.one.php';
+        $torrent = torrent_select_one($connection, $settings, $info_hash);
+        $torrent_name = ($torrent !== false && is_string($torrent['name'])) ? $torrent['name'] : null;
+    }
+
     require_once __DIR__.'/../model/peers.select.all.php';
-    $peers = peers_select_all($connection, $settings, $limit, $offset, $search, $state, $sort, $dir);
+    $peers = peers_select_all($connection, $settings, $limit, $offset, $search, $state, $sort, $dir, $info_hash);
 
     // Resolve this page's addresses to countries in one batch, so the reader is
     // opened once rather than per row. Like the client label below, the result
@@ -69,12 +91,12 @@ function admin_peers_controller(mysqli $connection, array $settings): string
     // filtered list would page against an unfiltered total and trail off into
     // empty pages.
     require_once __DIR__.'/../model/peers.count.php';
-    $total = peers_count($connection, $settings, $search, $state);
+    $total = peers_count($connection, $settings, $search, $state, $info_hash);
 
     require_once __DIR__.'/../functions/auth.csrf.token.php';
     $csrf_token = ! empty($settings['admin_password']) ? auth_csrf_token() : '';
 
     require_once __DIR__.'/../views/html.admin.peers.php';
 
-    return view_admin_peers_html($settings, $tagged, $total, $swarms, $offset, $limit, $csrf_token, $search, $state, $sort, $dir);
+    return view_admin_peers_html($settings, $tagged, $total, $swarms, $offset, $limit, $csrf_token, $search, $state, $sort, $dir, $info_hash, $torrent_name);
 }

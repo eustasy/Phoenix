@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 ////	peers_select_all
 // Returns a page of peers across every swarm — the data behind the admin global
-// Peers listing. Mirrors peers_select_by_torrent() but drops its WHERE clause,
-// adds the info_hash column, and LEFT JOINs torrents so each row carries its
+// Peers listing — swarm-wide, or narrowed to one swarm by $info_hash, which is
+// what the per-torrent drill-down uses. LEFT JOINs torrents so each row carries its
 // torrent name (null for an unregistered swarm). Paged by $limit/$offset, and
 // filtered/ordered server-side so search and sort see every peer rather than
 // only the rendered page.
@@ -46,6 +46,7 @@ function peers_select_all(
     int $state = -1,
     string $sort = 'updated',
     string $dir = 'desc',
+    string $info_hash = '',
 ): array {
     require_once __DIR__.'/peers.filter.sql.php';
 
@@ -66,7 +67,7 @@ function peers_select_all(
     $order = $columns[$sort] ?? $columns['updated'];
     $direction = strtolower($dir) === 'asc' ? 'ASC' : 'DESC';
 
-    $filter = peers_filter_sql($search, $state);
+    $filter = peers_filter_sql($search, $state, $info_hash);
 
     $result = mysqli_execute_query(
         $connection,

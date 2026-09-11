@@ -17,12 +17,15 @@ declare(strict_types=1);
 // country from the IP via GeoIP, which is deliberately never stored — so
 // neither can be reached from SQL. Address, info_hash and torrent name can.
 //
-// $state is 1 (seeding), 0 (leeching), or -1 for either.
+// $state is 1 (seeding), 0 (leeching), or -1 for either. $info_hash narrows to
+// one swarm — the per-torrent drill-down is this filter applied to the same
+// paged listing, rather than a second unpaged view that would render every peer
+// of a large swarm at once.
 //
 // Returns ['where' => string (empty or leading " WHERE "), 'params' => list].
 
 /** @return array{where: string, params: list<string|int>} */
-function peers_filter_sql(string $search, int $state = -1): array
+function peers_filter_sql(string $search, int $state = -1, string $info_hash = ''): array
 {
     $clauses = [];
     $params = [];
@@ -39,6 +42,11 @@ function peers_filter_sql(string $search, int $state = -1): array
     if ($state === 0 || $state === 1) {
         $clauses[] = 'p.`state` = ?';
         $params[] = $state;
+    }
+
+    if ($info_hash !== '') {
+        $clauses[] = 'p.`info_hash` = ?';
+        $params[] = $info_hash;
     }
 
     return [

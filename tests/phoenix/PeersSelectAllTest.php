@@ -56,6 +56,22 @@ class PeersSelectAllTest extends PhoenixTestCase
         return null;
     }
 
+    public function testInfoHashFilterNarrowsToOneSwarm(): void
+    {
+        // This is what the per-torrent drill-down uses, so it must page and
+        // filter like the swarm-wide listing rather than return everything.
+        $rows = \peers_select_all(self::$connection, self::$settings, 1000, 0, '', -1, 'updated', 'desc', self::REGISTERED);
+
+        $this->assertNotNull($this->findByPeer($rows, self::PEER_A));
+        $this->assertNull($this->findByPeer($rows, self::PEER_B));
+
+        require_once __DIR__.'/../../src/model/peers.count.php';
+        $this->assertSame(
+            count($rows),
+            \peers_count(self::$connection, self::$settings, '', -1, self::REGISTERED),
+        );
+    }
+
     public function testSearchMatchesTorrentNameAcrossTheWholeTable(): void
     {
         // The name lives on the joined torrents row, not on peers — searching it

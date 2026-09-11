@@ -40,13 +40,8 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
             return admin_torrents_controller($connection, $settings);
 
         case 'peers':
-            // With an info_hash, drill into one swarm (live). Without one, show
-            // the swarm-wide listing (UI-only preview).
-            if (isset($_GET['info_hash']) && $_GET['info_hash'] !== '') {
-                require_once __DIR__.'/admin.torrent.peers.php';
-
-                return admin_torrent_peers_controller($connection, $settings);
-            }
+            // One destination: ?info_hash simply filters the paged listing to
+            // that swarm, so a busy torrent pages like any other view.
             require_once __DIR__.'/admin.peers.php';
 
             return admin_peers_controller($connection, $settings);

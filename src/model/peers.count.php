@@ -14,13 +14,13 @@ declare(strict_types=1);
 // the sidebar badge wants. Returns 0 when nothing matches or the query fails.
 
 /** @param PhoenixSettings $settings */
-function peers_count(mysqli $connection, array $settings, string $search = '', int $state = -1): int
+function peers_count(mysqli $connection, array $settings, string $search = '', int $state = -1, string $info_hash = ''): int
 {
     require_once __DIR__.'/db.fetch.once.php';
     require_once __DIR__.'/peers.filter.sql.php';
 
     $prefix = $settings['db_prefix'];
-    $filter = peers_filter_sql($search, $state);
+    $filter = peers_filter_sql($search, $state, $info_hash);
 
     // The unfiltered count needs no join; the filter can reach the torrent name,
     // so join only when there is something to filter on.

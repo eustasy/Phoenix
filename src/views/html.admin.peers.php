@@ -57,14 +57,19 @@ function view_admin_peers_html(
     int $state = -1,
     string $sort = 'updated',
     string $dir = 'desc',
+    string $info_hash = '',
+    ?string $torrent_name = null,
 ): string {
     require_once __DIR__.'/html.admin.layout.php';
     require_once __DIR__.'/../functions/format.bytes.php';
 
     // Every link on the page has to carry the current query state, or paging
     // would silently drop the filter and sorting would reset it.
-    $query = static function (array $overrides) use ($search, $state, $sort, $dir): string {
+    $query = static function (array $overrides) use ($search, $state, $sort, $dir, $info_hash): string {
         $params = ['page' => 'peers'];
+        if ($info_hash !== '') {
+            $params['info_hash'] = $info_hash;
+        }
         if ($search !== '') {
             $params['q'] = $search;
         }
@@ -155,7 +160,7 @@ function view_admin_peers_html(
 
         $rows .= '<tr>'.
             '<td><span class="flex items-center gap-2">'.$client.'</span></td>'.
-            '<td>'.$torrent.'</td>'.
+            ($info_hash === '' ? '<td>'.$torrent.'</td>' : '').
             ($show_geo ? '<td>'.$country.'</td>' : '').
             '<td class="mono">'.$address.'</td>'.
             '<td>'.$state_cell.'</td>'.
@@ -199,14 +204,26 @@ function view_admin_peers_html(
             '<input type="hidden" name="dir" value="'.htmlspecialchars($dir, ENT_QUOTES, 'UTF-8').'">';
     }
 
-    $body = '<form method="GET" action="" class="ph-toolbar">
+    // When filtered to one swarm, say which — and offer the way back out. The
+    // Torrent column is dropped: it would repeat the same name on every row.
+    $swarm_banner = '';
+    if ($info_hash !== '') {
+        $swarm_banner = '<div class="alert alert-info"><span class="ph-ico" data-lucide="filter"></span><div>'.
+            'Peers for <b>'.($torrent_name !== null && $torrent_name !== ''
+                ? htmlspecialchars($torrent_name, ENT_QUOTES, 'UTF-8')
+                : '<span class="mono">'.htmlspecialchars(substr($info_hash, 0, 12), ENT_QUOTES, 'UTF-8').'&hellip;</span>').'</b> '.
+            '<a href="?page=peers">Show all peers</a></div></div>';
+    }
+
+    $body = $swarm_banner.'<form method="GET" action="" class="ph-toolbar">
 			<input type="hidden" name="page" value="peers">
+			'.($info_hash !== '' ? '<input type="hidden" name="info_hash" value="'.htmlspecialchars($info_hash, ENT_QUOTES, 'UTF-8').'">' : '').'
 			'.$sort_state.'
 			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" name="q" value="'.htmlspecialchars($search, ENT_QUOTES, 'UTF-8').'" aria-label="Search peers" placeholder="Search address, torrent, hash&hellip;"></span>
 			<select name="state" aria-label="Filter by state" class="ph-select">'.$state_options.'</select>
 			<button class="btn btn-sm" type="submit">Search</button>'.
             ($search !== '' || $state !== -1
-                ? '<a class="btn btn-ghost btn-sm" href="?page=peers">Clear</a>'
+                ? '<a class="btn btn-ghost btn-sm" href="'.$query(['q' => null, 'state' => null, 'offset' => null]).'">Clear</a>'
                 : '').'
 			<span class="ph-spacer"></span>
 			<span class="dim text-sm">'.$window.'</span>
@@ -216,7 +233,7 @@ function view_admin_peers_html(
 			<table id="tbl-peers">
 				<thead><tr>'.
                     '<th>Client</th>'.
-                    '<th>'.$sort_link('torrent', 'Torrent').'</th>'.
+                    ($info_hash === '' ? '<th>'.$sort_link('torrent', 'Torrent').'</th>' : '').
                     ($show_geo ? '<th>Country</th>' : '').
                     '<th>'.$sort_link('address', 'Address').'</th>'.
                     '<th>'.$sort_link('state', 'State').'</th>'.

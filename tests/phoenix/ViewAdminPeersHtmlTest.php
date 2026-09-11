@@ -43,6 +43,82 @@ class ViewAdminPeersHtmlTest extends TestCase
         ], $overrides);
     }
 
+    public function testSwarmFilterNamesTheTorrentAndDropsTheTorrentColumn(): void
+    {
+        // The per-torrent drill-down is this view with an info_hash filter, so a
+        // busy swarm pages like any other listing. The Torrent column would
+        // repeat the same name on every row, so it goes.
+        $html = view_admin_peers_html(
+            $this->settings(),
+            [$this->peer()],
+            1,
+            1,
+            0,
+            200,
+            'tok',
+            '',
+            -1,
+            'updated',
+            'desc',
+            str_repeat('a', 40),
+            'My Torrent',
+        );
+
+        $this->assertStringContainsString('Peers for <b>My Torrent</b>', $html);
+        $this->assertStringContainsString('Show all peers', $html);
+        $this->assertStringNotContainsString('>Torrent<', $html);
+    }
+
+    public function testSwarmFilterFallsBackToATruncatedHashWhenUnregistered(): void
+    {
+        $html = view_admin_peers_html(
+            $this->settings(),
+            [$this->peer()],
+            1,
+            1,
+            0,
+            200,
+            'tok',
+            '',
+            -1,
+            'updated',
+            'desc',
+            str_repeat('b', 40),
+            null,
+        );
+
+        $this->assertStringContainsString('bbbbbbbbbbbb&hellip;', $html);
+    }
+
+    public function testSwarmFilterSurvivesSearchSortAndPaging(): void
+    {
+        // Every link and the form must carry info_hash, or searching or paging
+        // inside a swarm would silently escape it.
+        $html = view_admin_peers_html(
+            $this->settings(),
+            [$this->peer()],
+            500,
+            1,
+            0,
+            200,
+            'tok',
+            'x',
+            -1,
+            'uploaded',
+            'asc',
+            str_repeat('a', 40),
+            'My Torrent',
+        );
+
+        $this->assertStringContainsString('name="info_hash" value="'.str_repeat('a', 40).'"', $html);
+        // Every sort link and the pager carry it; the exact count is incidental.
+        $this->assertGreaterThanOrEqual(
+            2,
+            substr_count($html, 'info_hash='.str_repeat('a', 40)),
+            'the sort links and the pager should carry the swarm',
+        );
+    }
+
     public function testSearchIsAGetFormNotAClientSideFilter(): void
     {
         // The table is paged, so a browser-side filter could only ever search
