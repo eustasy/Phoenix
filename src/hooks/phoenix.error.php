@@ -23,14 +23,29 @@ declare(strict_types=1);
 // handler cheap and non-blocking anyway: on the announce hot path, defer any
 // network send (e.g. a Sentry flush) to shutdown via fastcgi_finish_request().
 //
-// This shipped file is an empty placeholder. Example Sentry wiring — add
-// sentry/sentry via Composer, initialise the SDK in src/hooks/phoenix.init.php,
-// then replace this file's body with:
-//
-//   if (class_exists(\Sentry\SentrySdk::class)) {
-//       if (isset($context['throwable']) && $context['throwable'] instanceof \Throwable) {
-//           \Sentry\captureException($context['throwable']);
-//       } elseif (isset($context['message']) && is_string($context['message'])) {
-//           \Sentry\captureMessage($context['message']);
-//       }
-//   }
+// Ships wired for Sentry, and inert without it: phoenix.init.php only
+// initialises the SDK when sentry_dsn is set, and with no client the capture
+// calls below are no-ops. Nothing here needs its own DSN check.
+
+if (class_exists(\Sentry\SentrySdk::class) && \Sentry\SentrySdk::getCurrentHub()->getClient() !== null) {
+    // Source and level as tags, so the announce hot path can be told apart from
+    // an admin action at a glance, and a fatal from a handled failure.
+    \Sentry\configureScope(static function (\Sentry\State\Scope $scope) use ($context): void {
+        if (isset($context['source']) && is_string($context['source'])) {
+            $scope->setTag('phoenix.source', $context['source']);
+        }
+        foreach (['file', 'line', 'errno'] as $key) {
+            if (isset($context[$key]) && (is_string($context[$key]) || is_int($context[$key]))) {
+                $scope->setExtra('phoenix.'.$key, $context[$key]);
+            }
+        }
+    });
+
+    $level = (($context['level'] ?? '') === 'fatal') ? \Sentry\Severity::fatal() : \Sentry\Severity::error();
+
+    if (isset($context['throwable']) && $context['throwable'] instanceof \Throwable) {
+        \Sentry\captureException($context['throwable']);
+    } elseif (isset($context['message']) && is_string($context['message'])) {
+        \Sentry\captureMessage($context['message'], $level);
+    }
+}

@@ -131,6 +131,23 @@ $settings['debug'] = false;
 /* failures + uncaught exceptions/fatals, so an external monitor such as */
 /* Sentry can be wired up without touching core. off by default. */
 $settings['report_errors'] = false;
+/* Sentry DSN. Empty = the init/error hooks do nothing, which is the */
+/* default. Needs the sentry/sentry composer package AND report_errors */
+/* on: the hooks only fire when errors are being reported at all. */
+/* Keep the DSN in phoenix.custom.php, not here — this file is shipped. */
+$settings['sentry_dsn'] = '';
+/* environment + release tags on reported events. Empty release falls */
+/* back to the running phoenix_version. */
+$settings['sentry_environment'] = 'production';
+/* fraction of requests traced for performance, 0.0-1.0. 1.0 traces */
+/* everything, which is fine for a quiet tracker and expensive for a */
+/* busy one — announce is the hot path and it fires constantly. */
+$settings['sentry_traces_sample_rate'] = 0.0;
+/* fraction of TRACED requests profiled, 0.0-1.0. Needs ext-excimer; */
+/* without it this is inert. Relative to sentry_traces_sample_rate. */
+$settings['sentry_profiles_sample_rate'] = 0.0;
+/* forward log records to Sentry. */
+$settings['sentry_enable_logs'] = false;
 
 ////	Admin Options
 /* bcrypt hash of the admin password. Empty makes admin.php force a one-time */

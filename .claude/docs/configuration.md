@@ -83,3 +83,11 @@ Full list with comments is in `config/phoenix.default.php`. Highlights:
 **Logging / backups**
 - `debug` (NEVER in production — `display_errors` corrupts bencode; errors are
   always logged regardless), `error_log`, `backup_dir`.
+- `report_errors` — fire the `error` hook for server-side failures and uncaught
+  exceptions/fatals. Off by default; required for any external monitor.
+- `sentry_dsn` — empty (the default) leaves the shipped `phoenix.init.php` /
+  `phoenix.error.php` hooks inert. Set it, with `report_errors` on and
+  `sentry/sentry` installed, to report. Keep the DSN in `phoenix.custom.php`.
+  `sentry_environment`, `sentry_traces_sample_rate` (announce is the hot path —
+  1.0 traces every announce), `sentry_profiles_sample_rate` (needs ext-excimer,
+  inert without it) and `sentry_enable_logs` tune it.
