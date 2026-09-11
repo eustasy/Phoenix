@@ -366,12 +366,14 @@ a.ph-addr:hover { color: var(--color-action); text-decoration: underline; }
 }
 .ph-name { color: var(--color-text); font-weight: var(--font-weight-medium); }
 
-/* Torrent filename. Often longer than the display name and rarely needed in
-   full, so it truncates rather than wrapping the row. */
+/* Torrent filename. Longer than the display name, so it truncates rather than
+   wrapping the row — but wide enough that a conventional release filename
+   ("distro-8.0-stable-amd64.20250902rc.iso", 44ch) fits whole, since there is
+   no tooltip behind it. */
 .ph-file {
   display: inline-block;
   min-width: 0;
-  max-width: 28ch;
+  max-width: 46ch;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
