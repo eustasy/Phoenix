@@ -23,6 +23,13 @@ declare(strict_types=1);
 // in seconds (86400 daily, 2592000 monthly-ish). Both are clamped ints and
 // inlined; no untrusted string reaches the query.
 //
+// The bucket in progress is dropped. A day (or week, or month) that is only
+// part-elapsed always reads as a fall, which looks like traffic collapsing
+// rather than the period being incomplete — the most recent point on a chart is
+// the one people read hardest, and it is the one that is guaranteed wrong. Only
+// a bucket containing the current time is dropped, so a historical window keeps
+// its final point.
+//
 // Returns [['time' => bucket start, 'completions' => int, 'bytes' => int], …]
 // oldest first, with empty buckets omitted — the chart spans them itself rather
 // than the query inventing rows for quiet days.
@@ -53,10 +60,16 @@ function stats_traffic_series(mysqli $connection, array $settings, int $days = 9
         return [];
     }
 
+    $current = intdiv(time(), $bucket) * $bucket;
+
     $series = [];
     while ($row = mysqli_fetch_assoc($result)) {
+        $start = intval($row['bucket']);
+        if ($start >= $current) {
+            continue;
+        }
         $series[] = [
-            'time' => intval($row['bucket']),
+            'time' => $start,
             'completions' => intval($row['completions']),
             'bytes' => intval($row['bytes']),
         ];
