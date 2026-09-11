@@ -23,8 +23,14 @@ declare(strict_types=1);
 /**
  * @param PhoenixSettings $settings
  * @param array<string, float|int|string|null>|false $database_size
+ * @param array{
+ *     geo: array{enabled: bool, reader: string, database: string, readable: bool},
+ *     sentry: array{installed: bool, dsn: bool, reporting: bool},
+ *     totp: array{installed: bool, enabled: bool, password: bool},
+ *     backups: array{requested: bool, available: bool},
+ * }|null $extras
  */
-function view_admin_support_html(array $settings, bool $tables_installed, array|false $database_size, string $csrf_token = '', ?string $php_version = null, ?bool $has_mysqli = null): string
+function view_admin_support_html(array $settings, bool $tables_installed, array|false $database_size, string $csrf_token = '', ?string $php_version = null, ?bool $has_mysqli = null, ?array $extras = null): string
 {
     require_once __DIR__.'/html.admin.layout.php';
     require_once __DIR__.'/../functions/format.bytes.php';
@@ -69,7 +75,77 @@ function view_admin_support_html(array $settings, bool $tables_installed, array|
         }
     }
 
-    $body = $php_compat_html.$mysql_html.
+    ////	Optional extras
+    // None of these is required, so an unconfigured one is stated plainly, not
+    // flagged. Two cases DO warn: an admin password with no second factor, and
+    // a setting asking for something the server cannot provide.
+    $extras_html = '';
+    if ($extras !== null) {
+        $alert = static function (string $level, string $icon, string $text, string $note = ''): string {
+            return '<div class="alert alert-'.$level.' alert-center"><span class="ph-ico" data-lucide="'.$icon.'"></span>'.
+                $text.($note === '' ? '' : ' <span class="dim">'.$note.'</span>').'</div>';
+        };
+
+        ////	Geo
+        $geo = $extras['geo'];
+        if (! $geo['enabled']) {
+            $extras_html .= $alert('info', 'globe', 'Geo enrichment is off.', 'Set <code>stats_geo</code> to map peers and tag events by country.');
+        } elseif ($geo['reader'] === 'missing') {
+            $extras_html .= $alert('danger', 'circle-alert', 'Geo is on but the reader is not installed.', 'Run <code>composer require maxmind-db/reader</code>.');
+        } elseif (! $geo['readable']) {
+            $extras_html .= $alert('danger', 'circle-alert', 'Geo is on but no database was found.', 'Point <code>stats_geo_database</code> at a GeoLite2 <code>.mmdb</code>, or drop one in <code>/usr/share/GeoIP</code>, <code>/var/lib/GeoIP</code> or <code>config/</code>.');
+        } else {
+            $where = '<code>'.htmlspecialchars($geo['database'], ENT_QUOTES, 'UTF-8').'</code>';
+            if ($geo['reader'] === 'extension') {
+                $extras_html .= $alert('success', 'globe', 'Geo enrichment is active, using the <strong>C extension</strong>.', 'Reading '.$where.'.');
+            } else {
+                // Works, but slowly, and it is on the announce path.
+                $extras_html .= $alert('warning', 'triangle-alert', 'Geo enrichment is active, but using the <strong>pure-PHP reader</strong>.', 'Around 40&times; slower than <code>ext-maxminddb</code>, on every announce. Install it (Debian/Ubuntu: <code>php'.htmlspecialchars(PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION, ENT_QUOTES, 'UTF-8').'-maxminddb</code>) and it is picked up automatically. Reading '.$where.'.');
+            }
+        }
+
+        ////	Error reporting
+        $sentry = $extras['sentry'];
+        if (! $sentry['installed']) {
+            $extras_html .= $alert('info', 'bug', 'Error reporting is not installed.', 'Run <code>composer require sentry/sentry</code> to report failures to Sentry.');
+        } elseif (! $sentry['reporting'] || ! $sentry['dsn']) {
+            $missing = ! $sentry['reporting'] ? '<code>report_errors</code>' : '<code>sentry_dsn</code>';
+            $extras_html .= $alert('info', 'bug', 'Sentry is installed but not reporting.', 'Set '.$missing.' to turn it on.');
+        } else {
+            $extras_html .= $alert('success', 'bug', 'Errors are being reported to Sentry.');
+        }
+
+        ////	Two-factor
+        $totp = $extras['totp'];
+        if (! $totp['password']) {
+            $extras_html .= $alert('warning', 'triangle-alert', 'The admin panel has no password.', 'Anyone who can reach this page can use it. Set <code>admin_password</code>.');
+        } elseif ($totp['enabled']) {
+            $extras_html .= $alert('success', 'shield-check', 'Two-factor authentication is enabled.');
+        } elseif (! $totp['installed']) {
+            $extras_html .= $alert('warning', 'triangle-alert', 'Two-factor authentication is not available.', 'The admin panel is password-only. Run <code>composer require eustasy/authenticatron</code> to add a second factor.');
+        } else {
+            $extras_html .= $alert('warning', 'triangle-alert', 'Two-factor authentication is off.', 'The admin panel is password-only. Enable it from <a href="?page=settings">Settings</a>.');
+        }
+
+        ////	Backup compression
+        $backups = $extras['backups'];
+        if (! $backups['available']) {
+            $level = $backups['requested'] ? 'danger' : 'info';
+            $note = $backups['requested']
+                ? '<code>backup_compress</code> is on, but backups will be written as plain SQL.'
+                : 'Backups are written as plain SQL.';
+            $extras_html .= $alert($level, $backups['requested'] ? 'circle-alert' : 'file-archive', 'PHP has no zlib support.', $note);
+        } elseif ($backups['requested']) {
+            $extras_html .= $alert('success', 'file-archive', 'Backups are compressed with gzip.', 'Roughly 10&times; smaller, via PHP&rsquo;s zlib &mdash; no external binary needed.');
+        } else {
+            $extras_html .= $alert('info', 'file-archive', 'Backups are written as plain SQL.', 'Set <code>backup_compress</code> to gzip them, for roughly 10&times; less disk.');
+        }
+
+        $extras_html = '<div class="ph-section-head"><h3>Optional extras</h3>'.
+            '<span class="dim text-sm">None of these is required to run a tracker</span></div>'.$extras_html;
+    }
+
+    $body = $php_compat_html.$mysql_html.$extras_html.
         '<p class="muted text-sm">Read-only diagnostics. Phoenix requires PHP &ge; 8.2 and a MySQL-compatible database.</p>';
 
     return view_admin_layout_html($settings, 'Server Support', $body, 'support', $csrf_token, 'Server', '', 'narrow');
