@@ -149,34 +149,70 @@ BEP 48 scrape. Swarm counts without joining the swarm.
 
 | Parameter | Notes |
 | --- | --- |
-| `info_hash` | Repeatable. Omit for a full scrape. |
+| `info_hash` | The torrent. 40 hex chars, or 20 raw bytes URL-encoded. **Repeatable** — see below. Omit entirely for a full scrape. |
 | `stats` | Tracker-wide totals instead — see [below](#get-scrapestats). |
 
-With no `info_hash`, a **full scrape** returns every torrent on the tracker —
-which is what `full_scrape` controls. It ignores the allowed-torrents filter, so
-turn it off when the list should be private.
+**Repeat `info_hash` to scrape several torrents in one request.** Every hash
+given is answered, so a client tracking twenty torrents makes one request rather
+than twenty. This is the opposite of `announce`, where repeating `info_hash` is
+meaningless and only the first valid one is used — an announce registers one
+peer in one swarm.
 
-On a closed tracker, disallowed hashes are dropped silently and the rest are
-returned. If nothing survives, the request errors rather than falling through to
-a full scrape, so a caller cannot get the whole list by asking for a hash it is
-not allowed to see.
+```console
+$ curl "https://tracker.example.com/scrape?json\
+&info_hash=03148319face5909b193f1f980d0bcf9139a09ec\
+&info_hash=90b3382caff769f4c7779ef90a5ab30eedda73d4"
+```
 
-**`?json` response** — keyed by info_hash:
+The response is keyed by info_hash, one entry per torrent, in the order given:
 
 ```json
 {
   "03148319face5909b193f1f980d0bcf9139a09ec": {
     "info_hash": "03148319face5909b193f1f980d0bcf9139a09ec",
-    "seeders": 112,
+    "seeders": 113,
     "leechers": 1,
-    "peers": 113,
+    "peers": 114,
     "size": 3335405568,
     "downloads": 28693,
     "traffic": 95702791962624
   },
+  "90b3382caff769f4c7779ef90a5ab30eedda73d4": {
+    "info_hash": "90b3382caff769f4c7779ef90a5ab30eedda73d4",
+    "seeders": 33,
+    "leechers": 0,
+    "peers": 33,
+    "size": 3191691264,
+    "downloads": 5403,
+    "traffic": 17244707899392
+  },
   "min_request_interval": 900
 }
 ```
+
+The flag and the hashes may appear in any order — `?info_hash=…&json&info_hash=…`
+parses exactly like `?json&info_hash=…&info_hash=…`. Repeating the _same_ hash
+is harmless: the response is keyed by info_hash, so duplicates collapse to one
+entry.
+
+There is no cap on how many hashes one request may carry, so a client with a
+large library should still split very long requests: the limit you will hit is
+your web server's maximum request line (commonly 8 KB, about 100 hashes),
+not Phoenix.
+
+**A hash the tracker does not know** behaves differently by tracker type:
+
+- **Open tracker** — answered with every count at zero, which is what BEP 48
+  asks for.
+- **Closed tracker** — dropped from the response entirely, because it is not on
+  the allowed list. Ask for two hashes and you get back only the allowed one.
+  If _none_ of the requested hashes are allowed, the request errors with
+  `Torrent is not allowed.` rather than falling through to a full scrape, so a
+  caller cannot obtain the whole list by asking for a hash it may not see.
+
+With no `info_hash` at all, a **full scrape** returns every torrent on the
+tracker — which is what `full_scrape` controls. It ignores the allowed-torrents
+filter, so turn it off when the list should be private.
 
 `min_request_interval` (BEP 48) appears alongside the torrents when
 `scrape_min_interval` is non-zero. A 40-hex info_hash can never collide with
