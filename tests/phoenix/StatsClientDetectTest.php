@@ -177,4 +177,38 @@ class StatsClientDetectTest extends PhoenixTestCase
         $label = stats_client_detect($this->hex('-qB4620-'.str_repeat('x', 12)));
         $this->assertLessThanOrEqual(64, strlen($label));
     }
+
+    public function testIdentifiesCodesAbsentFromBep20(): void
+    {
+        // Real peers announce these and BEP 20 does not list them, so without
+        // an entry an operator sees a bare two-letter code. Sourced from the
+        // clients' own identification tables, not a wiki.
+        $this->assertSame('Zona 3.0.0.8', stats_client_detect($this->hex('-ZO3008-abcdefghijkl')));
+        $this->assertSame('Folx', stats_client_detect($this->hex('-FL56FF-abcdefghijkl')));
+    }
+
+    public function testFileCrocKeepsItsOwnCode(): void
+    {
+        // One widely-copied table puts FileCroc on 'FL'; libtorrent,
+        // Transmission and BEP 20 all put it on 'FC', where it stays.
+        $this->assertSame('FileCroc 0.1.0.2', stats_client_detect($this->hex('-FC0102-abcdefghijkl')));
+    }
+
+    public function testFolxIsIdentifiedDespiteItsShortPeerId(): void
+    {
+        // Folx encodes its version as one base-62 character, so the id is a
+        // byte short of the '-XX####-' shape and never reaches the Azureus
+        // branch. Without the prefix fallback, half a tracker's Folx peers read
+        // as 'Unknown' while the other half read as 'Folx'.
+        $this->assertSame('Folx', stats_client_detect($this->hex('-FL5Y0-abcdefghijklm')));
+    }
+
+    public function testPrefixFallbackDoesNotShadowTheAzureusTable(): void
+    {
+        // The fallback runs last, so it can only name a peer_id nothing else
+        // claimed — a well-formed code still wins, version and all.
+        $this->assertSame('Transmission 4.1.3.0', stats_client_detect($this->hex('-TR4130-abcdefghijkl')));
+        $this->assertSame('ZZ 0.0.0.0', stats_client_detect($this->hex('-ZZ0000-abcdefghijkl')));
+        $this->assertSame('Unknown', stats_client_detect(str_repeat('7a', 20)));
+    }
 }

@@ -26,6 +26,12 @@ function stats_client_detect(string $peer_id): string
     // with ones written by other implementations of the same table — "DE" is
     // "DelugeTorrent" and "UM" is "µTorrent for Mac" for that reason, not
     // because those read better.
+    //
+    // A few codes are NOT in BEP 20 and are marked as such below. They are here
+    // because real peers announce them and a bare two-letter code tells an
+    // operator nothing. Each is sourced from a client's own identification
+    // table rather than a wiki — do not prune one for being absent from the
+    // registry without checking that source first.
     static $azureus = [
         '7T' => 'aTorrent for Android',
         'AB' => 'AnyEvent::BitTorrent',
@@ -57,6 +63,11 @@ function stats_client_detect(string $peer_id): string
         'ES' => 'electric sheep',
         'FC' => 'FileCroc',
         'FD' => 'Free Download Manager',
+        // Not in BEP 20. Transmission's libtransmission/clients.cc maps '-FL'
+        // to Folx (with its own base-62 version formatter, which is why Folx
+        // peer ids are not all the same length). FileCroc is 'FC', above —
+        // one widely-copied table has FileCroc on 'FL', and it is alone in that.
+        'FL' => 'Folx',
         'FT' => 'FoxTorrent',
         'FX' => 'Freebox BitTorrent',
         'GS' => 'GSTorrent',
@@ -123,6 +134,9 @@ function stats_client_detect(string $peer_id): string
         'XS' => 'XSwifter',
         'XT' => 'XanTorrent',
         'XX' => 'Xtorrent',
+        // Not in BEP 20; agreed by libtorrent's name_map, Transmission's
+        // clients.cc and bittorrent-peerid.
+        'ZO' => 'Zona',
         'ZT' => 'ZipTorrent',
     ];
 
@@ -172,6 +186,21 @@ function stats_client_detect(string $peer_id): string
     ////	Shadow's-style: one letter then version chars
     if (isset($shadows[$raw[0]])) {
         return $shadows[$raw[0]];
+    }
+
+    ////	Known clients that use the leading dash but not the '-XX####-' shape.
+    // Folx encodes its version as a single base-62 character, so its ids are
+    // shorter than the Azureus form and fail the fixed-width test above —
+    // half the Folx peers on a tracker would otherwise read as 'Unknown'
+    // while the other half read as 'Folx'. Matched last and by exact prefix,
+    // so this can only ever name a peer_id nothing else claimed.
+    static $prefixes = [
+        '-FL' => 'Folx',
+    ];
+    foreach ($prefixes as $prefix => $client) {
+        if (str_starts_with($raw, $prefix)) {
+            return $client;
+        }
     }
 
     return 'Unknown';
