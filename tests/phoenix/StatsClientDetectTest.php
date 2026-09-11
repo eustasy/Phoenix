@@ -43,9 +43,13 @@ class StatsClientDetectTest extends PhoenixTestCase
 
     public function testUnregisteredCodeStaysABareCode(): void
     {
-        // -FL is not in the registry. Surfacing "FL" is honest; guessing a name
-        // for it would not be.
-        $this->assertSame('FL', \stats_client_detect($this->hex('-FL56FF-aaaaaaaaaaaa')));
+        // A well-formed code the table does not know surfaces as itself.
+        // Surfacing "Q7" is honest; guessing a name for it would not be.
+        //
+        // Deliberately a code no client is known to use: this fixture was
+        // '-FL' until Folx was identified and added, at which point the test
+        // was asserting the opposite of what it meant.
+        $this->assertSame('Q7', \stats_client_detect($this->hex('-Q756FF-aaaaaaaaaaaa')));
     }
 
     public function testAzureusKnownCodeWithVersion(): void
