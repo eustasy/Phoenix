@@ -38,18 +38,23 @@ function torrents_top(mysqli $connection, array $settings, string $measure = 'se
     $leechers = 'IFNULL(SUM(`p`.`state` = \'0\'), 0)';
     $traffic = '`t`.`size` * `t`.`downloads`';
 
+    // Per measure: ORDER BY, a row-level WHERE, and an aggregate HAVING. The
+    // split matters — a condition on a plain column (size, downloads) is not
+    // grouped or aggregated, so SQL rejects it in HAVING; only conditions over
+    // the SUMs belong there.
     $measures = [
-        'seeders' => [$seeders.' DESC', $seeders.' > 0'],
-        'leechers' => [$leechers.' DESC', $leechers.' > 0'],
-        'traffic' => [$traffic.' DESC', '`t`.`size` IS NOT NULL AND `t`.`downloads` > 0'],
+        'seeders' => [$seeders.' DESC', '', $seeders.' > 0'],
+        'leechers' => [$leechers.' DESC', '', $leechers.' > 0'],
+        'traffic' => [$traffic.' DESC', '`t`.`size` IS NOT NULL AND `t`.`downloads` > 0', ''],
         // Worst seeder share first, so the torrent with the most people waiting
         // on the fewest seeders leads.
         'trouble' => [
             '('.$seeders.' / ('.$seeders.' + '.$leechers.')) ASC, '.$leechers.' DESC',
+            '',
             $leechers.' > 0 AND ('.$seeders.' / ('.$seeders.' + '.$leechers.')) < 0.25',
         ],
     ];
-    [$order, $having] = $measures[$measure] ?? $measures['seeders'];
+    [$order, $where, $having] = $measures[$measure] ?? $measures['seeders'];
 
     $result = mysqli_query(
         $connection,
@@ -58,8 +63,9 @@ function torrents_top(mysqli $connection, array $settings, string $measure = 'se
         'IFNULL('.$traffic.', 0) AS `traffic` '.
         'FROM `'.$prefix.'torrents` `t` '.
         'LEFT JOIN `'.$prefix.'peers` `p` ON `p`.`info_hash` = `t`.`info_hash` '.
+        ($where === '' ? '' : 'WHERE '.$where.' ').
         'GROUP BY `t`.`info_hash` '.
-        'HAVING '.$having.' '.
+        ($having === '' ? '' : 'HAVING '.$having.' ').
         'ORDER BY '.$order.' '.
         'LIMIT '.$limit.';',
     );
