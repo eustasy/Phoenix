@@ -5,9 +5,11 @@
 An interface release. The admin Torrents and Peers tables and the public index all gain searchable meta, sensible default sorting and layouts that stop fighting their own column widths; the Geography map now draws its data on load rather than after a toggle; and byte counts render as sizes instead of raw digits. Magnet links carry more of what the tracker already knows. The tracker protocol and database schema are unchanged — **no DB migration is required.**
 
 - IMPROVES: Index the events ledger for the geography aggregations — `KEY geo (event, country, info_hash)` — which filter on `event` and `country` and group by country and torrent, and were otherwise full scans of a table that only grows. **Existing installs must add it by hand**; there is no migration file, because `ADD INDEX IF NOT EXISTS` is MariaDB-only and Phoenix's migrations are re-run on every upgrade, so a non-idempotent file would fail forever on MySQL:
+
   ```sql
   ALTER TABLE `phoenix_events` ADD INDEX `geo` (`event`, `country`, `info_hash`);
   ```
+
   Fresh installs get it from `sql/events.sql`. On a 1.26M-row ledger the index took ~12s to build and added ~4MB.
 - FIX: Draw the Geography choropleth's data on page load. The per-country fills were painted onto the SVG paths immediately after construction, outside jsVectorMap's own model, so the settling pass that follows first paint re-applied `regionStyle.initial` and wiped them — leaving a grey map until a metric toggle rebuilt it (clicking the metric already selected appeared to "fix" it). The fills are now handed to the map as a `series`, which survives an internal re-render.
 - FIX: Stop the login worker hanging around after an incorrect login, and accept a non-string password without a type error.

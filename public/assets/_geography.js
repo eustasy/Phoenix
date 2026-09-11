@@ -73,6 +73,8 @@ function lerpHex(a, b, t) {
   )
 }
 // A metric's values may be counts or bytes; "20.1 TB" beats 22098152264304.
+// $unit is appended only where there is room for it (the summary line), not on
+// every row of the list — see geoValue.
 function geoFormat(d, n) {
   if (d.format !== "bytes") return n.toLocaleString() + d.unit
   var u = ["B", "KB", "MB", "GB", "TB", "PB"]
@@ -82,6 +84,13 @@ function geoFormat(d, n) {
     i++
   }
   return (n < 10 && i > 0 ? n.toFixed(1) : Math.round(n)) + " " + u[i]
+}
+// The list's value column: the bare figure. "peers" and "downloads" are not
+// units, and repeating either down a narrow column only costs width — the
+// metric label above the list already says what is being counted. Bytes still
+// need their size suffix to mean anything.
+function geoValue(d, n) {
+  return d.format === "bytes" ? geoFormat(d, n) : n.toLocaleString()
 }
 function geoEntries(d) {
   return Object.keys(d.values)
@@ -134,7 +143,7 @@ function geoRenderPanel(d) {
       Math.round((e[1] / max) * 100) +
       '%"></i></span></span>' +
       '<span class="geo-val">' +
-      geoFormat(d, e[1]) +
+      geoValue(d, e[1]) +
       "</span></div>"
   })
   document.getElementById("geo-list").innerHTML = html || '<p class="dim text-sm">No data for this metric yet.</p>'

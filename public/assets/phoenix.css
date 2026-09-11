@@ -174,6 +174,16 @@ body { background-color: var(--color-bg); color: var(--color-text); }
 /* --------------------------------------------------------------------------
    Buttons — small additions
    -------------------------------------------------------------------------- */
+/* An <a> styled as a button still matches the design system's a:hover, which
+   sets a link colour at (0,1,1) — higher than the .btn-* rules that set the
+   label colour at (0,1,0), and the :hover variants restate only background and
+   border. So hovering an anchor button repaints its text. Restate each variant's
+   own colour for the anchor case; buttons proper are unaffected. */
+a.btn-primary:hover { color: var(--color-action-text); }
+a.btn-secondary:hover { color: var(--color-text); }
+a.btn-ghost:hover { color: var(--color-text-secondary); }
+a.btn-outline:hover { color: var(--color-action); }
+
 .btn .ph-ico { width: 16px; height: 16px; }
 .btn-icon { padding: var(--space-2); }
 .btn-icon .ph-ico { width: 18px; height: 18px; }
