@@ -168,6 +168,7 @@ Every HTTP endpoint Phoenix exposes is documented in [API.md](./API.md) — the 
 
 - [API.md](./API.md) — every HTTP endpoint: announce, scrape, the public index, and the management API.
 - [MIGRATING.md](./MIGRATING.md) — upgrading from 3.x to 4.0.
+- [LIMITS.md](./LIMITS.md) — how many peers and torrents an install carries, and what binds first.
 - [APACHE.md](./APACHE.md) — web server configuration for Apache 2.4.
 - [NGINX.md](./NGINX.md) — web server configuration for Nginx.
 - [CONTRIBUTING.md](./CONTRIBUTING.md) — development environment, project structure, and contribution conventions.

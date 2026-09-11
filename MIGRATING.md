@@ -21,9 +21,9 @@ This guide covers a 3.x → 4.3 upgrade. For per-release detail, see
 > git checkout v4.3    # or download the v4.3 release
 > ```
 >
-> Then move to 5.0 and apply the engine change below. 5.0 also switches every
-> table from **MyISAM to InnoDB**; `db_create()` only creates missing tables, so
-> an existing database keeps whatever engine it has. Convert each table once:
+> Then move to 5.0 and apply the engine change below. 5.0 requires every table
+> to be **InnoDB**; `db_create()` only creates missing tables, so an existing
+> database keeps whatever engine it has. Convert each table once:
 >
 > ```sql
 > ALTER TABLE `phoenix_events`    ENGINE=InnoDB;

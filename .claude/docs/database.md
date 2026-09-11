@@ -1,9 +1,10 @@
 # Database
 
 MySQL/MariaDB via `mysqli`. Tables are InnoDB: announces are concurrent and
-write-heavy, so row-level locking matters more than MyISAM's cheap `COUNT(*)`,
-and the redo log makes an unclean shutdown recoverable. Nothing uses
-transactions or foreign keys.
+write-heavy, so writes take row locks rather than queueing on the table, and the
+redo log makes an unclean shutdown recoverable. Nothing uses transactions or
+foreign keys. See [LIMITS.md](../../LIMITS.md) for what that costs and where it
+binds.
 
 ## Tables
 

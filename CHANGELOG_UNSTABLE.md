@@ -3,7 +3,7 @@
 ## Unreleased (5.0)
 
 5.0 is a clean-install release. The schema files describe the finished schema on
-their own, and the storage engine moves from MyISAM to InnoDB. **Existing
+their own, and every table is InnoDB. **Existing
 installs need manual DB work** — see [MIGRATING.md](MIGRATING.md). Convert each
 table once, during a quiet window (each `ALTER` rebuilds the table and holds it
 locked for the duration):
@@ -16,7 +16,7 @@ ALTER TABLE `phoenix_task_runs` ENGINE=InnoDB;
 ALTER TABLE `phoenix_torrents`  ENGINE=InnoDB;
 ```
 
-- CHANGES: Every table is now **InnoDB** rather than MyISAM. Concurrent announces take row locks on the peers they touch instead of serialising on a table lock, and an unclean shutdown replays from the redo log instead of needing a `REPAIR TABLE`. In exchange `COUNT(*)` is no longer O(1), `OPTIMIZE TABLE` becomes a full rebuild, `CHECK`/`REPAIR TABLE` are effectively no-ops, and the data uses roughly 2–3× the disk. Fresh installs get InnoDB from `sql/*.sql`; **existing installs must convert each table by hand** with `ALTER TABLE <prefix><table> ENGINE=InnoDB;` — `db_create()` only creates missing tables, so it will not change an existing one. **DB schema modification required.**
+- CHANGES: Every table is **InnoDB**. Concurrent announces take row locks on the peers they touch rather than queueing on the table, and an unclean shutdown replays from the redo log. The costs, all documented in the new [LIMITS.md](LIMITS.md): an unqualified `COUNT(*)` scans an index rather than reading a stored counter, `OPTIMIZE TABLE` is a full rebuild needing free disk equal to the table, and `REPAIR TABLE` is a no-op. Fresh installs get InnoDB from `sql/*.sql`; **existing installs must convert each table by hand** with `ALTER TABLE <prefix><table> ENGINE=InnoDB;` — `db_create()` only creates missing tables, so it will not change an existing one. **DB schema modification required.**
 - CHANGES: Drop every 3.x/4.x migration from `sql/migrations/`. Each one's schema change is already in `sql/*.sql`, so `db_create()` produces the finished schema in one step and the migrations only re-applied no-ops on every run. `db_migrate()`, the **Upgrade Schema** action, and the `sql/migrations/` directory all remain for the first 5.x schema change; with no files present they report success and do nothing. Operators upgrading an older database should apply the migration files from a **v4.3 checkout**, which still carries them, before moving to 5.0 — see [MIGRATING.md](MIGRATING.md).
 
 ## v4.3beta10 - 10/09/2026
