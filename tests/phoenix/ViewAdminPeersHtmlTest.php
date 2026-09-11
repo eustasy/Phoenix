@@ -43,6 +43,18 @@ class ViewAdminPeersHtmlTest extends TestCase
         ], $overrides);
     }
 
+    public function testAddressLinksToThatPeersOtherSwarms(): void
+    {
+        // A peer holds one row per torrent, so filtering on its address lists
+        // its torrents — and the window count reports how many. No separate
+        // view needed for "torrents for this peer".
+        $html = view_admin_peers_html($this->settings(), [$this->peer()], 1, 1, 0, 200, 'tok');
+
+        $this->assertStringContainsString('q=81.78.207.83', $html);
+        // The copy button keeps the full address including the port.
+        $this->assertStringContainsString('data-copy="81.78.207.83:51413"', $html);
+    }
+
     public function testSwarmFilterNamesTheTorrentAndDropsTheTorrentColumn(): void
     {
         // The per-torrent drill-down is this view with an info_hash filter, so a

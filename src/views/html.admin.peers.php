@@ -120,24 +120,38 @@ function view_admin_peers_html(
 
         $addrs = [];
         if ($peer['ipv4'] !== '') {
-            $addrs[] = htmlspecialchars($peer['ipv4'].':'.$peer['portv4'], ENT_QUOTES, 'UTF-8');
+            $addrs[] = [
+                'ip' => $peer['ipv4'],
+                'full' => htmlspecialchars($peer['ipv4'].':'.$peer['portv4'], ENT_QUOTES, 'UTF-8'),
+            ];
         }
         if ($peer['ipv6'] !== '') {
-            $addrs[] = htmlspecialchars('['.$peer['ipv6'].']:'.$peer['portv6'], ENT_QUOTES, 'UTF-8');
+            $addrs[] = [
+                'ip' => $peer['ipv6'],
+                'full' => htmlspecialchars('['.$peer['ipv6'].']:'.$peer['portv6'], ENT_QUOTES, 'UTF-8'),
+            ];
         }
         // One row per address rather than <br>-joined, so each truncates on its
         // own and carries its own copy button — the displayed form is elided, so
         // copying is the only way to get the whole value back out. The entries
         // are already escaped, so they are safe in the attributes too.
+        // The address links to every row sharing it — which, since a peer holds
+        // one row per torrent, is that peer's torrents, with the window count
+        // reporting how many. The IP alone, not the port: a client keeps its
+        // listening port across swarms, but matching on the address is what
+        // survives a client that does not.
         $address = $addrs === []
             ? '<span class="dim">&mdash;</span>'
             : implode('', array_map(
-                static fn (string $addr): string => '<span class="ph-addr-row">'.
-                    '<span class="ph-addr" title="'.$addr.'">'.$addr.'</span>'.
-                    '<button class="ph-copy" type="button" title="Copy address" aria-label="Copy address" data-copy="'.$addr.'">'.
-                    '<span class="ph-ico" data-lucide="copy"></span>'.
-                    '</button>'.
-                    '</span>',
+                static function (array $addr) use ($query): string {
+                    return '<span class="ph-addr-row">'.
+                        '<a class="ph-addr" href="'.$query(['q' => $addr['ip'], 'info_hash' => null, 'offset' => null]).
+                        '" title="Show this peer&rsquo;s torrents &mdash; '.$addr['full'].'">'.$addr['full'].'</a>'.
+                        '<button class="ph-copy" type="button" title="Copy address" aria-label="Copy address" data-copy="'.$addr['full'].'">'.
+                        '<span class="ph-ico" data-lucide="copy"></span>'.
+                        '</button>'.
+                        '</span>';
+                },
                 $addrs,
             ));
 

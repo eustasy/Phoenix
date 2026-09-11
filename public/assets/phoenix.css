@@ -336,6 +336,10 @@ body { background-color: var(--color-bg); color: var(--color-text); }
   cursor: help;
 }
 .ph-addr-row { display: flex; align-items: center; gap: var(--space-1-5); }
+/* A link now — to this peer's other swarms — but it should read as the address
+   it is, not as navigation. */
+a.ph-addr { color: inherit; text-decoration: none; }
+a.ph-addr:hover { color: var(--color-action); text-decoration: underline; }
 .ph-addr {
   min-width: 0;
   max-width: 22ch;
