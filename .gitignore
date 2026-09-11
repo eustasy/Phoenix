@@ -4,6 +4,8 @@
 .phoenix-setup-token
 *.mmdb
 /backups/*.sql
+/backups/*.sql.gz
+/public/.db
 /vendor/
 /composer.lock
 /.phpunit.cache/
