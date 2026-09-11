@@ -171,7 +171,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                 'Most seeded',
                 $rows_from($torrent_cards['seeded'], 'seeders', static fn (array $t): string => number_format($t['seeders']).' seeders'),
                 '#66800b',
-                ['label' => 'All torrents', 'href' => '?page=torrents'],
+                ['label' => 'All torrents', 'href' => '?page=torrents&amp;sort=seeders'],
             );
         }
         if (! empty($torrent_cards['leeched'])) {
@@ -179,7 +179,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                 'Most leeched',
                 $rows_from($torrent_cards['leeched'], 'leechers', static fn (array $t): string => number_format($t['leechers']).' leechers'),
                 '#205ea6',
-                ['label' => 'All peers', 'href' => '?page=peers&amp;state=0&amp;sort=downloaded'],
+                ['label' => 'All torrents', 'href' => '?page=torrents&amp;sort=leechers'],
             );
         }
         if (! empty($torrent_cards['trouble'])) {
@@ -195,7 +195,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                 'Most traffic served',
                 $rows_from($torrent_cards['traffic'], 'traffic', static fn (array $t): string => format_bytes($t['traffic'])),
                 '#bc5215',
-                null,
+                ['label' => 'All torrents', 'href' => '?page=torrents&amp;sort=traffic'],
             );
         }
         // Peers ranked by bytes moved — distinct from the torrent cards above,
