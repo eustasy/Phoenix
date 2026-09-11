@@ -52,7 +52,7 @@ function view_admin_traffic_html(
     // uses for its map metric.
     $toggle = '';
     foreach ([
-        'events' => ['circle-check-big', 'All time'],
+        'events' => ['clock-fading', 'All time'],
         'peers' => ['share-2', 'Live swarm'],
     ] as $key => [$icon, $label]) {
         $on = $metric === $key;
