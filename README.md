@@ -66,8 +66,8 @@ Use this path when you use a cPanel-style host with no direct web server configu
 2. Edit your crontab with `crontab -e`, and add entries like the following. Adjust the times and verify the paths are correct.
 
 ```cron
-15 * * * * php ~/phoenix/bin/clean-and-optimize.php
-30 * * * * php ~/phoenix/bin/backup-database.php
+*/15 * * * * php ~/phoenix/bin/clean-and-optimize.php
+30 3 * * * php ~/phoenix/bin/backup-database.php
 ```
 
 ## Configuration

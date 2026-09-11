@@ -11,10 +11,10 @@ declare(strict_types=1);
 // aggregates on the peer_id prefix in SQL and labels in PHP, so this only has
 // to regroup a few dozen labels.
 //
-// stats_client_detect() returns a label like "Transmission 4.1.3.0" — family
-// and version separated by the last space. A label with no version part (an
-// unrecognised client, or plain "Unknown") becomes a family with a single ''
-// version, so it still charts as one solid bar rather than disappearing.
+// Split through stats_client_family(), shared with the ledger view so both
+// agree on what a family is. A label with no version part (an unrecognised
+// client, or plain "Unknown") becomes a family with a single '' version, so it
+// still charts as one solid bar rather than disappearing.
 //
 // Families are ordered by total peers, highest first; versions within a family
 // likewise, and only the top $families_limit are returned — a horizontal bar chart
@@ -30,25 +30,11 @@ declare(strict_types=1);
 function peers_client_breakdown(mysqli $connection, array $settings, int $families_limit = 7): array
 {
     require_once __DIR__.'/peers.client.counts.php';
+    require_once __DIR__.'/../functions/stats.client.family.php';
 
     $families = [];
     foreach (peers_client_counts($connection, $settings) as $label => $count) {
-        $label = (string) $label;
-        $family = $label;
-        $version = '';
-
-        $split = strrpos($label, ' ');
-        // Only treat the tail as a version when it actually looks like one —
-        // "Unknown" must not become family "Unk" version "nown", and a client
-        // whose name contains a space keeps it.
-        if ($split !== false) {
-            $tail = substr($label, $split + 1);
-            if ($tail !== '' && preg_match('/^[0-9][0-9.]*$/', $tail) === 1) {
-                $family = substr($label, 0, $split);
-                $version = $tail;
-            }
-        }
-
+        ['family' => $family, 'version' => $version] = stats_client_family((string) $label);
         $families[$family][$version] = ($families[$family][$version] ?? 0) + $count;
     }
 

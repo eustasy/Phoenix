@@ -51,6 +51,7 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
             'dashboard' => ['layout-dashboard', 'Dashboard'],
             'torrents' => ['database', 'Torrents'],
             'peers' => ['users', 'Peers'],
+            'clients' => ['app-window', 'Clients'],
             'traffic' => ['arrow-up-down', 'Traffic'],
             'geography' => ['globe-2', 'Geography'],
             'add' => ['plus', 'Add Torrent'],
