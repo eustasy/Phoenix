@@ -43,6 +43,35 @@ class ViewAdminHtmlTest extends TestCase
         ];
     }
 
+    public function testTrafficChartFillsTheOtherHalfOfTheChartRow(): void
+    {
+        $traffic = [
+            ['time' => 1788739200, 'completions' => 76, 'bytes' => 250263275520],
+            ['time' => 1788825600, 'completions' => 79, 'bytes' => 260362334208],
+        ];
+        $html = view_admin_html(
+            $this->settings(),
+            true,
+            false,
+            'tok',
+            false,
+            [],
+            [],
+            [],
+            [],
+            ['Transmission' => ['4.1.3.0' => 49]],
+            $traffic,
+        );
+
+        // Both charts, and the library pulled once for the pair.
+        $this->assertStringContainsString('<canvas id="clients-chart">', $html);
+        $this->assertStringContainsString('<canvas id="traffic-chart">', $html);
+        $this->assertSame(1, substr_count($html, 'chart.js@4.4.3'));
+        // The card footers through to the full page.
+        $this->assertStringContainsString('476 GB', $html);
+        $this->assertStringContainsString('?page=traffic', $html);
+    }
+
     public function testClientChartLeadsTheSectionAtHalfWidth(): void
     {
         $clients = ['Transmission' => ['4.1.3.0' => 49, '3.0.0.0' => 33], 'qBittorrent' => ['5.2.3.0' => 52]];

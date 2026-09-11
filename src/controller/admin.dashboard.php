@@ -21,6 +21,7 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
     $count_cards = [];
     $peer_cards = [];
     $clients = [];
+    $traffic = [];
     if ($tables_installed) {
         // Surface the already-computed tracker stats (same aggregation the
         // ?stats scrape uses) plus the total registered-torrent count and the
@@ -71,6 +72,11 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
         // for the stacked chart — no extra query.
         require_once __DIR__.'/../model/peers.client.breakdown.php';
         $clients = peers_client_breakdown($connection, $settings);
+
+        // A short window for the dashboard: enough to show the shape without
+        // the cost of the Traffic page's longer views.
+        require_once __DIR__.'/../model/stats.traffic.series.php';
+        $traffic = stats_traffic_series($connection, $settings, 30, 86400);
     }
 
     require_once __DIR__.'/../functions/auth.csrf.token.php';
@@ -89,5 +95,6 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
         $count_cards,
         $peer_cards,
         $clients,
+        $traffic,
     );
 }
