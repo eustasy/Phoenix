@@ -202,7 +202,7 @@ class ViewIndexHtmlTest extends PhoenixTestCase
 
     public function testMetaRowIsADisclosureOpenedFromTheTitle(): void
     {
-        $html = view_index_html($this->torrents(), true);
+        $html = view_index_html($this->fixture(), true);
 
         // A checkbox and its label, not JavaScript: sorting and filtering are
         // progressive enhancements here and the drawer has to work without them.
@@ -217,7 +217,7 @@ class ViewIndexHtmlTest extends PhoenixTestCase
     public function testTorrentWithNoMetaGetsNoDisclosure(): void
     {
         // A control that opens an empty drawer is worse than no control.
-        $bare = $this->torrents([
+        $bare = $this->fixture([
             'filename' => null, 'files' => null, 'trackers' => null, 'webseeds' => null,
         ]);
         $html = view_index_html($bare, true);
@@ -232,7 +232,7 @@ class ViewIndexHtmlTest extends PhoenixTestCase
     {
         // tables.js sorts on the cell's textContent, so the disclosure markup
         // must not put anything else in it.
-        $html = view_index_html($this->torrents(), true);
+        $html = view_index_html($this->fixture(), true);
 
         preg_match('/<td class="idx-title">(.*?)<\/td>/s', $html, $m);
         $this->assertSame('Test Torrent', trim(strip_tags($m[1] ?? '')));

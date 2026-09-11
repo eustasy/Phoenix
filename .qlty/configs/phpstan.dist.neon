@@ -27,6 +27,19 @@ parameters:
             identifier: variable.undefined
             paths:
                 - %currentWorkingDirectory%/src/hooks
+        # Hooks call into OPTIONAL composer packages (Sentry), guarded at runtime
+        # by class_exists() and by the setting that turns the integration on. CI
+        # analyses without those packages installed, so the symbols genuinely are
+        # not there — which is the supported configuration, not a fault. Scoped
+        # to src/hooks so a real typo anywhere else still fails the build.
+        -
+            identifier: function.notFound
+            paths:
+                - %currentWorkingDirectory%/src/hooks
+        -
+            identifier: class.notFound
+            paths:
+                - %currentWorkingDirectory%/src/hooks
         # Entry points: phpstan cannot narrow types through include scope (array_filter
         # on sanitize_tracker_params result in scrape.php, etc.)
         -
