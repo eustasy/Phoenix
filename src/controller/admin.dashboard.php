@@ -45,14 +45,13 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
         // listing it summarises, so the dashboard is a way in rather than a
         // dead end. All are cheap aggregates over the same two tables.
         require_once __DIR__.'/../model/torrents.top.php';
-        require_once __DIR__.'/../model/peers.client.counts.php';
         $torrent_cards = [
             'seeded' => torrents_top($connection, $settings, 'seeders'),
             'leeched' => torrents_top($connection, $settings, 'leechers'),
             'trouble' => torrents_top($connection, $settings, 'trouble'),
             'traffic' => torrents_top($connection, $settings, 'traffic'),
         ];
-        $count_cards = ['clients' => peers_client_counts($connection, $settings)];
+        $count_cards = [];
 
         // Peers ranked by bytes moved — the peer-side counterpart to the
         // torrent cards, which rank torrents by how many peers they have.

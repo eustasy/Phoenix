@@ -182,12 +182,12 @@ class ViewAdminHtmlTest extends TestCase
             false,
             [],
             ['seeded' => $this->topTorrents()],
-            ['clients' => ['qBittorrent 5.2.3.0' => 52]],
+            ['countries' => ['GB' => 52]],
         );
 
         $this->assertStringContainsString('At a glance', $html);
         $this->assertStringContainsString('>Most seeded<', $html);
-        $this->assertStringContainsString('>Top clients<', $html);
+        $this->assertStringContainsString('>Top countries<', $html);
         // A card is a way in, not a dead end.
         $this->assertStringContainsString('?page=peers&amp;info_hash='.str_repeat('a', 40), $html);
         // An unregistered swarm falls back to a truncated hash.

@@ -17,13 +17,17 @@ declare(strict_types=1);
 // version, so it still charts as one solid bar rather than disappearing.
 //
 // Families are ordered by total peers, highest first; versions within a family
-// likewise. Returns ['Transmission' => ['4.1.3.0' => 49, '3.0.0.0' => 33], …].
+// likewise, and only the top $families_limit are returned — a horizontal bar chart
+// stops being readable once the labels are crowded, and the long tail of
+// one-peer clients is noise.
+//
+// Returns ['Transmission' => ['4.1.3.0' => 49, '3.0.0.0' => 33], …].
 
 /**
  * @param PhoenixSettings $settings
  * @return array<string, array<string, int>>
  */
-function peers_client_breakdown(mysqli $connection, array $settings): array
+function peers_client_breakdown(mysqli $connection, array $settings, int $families_limit = 7): array
 {
     require_once __DIR__.'/peers.client.counts.php';
 
@@ -55,5 +59,5 @@ function peers_client_breakdown(mysqli $connection, array $settings): array
     }
     unset($versions);
 
-    return $families;
+    return array_slice($families, 0, max(1, $families_limit), true);
 }

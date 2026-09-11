@@ -234,9 +234,6 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                 ['label' => 'All leechers', 'href' => '?page=peers&amp;state=0'],
             );
         }
-        if (! empty($count_cards['clients'])) {
-            $panels[] = view_toplist_html('Top clients', $rank_rows($count_cards['clients']), '#5e409d');
-        }
         if (! empty($count_cards['countries'])) {
             $panels[] = view_toplist_html(
                 'Top countries',
