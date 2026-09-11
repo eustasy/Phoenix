@@ -51,6 +51,7 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
             'dashboard' => ['layout-dashboard', 'Dashboard'],
             'torrents' => ['database', 'Torrents'],
             'peers' => ['users', 'Peers'],
+            'traffic' => ['arrow-up-down', 'Traffic'],
             'geography' => ['globe-2', 'Geography'],
             'add' => ['plus', 'Add Torrent'],
         ],
@@ -129,7 +130,6 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
 
 		<div class="ph-sidebar-foot">
 			'.view_theme_toggle_html('Light mode', 'Dark mode').'
-			<hr class="ph-sidebar-sep">
 			<div class="flex items-center justify-between gap-2">
 				<span class="dim mono text-xs">eustasy</span>
 				'.$logout_html.'

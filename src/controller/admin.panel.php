@@ -46,6 +46,11 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
 
             return admin_peers_controller($connection, $settings);
 
+        case 'traffic':
+            require_once __DIR__.'/admin.traffic.php';
+
+            return admin_traffic_controller($connection, $settings);
+
         case 'geography':
             require_once __DIR__.'/admin.geography.php';
 

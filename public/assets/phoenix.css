@@ -609,6 +609,9 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 /* A fixed height, because Chart.js sizes to its container and a container
    sized by its content would collapse to nothing. */
 .ph-chart { position: relative; height: 240px; }
+.ph-chart-tall { height: 320px; }
+.ph-traffic-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4); }
+.btn.is-on { background-color: var(--color-bg-tertiary); color: var(--color-text); }
 
 /* Mini-table cards, several to a row. Narrower than the stat grid: each holds
    a ranked list rather than one figure. */
