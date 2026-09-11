@@ -44,6 +44,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
 {
     require_once __DIR__.'/html.admin.layout.php';
     require_once __DIR__.'/html.hash.php';
+    require_once __DIR__.'/html.filename.php';
     require_once __DIR__.'/../functions/format.bytes.php';
 
     // Hidden field carrying the CSRF token, embedded in every action form.
@@ -134,13 +135,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
             // browser-side filter could match them. They are matched in SQL now
             // (torrents_filter_sql), which searches every torrent rather than
             // the rendered page, so the attribute would only be dead weight.
-            // The filename is what the torrent actually delivers, and it is
-            // routinely the thing that distinguishes two rows sharing a display
-            // name. Truncated by CSS rather than wrapped, so it costs one column
-            // and not the row height. No tooltip: it would only repeat the cell.
-            $file = $torrent['filename'] === null || $torrent['filename'] === ''
-                ? '<span class="muted">&mdash;</span>'
-                : '<span class="mono text-sm ph-file">'.htmlspecialchars($torrent['filename'], ENT_QUOTES, 'UTF-8').'</span>';
+            $file = view_filename_html($torrent['filename']);
 
             $rows .= '<tr>'.
                 '<td><span class="ph-name">'.$name.'</span></td>'.
