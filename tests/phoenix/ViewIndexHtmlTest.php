@@ -199,4 +199,42 @@ class ViewIndexHtmlTest extends PhoenixTestCase
         // The count header reflects the row total.
         $this->assertStringContainsString('>2 torrents</b>', $html);
     }
+
+    public function testMetaRowIsADisclosureOpenedFromTheTitle(): void
+    {
+        $html = view_index_html($this->torrents(), true);
+
+        // A checkbox and its label, not JavaScript: sorting and filtering are
+        // progressive enhancements here and the drawer has to work without them.
+        $this->assertMatchesRegularExpression(
+            '/<input type="checkbox" class="idx-toggle ph-visually-hidden" id="(idx-t0)">'
+            .'<label class="idx-disclose" for="\1">/',
+            $html,
+        );
+        $this->assertStringContainsString('class="idx-meta"', $html);
+    }
+
+    public function testTorrentWithNoMetaGetsNoDisclosure(): void
+    {
+        // A control that opens an empty drawer is worse than no control.
+        $bare = $this->torrents([
+            'filename' => null, 'files' => null, 'trackers' => null, 'webseeds' => null,
+        ]);
+        $html = view_index_html($bare, true);
+
+        $this->assertStringNotContainsString('idx-toggle', $html);
+        $this->assertStringNotContainsString('idx-meta', $html);
+        // The title is still there, just not wrapped in a control.
+        $this->assertStringContainsString('<span class="ph-name">Test Torrent</span>', $html);
+    }
+
+    public function testTitleCellStaysSortableText(): void
+    {
+        // tables.js sorts on the cell's textContent, so the disclosure markup
+        // must not put anything else in it.
+        $html = view_index_html($this->torrents(), true);
+
+        preg_match('/<td class="idx-title">(.*?)<\/td>/s', $html, $m);
+        $this->assertSame('Test Torrent', trim(strip_tags($m[1] ?? '')));
+    }
 }

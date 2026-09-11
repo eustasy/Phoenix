@@ -54,11 +54,15 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
 
     ////	Body rows
     $rows = '';
-    foreach ($index as $torrent) {
+    foreach ($index as $position => $torrent) {
         $swarm = $torrent['seeders'] + $torrent['leechers'];
         $health_sort = $swarm === 0 ? -1 : (int) round($torrent['seeders'] / $swarm * 100);
 
-        $cells = '<td><span class="ph-name">'.htmlspecialchars($torrent['name'] ?? '').'</span></td>';
+        // The title doubles as the disclosure control for the meta row, so the
+        // cells are built after the meta row is known — a torrent with nothing
+        // to disclose gets a plain title rather than a control that opens an
+        // empty drawer. $title_cell is filled in below.
+        $cells = '';
         $cells .= '<td>'.view_hash_html($torrent['info_hash'] ?? '').'</td>';
         $cells .= '<td class="table-col-numeric">'.number_format($torrent['seeders']).'</td>';
         $cells .= '<td class="table-col-numeric">'.number_format($torrent['leechers']).'</td>';
@@ -110,10 +114,27 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
             }
         }
 
+        // The title cell. With a meta row to show it is a disclosure control: a
+        // checkbox (visually hidden, still focusable and still keyboard-
+        // operable) whose label is the whole title, and CSS opens the drawer
+        // off :checked. No JavaScript, so the control works on a page where
+        // sorting and filtering do not.
+        $name = '<span class="ph-name">'.htmlspecialchars($torrent['name'] ?? '').'</span>';
+        if ($meta_row !== '') {
+            $toggle = 'idx-t'.$position;
+            $title_cell = '<td class="idx-title">'.
+                '<input type="checkbox" class="idx-toggle ph-visually-hidden" id="'.$toggle.'">'.
+                '<label class="idx-disclose" for="'.$toggle.'">'.
+                '<span class="idx-chevron ph-ico" data-lucide="chevron-right"></span>'.$name.'</label></td>';
+        } else {
+            $title_cell = '<td class="idx-title">'.$name.'</td>';
+        }
+
         // One <tbody> per torrent so tables.js treats the pair as a single unit
         // — sorting can never separate a torrent from its meta, and filtering
-        // hides both together.
-        $rows .= '<tbody'.$search_attr.'><tr>'.$cells.'</tr>'.$meta_row.'</tbody>';
+        // hides both together. It is also what lets the hover and the open
+        // state cover both rows: they are one element to style.
+        $rows .= '<tbody'.$search_attr.'><tr>'.$title_cell.$cells.'</tr>'.$meta_row.'</tbody>';
     }
 
     $count = count($index);

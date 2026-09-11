@@ -371,6 +371,40 @@ a.ph-addr:hover { color: var(--color-action); text-decoration: underline; }
 }
 .ph-name { color: var(--color-text); font-weight: var(--font-weight-medium); }
 
+/* Public torrent index: a torrent is a <tbody> of one or two rows, and both
+   behave as one record. */
+
+/* Hover the whole record, not the row the cursor happens to be over — the
+   generic rule lights only the hovered <tr>, which visually split a torrent
+   from its own meta. */
+.idx-table tbody:hover tr { background-color: var(--color-surface-raised); }
+
+/* The title doubles as a disclosure control. */
+.idx-disclose {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  user-select: none;
+}
+.idx-chevron {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+  transition: transform var(--duration-fast) var(--easing);
+}
+.idx-toggle:checked + .idx-disclose .idx-chevron { transform: rotate(90deg); }
+/* Keyboard users get the focus ring the visually-hidden checkbox would have. */
+.idx-toggle:focus-visible + .idx-disclose { outline: 2px solid var(--color-action); outline-offset: 2px; }
+
+/* The drawer. Guarded by @supports: a browser without :has() shows every meta
+   row as it did before, rather than hiding them all with no way to open one. */
+@supports selector(:has(*)) {
+  .idx-table tbody .idx-meta { display: none; }
+  .idx-table tbody:has(.idx-toggle:checked) .idx-meta { display: table-row; }
+}
+
 /* Torrent filename. Longer than the display name, so it truncates rather than
    wrapping the row — but wide enough that a conventional release filename
    ("distro-8.0-stable-amd64.20250902rc.iso", 44ch) fits whole, since there is
