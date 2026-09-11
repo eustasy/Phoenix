@@ -131,10 +131,9 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
                 : '<span class="listed is-no">Unlisted</span>';
 
             // The meta fields the table does not render — filename, file paths,
-            // trackers, webseeds — used to ride along in data-search so the
-            // browser-side filter could match them. They are matched in SQL now
-            // (torrents_filter_sql), which searches every torrent rather than
-            // the rendered page, so the attribute would only be dead weight.
+            // trackers, webseeds — are matched in SQL (torrents_filter_sql),
+            // which searches every torrent rather than the rendered page, so
+            // carrying them in data-search would only be dead weight.
             $file = view_filename_html($torrent['filename']);
 
             $rows .= '<tr>'.

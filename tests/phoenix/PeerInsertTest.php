@@ -159,7 +159,7 @@ class PeerInsertTest extends PhoenixTestCase
 
     public function testStoresNegativeLeftSentinel(): void
     {
-        // Regression: peer_parse_announce_optional() sets left=-1 ("bytes
+        // peer_parse_announce_optional() sets left=-1 ("bytes
         // remaining unknown") when a client omits `left`. The peers.`left`
         // column is signed, so this round-trips instead of throwing an
         // out-of-range strict-mode exception.

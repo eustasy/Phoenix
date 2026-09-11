@@ -87,6 +87,6 @@ if (! $connection) {
 // only info_hashes registered here may be announced to or scraped.
 //
 // The check itself is torrents_filter_allowed(), asked per request with the
-// hashes that request names. Nothing is loaded here: the bootstrap used to read
-// every info_hash into an array on every announce, which cost 48.8 MB and 57ms
-// at 200k torrents to answer a question about one of them.
+// hashes that request names. Nothing is loaded here: reading every info_hash
+// into an array on each announce costs 48.8 MB and 57ms at 200k torrents to
+// answer a question about one of them.

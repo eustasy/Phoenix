@@ -24,7 +24,7 @@ declare(strict_types=1);
 // The ledger metrics are offered when geo is configured (so they sit alongside
 // peers and fill in as completions are logged), or when the ledger already
 // holds geo-tagged completions even if geo has since been turned off. That
-// second test is a LIMIT 1 seek, not the full aggregation it used to be.
+// second test is a LIMIT 1 seek, not a full aggregation.
 
 /** @param PhoenixSettings $settings */
 function admin_geography_controller(mysqli $connection, array $settings): string

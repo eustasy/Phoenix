@@ -205,9 +205,9 @@ class ViewAdminTrafficHtmlTest extends TestCase
 
     public function testSelectedWindowIsMarked(): void
     {
-        // Regression: $windows' numeric-looking keys are ints by the time they
-        // are read back, so a strict compare against the string $window matched
-        // nothing and no window was ever marked selected.
+        // $windows' numeric-looking keys are ints by the time they are read
+        // back, so a strict compare against the string $window matches nothing
+        // and leaves no window marked selected.
         $windows = [
             '30' => ['days' => 30, 'bucket' => 86400, 'label' => '30 days'],
             '90' => ['days' => 90, 'bucket' => 86400, 'label' => '90 days'],

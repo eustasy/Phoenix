@@ -29,11 +29,9 @@ class DbCreateTest extends PhoenixTestCase
 
     public function testSchemaIsCompleteWithoutMigrations(): void
     {
-        // 5.0 folds every 3.x/4.x migration into sql/*.sql, so db_create alone
-        // must produce the finished schema. These are the columns those
-        // migrations used to add — if one goes missing from a schema file, a
-        // fresh install silently loses it and there is no migration left to
-        // repair it.
+        // db_create alone must produce the finished schema: with sql/migrations
+        // empty there is nothing to repair a column missing from a schema file,
+        // so a fresh install would silently lose it.
         $this->assertTrue(db_create(self::$connection, self::$settings));
 
         $expected = [

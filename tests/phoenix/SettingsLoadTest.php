@@ -65,7 +65,7 @@ class SettingsLoadTest extends PhoenixTestCase
         $this->assertSame('', $result['db_host']);
         $this->assertSame('', $result['db_user']);
         $this->assertSame('', $result['db_name']);
-        // No demo credentials are injected (the old fallback set these).
+        // No demo credentials are injected.
         $this->assertArrayNotHasKey('db_pass', $result);
         $this->assertArrayNotHasKey('db_persist', $result);
         $this->assertArrayNotHasKey('open_tracker', $result);

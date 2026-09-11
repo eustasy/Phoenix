@@ -55,7 +55,7 @@ Full list with comments is in `config/phoenix.default.php`. Highlights:
 - `trusted_proxies` — CIDR ranges a forwarded header is honored from (the direct
   `REMOTE_ADDR` must fall inside one).
 - `trust_any_forwarded` — let an empty `trusted_proxies` still trust forwarded headers
-  from *any* peer (insecure opt-in; default false — closes the old fail-open).
+  from *any* peer (insecure opt-in; default false).
 - `allow_client_ip` — allow clients to specify their IP (`?ip` / `?ipv4` / `?ipv6`).
 - `reject_private_ips` — drop RFC 1918 / reserved addresses from the swarm.
 

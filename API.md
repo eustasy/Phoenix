@@ -300,11 +300,8 @@ Unauthenticated.
 The XML form puts the version on the root element:
 `<tracker version="v4.3beta10">`.
 
-**Changed in v4.3.** `version` was previously wrapped as `$Id: v4.3beta10 $,`
-— a Subversion keyword inherited from PeerTracker, which git never expanded,
-plus a trailing comma left behind when the response stopped being assembled by
-hand. It is the bare version now, matching [`/api`](#get-api). A client that was
-stripping the wrapper should stop.
+`version` is the bare version string, matching [`/api`](#get-api) — no wrapper
+or delimiter around it.
 
 ## Management API
 

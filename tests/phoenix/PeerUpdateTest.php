@@ -47,7 +47,7 @@ class PeerUpdateTest extends PhoenixTestCase
 
     public function testUpdatesLeftToNegativeSentinel(): void
     {
-        // Regression: a re-announce that omits `left` carries the -1 "unknown"
+        // A re-announce that omits `left` carries the -1 "unknown"
         // sentinel; the signed column stores it instead of throwing an
         // out-of-range strict-mode exception.
         mysqli_query(

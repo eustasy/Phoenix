@@ -50,8 +50,8 @@ final class ViewToplistHtmlTest extends TestCase
 
     public function testRowTitleBecomesATooltipAndDoesNotClobberTheCardTitle(): void
     {
-        // Regression: the row's title once overwrote the card's own heading,
-        // because both were held in a variable called $title.
+        // The row's title and the card's own heading must not share a
+        // variable — holding both in $title renders the heading as the tooltip.
         $html = view_toplist_html('Most seeded', [
             ['label' => 'A', 'value' => '1', 'title' => "hash\nfile.iso"],
         ]);

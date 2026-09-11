@@ -13,10 +13,9 @@ declare(strict_types=1);
 // back as bound parameters, never interpolated: $search is an untrusted string
 // straight off the query string.
 //
-// Everything the old client-side filter matched on is reachable here, including
-// the four meta fields the table does not render as columns (filename, the file
-// list, trackers, webseeds). They were searchable when the whole table was in
-// the browser; paging the listing would otherwise have quietly taken that away.
+// The search reaches every field worth matching, including the four the table
+// does not render as columns (filename, the file list, trackers, webseeds) —
+// paging the listing must not narrow what an operator can find.
 // `files`, `trackers` and `webseeds` are stored as JSON text, so a LIKE matches
 // inside the encoded list — good enough to find a path or a tracker host, and
 // far cheaper than parsing every row.

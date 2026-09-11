@@ -505,10 +505,9 @@ class AnnounceControllerTest extends PhoenixTestCase
         // open_tracker=false and the hash is not registered → "Torrent is not
         // allowed." instead of falling through to peer_id validation.
         //
-        // A hash the fixture never inserted, because being allowed is a fact
-        // about the torrents table now rather than a list the caller passes in
-        // — the check is an indexed lookup, so an empty list can no longer
-        // stand in for "not registered".
+        // A hash the fixture never inserted: being allowed is a fact about the
+        // torrents table, not a list the caller passes in, so the only way to
+        // be "not registered" is to be absent from that table.
         $result = $this->runControllerSubprocess(
             [
                 'info_hash' => str_repeat('d', 40),

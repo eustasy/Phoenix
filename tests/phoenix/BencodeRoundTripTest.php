@@ -9,11 +9,11 @@ use RuntimeException;
 /**
  * Strict round-trip checks for every bencode emitter in the codebase.
  *
- * Past regressions in this area have been variations on the same theme:
- * stray or missing 'e' tokens around loops, dict keys emitted in the wrong
- * lexicographic order, length prefixes that don't match the byte body. The
- * surface symptom is "some clients tolerate it, strict ones don't" — easy to
- * miss without an actual decoder.
+ * The failure modes here are all variations on the same theme: stray or
+ * missing 'e' tokens around loops, dict keys emitted in the wrong lexicographic
+ * order, length prefixes that don't match the byte body. The surface symptom is
+ * "some clients tolerate it, strict ones don't" — easy to miss without an
+ * actual decoder.
  *
  * The decoder below is intentionally strict: it rejects trailing bytes,
  * unterminated containers, and non-string dict keys, and assertSortedKeys()

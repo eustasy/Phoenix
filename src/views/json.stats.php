@@ -9,10 +9,7 @@ declare(strict_types=1);
 //	       $settings array for phoenix_version.
 //	Output: JSON string with a top-level 'tracker' object.
 //
-//	'version' is the bare version string, matching /api. It carried a
-//	'$Id: … $,' wrapper until v4.3: a Subversion keyword inherited from
-//	PeerTracker, which git never expanded, plus a trailing comma left behind
-//	when the response stopped being concatenated by hand.
+//	'version' is the bare version string, matching /api.
 
 /**
  * @param array<string, int> $stats

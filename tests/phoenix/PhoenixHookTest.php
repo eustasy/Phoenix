@@ -39,7 +39,7 @@ class PhoenixHookTest extends PhoenixTestCase
 
     public function testHookFiresOnEveryCallNotOncePerProcess(): void
     {
-        // Regression: phoenix_hook must use include, not include_once.
+        // phoenix_hook must use include, not include_once.
         // Persistent runtimes (PHP-FPM workers) serve many requests per
         // process; a once-per-process hook would silently drop every
         // stat-tracking event after the first.

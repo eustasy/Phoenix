@@ -187,9 +187,9 @@ class AdminTorrentAddActionTest extends PhoenixTestCase
     public function testFormBlankFieldsFallBackToUpload(): void
     {
         // The drag-and-drop form posts every field, blank ones as '' — those
-        // must not clobber the parsed upload. Regression: '' was treated as a
-        // real value, so the empty info_hash field failed validation even though
-        // the file carried a valid one.
+        // must not clobber the parsed upload. Treating '' as a real value fails
+        // validation on the empty info_hash field even though the uploaded file
+        // carries a valid one.
         $hash = $this->torrentInfoHash('Dropped.iso', 7777);
         $this->fakeUpload($this->buildTorrent('Dropped.iso', 7777));
         $_POST = [

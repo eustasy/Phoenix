@@ -90,7 +90,7 @@ class AdminLoginControllerTest extends PhoenixTestCase
     {
         // The documented opt-out: an operator deliberately running the panel
         // unauthenticated (protected by other means) sets admin_auth_optional,
-        // which restores the old skip-auth behaviour.
+        // which skips the auth check entirely.
         $result = \admin_login_controller([
             'admin_password' => '',
             'admin_auth_optional' => true,
