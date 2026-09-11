@@ -112,7 +112,7 @@ function view_admin_traffic_html(
 				<div class="row-actions">'.$ranges.'</div>
 			</div>
 			<div class="ph-chart ph-chart-tall"><canvas id="traffic-chart"></canvas></div>
-			<p class="dim geo-foot">Estimated from the events ledger &mdash; each completed download counted as one full transfer, so partial and repeat downloads are not included.</p>
+			<p class="dim geo-foot">Estimated from the events ledger &mdash; each completed download counted as one full transfer, so partial and repeat downloads are not included. <a href="?page=geography&amp;metric=traffic">See it by country</a>.</p>
 		</div>';
 
         if ($series === []) {

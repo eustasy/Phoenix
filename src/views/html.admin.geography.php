@@ -16,7 +16,7 @@ declare(strict_types=1);
  * @param PhoenixSettings $settings
  * @param array<string, array<string, int>> $metrics
  */
-function view_admin_geography_html(array $settings, array $metrics, string $csrf_token): string
+function view_admin_geography_html(array $settings, array $metrics, string $csrf_token, string $metric = ''): string
 {
     require_once __DIR__.'/html.admin.layout.php';
 
@@ -50,6 +50,22 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
             // high-value country the palest on the map, which reads inverted.
             'scaleD' => ['#abcfe2', '#4385be'],
         ],
+        'traffic' => [
+            'short' => 'Traffic',
+            'label' => 'Traffic by country',
+            'listTitle' => 'Top countries — traffic',
+            'unit' => ' bytes',
+            // Values are byte counts, so the panel and tooltip render them as
+            // sizes rather than as 22098152264304.
+            'format' => 'bytes',
+            'scope' => 'all-time estimate',
+            'note' => 'Completed downloads weighted by torrent size — each counted as one full transfer, so partial and repeat downloads are not included.',
+            'icon' => 'arrow-up-down',
+            'accent' => '#bc5215',
+            'bg' => 'var(--color-warning-bg)',
+            'scaleL' => ['#f1d3b3', '#bc5215'],
+            'scaleD' => ['#e8b79b', '#c25d1e'],
+        ],
         'downloads' => [
             'short' => 'Completed downloads',
             'label' => 'Completed downloads by country',
@@ -73,7 +89,10 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
         }
         $geo[$key] = $presentation[$key] + ['values' => $values];
     }
-    $default = (string) array_key_first($geo);
+    // A requested metric wins, when it survived the controller's filtering.
+    $default = $metric !== '' && isset($geo[$metric])
+        ? $metric
+        : (string) array_key_first($geo);
 
     // Metric toggle (top bar). One segment per available metric.
     $toggle = '';

@@ -72,6 +72,17 @@ function lerpHex(a, b, t) {
       .join("")
   )
 }
+// A metric's values may be counts or bytes; "20.1 TB" beats 22098152264304.
+function geoFormat(d, n) {
+  if (d.format !== "bytes") return n.toLocaleString() + d.unit
+  var u = ["B", "KB", "MB", "GB", "TB", "PB"]
+  var i = 0
+  while (n >= 1024 && i < u.length - 1) {
+    n /= 1024
+    i++
+  }
+  return (n < 10 && i > 0 ? n.toFixed(1) : Math.round(n)) + " " + u[i]
+}
 function geoEntries(d) {
   return Object.keys(d.values)
     .map(function (k) {
@@ -88,9 +99,9 @@ function geoRenderPanel(d) {
   }, 0)
   document.getElementById("geo-metric-label").textContent = d.label
   document.getElementById("geo-sub").textContent =
-    total.toLocaleString() + d.unit + " · " + entries.length + (entries.length === 1 ? " country · " : " countries · ") + d.scope
+    geoFormat(d, total) + " · " + entries.length + (entries.length === 1 ? " country · " : " countries · ") + d.scope
   document.getElementById("geo-note").textContent = d.note
-  document.getElementById("geo-total").textContent = total.toLocaleString()
+  document.getElementById("geo-total").textContent = d.format === "bytes" ? geoFormat(d, total) : total.toLocaleString()
   document.getElementById("geo-total-label").textContent = d.label.replace(" by country", "")
   document.getElementById("geo-list-title").textContent = d.listTitle
   document.getElementById("geo-countries").textContent = entries.length
@@ -121,7 +132,7 @@ function geoRenderPanel(d) {
       Math.round((e[1] / max) * 100) +
       '%"></i></span></span>' +
       '<span class="geo-val">' +
-      e[1].toLocaleString() +
+      geoFormat(d, e[1]) +
       "</span></div>"
   })
   document.getElementById("geo-list").innerHTML = html || '<p class="dim text-sm">No data for this metric yet.</p>'
@@ -175,7 +186,7 @@ function geoBuildMap() {
     // does not need the map rebuilt for the tooltip to stay correct.
     onRegionTooltipShow: function (event, tooltip, code) {
       var v = geoData ? geoData.values[code] : null
-      tooltip.text((COUNTRY[code] || tooltip.text()) + (v != null ? " — " + v.toLocaleString() + geoData.unit : " — no data"), true)
+      tooltip.text((COUNTRY[code] || tooltip.text()) + (v != null ? " — " + geoFormat(geoData, v) : " — no data"), true)
     },
   })
   geoSchedulePaint()

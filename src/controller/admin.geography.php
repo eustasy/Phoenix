@@ -17,6 +17,10 @@ declare(strict_types=1);
 //                 stored coarse codes. Shown whenever geo is configured (so it
 //                 sits alongside peers and fills in as completions are logged),
 //                 or whenever the ledger already carries geo-tagged completions.
+//   * traffic   — The same completions weighted by torrent size. One dataset
+//                 read two ways, so it appears on exactly the same condition as
+//                 downloads; it is an estimate, counting each completion as one
+//                 full transfer.
 
 /** @param PhoenixSettings $settings */
 function admin_geography_controller(mysqli $connection, array $settings): string
@@ -43,6 +47,10 @@ function admin_geography_controller(mysqli $connection, array $settings): string
     $downloads = events_geo_counts($connection, $settings);
     if ($geo_ready || $downloads !== []) {
         $metrics['downloads'] = $downloads;
+
+        // Same rows, weighted by size — so it stands or falls with downloads.
+        require_once __DIR__.'/../model/events.geo.traffic.php';
+        $metrics['traffic'] = events_geo_traffic($connection, $settings);
     }
 
     require_once __DIR__.'/../functions/auth.csrf.token.php';
@@ -50,5 +58,12 @@ function admin_geography_controller(mysqli $connection, array $settings): string
 
     require_once __DIR__.'/../views/html.admin.geography.php';
 
-    return view_admin_geography_html($settings, $metrics, $csrf_token);
+    // ?metric deep-links a specific map — the Traffic page links here for the
+    // geographic cut, and without this it would land on whichever metric
+    // happened to be first.
+    $metric = is_string($_GET['metric'] ?? null) && isset($metrics[$_GET['metric']])
+        ? (string) $_GET['metric']
+        : '';
+
+    return view_admin_geography_html($settings, $metrics, $csrf_token, $metric);
 }

@@ -20,6 +20,37 @@ class ViewAdminGeographyHtmlTest extends TestCase
         return ['phoenix_version' => 'Phoenix Test v.0', 'admin_password' => 'hash'];
     }
 
+    public function testTrafficMetricRendersAsSizesNotRawByteCounts(): void
+    {
+        $html = view_admin_geography_html(
+            $this->settings(),
+            ['downloads' => ['BR' => 157875], 'traffic' => ['BR' => 293437328142336]],
+            'tok',
+        );
+
+        $this->assertStringContainsString('data-metric="traffic"', $html);
+        // The script formats byte metrics as sizes; without the flag the panel
+        // would read 293437328142336.
+        $this->assertStringContainsString('"format":"bytes"', $html);
+    }
+
+    public function testMetricCanBeDeepLinked(): void
+    {
+        // The Traffic page links here for the geographic cut; without this it
+        // would land on whichever metric happened to be first.
+        $metrics = ['peers' => ['GB' => 5], 'traffic' => ['BR' => 1024]];
+
+        $this->assertStringContainsString(
+            'GEO_DEFAULT = "traffic"',
+            view_admin_geography_html($this->settings(), $metrics, 'tok', 'traffic'),
+        );
+        // An unknown metric falls back rather than rendering an empty map.
+        $this->assertStringContainsString(
+            'GEO_DEFAULT = "peers"',
+            view_admin_geography_html($this->settings(), $metrics, 'tok', 'nonsense'),
+        );
+    }
+
     public function testNotConfiguredStateWhenNoMetrics(): void
     {
         $html = view_admin_geography_html($this->settings(), [], 'tok');
