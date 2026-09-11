@@ -38,7 +38,7 @@ class PeersTopTest extends PhoenixTestCase
             '(`info_hash`, `peer_id`, `compactv4`, `compactv6`, `ipv4`, `portv4`, `portv6`, '.
             '`uploaded`, `downloaded`, `left`, `state`, `updated`) '.
             'VALUES (?, ?, \'\', \'\', ?, 51413, 0, ?, ?, 0, ?, ?);',
-            [$hash, bin2hex(str_pad($ip, 20, 'x')), $ip, $uploaded, $downloaded, $state, time()],
+            [$hash, bin2hex(substr(str_pad($ip, 20, 'x'), 0, 20)), $ip, $uploaded, $downloaded, $state, time()],
         );
     }
 

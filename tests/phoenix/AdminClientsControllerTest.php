@@ -33,7 +33,7 @@ class AdminClientsControllerTest extends PhoenixTestCase
     private function peer(string $peerId): void
     {
         // peer_id reaches the table as hex, the same form the tracker stores.
-        $this->insertPeer(self::HASH, bin2hex(str_pad($peerId, 20, 'x')), 1, time());
+        $this->insertPeer(self::HASH, bin2hex(substr(str_pad($peerId, 20, 'x'), 0, 20)), 1, time());
     }
 
     private function completion(string $client): void

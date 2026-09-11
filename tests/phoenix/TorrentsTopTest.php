@@ -32,15 +32,33 @@ class TorrentsTopTest extends PhoenixTestCase
         );
     }
 
-    /** Seeders are state 1, leechers state 0. */
+    /**
+     * Seeders are state 1, leechers state 0.
+     *
+     * The peer_id is built from the index alone, not the info_hash: str_pad()
+     * only ever pads, so folding a 19-character hash in produced 42 hex
+     * characters for a varchar(40) column, and the failed insert took the whole
+     * runner down through tracker_error()'s exit(). The primary key is
+     * (info_hash, peer_id), so uniqueness within one torrent is all that is
+     * needed anyway.
+     */
     private function swarm(string $hash, int $seeders, int $leechers): void
     {
         for ($i = 0; $i < $seeders; $i++) {
-            $this->insertPeer($hash, bin2hex(str_pad('s'.$i.$hash, 20, 'x')), 1, time());
+            $this->insertPeer($hash, $this->peerId('s'.$i), 1, time());
         }
         for ($i = 0; $i < $leechers; $i++) {
-            $this->insertPeer($hash, bin2hex(str_pad('l'.$i.$hash, 20, 'x')), 0, time());
+            $this->insertPeer($hash, $this->peerId('l'.$i), 0, time());
         }
+    }
+
+    /** A 20-byte peer_id, which is exactly 40 hex characters. */
+    private function peerId(string $seed): string
+    {
+        $hex = bin2hex(substr(str_pad($seed, 20, 'x'), 0, 20));
+        $this->assertSame(40, strlen($hex), 'peer_id must fit varchar(40)');
+
+        return $hex;
     }
 
     /** @param list<array<string, mixed>> $rows */
