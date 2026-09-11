@@ -638,16 +638,30 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .seg-btn:hover { color: var(--color-text); }
 /* The selected segment. Background alone cannot carry this: in light mode the
    raised pill (#fffcf0) sits on a #f2f0e5 track, a 3% difference that left the
-   shadow doing all the work. The inset ring is what fixes that — a defined
-   boundary at any luminance. The label stays plain text: against an unselected
-   segment's muted grey it is already the brighter of the two, and an accent
-   colour on top read as a link rather than a state. */
+   shadow doing all the work. The inset ring fixes that at any luminance, and
+   the accent names the selection. */
 .seg-btn.is-on {
   background-color: var(--color-surface);
-  color: var(--color-text);
+  color: var(--color-action);
   box-shadow:
     inset 0 0 0 var(--border-width) var(--color-border),
     var(--shadow-sm);
+}
+.seg-btn.is-on:hover { color: var(--color-action); }
+
+/* Except in dark mode, where the accent is a light blue on a near-black pill
+   and reads as a link rather than a state. The ring still marks the selection
+   there, so the label can stay plain. Both dark paths, since the theme is
+   either chosen (.theme-dark) or inherited from the system. */
+@media (prefers-color-scheme: dark) {
+  :root:not(.theme-light) .seg-btn.is-on,
+  :root:not(.theme-light) .seg-btn.is-on:hover {
+    color: var(--color-text);
+  }
+}
+.theme-dark .seg-btn.is-on,
+.theme-dark .seg-btn.is-on:hover {
+  color: var(--color-text);
 }
 
 .geo-wrap { display: grid; grid-template-columns: 1fr 320px; gap: var(--space-5); align-items: start; }
