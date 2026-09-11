@@ -26,7 +26,7 @@ declare(strict_types=1);
  * @param PhoenixSettings $settings
  * @param array<string, int>|false $stats
  * @param array<string, array{value: int, source: string}> $tasks
- * @param array<string, list<array{info_hash: string, name: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>> $torrent_cards
+ * @param array<string, list<array{info_hash: string, name: string|null, filename: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>> $torrent_cards
  * @param array<string, array<string, int>> $count_cards
  * @param array<string, list<array{address: string, peer_id: string, info_hash: string, name: string|null, bytes: int}>> $peer_cards
  * @param array<string, array<string, int>> $clients client family => version => peers
@@ -118,9 +118,21 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             ? $t['name']
             : substr($t['info_hash'], 0, 12).'…';
 
+        // A card row shows one line, and the display name is not an identifier:
+        // the same release rebuilt carries the same name under a different hash.
+        // The hash and filename go in the tooltip rather than the label.
+        $torrent_title = static function (array $t): string {
+            $title = $t['info_hash'];
+            if (($t['filename'] ?? null) !== null && $t['filename'] !== '') {
+                $title .= "\n".$t['filename'];
+            }
+
+            return $title;
+        };
+
         // Bars are proportional to the leader of each card, so a card is read
         // against itself rather than against the tracker's busiest swarm.
-        $rows_from = static function (array $torrents, string $key, callable $format) use ($hash_link, $torrent_label): array {
+        $rows_from = static function (array $torrents, string $key, callable $format) use ($hash_link, $torrent_label, $torrent_title): array {
             $max = 0;
             foreach ($torrents as $t) {
                 $max = max($max, (int) $t[$key]);
@@ -132,6 +144,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                     'value' => $format($t),
                     'bar' => $max > 0 ? (int) round((int) $t[$key] / $max * 100) : 0,
                     'href' => $hash_link($t['info_hash']),
+                    'title' => $torrent_title($t),
                 ];
             }
 

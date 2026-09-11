@@ -61,6 +61,7 @@ function torrents_select_all(
     // so the ranking is the one the page shows.
     $columns = [
         'name' => '`t`.`name`',
+        'filename' => '`t`.`filename`',
         'user' => '`t`.`user`',
         'size' => '`t`.`size`',
         'downloads' => '`t`.`downloads`',

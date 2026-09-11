@@ -35,6 +35,7 @@ declare(strict_types=1);
  *     state: int,
  *     updated: int,
  *     name: string|null,
+ *     filename: string|null,
  * }>
  */
 function peers_select_all(
@@ -72,7 +73,7 @@ function peers_select_all(
     $result = mysqli_execute_query(
         $connection,
         'SELECT p.`info_hash`, p.`peer_id`, p.`ipv4`, p.`ipv6`, p.`portv4`, p.`portv6`, '.
-        'p.`uploaded`, p.`downloaded`, p.`left`, p.`state`, p.`updated`, t.`name` '.
+        'p.`uploaded`, p.`downloaded`, p.`left`, p.`state`, p.`updated`, t.`name`, t.`filename` '.
         'FROM `'.$prefix.'peers` p '.
         'LEFT JOIN `'.$prefix.'torrents` t ON t.`info_hash` = p.`info_hash`'.
         $filter['where'].
@@ -102,6 +103,7 @@ function peers_select_all(
             'state' => intval($row['state']),
             'updated' => intval($row['updated']),
             'name' => is_string($row['name']) ? $row['name'] : null,
+            'filename' => is_string($row['filename']) ? $row['filename'] : null,
         ];
     }
 

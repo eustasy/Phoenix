@@ -345,6 +345,13 @@ a.btn-outline:hover { color: var(--color-action); }
   border-bottom: none;
   cursor: help;
 }
+/* An <abbr> used only to carry a tooltip, inheriting the cell's own type
+   rather than announcing itself as an abbreviation. */
+.ph-plain {
+  text-decoration: none;
+  border-bottom: none;
+  cursor: help;
+}
 .ph-addr-row { display: flex; align-items: center; gap: var(--space-1-5); }
 /* A link now — to this peer's other swarms — but it should read as the address
    it is, not as navigation. */
@@ -358,6 +365,19 @@ a.ph-addr:hover { color: var(--color-action); text-decoration: underline; }
   white-space: nowrap;
 }
 .ph-name { color: var(--color-text); font-weight: var(--font-weight-medium); }
+
+/* Torrent filename. Often longer than the display name and rarely needed in
+   full, so it truncates and keeps the whole value on hover. */
+.ph-file {
+  display: inline-block;
+  min-width: 0;
+  max-width: 28ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+  color: var(--color-text-secondary);
+}
 
 /* Server-side sort links. Unlike th.ph-sort (client-side, whole-table
    sorting), these are real links carrying the query state, for tables that are

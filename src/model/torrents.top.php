@@ -22,12 +22,16 @@ declare(strict_types=1);
 // $limit is clamped and inlined as an int; $measure only ever selects a literal
 // from the map below, so no untrusted string reaches the query.
 //
-// Returns a list of ['info_hash', 'name', 'seeders', 'leechers', 'downloads',
-// 'traffic'], highest first, empty when nothing qualifies.
+// Returns a list of ['info_hash', 'name', 'filename', 'seeders', 'leechers',
+// 'downloads', 'traffic'], highest first, empty when nothing qualifies.
+//
+// The filename rides along unrendered: a card has room for one line, but two
+// torrents can share a display name (the same release rebuilt), and the hash
+// and filename are what tell them apart on hover.
 
 /**
  * @param PhoenixSettings $settings
- * @return list<array{info_hash: string, name: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>
+ * @return list<array{info_hash: string, name: string|null, filename: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>
  */
 function torrents_top(mysqli $connection, array $settings, string $measure = 'seeders', int $limit = 5): array
 {
@@ -58,7 +62,7 @@ function torrents_top(mysqli $connection, array $settings, string $measure = 'se
 
     $result = mysqli_query(
         $connection,
-        'SELECT `t`.`info_hash`, `t`.`name`, `t`.`downloads`, '.
+        'SELECT `t`.`info_hash`, `t`.`name`, `t`.`filename`, `t`.`downloads`, '.
         $seeders.' AS `seeders`, '.$leechers.' AS `leechers`, '.
         'IFNULL('.$traffic.', 0) AS `traffic` '.
         'FROM `'.$prefix.'torrents` `t` '.
@@ -78,6 +82,7 @@ function torrents_top(mysqli $connection, array $settings, string $measure = 'se
         $rows[] = [
             'info_hash' => is_string($row['info_hash']) ? $row['info_hash'] : '',
             'name' => is_string($row['name']) ? $row['name'] : null,
+            'filename' => is_string($row['filename']) ? $row['filename'] : null,
             'seeders' => intval($row['seeders']),
             'leechers' => intval($row['leechers']),
             'downloads' => intval($row['downloads']),

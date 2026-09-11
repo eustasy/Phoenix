@@ -26,7 +26,7 @@ declare(strict_types=1);
 /**
  * @param PhoenixSettings $settings
  * @param list<array{time: int, completions: int, bytes: int}> $series
- * @param list<array{info_hash: string, name: string|null, size: int, downloads: int, estimated: int, uploaded: int, downloaded: int, peers: int}> $torrents
+ * @param list<array{info_hash: string, name: string|null, filename: string|null, user: string|null, size: int, downloads: int, estimated: int, uploaded: int, downloaded: int, peers: int}> $torrents
  * @param array<array-key, array{days: int, bucket: int, label: string}> $windows
  *        Numeric-looking keys ('30') become int keys in PHP while 'all' stays a
  *        string, hence array-key rather than string.
@@ -133,9 +133,24 @@ function view_admin_traffic_html(
                 ? htmlspecialchars($t['name'], ENT_QUOTES, 'UTF-8')
                 : '<span class="dim">&mdash;</span>';
 
+            // The filename is what the torrent actually delivers, and routinely
+            // what distinguishes two rows sharing a display name. Truncated by
+            // CSS with the full value on hover, so it costs a column, not the
+            // row height.
+            $file = $t['filename'] === null || $t['filename'] === ''
+                ? '<span class="dim">&mdash;</span>'
+                : '<abbr class="ph-plain mono text-sm ph-file" title="'.htmlspecialchars($t['filename'], ENT_QUOTES, 'UTF-8').'">'.
+                    htmlspecialchars($t['filename'], ENT_QUOTES, 'UTF-8').'</abbr>';
+
+            $owner = $t['user'] === null || $t['user'] === ''
+                ? '<span class="dim">&mdash;</span>'
+                : '<span class="badge badge-cyan">'.htmlspecialchars($t['user'], ENT_QUOTES, 'UTF-8').'</span>';
+
             $primary = $peers_metric ? $t['uploaded'] : $t['estimated'];
             $rows .= '<tr>'.
                 '<td><span class="ph-name">'.$name.'</span></td>'.
+                '<td>'.$file.'</td>'.
+                '<td>'.$owner.'</td>'.
                 '<td>'.view_hash_html($t['info_hash']).'</td>'.
                 '<td class="table-col-numeric mono" data-sort="'.$primary.'">'.format_bytes($primary).'</td>'.
                 '<td class="table-col-numeric mono" data-sort="'.$t['size'].'">'.($t['size'] > 0 ? format_bytes($t['size']) : '<span class="dim">&mdash;</span>').'</td>'.
@@ -151,13 +166,15 @@ function view_admin_traffic_html(
         $count = count($torrents);
 
         $body .= '<div class="ph-toolbar mt-5">
-			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search torrents" placeholder="Search name or hash&hellip;" data-filter-table="#tbl-traffic" data-filter-count="#traffic-count"></span>
+			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" aria-label="Search torrents" placeholder="Search name, filename, owner, hash&hellip;" data-filter-table="#tbl-traffic" data-filter-count="#traffic-count"></span>
 			<span class="ph-spacer"></span>
 			<span class="ph-count" id="traffic-count">'.$count.' '.($count === 1 ? 'torrent' : 'torrents').'</span>
 		</div>
 		<div class="ph-card-table wide"><table id="tbl-traffic">'.
             '<thead><tr>'.
                 '<th class="ph-sort" data-type="text">Torrent '.$sort_ico.'</th>'.
+                '<th class="ph-sort" data-type="text">Filename '.$sort_ico.'</th>'.
+                '<th class="ph-sort" data-type="text">Owner '.$sort_ico.'</th>'.
                 '<th>Hash</th>'.
                 '<th class="ph-sort table-col-numeric" data-type="num" data-sort-default="desc">'.
                     ($peers_metric ? 'Uploaded' : 'Traffic').' '.$sort_ico.'</th>'.

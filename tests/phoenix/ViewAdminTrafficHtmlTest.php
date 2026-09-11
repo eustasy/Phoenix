@@ -26,11 +26,11 @@ class ViewAdminTrafficHtmlTest extends TestCase
         return ['90' => ['days' => 90, 'bucket' => 86400, 'label' => '90 days']];
     }
 
-    /** @return list<array{info_hash: string, name: string|null, size: int, downloads: int, estimated: int, uploaded: int, downloaded: int, peers: int}> */
+    /** @return list<array{info_hash: string, name: string|null, filename: string|null, user: string|null, size: int, downloads: int, estimated: int, uploaded: int, downloaded: int, peers: int}> */
     private function torrents(): array
     {
         return [[
-            'info_hash' => str_repeat('a', 40), 'name' => 'Alpha', 'size' => 3335405568,
+            'info_hash' => str_repeat('a', 40), 'name' => 'Alpha', 'filename' => 'alpha.iso', 'user' => 'alice', 'size' => 3335405568,
             'downloads' => 28660, 'estimated' => 95689450340352,
             'uploaded' => 201102059384, 'downloaded' => 0, 'peers' => 121,
         ]];
@@ -86,5 +86,23 @@ class ViewAdminTrafficHtmlTest extends TestCase
 
         $this->assertStringContainsString('>Traffic ', $estimate);
         $this->assertStringContainsString('>Uploaded ', $live);
+    }
+
+    public function testTableCarriesFilenameAndOwner(): void
+    {
+        $html = view_admin_traffic_html(
+            $this->settings(),
+            [['time' => 1788739200, 'completions' => 76, 'bytes' => 250263275520]],
+            $this->torrents(),
+            'events',
+            '90',
+            $this->windows(),
+            'tok',
+        );
+
+        $this->assertStringContainsString('>Filename ', $html);
+        $this->assertStringContainsString('>Owner ', $html);
+        $this->assertStringContainsString('alpha.iso', $html);
+        $this->assertStringContainsString('alice', $html);
     }
 }

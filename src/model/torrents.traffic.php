@@ -25,7 +25,7 @@ declare(strict_types=1);
 
 /**
  * @param PhoenixSettings $settings
- * @return list<array{info_hash: string, name: string|null, size: int, downloads: int, estimated: int, uploaded: int, downloaded: int, peers: int}>
+ * @return list<array{info_hash: string, name: string|null, filename: string|null, user: string|null, size: int, downloads: int, estimated: int, uploaded: int, downloaded: int, peers: int}>
  */
 function torrents_traffic(mysqli $connection, array $settings, string $measure = 'events', int $limit = 100): array
 {
@@ -39,7 +39,7 @@ function torrents_traffic(mysqli $connection, array $settings, string $measure =
 
     $result = mysqli_query(
         $connection,
-        'SELECT `t`.`info_hash`, `t`.`name`, IFNULL(`t`.`size`, 0) AS `size`, `t`.`downloads`, '.
+        'SELECT `t`.`info_hash`, `t`.`name`, `t`.`filename`, `t`.`user`, IFNULL(`t`.`size`, 0) AS `size`, `t`.`downloads`, '.
         $estimated.' AS `estimated`, '.
         $uploaded.' AS `uploaded`, '.
         'IFNULL(SUM(`p`.`downloaded`), 0) AS `downloaded`, '.
@@ -59,6 +59,8 @@ function torrents_traffic(mysqli $connection, array $settings, string $measure =
         $rows[] = [
             'info_hash' => is_string($row['info_hash']) ? $row['info_hash'] : '',
             'name' => is_string($row['name']) ? $row['name'] : null,
+            'filename' => is_string($row['filename']) ? $row['filename'] : null,
+            'user' => is_string($row['user']) ? $row['user'] : null,
             'size' => intval($row['size']),
             'downloads' => intval($row['downloads']),
             'estimated' => intval($row['estimated']),

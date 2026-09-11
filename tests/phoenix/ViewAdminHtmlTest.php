@@ -33,13 +33,13 @@ class ViewAdminHtmlTest extends TestCase
     }
 
     /**
-     * @return list<array{info_hash: string, name: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>
+     * @return list<array{info_hash: string, name: string|null, filename: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>
      */
     private function topTorrents(): array
     {
         return [
-            ['info_hash' => str_repeat('a', 40), 'name' => 'Alpha', 'seeders' => 50, 'leechers' => 1, 'downloads' => 10, 'traffic' => 0],
-            ['info_hash' => str_repeat('b', 40), 'name' => null, 'seeders' => 20, 'leechers' => 0, 'downloads' => 10, 'traffic' => 0],
+            ['info_hash' => str_repeat('a', 40), 'name' => 'Alpha', 'filename' => 'alpha.iso', 'seeders' => 50, 'leechers' => 1, 'downloads' => 10, 'traffic' => 0],
+            ['info_hash' => str_repeat('b', 40), 'name' => null, 'filename' => null, 'seeders' => 20, 'leechers' => 0, 'downloads' => 10, 'traffic' => 0],
         ];
     }
 
@@ -287,5 +287,41 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertStringNotContainsString('name="process" value="torrent_add"', $html);
         $this->assertStringNotContainsString('Compatibility Check', $html);
         $this->assertStringNotContainsString('Your server supports MySQL.', $html);
+    }
+
+    public function testTorrentCardRowsCarryHashAndFilenameOnHover(): void
+    {
+        // A card row shows one line; the identifying detail goes in the tooltip.
+        $html = view_admin_html(
+            $this->settings(),
+            true,
+            false,
+            'tok',
+            $this->stats(),
+            [],
+            ['seeded' => $this->topTorrents(), 'leeched' => $this->topTorrents()],
+        );
+
+        $this->assertStringContainsString('title="'.str_repeat('a', 40)."\n".'alpha.iso"', $html);
+        // A torrent with no filename still offers the hash.
+        $this->assertStringContainsString('title="'.str_repeat('b', 40).'"', $html);
+    }
+
+    public function testCardHeadingsSurviveRowTooltips(): void
+    {
+        // Regression: the row tooltip once overwrote the card's own heading,
+        // because both were held in a variable called $title.
+        $html = view_admin_html(
+            $this->settings(),
+            true,
+            false,
+            'tok',
+            $this->stats(),
+            [],
+            ['seeded' => $this->topTorrents(), 'leeched' => $this->topTorrents()],
+        );
+
+        $this->assertStringContainsString('<h3>Most seeded</h3>', $html);
+        $this->assertStringContainsString('<h3>Most leeched</h3>', $html);
     }
 }

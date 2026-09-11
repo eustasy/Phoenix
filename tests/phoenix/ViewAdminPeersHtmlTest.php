@@ -39,6 +39,7 @@ class ViewAdminPeersHtmlTest extends TestCase
             'state' => 1,
             'updated' => 1700000000,
             'name' => 'Ubuntu 24.04.1 LTS',
+            'filename' => 'ubuntu-24.04.1-desktop-amd64.iso',
             'client' => 'Transmission 4.1.1.0',
         ], $overrides);
     }
@@ -302,5 +303,18 @@ class ViewAdminPeersHtmlTest extends TestCase
     {
         $html = view_admin_peers_html($this->settings(), [$this->peer()], 1, 1, 0, 200, 'tok');
         $this->assertStringNotContainsString('?page=peers&amp;offset=', $html);
+    }
+
+    public function testTorrentCellCarriesHashAndFilenameOnHover(): void
+    {
+        // The column shows the display name, which is not an identifier: the
+        // same release rebuilt carries it under a different hash.
+        $html = view_admin_peers_html($this->settings(), [$this->peer()], 1, 1, 0, 200, 'tok');
+
+        $this->assertStringContainsString(
+            'title="'.str_repeat('a', 40)."\n".'ubuntu-24.04.1-desktop-amd64.iso"',
+            $html,
+        );
+        $this->assertStringContainsString('ph-plain', $html);
     }
 }

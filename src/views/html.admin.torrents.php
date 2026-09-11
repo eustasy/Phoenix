@@ -133,8 +133,18 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
             // browser-side filter could match them. They are matched in SQL now
             // (torrents_filter_sql), which searches every torrent rather than
             // the rendered page, so the attribute would only be dead weight.
+            // The filename is what the torrent actually delivers, and it is
+            // routinely the thing that distinguishes two rows sharing a display
+            // name. Truncated by CSS rather than wrapped, with the full value on
+            // hover, so it costs one column and not the row height.
+            $file = $torrent['filename'] === null || $torrent['filename'] === ''
+                ? '<span class="muted">&mdash;</span>'
+                : '<abbr class="ph-plain mono text-sm ph-file" title="'.htmlspecialchars($torrent['filename'], ENT_QUOTES, 'UTF-8').'">'.
+                    htmlspecialchars($torrent['filename'], ENT_QUOTES, 'UTF-8').'</abbr>';
+
             $rows .= '<tr>'.
                 '<td><span class="ph-name">'.$name.'</span></td>'.
+                '<td>'.$file.'</td>'.
                 '<td>'.$owner.'</td>'.
                 '<td>'.view_hash_html($info_hash).'</td>'.
                 '<td class="table-col-numeric mono">'.format_bytes($torrent['size']).'</td>'.
@@ -195,6 +205,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
 			<table id="tbl-torrents">
 				<thead><tr>'.
                     '<th>'.$sort_link('name', 'Name').'</th>'.
+                    '<th>'.$sort_link('filename', 'Filename').'</th>'.
                     '<th>'.$sort_link('user', 'Owner').'</th>'.
                     '<th>Info hash</th>'.
                     '<th class="table-col-numeric">'.$sort_link('size', 'Size').'</th>'.

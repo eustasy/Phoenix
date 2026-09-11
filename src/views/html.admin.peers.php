@@ -40,6 +40,7 @@ declare(strict_types=1);
  *     state: int,
  *     updated: int,
  *     name: string|null,
+ *     filename: string|null,
  *     client: string,
  *     country?: string,
  *     country_name?: string,
@@ -112,10 +113,19 @@ function view_admin_peers_html(
         $client = '<span class="badge">'.htmlspecialchars($peer['client'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'</span>';
 
         // Registry name, or the truncated hash for an unregistered swarm.
+        // The column has room for the display name alone, but that is not an
+        // identifier: the same release rebuilt carries the same name under a
+        // different hash. Both, plus the filename, go in the tooltip.
+        $torrent_title = $peer['info_hash'];
+        if ($peer['filename'] !== null && $peer['filename'] !== '') {
+            $torrent_title .= "\n".$peer['filename'];
+        }
+        $torrent_title = htmlspecialchars($torrent_title, ENT_QUOTES, 'UTF-8');
+
         if ($peer['name'] !== null && $peer['name'] !== '') {
-            $torrent = '<span class="muted nowrap">'.htmlspecialchars($peer['name'], ENT_QUOTES, 'UTF-8').'</span>';
+            $torrent = '<abbr class="muted nowrap ph-plain" title="'.$torrent_title.'">'.htmlspecialchars($peer['name'], ENT_QUOTES, 'UTF-8').'</abbr>';
         } else {
-            $torrent = '<span class="mono dim">'.htmlspecialchars(substr($peer['info_hash'], 0, 12), ENT_QUOTES, 'UTF-8').'&hellip;</span>';
+            $torrent = '<abbr class="mono dim ph-plain" title="'.$torrent_title.'">'.htmlspecialchars(substr($peer['info_hash'], 0, 12), ENT_QUOTES, 'UTF-8').'&hellip;</abbr>';
         }
 
         $addrs = [];
