@@ -62,8 +62,9 @@ function admin_peers_controller(mysqli $connection, array $settings): string
     $peers = peers_select_all($connection, $settings, $limit, $offset, $search, $state, $sort, $dir, $info_hash);
 
     // Resolve this page's addresses to countries in one batch, so the reader is
-    // opened once rather than per row. Like the client label below, the result
-    // is derived transiently for display and never stored.
+    // opened once rather than per row. Like the client label below, the country
+    // is derived for this render and never written back — the addresses it is
+    // derived from are stored, as a tracker's swarm index has to be.
     require_once __DIR__.'/../functions/stats.geo.lookup.batch.php';
     $ips = [];
     foreach ($peers as $peer) {

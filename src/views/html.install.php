@@ -85,7 +85,7 @@ function view_install_html(
     // checkbox is greyed out so the operator can't enable a no-op.
     $geo_available = $form['geo_available'];
     $geo_note = $geo_available
-        ? '<span class="dim">&mdash; coarse country per event/peer; the IP is never stored</span>'
+        ? '<span class="dim">&mdash; coarse country per event/peer; the event stores the country, not the address</span>'
         : '<span class="dim">&mdash; needs the geoip2 library and a GeoLite2 database</span>';
 
     $body = $error_html.'

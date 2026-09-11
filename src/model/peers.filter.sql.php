@@ -14,8 +14,9 @@ declare(strict_types=1);
 //
 // What is searchable is limited by what is actually stored. `client` and
 // `country` are derived per-request in PHP — the client label from peer_id, the
-// country from the IP via GeoIP, which is deliberately never stored — so
-// neither can be reached from SQL. Address, info_hash and torrent name can.
+// country from the IP via GeoIP — and neither derived value is kept as a
+// column, so neither can be reached from SQL. Address, info_hash and torrent
+// name can.
 //
 // $state is 1 (seeding), 0 (leeching), or -1 for either. $info_hash narrows to
 // one swarm — the per-torrent drill-down is this filter applied to the same

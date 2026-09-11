@@ -5,9 +5,10 @@ declare(strict_types=1);
 ////	view_admin_peers_html
 // Render the admin global Peers page: a paged, swarm-wide table of peers
 // (client, torrent, country, address, state, transfer totals, last seen) with a
-// client-side filter. The Country column appears only when stats_geo is on —
-// the code is resolved transiently from the peer's IP by the controller and,
-// like the client label, never stored.
+// server-side filter. The Country column appears only when stats_geo is on —
+// the code is resolved from the peer's IP by the controller for this render and
+// never written back, as with the client label. The address itself is stored;
+// this page is the swarm index, and listing it is the point.
 //
 // The torrent column shows the registry name, or the
 // (truncated) info_hash for an unregistered swarm. The header reports the

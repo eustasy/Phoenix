@@ -8,7 +8,8 @@ declare(strict_types=1);
 // Logs a 'stopped' event via stats_log_event() — a no-op unless stats are
 // enabled and 'stopped' is opted into stats_events. The shared logger keeps the
 // privacy contract: peer_id and IP are used transiently (client label + coarse
-// geo) and never stored.
+// geo) and never written to the event row. The peers table holds the address
+// itself — that is the swarm index, not the ledger.
 //
 // Runs inside phoenix_hook()'s scope, so $connection, $settings, $time, and
 // $peer are already in scope. Hooks fire per event and must declare no

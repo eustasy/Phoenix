@@ -7,8 +7,9 @@ declare(strict_types=1);
 // peer's IP is resolved to an ISO country code via the GeoLite2 database — the
 // same gate as stats_geo_lookup() (stats_geo on, geoip2 present, readable
 // .mmdb), but the reader is opened ONCE for the whole batch rather than per
-// peer. The IP is used only for the lookup and never stored; only the per-
-// country counts are returned. Returns ['US' => 612, …] (countries that
+// peer. Nothing is written back: the country is derived per request and only
+// the per-country counts are returned. The addresses themselves are read from
+// the peers table, which is where a tracker keeps them. Returns ['US' => 612, …] (countries that
 // resolved), or an empty array when geo isn't configured or no peer resolves.
 
 /**
