@@ -45,7 +45,6 @@ function view_admin_geography_html(array $settings, string $metric, array $value
             'listTitle' => 'Top countries — peers',
             'unit' => ' peers',
             'scope' => 'right now',
-            'note' => 'Live peer counts, by the country of each peer\'s IP — resolved transiently and never stored.',
             'icon' => 'share-2',
             'accent' => '#205ea6',
             'bg' => 'var(--color-info-bg)',
@@ -64,7 +63,6 @@ function view_admin_geography_html(array $settings, string $metric, array $value
             // sizes rather than as 22098152264304.
             'format' => 'bytes',
             'scope' => 'all-time estimate',
-            'note' => 'Completed downloads weighted by torrent size — each counted as one full transfer, so partial and repeat downloads are not included.',
             'icon' => 'arrow-up-down',
             'accent' => '#bc5215',
             'bg' => 'var(--color-warning-bg)',
@@ -77,7 +75,6 @@ function view_admin_geography_html(array $settings, string $metric, array $value
             'listTitle' => 'Top countries — downloads',
             'unit' => ' downloads',
             'scope' => 'all-time',
-            'note' => 'Completed downloads, by the coarse country code recorded in the events ledger.',
             'icon' => 'circle-check-big',
             'accent' => '#66800b',
             'bg' => 'var(--color-success-bg)',
@@ -128,7 +125,6 @@ function view_admin_geography_html(array $settings, string $metric, array $value
 					<div class="geo-legend" id="geo-legend"></div>
 				</div>
 				<div id="geo-map" class="geo-map"></div>
-				<p class="dim geo-foot">Country-level only &mdash; Phoenix never stores raw IP addresses. <span id="geo-note"></span></p>
 			</div>
 			<aside class="geo-side">
 				<div class="ph-stat ph-stat-blue" id="geo-summary">

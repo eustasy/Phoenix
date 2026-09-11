@@ -111,7 +111,6 @@ function geoRenderPanel(d) {
   document.getElementById("geo-metric-label").textContent = d.label
   document.getElementById("geo-sub").textContent =
     geoFormat(d, total) + " · " + entries.length + (entries.length === 1 ? " country · " : " countries · ") + d.scope
-  document.getElementById("geo-note").textContent = d.note
   document.getElementById("geo-total").textContent = d.format === "bytes" ? geoFormat(d, total) : total.toLocaleString()
   document.getElementById("geo-total-label").textContent = d.label.replace(" by country", "")
   document.getElementById("geo-list-title").textContent = d.listTitle
