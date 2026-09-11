@@ -527,6 +527,13 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-field select { width: 100%; max-width: none; margin-bottom: 0; }
 .ph-field .ph-hint { font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin-top: var(--space-1-5); }
 .ph-field textarea.code { font-family: var(--font-mono); font-size: var(--font-size-sm); }
+/* An input and its submit on one row. align-items: stretch rather than a fixed
+   height, so the button takes the input's height whatever the design system
+   sizes it to. */
+.ph-field-inline { display: flex; align-items: stretch; gap: var(--space-3); }
+.ph-field-inline > input { flex: 1; min-width: 0; }
+.ph-field-inline > .btn { flex-shrink: 0; white-space: nowrap; }
+@media (max-width: 480px) { .ph-field-inline { flex-wrap: wrap; } }
 .ph-field-row { display: grid; gap: var(--space-4); grid-template-columns: 1fr 1fr; }
 
 .ph-form-card { background-color: var(--color-surface); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6); box-shadow: var(--shadow-sm); }

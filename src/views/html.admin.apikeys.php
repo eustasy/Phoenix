@@ -31,13 +31,18 @@ function view_admin_apikeys_html(array $settings, bool $writable, string|false $
 
     ////	Create control (or a read-only notice when config/ can't be written)
     if ($writable) {
+        // Button beside the input rather than under the hint: one short field
+        // and its action read as a single control, and the hint stays attached
+        // to the input it describes.
         $create_html = '<form method="POST">'.$csrf_field.'
 				<input type="hidden" name="process" value="apikey_create">
 				<div class="ph-field"><label for="api_user">User</label>
-					<input type="text" id="api_user" name="api_user" placeholder="alice or *" maxlength="64" pattern="[a-z0-9._*-]+" required>
+					<div class="ph-field-inline">
+						<input type="text" id="api_user" name="api_user" placeholder="alice or *" maxlength="64" pattern="[a-z0-9._*-]+" required>
+						<button type="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="plus"></span>Generate key</button>
+					</div>
 					<div class="ph-hint">Lowercase letters, digits, <code>. _ -</code>, or <code>*</code> for the admin key. Reusing a name rotates that user&rsquo;s key.</div>
 				</div>
-				<button type="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="plus"></span>Generate key</button>
 			</form>';
     } else {
         $create_html = '<div class="alert alert-warning"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The <code>config/</code> directory is not writable, so keys cannot be created or revoked here. Edit <code>config/phoenix.custom.php</code> directly (each value is the SHA-256 hash of the key), or make the directory writable.</div></div>';
