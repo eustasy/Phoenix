@@ -118,7 +118,9 @@ function geoRenderPanel(d) {
   document.getElementById("geo-legend").innerHTML = leg
   var max = entries.length ? entries[0][1] : 1
   var html = ""
-  entries.slice(0, 7).forEach(function (e, i) {
+  // 12, not a handful: the panel runs the full height of the map beside it, and
+  // a shorter list left it half empty.
+  entries.slice(0, 12).forEach(function (e, i) {
     html +=
       '<div class="geo-rowi" style="--geo-c:' +
       d.accent +
