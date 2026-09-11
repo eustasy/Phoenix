@@ -52,7 +52,7 @@ Per-request PHP-FPM overhead — bootstrap, config load, DB connect — measured
 separately over HTTPS on a reused connection as the gap between a rejected
 announce (2.98 ms) and a static asset (0.39 ms): **~2.6 ms**.
 
-```
+```text
 announce      = 3.78 ms controller + 2.6 ms request overhead
               = 6.4 ms                                          (derived)
 announces/sec = 1000 / 6.4  = ~156 per core
