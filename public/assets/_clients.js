@@ -8,6 +8,24 @@
  * Transmission" first and "which Transmission" second. */
 /* global CLIENTS, Chart */
 
+// Theme colours, read at paint time rather than captured once: the class on
+// <html> flips under a live chart when the reader toggles the theme.
+//
+// The grid and tick colours have to be given. Chart.js defaults them to a dark
+// grey that is invisible against a dark background, which is what hid this
+// chart's vertical grid in dark mode while the other charts, which set them,
+// were fine.
+function phClientTheme() {
+  var dark = document.documentElement.classList.contains("theme-dark")
+  return {
+    // Shades of the action colour, darkest for the most-used version, so a bar
+    // reads as one family at a glance and still separates into versions.
+    shades: dark ? ["#abcfe2", "#7ab4d6", "#4385be", "#2d6ca8", "#1f4f80"] : ["#205ea6", "#4385be", "#66a0c8", "#a1cbe4", "#c6dde8"],
+    grid: dark ? "rgba(255,252,240,0.14)" : "rgba(16,15,15,0.14)",
+    text: dark ? "#b7b5ac" : "#6f6e69",
+  }
+}
+
 function phClientChart() {
   var el = document.getElementById("clients-chart")
   if (!el || typeof Chart === "undefined") return
@@ -23,11 +41,8 @@ function phClientChart() {
     depth = Math.max(depth, Object.keys(CLIENTS[f]).length)
   })
 
-  // Shades of the action colour, darkest for the most-used version, so a bar
-  // reads as one family at a glance and still separates into versions.
-  var shades = ["#205ea6", "#4385be", "#66a0c8", "#a1cbe4", "#c6dde8"]
-  var dark = document.documentElement.classList.contains("theme-dark")
-  if (dark) shades = ["#abcfe2", "#7ab4d6", "#4385be", "#2d6ca8", "#1f4f80"]
+  var c = phClientTheme()
+  var shades = c.shades
 
   var datasets = []
   for (var slot = 0; slot < depth; slot++) {
@@ -48,7 +63,7 @@ function phClientChart() {
     })
   }
 
-  new Chart(el, {
+  return new Chart(el, {
     type: "bar",
     data: { labels: families, datasets: datasets },
     options: {
@@ -68,11 +83,31 @@ function phClientChart() {
         },
       },
       scales: {
-        x: { stacked: true, beginAtZero: true, ticks: { precision: 0 } },
-        y: { stacked: true, grid: { display: false } },
+        x: {
+          stacked: true,
+          beginAtZero: true,
+          grid: { color: c.grid },
+          ticks: { precision: 0, color: c.text },
+        },
+        y: { stacked: true, grid: { display: false }, ticks: { color: c.text } },
       },
     },
   })
 }
 
-phClientChart()
+var phClientInstance = phClientChart()
+
+// Repaint on theme change. Without this the chart keeps the palette it was
+// built with, so a grid sized for one background all but vanishes on the other.
+document.addEventListener("phoenix:theme", function () {
+  if (!phClientInstance) return
+  var c = phClientTheme()
+  var o = phClientInstance.options
+  o.scales.x.grid.color = c.grid
+  o.scales.x.ticks.color = c.text
+  o.scales.y.ticks.color = c.text
+  phClientInstance.data.datasets.forEach(function (d, slot) {
+    d.backgroundColor = c.shades[Math.min(slot, c.shades.length - 1)]
+  })
+  phClientInstance.update("none")
+})

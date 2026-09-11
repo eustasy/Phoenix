@@ -4,6 +4,11 @@
  * and the Lucide icon render. */
 
 // Theme toggle (the init snippet runs inline in <head> to avoid a flash).
+//
+// Announces the change, because CSS is not the only thing that carries theme
+// colours: a canvas chart picks its grid, tick and series colours once when it
+// is constructed, and has no way to notice the class flipping underneath it.
+// Anything that painted itself from the theme listens for this and repaints.
 function phToggleTheme() {
   var dark = document.documentElement.classList.toggle("theme-dark")
   document.documentElement.classList.toggle("theme-light", !dark)
@@ -12,6 +17,7 @@ function phToggleTheme() {
   } catch {
     /* ignore */
   }
+  document.dispatchEvent(new CustomEvent("phoenix:theme", { detail: { dark: dark } }))
 }
 
 // (Re)render Lucide icons for any <span class="ph-ico" data-lucide="…">.

@@ -7,14 +7,25 @@
  * flat stretch, not as the line skipping forward. */
 /* global TRAFFIC, TRAFFIC_BUCKET, Chart */
 
+// Theme colours, read at paint time rather than captured once: the class on
+// <html> flips under a live chart when the reader toggles the theme.
+function phTrafficTheme() {
+  var dark = document.documentElement.classList.contains("theme-dark")
+  return {
+    line: dark ? "#879a39" : "#66800b",
+    grid: dark ? "rgba(255,252,240,0.14)" : "rgba(16,15,15,0.14)",
+    text: dark ? "#b7b5ac" : "#6f6e69",
+  }
+}
+
 function phTrafficChart(canvasId) {
   var el = document.getElementById(canvasId || "traffic-chart")
   if (!el || typeof Chart === "undefined" || !TRAFFIC.length) return
 
-  var dark = document.documentElement.classList.contains("theme-dark")
-  var line = dark ? "#879a39" : "#66800b"
-  var grid = dark ? "rgba(255,252,240,0.08)" : "rgba(16,15,15,0.08)"
-  var text = dark ? "#b7b5ac" : "#6f6e69"
+  var c = phTrafficTheme()
+  var line = c.line
+  var grid = c.grid
+  var text = c.text
 
   // A bucket wider than a week is a month's worth; label accordingly.
   var monthly = TRAFFIC_BUCKET > 604800
@@ -29,7 +40,7 @@ function phTrafficChart(canvasId) {
     return (bytes < 10 && i > 0 ? bytes.toFixed(1) : Math.round(bytes)) + " " + u[i]
   }
 
-  new Chart(el, {
+  return new Chart(el, {
     type: "line",
     data: {
       labels: TRAFFIC.map(function (p) {
@@ -85,4 +96,20 @@ function phTrafficChart(canvasId) {
   })
 }
 
-phTrafficChart()
+var phTrafficInstance = phTrafficChart()
+
+// Repaint on theme change. Without this the chart keeps the palette it was
+// built with, so a grid sized for one background all but vanishes on the other.
+document.addEventListener("phoenix:theme", function () {
+  if (!phTrafficInstance) return
+  var c = phTrafficTheme()
+  var o = phTrafficInstance.options
+  o.scales.x.ticks.color = c.text
+  o.scales.y.ticks.color = c.text
+  o.scales.y.grid.color = c.grid
+  phTrafficInstance.data.datasets.forEach(function (d) {
+    d.borderColor = c.line
+    d.backgroundColor = c.line + "22"
+  })
+  phTrafficInstance.update("none")
+})

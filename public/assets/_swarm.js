@@ -11,15 +11,27 @@
  * when a peer leaves, so there is nothing to plot over time. */
 /* global SWARM, Chart */
 
+// Theme colours, read at paint time rather than captured once: the class on
+// <html> flips under a live chart when the reader toggles the theme.
+function phSwarmTheme() {
+  var dark = document.documentElement.classList.contains("theme-dark")
+  return {
+    up: dark ? "#879a39" : "#66800b",
+    down: dark ? "#4385be" : "#205ea6",
+    grid: dark ? "rgba(255,252,240,0.14)" : "rgba(16,15,15,0.14)",
+    text: dark ? "#b7b5ac" : "#6f6e69",
+  }
+}
+
 function phSwarmChart() {
   var el = document.getElementById("swarm-chart")
   if (!el || typeof Chart === "undefined" || !SWARM.length) return
 
-  var dark = document.documentElement.classList.contains("theme-dark")
-  var up = dark ? "#879a39" : "#66800b"
-  var down = dark ? "#4385be" : "#205ea6"
-  var grid = dark ? "rgba(255,252,240,0.08)" : "rgba(16,15,15,0.08)"
-  var text = dark ? "#b7b5ac" : "#6f6e69"
+  var c = phSwarmTheme()
+  var up = c.up
+  var down = c.down
+  var grid = c.grid
+  var text = c.text
 
   function unit(bytes) {
     var u = ["B", "KB", "MB", "GB", "TB", "PB"]
@@ -31,7 +43,7 @@ function phSwarmChart() {
     return (bytes < 10 && i > 0 ? bytes.toFixed(1) : Math.round(bytes)) + " " + u[i]
   }
 
-  new Chart(el, {
+  return new Chart(el, {
     type: "bar",
     data: {
       labels: SWARM.map(function (p) {
@@ -95,4 +107,19 @@ function phSwarmChart() {
   })
 }
 
-phSwarmChart()
+var phSwarmInstance = phSwarmChart()
+
+// Repaint on theme change. Without this the chart keeps the palette it was
+// built with, so a grid sized for one background all but vanishes on the other.
+document.addEventListener("phoenix:theme", function () {
+  if (!phSwarmInstance) return
+  var c = phSwarmTheme()
+  var o = phSwarmInstance.options
+  o.scales.x.grid.color = c.grid
+  o.scales.x.ticks.color = c.text
+  o.scales.y.ticks.color = c.text
+  o.plugins.legend.labels.color = c.text
+  phSwarmInstance.data.datasets[0].backgroundColor = c.up
+  phSwarmInstance.data.datasets[1].backgroundColor = c.down
+  phSwarmInstance.update("none")
+})
