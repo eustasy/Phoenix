@@ -5,7 +5,7 @@ declare(strict_types=1);
 ////	peers_geo_counts
 // Aggregate the active peers by country for the admin Geography page. Each
 // peer's IP is resolved to an ISO country code via the GeoLite2 database — the
-// same gate as stats_geo_lookup() (stats_geo on, geoip2 present, readable
+// same gate as stats_geo_lookup() (stats_geo on, the reader present, readable
 // .mmdb), but the reader is opened ONCE for the whole batch rather than per
 // peer. Nothing is written back: the country is derived per request and only
 // the per-country counts are returned. The addresses themselves are read from
@@ -21,14 +21,14 @@ function peers_geo_counts(mysqli $connection, array $settings): array
     // Geo must be enabled, the library present, and the database readable.
     if (
         $settings['stats_geo'] !== true ||
-        ! class_exists(\GeoIp2\Database\Reader::class) ||
+        ! class_exists(\MaxMind\Db\Reader::class) ||
         ! is_readable($settings['stats_geo_database'])
     ) {
         return [];
     }
 
     try {
-        $reader = new \GeoIp2\Database\Reader($settings['stats_geo_database']);
+        $reader = new \MaxMind\Db\Reader($settings['stats_geo_database']);
     } catch (\Throwable $e) {
         // A Reader that will not construct means a corrupt/unreadable .mmdb —
         // always unexpected, so surface it rather than silently disabling geo.
@@ -63,10 +63,17 @@ function peers_geo_counts(mysqli $connection, array $settings): array
         }
 
         try {
-            $record = $reader->country($ip);
-            $country = strtoupper((string) ($record->country->isoCode ?? ''));
-        } catch (\GeoIp2\Exception\AddressNotFoundException) {
-            // Expected: this IP is not in the database.
+            // The raw record, not GeoIp2's model graph: this page resolves one
+            // address per distinct peer, and with ext-maxminddb the model
+            // objects cost more than the lookup. A miss returns null instead of
+            // throwing, and a record carrying only `registered_country` has no
+            // `country` key — both are simply unknown, as they were before.
+            $record = $reader->get($ip);
+            $country = is_array($record)
+                ? strtoupper((string) ($record['country']['iso_code'] ?? ''))
+                : '';
+        } catch (\InvalidArgumentException) {
+            // Not an address this reader can parse.
             $country = '';
         } catch (\Throwable $e) {
             // Unexpected mid-batch error; report once per call to avoid a flood.

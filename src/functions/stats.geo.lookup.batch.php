@@ -5,7 +5,7 @@ declare(strict_types=1);
 ////	stats_geo_lookup_batch
 // Resolve many IPs to their ISO country code and English country name in one
 // pass, for the admin Peers table's Country column. Same gate as
-// stats_geo_lookup() (stats_geo on, geoip2 present, readable .mmdb), but the
+// stats_geo_lookup() (stats_geo on, the reader present, readable .mmdb), but the
 // reader is opened ONCE for the whole batch and each distinct address is looked
 // up once — a page of peers is up to admin_peers_limit rows, and per-row reader
 // construction would dominate the render.
@@ -28,14 +28,14 @@ function stats_geo_lookup_batch(array $settings, array $ips): array
     if (
         $settings['stats_geo'] !== true ||
         $ips === [] ||
-        ! class_exists(\GeoIp2\Database\Reader::class) ||
+        ! class_exists(\MaxMind\Db\Reader::class) ||
         ! is_readable($settings['stats_geo_database'])
     ) {
         return [];
     }
 
     try {
-        $reader = new \GeoIp2\Database\Reader($settings['stats_geo_database']);
+        $reader = new \MaxMind\Db\Reader($settings['stats_geo_database']);
     } catch (\Throwable $e) {
         // A Reader that will not construct means a corrupt/unreadable .mmdb —
         // always unexpected, so surface it rather than silently disabling geo.
@@ -55,11 +55,24 @@ function stats_geo_lookup_batch(array $settings, array $ips): array
         }
 
         try {
-            $record = $reader->country($ip);
-            $code = strtoupper((string) ($record->country->isoCode ?? ''));
-            $name = (string) ($record->country->name ?? '');
-        } catch (\GeoIp2\Exception\AddressNotFoundException) {
-            // Expected: this IP is not in the database.
+            // The raw record, not GeoIp2's model graph. With ext-maxminddb the
+            // lookup itself costs ~6us, and building Country/Continent/Traits
+            // objects around it costs more than the lookup did — measured at
+            // 66k/sec through GeoIp2\Database\Reader against 154k/sec here.
+            //
+            // An address the database does not carry returns null rather than
+            // throwing, and one carrying only `registered_country` has no
+            // `country` key — GeoIp2 reports that as a null isoCode, so both
+            // agree it is unknown.
+            $record = $reader->get($ip);
+            if (! is_array($record)) {
+                continue;
+            }
+            $code = strtoupper((string) ($record['country']['iso_code'] ?? ''));
+            $name = (string) ($record['country']['names']['en'] ?? '');
+        } catch (\InvalidArgumentException) {
+            // Not an address this reader can parse; the model reader raised the
+            // same for it.
             continue;
         } catch (\Throwable $e) {
             // Unexpected mid-batch error; report once per call to avoid a flood.

@@ -65,8 +65,8 @@ class PeersGeoCountsTest extends PhoenixTestCase
         // Readable but not a .mmdb: the Reader constructor throws. The catch
         // keeps a corrupt geo database from taking down the Geography page,
         // which is a different failure from "geo is not configured".
-        if (! class_exists(\GeoIp2\Database\Reader::class)) {
-            $this->markTestSkipped('geoip2 library not installed.');
+        if (! class_exists(\MaxMind\Db\Reader::class)) {
+            $this->markTestSkipped('maxmind-db reader not installed.');
         }
 
         $path = (string) tempnam(sys_get_temp_dir(), 'phx_geo_');
@@ -85,8 +85,8 @@ class PeersGeoCountsTest extends PhoenixTestCase
         // The resolving path needs a GeoLite2 database, which MaxMind's licence
         // forbids shipping, so this skips where one is absent.
         $mmdb = __DIR__.'/../../config/GeoLite2-Country.mmdb';
-        if (! class_exists(\GeoIp2\Database\Reader::class) || ! is_readable($mmdb)) {
-            $this->markTestSkipped('geoip2 library or GeoLite2 database not available.');
+        if (! class_exists(\MaxMind\Db\Reader::class) || ! is_readable($mmdb)) {
+            $this->markTestSkipped('maxmind-db reader or GeoLite2 database not available.');
         }
 
         $settings = $this->settings(['stats_geo' => true, 'stats_geo_database' => $mmdb]);

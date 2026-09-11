@@ -80,8 +80,8 @@ final class StatsGeoLookupBatchTest extends TestCase
     {
         // Readable but not a .mmdb: the Reader constructor throws, and the
         // catch keeps a corrupt geo database from breaking the admin page.
-        if (! class_exists(\GeoIp2\Database\Reader::class)) {
-            $this->markTestSkipped('geoip2 library not installed.');
+        if (! class_exists(\MaxMind\Db\Reader::class)) {
+            $this->markTestSkipped('maxmind-db reader not installed.');
         }
 
         $settings = $this->settings([
@@ -95,8 +95,8 @@ final class StatsGeoLookupBatchTest extends TestCase
     {
         // A peer with neither an IPv4 nor an IPv6 address contributes an empty
         // string, which must not reach the reader.
-        if (! class_exists(\GeoIp2\Database\Reader::class)) {
-            $this->markTestSkipped('geoip2 library not installed.');
+        if (! class_exists(\MaxMind\Db\Reader::class)) {
+            $this->markTestSkipped('maxmind-db reader not installed.');
         }
 
         $settings = $this->settings([
@@ -109,8 +109,8 @@ final class StatsGeoLookupBatchTest extends TestCase
     public function testResolvesAddressesAndKeysTheMapByTheAddressGivenIn(): void
     {
         $mmdb = __DIR__.'/../../config/GeoLite2-Country.mmdb';
-        if (! class_exists(\GeoIp2\Database\Reader::class) || ! is_readable($mmdb)) {
-            $this->markTestSkipped('geoip2 library or GeoLite2 database not available.');
+        if (! class_exists(\MaxMind\Db\Reader::class) || ! is_readable($mmdb)) {
+            $this->markTestSkipped('maxmind-db reader or GeoLite2 database not available.');
         }
 
         $settings = $this->settings(['stats_geo_database' => $mmdb]);
