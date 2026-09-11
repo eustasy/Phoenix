@@ -9,7 +9,7 @@ set -euo pipefail
 echo '>>> Copying the working tree and installing dependencies...'
 mkdir -p /app
 tar -C /repo --exclude=./vendor --exclude=./.git --exclude=./docker -cf - . |
-    tar -C /app -xf -
+	tar -C /app -xf -
 cd /app
 composer install --no-interaction --prefer-dist
 
