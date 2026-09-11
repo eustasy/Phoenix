@@ -617,13 +617,18 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--space-4);
 }
-.ph-toplist-more { margin-top: var(--space-3); padding-top: var(--space-2); border-top: var(--border-width) solid var(--color-border); }
+/* auto rather than a fixed margin — this is what pins it to the bottom of a
+   stretched card, while still clearing the last row on a full one. */
+.ph-toplist-more { margin-top: auto; padding-top: var(--space-3); border-top: var(--border-width) solid var(--color-border); }
 .ph-toplist-more a { font-size: var(--font-size-xs); color: var(--color-text-tertiary); text-decoration: none; }
 .ph-toplist-more a:hover { color: var(--color-action); }
 .geo-co a.nm { display: block; color: inherit; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .geo-co a.nm:hover { color: var(--color-action); }
 
-.geo-toplist { background-color: var(--color-surface); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-4) var(--space-5); box-shadow: var(--shadow-sm); }
+/* A flex column so the footer link can be pushed to the bottom: cards in a grid
+   row stretch to the tallest, and a short card would otherwise leave its "more"
+   link floating wherever its rows happened to end. */
+.geo-toplist { background-color: var(--color-surface); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-4) var(--space-5); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
 .geo-toplist h3 { font-size: var(--font-size-xs); margin: 0 0 var(--space-3); text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-tertiary); font-weight: var(--font-weight-medium); }
 .geo-rowi { display: grid; grid-template-columns: 1.6em 1fr auto; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; border-top: var(--border-width) solid var(--color-border); }
 .geo-rowi:first-of-type { border-top: none; }
