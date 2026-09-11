@@ -20,6 +20,7 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
     $torrent_cards = [];
     $count_cards = [];
     $peer_cards = [];
+    $clients = [];
     if ($tables_installed) {
         // Surface the already-computed tracker stats (same aggregation the
         // ?stats scrape uses) plus the total registered-torrent count and the
@@ -65,6 +66,11 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
         // then simply does not render.
         require_once __DIR__.'/../model/peers.geo.counts.php';
         $count_cards['countries'] = peers_geo_counts($connection, $settings);
+
+        // Same aggregation as the Top Clients card, regrouped family/version
+        // for the stacked chart — no extra query.
+        require_once __DIR__.'/../model/peers.client.breakdown.php';
+        $clients = peers_client_breakdown($connection, $settings);
     }
 
     require_once __DIR__.'/../functions/auth.csrf.token.php';
@@ -82,5 +88,6 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
         $torrent_cards,
         $count_cards,
         $peer_cards,
+        $clients,
     );
 }

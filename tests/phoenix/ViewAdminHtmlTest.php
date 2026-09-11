@@ -43,6 +43,43 @@ class ViewAdminHtmlTest extends TestCase
         ];
     }
 
+    public function testClientChartLeadsTheSectionAtHalfWidth(): void
+    {
+        $clients = ['Transmission' => ['4.1.3.0' => 49, '3.0.0.0' => 33], 'qBittorrent' => ['5.2.3.0' => 52]];
+        $html = view_admin_html(
+            $this->settings(),
+            true,
+            false,
+            'tok',
+            false,
+            [],
+            [],
+            ['countries' => ['GB' => 5]],
+            [],
+            $clients,
+        );
+
+        $this->assertStringContainsString('<canvas id="clients-chart">', $html);
+        // Two-column grid, and ahead of the ranked cards.
+        $this->assertLessThan(
+            strpos($html, 'ph-toplist-grid'),
+            strpos($html, 'ph-chart-grid'),
+            'charts lead the section',
+        );
+        // Data is inlined for the chart script, like the geography map.
+        $this->assertStringContainsString('var CLIENTS =', $html);
+        $this->assertStringContainsString('"Transmission"', $html);
+    }
+
+    public function testClientChartAbsentWhenThereAreNoPeers(): void
+    {
+        // No chart, and no reason to pull the library in either.
+        $html = view_admin_html($this->settings(), true, false, 'tok', false, [], [], [], [], []);
+
+        $this->assertStringNotContainsString('clients-chart', $html);
+        $this->assertStringNotContainsString('chart.js', $html);
+    }
+
     public function testCountMapCardsAreRankedNotJustSliced(): void
     {
         // peers_geo_counts() returns whatever order it resolved addresses in,

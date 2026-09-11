@@ -29,8 +29,9 @@ declare(strict_types=1);
  * @param array<string, list<array{info_hash: string, name: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>> $torrent_cards
  * @param array<string, array<string, int>> $count_cards
  * @param array<string, list<array{address: string, peer_id: string, info_hash: string, name: string|null, bytes: int}>> $peer_cards
+ * @param array<string, array<string, int>> $clients client family => version => peers
  */
-function view_admin_html(array $settings, bool $tables_installed, bool $show_installed = false, string $csrf_token = '', array|false $stats = false, array $tasks = [], array $torrent_cards = [], array $count_cards = [], array $peer_cards = []): string
+function view_admin_html(array $settings, bool $tables_installed, bool $show_installed = false, string $csrf_token = '', array|false $stats = false, array $tasks = [], array $torrent_cards = [], array $count_cards = [], array $peer_cards = [], array $clients = []): string
 {
     require_once __DIR__.'/html.admin.layout.php';
     require_once __DIR__.'/../functions/format.bytes.php';
@@ -108,7 +109,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
     // Ranked cards, three columns each, linking into the listing they
     // summarise. A card with no rows is dropped rather than shown empty — a
     // tracker with no unhealthy swarms should not be told about it every visit.
-    if ($torrent_cards !== [] || $count_cards !== [] || $peer_cards !== []) {
+    if ($torrent_cards !== [] || $count_cards !== [] || $peer_cards !== [] || $clients !== []) {
         require_once __DIR__.'/html.toplist.php';
 
         $hash_link = static fn (string $hash): string => '?page=peers&amp;info_hash='.htmlspecialchars($hash, ENT_QUOTES, 'UTF-8');
@@ -244,14 +245,40 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             );
         }
 
+        // Charts lead the section, two to a row. The right slot is reserved for
+        // traffic over time; until that exists the client chart simply sits in
+        // the left half rather than stretching across.
+        $charts = '';
+        if ($clients !== []) {
+            $charts .= '<div class="geo-toplist ph-chart-card"><h3>Clients</h3>'.
+                '<div class="ph-chart"><canvas id="clients-chart"></canvas></div></div>';
+        }
+
+        if ($charts !== '' || $panels !== []) {
+            $body .= '<div class="ph-section-head"><h3>At a glance</h3></div>';
+        }
+        if ($charts !== '') {
+            $body .= '<div class="ph-chart-grid">'.$charts.'</div>';
+        }
         if ($panels !== []) {
-            $body .= '<div class="ph-section-head"><h3>At a glance</h3></div>'.
-                '<div class="ph-toplist-grid">'.implode('', $panels).'</div>';
+            $body .= '<div class="ph-toplist-grid">'.implode('', $panels).'</div>';
         }
     }
 
     $actions = '<a class="btn btn-secondary btn-sm" href="?page=support"><span class="ph-ico" data-lucide="stethoscope"></span>Diagnostics</a>'.
         '<a class="btn btn-primary btn-sm" href="?page=add"><span class="ph-ico" data-lucide="plus"></span>Add Torrent</a>';
 
-    return view_admin_layout_html($settings, 'Dashboard', $body, 'dashboard', $csrf_token, 'Tracker', $actions);
+    // The chart logic lives in assets/_clients.js; it is read in and emitted
+    // inline (prefixed with the PHP-computed breakdown) so the data is in
+    // scope — hence the "_" name marking it an inlined file.
+    $inline_js = '';
+    $extra_srcs = [];
+    if ($clients !== []) {
+        $extra_srcs[] = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js';
+        $inline_js = 'var CLIENTS = '.
+            (string) json_encode($clients, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
+            (string) file_get_contents(__DIR__.'/../../public/assets/_clients.js');
+    }
+
+    return view_admin_layout_html($settings, 'Dashboard', $body, 'dashboard', $csrf_token, 'Tracker', $actions, '', '', $inline_js, $extra_srcs);
 }
