@@ -10,6 +10,9 @@ declare(strict_types=1);
 // $measure is one of:
 //   'seeders'  — peers in the seeding state, by bytes uploaded
 //   'leechers' — peers still downloading, by bytes downloaded
+//   'traffic'  — every peer, by bytes uploaded, whatever its state: a leecher
+//                that is also serving belongs in a chart of who is moving the
+//                most data, which the state-filtered measures would hide
 //
 // Both figures are client-reported: a peer announces its own cumulative
 // uploaded/downloaded, so they are trustworthy enough to rank by and not
@@ -17,34 +20,41 @@ declare(strict_types=1);
 // this is "most active right now", not an all-time league table.
 //
 // Rows carry the address rather than the peer_id, because that is what the
-// listing filters on — a card row links to that peer's swarms.
+// listing filters on — a card row links to that peer's swarms. Both counters
+// come back regardless of which one ordered the rows, so a caller can show the
+// ratio (a peer pulling 400 MB while serving nothing reads differently from one
+// doing both).
 //
-// Returns a list of ['address', 'peer_id', 'info_hash', 'name', 'bytes'],
-// largest first, empty when no peer qualifies.
+// Returns a list of ['address', 'peer_id', 'info_hash', 'name', 'bytes',
+// 'uploaded', 'downloaded', 'state'], largest first, empty when none qualifies.
 
 /**
  * @param PhoenixSettings $settings
- * @return list<array{address: string, peer_id: string, info_hash: string, name: string|null, bytes: int}>
+ * @return list<array{address: string, peer_id: string, info_hash: string, name: string|null, bytes: int, uploaded: int, downloaded: int, state: int}>
  */
 function peers_top(mysqli $connection, array $settings, string $measure = 'seeders', int $limit = 5): array
 {
     $prefix = $settings['db_prefix'];
     $limit = max(1, min(50, $limit));
 
-    // Literals from a fixed map — no untrusted string reaches the query.
+    // Literals from a fixed map — no untrusted string reaches the query. A null
+    // state means "any", for the traffic ranking.
     $measures = [
         'seeders' => ['`p`.`uploaded`', '1'],
         'leechers' => ['`p`.`downloaded`', '0'],
+        'traffic' => ['`p`.`uploaded`', null],
     ];
     [$column, $state] = $measures[$measure] ?? $measures['seeders'];
 
     $result = mysqli_query(
         $connection,
-        'SELECT `p`.`peer_id`, `p`.`info_hash`, `p`.`ipv4`, `p`.`ipv6`, '.
+        'SELECT `p`.`peer_id`, `p`.`info_hash`, `p`.`ipv4`, `p`.`ipv6`, `p`.`state`, '.
+        '`p`.`uploaded`, `p`.`downloaded`, '.
         $column.' AS `bytes`, `t`.`name` '.
         'FROM `'.$prefix.'peers` `p` '.
         'LEFT JOIN `'.$prefix.'torrents` `t` ON `t`.`info_hash` = `p`.`info_hash` '.
-        'WHERE `p`.`state` = \''.$state.'\' AND '.$column.' > 0 '.
+        'WHERE '.($state === null ? '' : '`p`.`state` = \''.$state.'\' AND ').
+        $column.' > 0 '.
         'ORDER BY '.$column.' DESC '.
         'LIMIT '.$limit.';',
     );
@@ -62,6 +72,9 @@ function peers_top(mysqli $connection, array $settings, string $measure = 'seede
             'info_hash' => is_string($row['info_hash']) ? $row['info_hash'] : '',
             'name' => is_string($row['name']) ? $row['name'] : null,
             'bytes' => intval($row['bytes']),
+            'uploaded' => intval($row['uploaded']),
+            'downloaded' => intval($row['downloaded']),
+            'state' => intval($row['state']),
         ];
     }
 

@@ -9,9 +9,11 @@ declare(strict_types=1);
 // the live swarm's client-reported byte counters. Read-only. Dispatched by
 // admin_panel_controller() for page=traffic.
 //
-// ?metric selects the table's measure and ?days the chart window; both are
-// narrowed to known values here rather than trusted, and the models clamp them
-// again.
+// ?metric selects both the table's measure and which chart is drawn — the
+// ledger-derived time series for the all-time estimate, the busiest peers for
+// the live swarm, since the live counters have no history. ?days picks the
+// series window. Both are narrowed to known values here rather than trusted,
+// and the models clamp them again.
 
 /** @param PhoenixSettings $settings */
 function admin_traffic_controller(mysqli $connection, array $settings): string
@@ -35,12 +37,33 @@ function admin_traffic_controller(mysqli $connection, array $settings): string
         : '90';
 
     $series = [];
+    $swarm = [];
     $torrents = [];
     if ($tables_installed) {
-        require_once __DIR__.'/../model/stats.traffic.series.php';
         require_once __DIR__.'/../model/torrents.traffic.php';
-        $series = stats_traffic_series($connection, $settings, $windows[$window]['days'], $windows[$window]['bucket']);
         $torrents = torrents_traffic($connection, $settings, $metric);
+
+        if ($metric === 'peers') {
+            // The live counters have no history to plot — they are cumulative
+            // since each client started and vanish when a peer leaves — so the
+            // Live swarm metric gets the busiest peers instead of a time series.
+            require_once __DIR__.'/../model/peers.top.php';
+            require_once __DIR__.'/../functions/stats.client.detect.php';
+            foreach (peers_top($connection, $settings, 'traffic', 10) as $peer) {
+                $swarm[] = [
+                    'label' => $peer['address'],
+                    // Derived transiently for the tooltip, never stored, as
+                    // everywhere else the client label is shown.
+                    'client' => stats_client_detect($peer['peer_id']),
+                    'torrent' => $peer['name'],
+                    'uploaded' => $peer['uploaded'],
+                    'downloaded' => $peer['downloaded'],
+                ];
+            }
+        } else {
+            require_once __DIR__.'/../model/stats.traffic.series.php';
+            $series = stats_traffic_series($connection, $settings, $windows[$window]['days'], $windows[$window]['bucket']);
+        }
     }
 
     require_once __DIR__.'/../functions/auth.csrf.token.php';
@@ -48,5 +71,5 @@ function admin_traffic_controller(mysqli $connection, array $settings): string
 
     require_once __DIR__.'/../views/html.admin.traffic.php';
 
-    return view_admin_traffic_html($settings, $series, $torrents, $metric, $window, $windows, $csrf_token);
+    return view_admin_traffic_html($settings, $series, $torrents, $metric, $window, $windows, $csrf_token, $swarm);
 }

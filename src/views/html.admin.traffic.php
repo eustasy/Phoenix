@@ -15,8 +15,13 @@ declare(strict_types=1);
 //     peer leaves.
 // Both are labelled as what they are, rather than presented as one number.
 //
-// The chart is always the ledger-derived series — the live counters carry no
-// history to plot. Marks the Traffic nav active. Returns HTML string.
+// The chart follows the metric. All-time gets the ledger-derived time series;
+// the live swarm gets the busiest peers as paired upload/download bars, because
+// those counters are cumulative-since-client-start and vanish when a peer
+// leaves — there is no history to plot, and showing the historical chart under
+// a live metric claimed something the tracker cannot know.
+//
+// Marks the Traffic nav active. Returns HTML string.
 
 /**
  * @param PhoenixSettings $settings
@@ -25,6 +30,7 @@ declare(strict_types=1);
  * @param array<array-key, array{days: int, bucket: int, label: string}> $windows
  *        Numeric-looking keys ('30') become int keys in PHP while 'all' stays a
  *        string, hence array-key rather than string.
+ * @param list<array{label: string, client: string, torrent: string|null, uploaded: int, downloaded: int}> $swarm
  */
 function view_admin_traffic_html(
     array $settings,
@@ -34,6 +40,7 @@ function view_admin_traffic_html(
     string $window,
     array $windows,
     string $csrf_token,
+    array $swarm = [],
 ): string {
     require_once __DIR__.'/html.admin.layout.php';
     require_once __DIR__.'/html.hash.php';
@@ -70,7 +77,32 @@ function view_admin_traffic_html(
             htmlspecialchars($w['label'], ENT_QUOTES, 'UTF-8').'</a>';
     }
 
-    $body = '<div class="geo-toplist ph-chart-card">
+    if ($peers_metric) {
+        // No window buttons: there is no series to window.
+        $up = 0;
+        $down = 0;
+        foreach ($swarm as $peer) {
+            $up += $peer['uploaded'];
+            $down += $peer['downloaded'];
+        }
+
+        $body = $swarm === []
+            ? '<div class="ph-empty"><span class="ph-ico" data-lucide="share-2"></span>
+				<p>No peer is reporting any transfer.</p>
+				<p class="dim geo-empty-note">Peers report their own cumulative totals on announce; a swarm that has only just formed has nothing to show yet.</p>
+			</div>'
+            : '<div class="geo-toplist ph-chart-card">
+				<div class="ph-traffic-head">
+					<div>
+						<div class="geo-metric-label">Busiest peers</div>
+						<div class="dim geo-sub">'.format_bytes($up).' up &middot; '.format_bytes($down).' down, across the '.count($swarm).' busiest</div>
+					</div>
+				</div>
+				<div class="ph-chart ph-chart-tall"><canvas id="swarm-chart"></canvas></div>
+				<p class="dim geo-foot">Reported by the peers themselves &mdash; cumulative since each client started, reset when it restarts, and gone when the peer leaves. A snapshot of the live swarm, not a total.</p>
+			</div>';
+    } else {
+        $body = '<div class="geo-toplist ph-chart-card">
 			<div class="ph-traffic-head">
 				<div>
 					<div class="geo-metric-label">Traffic served</div>
@@ -83,11 +115,12 @@ function view_admin_traffic_html(
 			<p class="dim geo-foot">Estimated from the events ledger &mdash; each completed download counted as one full transfer, so partial and repeat downloads are not included.</p>
 		</div>';
 
-    if ($series === []) {
-        $body = '<div class="ph-empty"><span class="ph-ico" data-lucide="chart-line"></span>
-			<p>No traffic recorded for this period.</p>
-			<p class="dim geo-empty-note">The chart is derived from the events ledger: turn on <code>stats_enabled</code> and keep <code>completed</code> in <code>stats_events</code> to populate it. The per-torrent figures below do not depend on it.</p>
-		</div>';
+        if ($series === []) {
+            $body = '<div class="ph-empty"><span class="ph-ico" data-lucide="chart-line"></span>
+				<p>No traffic recorded for this period.</p>
+				<p class="dim geo-empty-note">The chart is derived from the events ledger: turn on <code>stats_enabled</code> and keep <code>completed</code> in <code>stats_events</code> to populate it. The per-torrent figures below do not depend on it.</p>
+			</div>';
+        }
     }
 
     ////	Per-torrent table
@@ -137,10 +170,16 @@ function view_admin_traffic_html(
                 : 'Traffic is size &times; completed downloads: an estimate that counts no partial or repeat downloads.').'</p>';
     }
 
-    // The chart data is inlined for assets/_traffic.js, like the geography map.
+    // Whichever chart the metric calls for, inlined with its data like the
+    // geography map. Only one is ever loaded.
     $inline_js = '';
     $extra_srcs = ['/assets/tables.js'];
-    if ($series !== []) {
+    if ($peers_metric && $swarm !== []) {
+        $extra_srcs[] = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js';
+        $inline_js = 'var SWARM = '.
+            (string) json_encode($swarm, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
+            (string) file_get_contents(__DIR__.'/../../public/assets/_swarm.js');
+    } elseif (! $peers_metric && $series !== []) {
         $extra_srcs[] = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js';
         $inline_js = 'var TRAFFIC = '.
             (string) json_encode($series, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
