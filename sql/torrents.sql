@@ -21,4 +21,4 @@ CREATE TABLE IF NOT EXISTS `phoenix_torrents` (
 	`webseeds` longtext NULL,
 	PRIMARY KEY (`info_hash`),
 	KEY `listed` (`listed`)
-) ENGINE = MyISAM DEFAULT CHARSET = latin1;
+) ENGINE = InnoDB DEFAULT CHARSET = latin1;

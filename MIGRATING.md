@@ -14,12 +14,29 @@ This guide covers a 3.x → 4.3 upgrade. For per-release detail, see
 > **Running 5.0?** 5.0 is a clean-install release. `sql/migrations/` ships empty
 > — every 3.x/4.x migration is folded into `sql/*.sql`, so `db_create()` builds
 > the finished schema in one step and there is nothing left for **Upgrade
-> Schema** to apply. To upgrade an existing 3.x or 4.x database, run this guide
-> against a **v4.3 checkout**, which still carries the migration files:
+> Schema** to apply. To upgrade an existing 3.x or 4.x database, first run this
+> guide against a **v4.3 checkout**, which still carries the migration files:
 >
 > ```bash
 > git checkout v4.3    # or download the v4.3 release
 > ```
+>
+> Then move to 5.0 and apply the engine change below. 5.0 also switches every
+> table from **MyISAM to InnoDB**; `db_create()` only creates missing tables, so
+> an existing database keeps whatever engine it has. Convert each table once:
+>
+> ```sql
+> ALTER TABLE `phoenix_events`    ENGINE=InnoDB;
+> ALTER TABLE `phoenix_peers`     ENGINE=InnoDB;
+> ALTER TABLE `phoenix_tasks`     ENGINE=InnoDB;
+> ALTER TABLE `phoenix_task_runs` ENGINE=InnoDB;
+> ALTER TABLE `phoenix_torrents`  ENGINE=InnoDB;
+> ```
+>
+> Each rebuilds the table and holds it locked for the duration, so run them
+> during a quiet window. Phoenix behaves identically on either engine; InnoDB
+> takes row locks instead of table locks, survives an unclean shutdown without a
+> `REPAIR TABLE`, and uses roughly 2–3× the disk.
 
 ## At a glance
 
@@ -180,6 +197,7 @@ New installs get the complete schema directly from `sql/*.sql` via
 
 - [ ] Runtime is PHP >= 8.2 with `mysqli` and `xml`.
 - [ ] Database upgraded — **Upgrade Schema** in the panel, or `sql/events.sql` plus the `sql/migrations/*.sql` files imported in order (3.1 or earlier: the 3.2 migration is the first of those). Run this from a v4.3 checkout; 5.0 ships no migrations.
+- [ ] (5.0 only) All five tables converted to InnoDB — see the note at the top.
 - [ ] (Optional) `torrents.listed` index added on existing installs for faster public-index reads.
 - [ ] Document root re-pointed at `public/`; `src/`, `bin/`, `config/`, `tests/` are above the web root and not reachable over HTTP.
 - [ ] Config copied to `config/phoenix.custom.php`.

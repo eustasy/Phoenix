@@ -15,4 +15,4 @@ CREATE TABLE IF NOT EXISTS `phoenix_tasks` (
 	`value` int(10) NOT NULL,
 	`source` varchar(8) NOT NULL DEFAULT '',
 	PRIMARY KEY (`name`)
-) ENGINE = MyISAM DEFAULT CHARSET = latin1;
+) ENGINE = InnoDB DEFAULT CHARSET = latin1;

@@ -28,4 +28,4 @@ CREATE TABLE IF NOT EXISTS `phoenix_events` (
 	-- and group by country and torrent. Without it those are full table scans of
 	-- a ledger that only grows; with it they are index-only.
 	KEY `geo` (`event`, `country`, `info_hash`)
-) ENGINE = MyISAM DEFAULT CHARSET = latin1;
+) ENGINE = InnoDB DEFAULT CHARSET = latin1;

@@ -18,4 +18,4 @@ CREATE TABLE IF NOT EXISTS `phoenix_task_runs` (
 	`source` varchar(8) NOT NULL DEFAULT '',
 	PRIMARY KEY (`id`),
 	KEY `name` (`name`)
-) ENGINE = MyISAM DEFAULT CHARSET = latin1;
+) ENGINE = InnoDB DEFAULT CHARSET = latin1;

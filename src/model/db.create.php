@@ -13,8 +13,9 @@ declare(strict_types=1);
 // kept in one place. Each file uses the literal default prefix `phoenix_`,
 // which is rewritten here to whatever the install's actual prefix is.
 //
-// MyISAM is chosen over InnoDB: the tracker is write-heavy and never needs
-// transactions or foreign keys.
+// Tables are InnoDB: row-level locking keeps concurrent announces from
+// serialising on a table lock, and the redo log makes an unclean shutdown
+// recoverable rather than a REPAIR TABLE.
 /** @param array{db_prefix: string} $settings */
 function db_create(mysqli $connection, array $settings, bool $debug = false): bool
 {

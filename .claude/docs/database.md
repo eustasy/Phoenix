@@ -1,7 +1,9 @@
 # Database
 
-MySQL/MariaDB via `mysqli`. Tables are MyISAM, chosen for a write-heavy workload
-with no transactions or foreign keys.
+MySQL/MariaDB via `mysqli`. Tables are InnoDB: announces are concurrent and
+write-heavy, so row-level locking matters more than MyISAM's cheap `COUNT(*)`,
+and the redo log makes an unclean shutdown recoverable. Nothing uses
+transactions or foreign keys.
 
 ## Tables
 

@@ -5,8 +5,9 @@
 --   mysql <database> < sql/peers.sql
 -- and edit the table name first if your install uses a different prefix.
 --
--- MyISAM is chosen over InnoDB because the tracker is write-heavy and never
--- needs transactions or foreign keys.
+-- InnoDB, so that concurrent announces take row locks on the peers they touch
+-- rather than serialising on a table lock, and an unclean shutdown replays from
+-- the redo log instead of needing a REPAIR TABLE.
 --
 -- `ipv4` and `ipv6` default to '' as the "no address" sentinel, matching what
 -- peer_insert writes when only the other family is present.
@@ -30,4 +31,4 @@ CREATE TABLE IF NOT EXISTS `phoenix_peers` (
 	`state` tinyint(1) unsigned NOT NULL DEFAULT '0',
 	`updated` int(10) unsigned NOT NULL,
 	PRIMARY KEY (`info_hash`, `peer_id`)
-) ENGINE = MyISAM DEFAULT CHARSET = latin1;
+) ENGINE = InnoDB DEFAULT CHARSET = latin1;
