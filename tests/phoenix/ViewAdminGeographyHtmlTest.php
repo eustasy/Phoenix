@@ -24,39 +24,71 @@ class ViewAdminGeographyHtmlTest extends TestCase
     {
         $html = view_admin_geography_html(
             $this->settings(),
-            ['downloads' => ['BR' => 157875], 'traffic' => ['BR' => 293437328142336]],
+            'traffic',
+            ['BR' => 293437328142336],
+            ['downloads', 'traffic'],
             'tok',
         );
 
-        $this->assertStringContainsString('data-metric="traffic"', $html);
+        $this->assertStringContainsString('metric=traffic', $html);
         // The script formats byte metrics as sizes; without the flag the panel
         // would read 293437328142336.
         $this->assertStringContainsString('"format":"bytes"', $html);
     }
 
-    public function testMetricCanBeDeepLinked(): void
+    public function testOnlyTheSelectedMetricIsInlined(): void
     {
-        // The Traffic page links here for the geographic cut; without this it
-        // would land on whichever metric happened to be first.
-        $metrics = ['peers' => ['GB' => 5], 'traffic' => ['BR' => 1024]];
+        // Each metric reads the whole events ledger, so the page computes one
+        // and links to the rest rather than shipping all of them for a
+        // client-side toggle.
+        $html = view_admin_geography_html(
+            $this->settings(),
+            'traffic',
+            ['BR' => 1024],
+            ['peers', 'downloads', 'traffic'],
+            'tok',
+        );
 
-        $this->assertStringContainsString(
-            'GEO_DEFAULT = "traffic"',
-            view_admin_geography_html($this->settings(), $metrics, 'tok', 'traffic'),
-        );
-        // An unknown metric falls back rather than rendering an empty map.
-        $this->assertStringContainsString(
-            'GEO_DEFAULT = "peers"',
-            view_admin_geography_html($this->settings(), $metrics, 'tok', 'nonsense'),
-        );
+        preg_match('/var GEO = (\{.*?\});\n/s', $html, $m);
+        $this->assertNotEmpty($m, 'GEO should be inlined');
+        $geo = json_decode($m[1], true);
+        $this->assertSame(['traffic'], array_keys($geo));
     }
 
-    public function testNotConfiguredStateWhenNoMetrics(): void
+    public function testEveryAvailableMetricIsOfferedAsALink(): void
     {
-        $html = view_admin_geography_html($this->settings(), [], 'tok');
+        // Links, not buttons: each metric is its own request and its own URL.
+        $html = view_admin_geography_html(
+            $this->settings(),
+            'peers',
+            ['GB' => 5],
+            ['peers', 'downloads', 'traffic'],
+            'tok',
+        );
+
+        $this->assertSame(3, substr_count($html, '<a class="seg-btn'));
+        $this->assertStringContainsString('?page=geography&amp;metric=downloads', $html);
+        $this->assertStringContainsString('seg-btn is-on', $html);
+    }
+
+    public function testUnknownMetricFallsBackToTheFirstAvailable(): void
+    {
+        $html = view_admin_geography_html(
+            $this->settings(),
+            'nonsense',
+            [],
+            ['peers', 'downloads'],
+            'tok',
+        );
+
+        $this->assertStringContainsString('GEO_DEFAULT = "peers"', $html);
+    }
+
+    public function testNotConfiguredStateWhenNothingIsAvailable(): void
+    {
+        $html = view_admin_geography_html($this->settings(), '', [], [], 'tok');
         $this->assertStringStartsWith('<!DOCTYPE html>', $html);
         $this->assertStringContainsString('<title>Phoenix Admin: Geography</title>', $html);
-        $this->assertStringContainsString('<a href="?page=geography" class="is-active" aria-current="page">', $html);
         // Guidance on how to populate it, and no map.
         $this->assertStringContainsString("isn't available yet", $html);
         $this->assertStringContainsString('stats_geo', $html);
@@ -65,46 +97,28 @@ class ViewAdminGeographyHtmlTest extends TestCase
 
     public function testRendersPeersMetric(): void
     {
-        $html = view_admin_geography_html($this->settings(), ['peers' => ['US' => 10, 'DE' => 5]], 'tok');
+        $html = view_admin_geography_html($this->settings(), 'peers', ['US' => 10, 'DE' => 5], ['peers'], 'tok');
         $this->assertStringContainsString('id="geo-map"', $html);
         $this->assertStringContainsString('jsvectormap', $html);
-        // The metric toggle and the data both render.
-        $this->assertStringContainsString('data-metric="peers"', $html);
         $this->assertStringContainsString('Active peers', $html);
         $this->assertStringContainsString('"US":10', $html);
         $this->assertStringContainsString('<a href="?page=geography" class="is-active" aria-current="page">', $html);
     }
 
-    public function testRendersBothMetricsWhenSupplied(): void
-    {
-        $html = view_admin_geography_html(
-            $this->settings(),
-            ['peers' => ['US' => 1], 'downloads' => ['DE' => 2]],
-            'tok',
-        );
-        $this->assertStringContainsString('data-metric="peers"', $html);
-        $this->assertStringContainsString('data-metric="downloads"', $html);
-        $this->assertStringContainsString('Active peers', $html);
-        $this->assertStringContainsString('Completed downloads', $html);
-        // Default metric is the first supplied.
-        $this->assertStringContainsString('GEO_DEFAULT = "peers"', $html);
-    }
-
     public function testRendersMetricWithNoDataYet(): void
     {
-        // A configured-but-empty metric (e.g. geo on, no completions geo-tagged
-        // yet) still gets its toggle and an empty-state hint, not omission.
-        $html = view_admin_geography_html($this->settings(), ['peers' => ['US' => 5], 'downloads' => []], 'tok');
-        $this->assertStringContainsString('data-metric="downloads"', $html);
-        $this->assertStringContainsString('No data for this metric yet', $html);
+        // A configured-but-empty metric (geo on, nothing geo-tagged yet) still
+        // renders its map and an empty-state hint, not omission.
+        $html = view_admin_geography_html($this->settings(), 'downloads', [], ['peers', 'downloads'], 'tok');
+        $this->assertStringContainsString('metric=downloads', $html);
+        $this->assertStringContainsString('GEO_DEFAULT = "downloads"', $html);
     }
 
     public function testDownloadsOnlyWhenPeersUnavailable(): void
     {
-        // geoip2 missing but the ledger has geo data → only the downloads metric.
-        $html = view_admin_geography_html($this->settings(), ['downloads' => ['GB' => 3]], 'tok');
-        $this->assertStringContainsString('data-metric="downloads"', $html);
-        $this->assertStringNotContainsString('data-metric="peers"', $html);
+        // geoip2 missing but the ledger has geo data → no peers segment.
+        $html = view_admin_geography_html($this->settings(), 'downloads', ['GB' => 3], ['downloads', 'traffic'], 'tok');
+        $this->assertStringNotContainsString('metric=peers', $html);
         $this->assertStringContainsString('GEO_DEFAULT = "downloads"', $html);
     }
 }

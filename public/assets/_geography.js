@@ -1,7 +1,9 @@
 /* Phoenix — Geography choropleth (admin Geography page).
  * Inlined by PHP inside a <script> tag, prefixed with `var GEO = {…}; var
- * GEO_DEFAULT = "…";` (the per-country metrics + default metric key). Renders the
- * jsVectorMap world map, the metric toggle, legend, and top-countries panel. */
+ * GEO_DEFAULT = "…";` — one metric's per-country values and its key. Each metric
+ * is a separate request (they each read the whole events ledger), so the toggle
+ * is links in the markup rather than a client-side switch, and this renders the
+ * single metric it is given. A theme change still recolours in place. */
 /* global GEO, GEO_DEFAULT, jsVectorMap, phInitIcons */
 
 var COUNTRY = {
@@ -233,11 +235,6 @@ function geoApplyFills() {
 function phGeoSet(metric) {
   if (!GEO[metric]) return
   geoMetric = metric
-  document.querySelectorAll(".seg-btn").forEach(function (b) {
-    var on = b.dataset.metric === metric
-    b.classList.toggle("is-on", on)
-    b.setAttribute("aria-selected", on ? "true" : "false")
-  })
   geoData = GEO[metric]
   geoRenderPanel(geoData)
   geoSetThemeColors()
@@ -258,11 +255,6 @@ function phGeoSet(metric) {
   geoSchedulePaint()
 }
 
-document.querySelectorAll(".seg-btn[data-metric]").forEach(function (b) {
-  b.addEventListener("click", function () {
-    phGeoSet(b.dataset.metric)
-  })
-})
 phGeoSet(GEO_DEFAULT)
 // The theme toggle flips two classes on <html>; other code may touch them too.
 // Only react when the theme actually differs from the one last painted, so an

@@ -15,6 +15,7 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
   - [Requirements](#requirements)
   - [With server access](#with-server-access)
   - [Managed LAMP / shared hosting](#managed-lamp--shared-hosting)
+- [Cron (Automating Maintenance)](#cron-automating-maintenance)
 - [Configuration](#configuration)
   - [Stat-Tracking](#stat-tracking)
     - [Geo enrichment](#geo-enrichment)
@@ -23,7 +24,6 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
   - [Recovering admin access](#recovering-admin-access)
   - [Reverse proxies & client IP address](#reverse-proxies--client-ip-address)
 - [Server Configuration](#server-configuration)
-- [Cron (Automating Maintenance)](#cron-automating-maintenance)
 - [Documentation](#documentation)
 
 ## Installation
@@ -57,6 +57,18 @@ Use this path when you use a cPanel-style host with no direct web server configu
     - Load `public/admin.php` in your browser and run **Setup**. It asks for the one-time token Phoenix writes to `config/.phoenix-setup-token` (open it in your host's file manager and paste it in), then creates the tables and writes `config/phoenix.custom.php` with your database credentials.
     - Or import the schema files manually (`sql/peers.sql`, `sql/torrents.sql`, `sql/tasks.sql`, `sql/events.sql`), copy `config/phoenix.default.php` to `config/phoenix.custom.php`, and fill in your database credentials.
 6. After setup, secure `admin.php` as described above.
+
+## Cron (Automating Maintenance)
+
+1. Edit `config/phoenix.custom.php` and set:
+    - `$settings['backup_dir']` to change the backup directory. Defaults to `backups/` in the project root.
+    - `$settings['clean_with_cron']` to `true` to enable the script and disable occasional cleanup on announce.
+2. Edit your crontab with `crontab -e`, and add entries like the following. Adjust the times and verify the paths are correct.
+
+```cron
+15 * * * * php ~/phoenix/bin/clean-and-optimize.php
+30 * * * * php ~/phoenix/bin/backup-database.php
+```
 
 ## Configuration
 
@@ -124,18 +136,6 @@ Phoenix ships with example web server configurations covering document root loca
 
 - [APACHE.md](./APACHE.md)
 - [NGINX.md](./NGINX.md)
-
-## Cron (Automating Maintenance)
-
-1. Edit `config/phoenix.custom.php` and set:
-    - `$settings['backup_dir']` to change the backup directory. Defaults to `backups/` in the project root.
-    - `$settings['clean_with_cron']` to `true` to enable the script and disable occasional cleanup on announce.
-2. Edit your crontab with `crontab -e`, and add entries like the following. Adjust the times and verify the paths are correct.
-
-```cron
-15 * * * * php ~/phoenix/bin/clean-and-optimize.php
-30 * * * * php ~/phoenix/bin/backup-database.php
-```
 
 ## Documentation
 

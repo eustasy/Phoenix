@@ -3,25 +3,30 @@
 declare(strict_types=1);
 
 ////	view_admin_geography_html
-// Render the admin Geography page: a choropleth world map (jsVectorMap) of the
-// supplied per-country metrics, with a metric toggle, stepped legend, and
-// top-countries panel. $metrics is the subset of metrics that have a usable
-// source — 'peers' (active peers by country, live) and/or 'downloads'
-// (completed downloads by country, from the events ledger) — each a
-// country-code => count map. When $metrics is empty, a "geo isn't configured"
-// state is shown instead. Marks the Geography nav active. Wrapped in the shared
-// admin layout. Returns HTML string.
+// Render the admin Geography page: a choropleth world map (jsVectorMap) of ONE
+// per-country metric, with links to the others, a stepped legend, and a
+// top-countries panel.
+//
+// $metric names the metric being shown and $values is its country-code => number
+// map; $available lists every metric the controller can offer, which is what the
+// segmented control is built from. Only the selected metric is computed, because
+// each reads the whole events ledger — a client-side toggle would mean paying
+// for maps nobody asked to see.
+//
+// An empty $available is the "geo isn't configured" state. Marks the Geography
+// nav active. Wrapped in the shared admin layout. Returns HTML string.
 //
 /**
  * @param PhoenixSettings $settings
- * @param array<string, array<string, int>> $metrics
+ * @param array<string, int> $values
+ * @param list<string> $available
  */
-function view_admin_geography_html(array $settings, array $metrics, string $csrf_token, string $metric = ''): string
+function view_admin_geography_html(array $settings, string $metric, array $values, array $available, string $csrf_token): string
 {
     require_once __DIR__.'/html.admin.layout.php';
 
     ////	Not configured / no data
-    if ($metrics === []) {
+    if ($available === [] || $metric === '') {
         $body = '<div class="ph-empty">
 			<span class="ph-ico" data-lucide="globe-2"></span>
 			<p>Geographic data isn\'t available yet.</p>
@@ -81,24 +86,26 @@ function view_admin_geography_html(array $settings, array $metrics, string $csrf
         ],
     ];
 
-    // Merge presentation + values for the included metrics, in $metrics order.
-    $geo = [];
-    foreach ($metrics as $key => $values) {
+    if (! isset($presentation[$metric])) {
+        $metric = (string) ($available[0] ?? '');
+    }
+
+    // Only the selected metric carries data; the script renders exactly this one.
+    $geo = [$metric => $presentation[$metric] + ['values' => $values]];
+    $default = $metric;
+
+    // Metric toggle (top bar). Links, not buttons: each metric is a separate
+    // request, so each is its own URL — shareable, and the back button works.
+    $toggle = '';
+    foreach ($available as $key) {
         if (! isset($presentation[$key])) {
             continue;
         }
-        $geo[$key] = $presentation[$key] + ['values' => $values];
-    }
-    // A requested metric wins, when it survived the controller's filtering.
-    $default = $metric !== '' && isset($geo[$metric])
-        ? $metric
-        : (string) array_key_first($geo);
-
-    // Metric toggle (top bar). One segment per available metric.
-    $toggle = '';
-    foreach ($geo as $key => $m) {
-        $on = $key === $default;
-        $toggle .= '<button class="seg-btn'.($on ? ' is-on' : '').'" type="button" role="tab" aria-selected="'.($on ? 'true' : 'false').'" data-metric="'.htmlspecialchars($key, ENT_QUOTES, 'UTF-8').'"><span class="ph-ico" data-lucide="'.$m['icon'].'"></span>'.htmlspecialchars($m['short']).'</button>';
+        $on = $key === $metric;
+        $toggle .= '<a class="seg-btn'.($on ? ' is-on' : '').'" role="tab" aria-selected="'.($on ? 'true' : 'false').
+            '" href="?page=geography&amp;metric='.htmlspecialchars($key, ENT_QUOTES, 'UTF-8').'">'.
+            '<span class="ph-ico" data-lucide="'.$presentation[$key]['icon'].'"></span>'.
+            htmlspecialchars($presentation[$key]['short']).'</a>';
     }
     $actions = '<div class="seg" role="tablist" aria-label="Map metric">'.$toggle.'</div>';
 
