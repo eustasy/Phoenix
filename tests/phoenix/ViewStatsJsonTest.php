@@ -76,9 +76,11 @@ class ViewStatsJsonTest extends PhoenixTestCase
         }
     }
 
-    public function testVersionIncludesPhoenixVersion()
+    public function testVersionIsTheBareVersionString()
     {
-        $this->assertStringContainsString(
+        // Exactly the version, nothing around it: the '$Id: … $,' wrapper this
+        // carried until v4.3 was a Subversion keyword plus a stray delimiter.
+        $this->assertSame(
             self::$settings['phoenix_version'],
             $this->tracker(self::ZEROES)['version'],
         );

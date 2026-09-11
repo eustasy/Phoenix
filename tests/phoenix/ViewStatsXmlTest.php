@@ -25,7 +25,11 @@ class ViewStatsXmlTest extends TestCase
         $output = view_stats_xml($stats, $settings);
 
         $this->assertStringContainsString('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', $output);
-        $this->assertStringContainsString('<tracker version="$Id: 1.0.0 $">', $output);
+        // The bare version, as /api reports it — the '$Id: … $' wrapper was a
+        // Subversion keyword this project has not been able to expand since it
+        // left SVN.
+        $this->assertStringContainsString('<tracker version="1.0.0">', $output);
+        $this->assertStringNotContainsString('$Id', $output);
         $this->assertStringContainsString('<peers>15</peers>', $output);
         $this->assertStringContainsString('<seeders>10</seeders>', $output);
         $this->assertStringContainsString('<leechers>5</leechers>', $output);

@@ -286,7 +286,7 @@ Unauthenticated.
 ```json
 {
   "tracker": {
-    "version": "$Id: v4.3beta10 $,",
+    "version": "v4.3beta10",
     "peers": 346,
     "seeders": 343,
     "leechers": 3,
@@ -298,7 +298,13 @@ Unauthenticated.
 ```
 
 The XML form puts the version on the root element:
-`<tracker version="$Id: v4.3beta10 $">`.
+`<tracker version="v4.3beta10">`.
+
+**Changed in v4.3.** `version` was previously wrapped as `$Id: v4.3beta10 $,`
+— a Subversion keyword inherited from PeerTracker, which git never expanded,
+plus a trailing comma left behind when the response stopped being assembled by
+hand. It is the bare version now, matching [`/api`](#get-api). A client that was
+stripping the wrapper should stop.
 
 ## Management API
 
