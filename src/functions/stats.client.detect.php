@@ -22,9 +22,13 @@ function stats_client_detect(string $peer_id): string
     static $azureus = [
         'AZ' => 'Azureus',
         'BC' => 'BitComet',
+        'BT' => 'BitTorrent',
         'BW' => 'BiglyBT',
         'DE' => 'Deluge',
         'FD' => 'Free Download Manager',
+        'FL' => 'FlashGet',
+        'FX' => 'Freebox BitTorrent',
+        'KT' => 'KTorrent',
         'LT' => 'libtorrent',
         'lt' => 'libTorrent',
         'PI' => 'PicoTorrent',

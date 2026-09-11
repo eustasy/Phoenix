@@ -35,15 +35,37 @@ class ViewAdminClientsHtmlTest extends TestCase
     {
         // The ledger stores the label written at the time, so a long-running
         // tracker carries both "Transmission" and "Transmission 4.1.3.0" for the
-        // same client. They are folded to family, and the page says so rather
-        // than leaving the reader to wonder where versions went.
+        // same client; the model folds them to family, so no version detail is
+        // rendered here and the count column counts downloads, not peers.
         $families = ['Transmission' => ['' => 364237], 'qBittorrent' => ['' => 357158]];
         $html = view_admin_clients_html($this->settings(), 'events', $families, 721395, 'tok');
 
         $this->assertStringContainsString('>Downloads ', $html);
         $this->assertStringNotContainsString('4.1.3.0', $html);
-        $this->assertStringContainsString('folded together', $html);
         $this->assertStringContainsString('metric=live', $html);
+    }
+
+    public function testChartHeightScalesWithTheNumberOfClients(): void
+    {
+        // A fixed height squeezes a long list until Chart.js drops labels, and
+        // the all-time view carries every client the tracker has ever seen.
+        $few = [];
+        $many = [];
+        for ($i = 0; $i < 3; $i++) {
+            $few['Client'.$i] = ['' => 10];
+        }
+        for ($i = 0; $i < 40; $i++) {
+            $many['Client'.$i] = ['' => 10];
+        }
+
+        preg_match('/ph-chart" style="height: (\d+)px/', view_admin_clients_html($this->settings(), 'events', $few, 30, 'tok'), $a);
+        preg_match('/ph-chart" style="height: (\d+)px/', view_admin_clients_html($this->settings(), 'events', $many, 400, 'tok'), $b);
+
+        $this->assertNotEmpty($a);
+        $this->assertNotEmpty($b);
+        // A short list keeps a sensible minimum; a long one grows.
+        $this->assertSame(240, (int) $a[1]);
+        $this->assertGreaterThan(1000, (int) $b[1]);
     }
 
     public function testShareIsOfTheSelectedMetricsTotal(): void

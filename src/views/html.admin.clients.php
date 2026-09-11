@@ -53,6 +53,11 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
     }
 
     ////	Chart
+    // Height scales with the number of bars. A fixed height squeezes a long
+    // list until Chart.js starts dropping labels — and the all-time view has
+    // every client the tracker has ever seen, not the dashboard's top few.
+    $chart_height = max(240, count($families) * 28 + 48);
+
     $unit = $historical ? 'completed download' : 'peer';
     $body = '<div class="geo-toplist ph-chart-card">
 			<div class="ph-traffic-head">
@@ -62,10 +67,7 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
                     ' across '.count($families).' client'.(count($families) === 1 ? '' : 's').'</div>
 				</div>
 			</div>
-			<div class="ph-chart ph-chart-tall"><canvas id="clients-chart"></canvas></div>
-			<p class="dim geo-foot">'.($historical
-                ? 'By client family only. The ledger stores the label written at the time, and a tracker that has been running a while carries both versioned and unversioned labels for the same client, so they are folded together here.'
-                : 'Detected from each peer&rsquo;s announced ID and never stored, so this reflects the swarm right now.').'</p>
+			<div class="ph-chart" style="height: '.$chart_height.'px"><canvas id="clients-chart"></canvas></div>
 		</div>';
 
     ////	Table
