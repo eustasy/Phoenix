@@ -20,8 +20,18 @@ declare(strict_types=1);
 // silently merged into something it does not belong to. The '' version — a
 // label that carried none — stays '', and charts as one solid bar.
 //
-// Groups come back ordered by total, largest first, and the versions inside
-// each likewise, so a caller can render them in order without re-sorting.
+// Groups come back ordered by VERSION, newest first, and the exact versions
+// inside each likewise, so a caller can render them in order without
+// re-sorting. Not by count: the stacked bars are a split of one family across
+// its releases, and a reader following a version across families wants it in
+// the same place each time, rather than shuffling with whichever release
+// happens to be most popular in that family today. Newest leads because the
+// chart's first slot carries the strongest shade, and "what is current" is the
+// question the chart is usually asked.
+//
+// A major that is not a version number sorts after every numbered one, and the
+// '' group — a label that carried no version at all — sorts last, so neither
+// pushes real releases out of order.
 //
 // Returns ['4' => ['total' => 61, 'versions' => ['4.1.3.0' => 49, …]], …].
 //
@@ -53,9 +63,29 @@ function stats_client_majors(array $versions): array
         $majors[$major]['versions'][$version] = ($majors[$major]['versions'][$version] ?? 0) + $count;
     }
 
-    uasort($majors, static fn (array $a, array $b): int => $b['total'] <=> $a['total']);
+    // Newest version first, with anything that is not a version number pushed
+    // behind the ones that are, and the versionless group last of all. uksort
+    // because the key IS the version; it arrives as an int for a numeric major,
+    // hence the casts. version_compare handles the dotted forms ('4.10' after
+    // '4.9', which a string sort gets backwards).
+    $by_version = static function (int|string $a, int|string $b): int {
+        $a = (string) $a;
+        $b = (string) $b;
+
+        $rank = static fn (string $v): int => match (true) {
+            $v === '' => 2,
+            preg_match('/^[0-9]/', $v) === 1 => 0,
+            default => 1,
+        };
+
+        return $rank($a) <=> $rank($b)
+            ?: version_compare($b, $a)
+            ?: strcmp($a, $b);
+    };
+
+    uksort($majors, $by_version);
     foreach ($majors as &$group) {
-        arsort($group['versions']);
+        uksort($group['versions'], $by_version);
     }
     unset($group);
 

@@ -137,4 +137,21 @@ class ViewAdminClientsHtmlTest extends TestCase
         // point release.
         $this->assertStringContainsString('"Transmission":{"4":61,"3":7}', $html);
     }
+
+    public function testChartSubBarsAreOrderedByVersionNotCount(): void
+    {
+        // 5 is the smallest group and still leads, 4 the biggest and still
+        // follows — so this fixture can only pass under version ordering.
+        $html = view_admin_clients_html(
+            $this->settings(),
+            'live',
+            ['Transmission' => ['4.1.3.0' => 49, '4.0.6' => 12, '3.0.0' => 7, '5.0.1' => 2]],
+            70,
+            'tok',
+        );
+
+        $this->assertStringContainsString('"Transmission":{"5":2,"4":61,"3":7}', $html);
+        // And the table reads the same way, so chart and table agree.
+        $this->assertMatchesRegularExpression('/>5<\/abbr>.*>4<\/abbr>.*>3<\/abbr>/s', $html);
+    }
 }

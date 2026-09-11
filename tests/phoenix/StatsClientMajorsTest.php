@@ -24,17 +24,38 @@ final class StatsClientMajorsTest extends TestCase
     {
         $majors = stats_client_majors(['4.0.6' => 12, '4.1.3.0' => 49]);
 
-        // Biggest first, so a caller can render without re-sorting.
+        // Newest first, so a caller can render without re-sorting.
         $this->assertSame(['4.1.3.0' => 49, '4.0.6' => 12], $majors['4']['versions']);
     }
 
-    public function testOrdersGroupsByTotalNotByVersion(): void
+    public function testOrdersGroupsByVersionNotByCount(): void
     {
-        // 9 sorts after 10 numerically and before it as a string; neither
-        // matters — the biggest group leads.
+        // 9 is the far bigger group and still sorts behind 10: the bars are a
+        // split of one family across its releases, so a reader following a
+        // version wants it in the same place every time.
         $majors = stats_client_majors(['10.2' => 1, '9.9' => 40]);
 
-        $this->assertSame(['9', '10'], array_map('strval', array_keys($majors)));
+        $this->assertSame(['10', '9'], array_map('strval', array_keys($majors)));
+    }
+
+    public function testComparesVersionsNumericallyNotAsStrings(): void
+    {
+        // A string sort puts 4.10 before 4.9 and 2 before 10; version_compare
+        // does not.
+        $majors = stats_client_majors(['4.9' => 1, '4.10' => 1, '4.2' => 1]);
+        $this->assertSame(['4.10', '4.9', '4.2'], array_map('strval', array_keys($majors['4']['versions'])));
+
+        $majors = stats_client_majors(['2.0' => 1, '10.0' => 1]);
+        $this->assertSame(['10', '2'], array_map('strval', array_keys($majors)));
+    }
+
+    public function testUnnumberedAndVersionlessGroupsSortLast(): void
+    {
+        // Neither is a version number, so neither should push real releases
+        // out of order.
+        $majors = stats_client_majors(['' => 8, 'versions >= 6.1.0' => 3, '2.1' => 5]);
+
+        $this->assertSame(['2', 'versions >= 6.1.0', ''], array_map('strval', array_keys($majors)));
     }
 
     public function testVersionlessLabelStaysVersionless(): void
