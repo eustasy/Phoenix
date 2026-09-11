@@ -23,5 +23,9 @@ CREATE TABLE IF NOT EXISTS `phoenix_events` (
 	`continent` char(2) NOT NULL DEFAULT '',
 	PRIMARY KEY (`id`),
 	KEY `time` (`time`),
-	KEY `info_hash` (`info_hash`)
+	KEY `info_hash` (`info_hash`),
+	-- Covers the geography aggregations, which filter on `event` and `country`
+	-- and group by country and torrent. Without it those are full table scans of
+	-- a ledger that only grows; with it they are index-only.
+	KEY `geo` (`event`, `country`, `info_hash`)
 ) ENGINE = MyISAM DEFAULT CHARSET = latin1;
