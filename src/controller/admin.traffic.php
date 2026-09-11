@@ -14,6 +14,11 @@ declare(strict_types=1);
 // the live swarm, since the live counters have no history. ?days picks the
 // series window. Both are narrowed to known values here rather than trusted,
 // and the models clamp them again.
+//
+// The table below the chart is paged, searched and sorted in SQL via ?q /
+// ?info_hash / ?sort / ?dir / ?offset, the same shape the Peers and Torrents
+// listings use. ?info_hash narrows to one torrent, so a row elsewhere can link
+// here for that torrent's traffic without a second view to keep in step.
 
 /** @param PhoenixSettings $settings */
 function admin_traffic_controller(mysqli $connection, array $settings): string
@@ -39,12 +44,39 @@ function admin_traffic_controller(mysqli $connection, array $settings): string
         ? (string) $_GET['days']
         : '90';
 
+    // All untrusted: the model binds $search and whitelists $sort/$dir.
+    $limit = max(1, intval($settings['admin_traffic_limit']));
+    $offset = max(0, (int) ($_GET['offset'] ?? 0));
+    $search = is_string($_GET['q'] ?? null) ? trim((string) $_GET['q']) : '';
+    $sort = is_string($_GET['sort'] ?? null) ? (string) $_GET['sort'] : 'traffic';
+    $dir = ($_GET['dir'] ?? '') === 'asc' ? 'asc' : 'desc';
+
+    // Validated to 40-char hex before it is bound, like every other info_hash
+    // entering the tracker.
+    $info_hash = '';
+    if (isset($_GET['info_hash']) && $_GET['info_hash'] !== '') {
+        require_once __DIR__.'/../functions/sanitize.maybe_binary_to_hex.php';
+        $raw = $_GET['info_hash'];
+        $hex = maybe_binary_to_hex(is_string($raw) ? $raw : '');
+        if ($hex === false || strlen($hex) !== 40) {
+            tracker_error('Info Hash is invalid.');
+        }
+        $info_hash = $hex;
+    }
+
     $series = [];
     $swarm = [];
     $torrents = [];
+    $total = 0;
     if ($tables_installed) {
         require_once __DIR__.'/../model/torrents.traffic.php';
-        $torrents = torrents_traffic($connection, $settings, $metric);
+        $torrents = torrents_traffic($connection, $settings, $metric, $limit, $offset, $search, $info_hash, $sort, $dir);
+
+        // The pager counts what the filter matched, not the whole table, or a
+        // filtered list would page against an unfiltered total and trail off
+        // into empty pages.
+        require_once __DIR__.'/../model/torrents.count.php';
+        $total = torrents_count($connection, $settings, $search, -1, $info_hash);
 
         if ($metric === 'peers') {
             // The live counters have no history to plot — they are cumulative
@@ -74,5 +106,5 @@ function admin_traffic_controller(mysqli $connection, array $settings): string
 
     require_once __DIR__.'/../views/html.admin.traffic.php';
 
-    return view_admin_traffic_html($settings, $series, $torrents, $metric, $window, $windows, $csrf_token, $swarm);
+    return view_admin_traffic_html($settings, $series, $torrents, $metric, $window, $windows, $csrf_token, $swarm, $total, $offset, $limit, $search, $info_hash, $sort, $dir);
 }

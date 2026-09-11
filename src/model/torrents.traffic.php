@@ -19,25 +19,62 @@ declare(strict_types=1);
 //              a peer leaves — this is a snapshot of the live swarm, not a
 //              total.
 //
-// $measure selects between them; anything else falls back to 'events'. $limit is
-// clamped and inlined. Returns rows ordered by that measure, highest first,
-// carrying both figures so the view can show the other as context.
+// $measure selects between them; anything else falls back to 'events'. It also
+// sets the default ordering, since the measure on show is the one worth ranking
+// by; $sort overrides that with a whitelist key.
+//
+// $search, $info_hash and the paging go through torrents_filter_sql(), shared
+// with torrents_count() so a filtered listing pages against a filtered total —
+// the same arrangement the Torrents listing uses, and for the same reason: a
+// row per torrent is unbounded work, and a browser-side filter would only ever
+// search the page it was given.
+//
+// $limit and $offset are clamped and inlined. Returns rows ordered by that
+// measure, highest first, carrying both figures so the view can show the other
+// as context.
 
 /**
  * @param PhoenixSettings $settings
  * @return list<array{info_hash: string, name: string|null, filename: string|null, user: string|null, size: int, downloads: int, estimated: int, uploaded: int, downloaded: int, peers: int}>
  */
-function torrents_traffic(mysqli $connection, array $settings, string $measure = 'events', int $limit = 100): array
-{
+function torrents_traffic(
+    mysqli $connection,
+    array $settings,
+    string $measure = 'events',
+    int $limit = 100,
+    int $offset = 0,
+    string $search = '',
+    string $info_hash = '',
+    string $sort = '',
+    string $dir = 'desc',
+): array {
+    require_once __DIR__.'/torrents.filter.sql.php';
+
     $prefix = $settings['db_prefix'];
     $limit = max(1, min(500, $limit));
+    $offset = max(0, $offset);
 
     $estimated = 'IFNULL(`t`.`size`, 0) * `t`.`downloads`';
     $uploaded = 'IFNULL(SUM(`p`.`uploaded`), 0)';
 
-    $order = $measure === 'peers' ? $uploaded.' DESC' : $estimated.' DESC';
+    // Whitelist: the key arrives from the query string, the value never does.
+    // 'traffic' is whichever figure the metric is showing, so the column the
+    // table leads with is always sortable under the same name.
+    $columns = [
+        'traffic' => $measure === 'peers' ? $uploaded : $estimated,
+        'name' => '`t`.`name`',
+        'filename' => '`t`.`filename`',
+        'user' => '`t`.`user`',
+        'size' => 'IFNULL(`t`.`size`, 0)',
+        'downloads' => '`t`.`downloads`',
+        'peers' => 'COUNT(`p`.`peer_id`)',
+    ];
+    $order = $columns[$sort] ?? $columns['traffic'];
+    $direction = strtolower($dir) === 'asc' ? 'ASC' : 'DESC';
 
-    $result = mysqli_query(
+    $filter = torrents_filter_sql($search, -1, $info_hash);
+
+    $result = mysqli_execute_query(
         $connection,
         'SELECT `t`.`info_hash`, `t`.`name`, `t`.`filename`, `t`.`user`, IFNULL(`t`.`size`, 0) AS `size`, `t`.`downloads`, '.
         $estimated.' AS `estimated`, '.
@@ -45,10 +82,15 @@ function torrents_traffic(mysqli $connection, array $settings, string $measure =
         'IFNULL(SUM(`p`.`downloaded`), 0) AS `downloaded`, '.
         'COUNT(`p`.`peer_id`) AS `peers` '.
         'FROM `'.$prefix.'torrents` `t` '.
-        'LEFT JOIN `'.$prefix.'peers` `p` ON `p`.`info_hash` = `t`.`info_hash` '.
+        'LEFT JOIN `'.$prefix.'peers` `p` ON `p`.`info_hash` = `t`.`info_hash`'.
+        $filter['where'].' '.
         'GROUP BY `t`.`info_hash` '.
-        'ORDER BY '.$order.' '.
-        'LIMIT '.$limit.';',
+        'ORDER BY '.$order.' '.$direction.
+        // Tie-break on the primary key so paging is stable: without it, rows
+        // sharing a sort value can reappear or vanish between pages.
+        ', `t`.`info_hash` ASC '.
+        'LIMIT '.$limit.' OFFSET '.$offset.';',
+        $filter['params'],
     );
     if (! $result instanceof mysqli_result) {
         return [];

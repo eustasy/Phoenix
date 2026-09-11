@@ -21,12 +21,14 @@ declare(strict_types=1);
 // inside the encoded list — good enough to find a path or a tracker host, and
 // far cheaper than parsing every row.
 //
-// $listed is 1 (listed), 0 (unlisted), or -1 for either.
+// $listed is 1 (listed), 0 (unlisted), or -1 for either. $info_hash narrows to
+// one torrent — the drill-down is this filter applied to the same paged
+// listing, rather than a second view that has to be kept in step with it.
 //
 // Returns ['where' => string (empty or leading " WHERE "), 'params' => list].
 
 /** @return array{where: string, params: list<string|int>} */
-function torrents_filter_sql(string $search, int $listed = -1): array
+function torrents_filter_sql(string $search, int $listed = -1, string $info_hash = ''): array
 {
     $clauses = [];
     $params = [];
@@ -48,6 +50,11 @@ function torrents_filter_sql(string $search, int $listed = -1): array
     if ($listed === 0 || $listed === 1) {
         $clauses[] = 't.`listed` = ?';
         $params[] = $listed;
+    }
+
+    if ($info_hash !== '') {
+        $clauses[] = 't.`info_hash` = ?';
+        $params[] = $info_hash;
     }
 
     return [

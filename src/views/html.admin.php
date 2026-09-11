@@ -208,7 +208,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                 'Most traffic served',
                 $rows_from($torrent_cards['traffic'], 'traffic', static fn (array $t): string => format_bytes($t['traffic'])),
                 '#bc5215',
-                ['label' => 'All torrents', 'href' => '?page=torrents&amp;sort=traffic'],
+                ['label' => 'All traffic', 'href' => '?page=traffic&amp;metric=events'],
             );
         }
         // Peers ranked by bytes moved — distinct from the torrent cards above,

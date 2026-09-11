@@ -49,6 +49,7 @@ function torrents_select_all(
     int $listed = -1,
     string $sort = 'seeders',
     string $dir = 'desc',
+    string $info_hash = '',
 ): array {
     require_once __DIR__.'/../functions/torrent.normalize.meta.php';
     require_once __DIR__.'/torrents.filter.sql.php';
@@ -73,7 +74,7 @@ function torrents_select_all(
     $order = $columns[$sort] ?? $columns['seeders'];
     $direction = strtolower($dir) === 'asc' ? 'ASC' : 'DESC';
 
-    $filter = torrents_filter_sql($search, $listed);
+    $filter = torrents_filter_sql($search, $listed, $info_hash);
     $params = $filter['params'];
 
     // $user is the API's own scoping, applied on top of whatever the listing

@@ -105,4 +105,95 @@ class ViewAdminTrafficHtmlTest extends TestCase
         $this->assertStringContainsString('alpha.iso', $html);
         $this->assertStringContainsString('alice', $html);
     }
+
+    public function testTableIsAGetFormNotAClientSideFilter(): void
+    {
+        // The listing is paged, so a browser-side filter would only ever search
+        // the rendered page.
+        $html = view_admin_traffic_html(
+            $this->settings(),
+            [['time' => 1788739200, 'completions' => 76, 'bytes' => 250263275520]],
+            $this->torrents(),
+            'events',
+            '90',
+            $this->windows(),
+            'tok',
+            [],
+            1,
+        );
+
+        $this->assertStringContainsString('<form method="GET"', $html);
+        $this->assertStringContainsString('name="q"', $html);
+        $this->assertStringNotContainsString('data-filter-table', $html);
+    }
+
+    public function testFilterMetricAndWindowSurviveInLinks(): void
+    {
+        $html = view_admin_traffic_html(
+            $this->settings(),
+            [],
+            $this->torrents(),
+            'events',
+            '30',
+            $this->windows(),
+            'tok',
+            [],
+            250,
+            100,
+            100,
+            'ubuntu',
+        );
+
+        // Sorting a search must not drop back to the whole table, nor to the
+        // other metric.
+        $this->assertStringContainsString('q=ubuntu', $html);
+        $this->assertStringContainsString('metric=events', $html);
+        $this->assertStringContainsString('days=30', $html);
+        $this->assertStringContainsString('Showing 101&ndash;101 of 250', $html);
+        $this->assertStringContainsString('>Next', $html);
+    }
+
+    public function testInfoHashNarrowsToOneTorrentAndSaysSo(): void
+    {
+        $html = view_admin_traffic_html(
+            $this->settings(),
+            [],
+            $this->torrents(),
+            'peers',
+            '90',
+            $this->windows(),
+            'tok',
+            [],
+            1,
+            0,
+            100,
+            '',
+            str_repeat('a', 40),
+        );
+
+        $this->assertStringContainsString('Traffic for <b>Alpha</b>', $html);
+        $this->assertStringContainsString('info_hash='.str_repeat('a', 40), $html);
+        $this->assertStringContainsString('Show all torrents', $html);
+    }
+
+    public function testEmptyFilteredListOffersWayBack(): void
+    {
+        $html = view_admin_traffic_html(
+            $this->settings(),
+            [],
+            [],
+            'events',
+            '90',
+            $this->windows(),
+            'tok',
+            [],
+            0,
+            0,
+            100,
+            'nothing-matches',
+        );
+
+        $this->assertStringContainsString('No torrents match this filter.', $html);
+        $this->assertStringNotContainsString('No torrents are registered.', $html);
+    }
 }

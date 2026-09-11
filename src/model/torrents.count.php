@@ -7,22 +7,22 @@ declare(strict_types=1);
 // active peers, so this gives the dashboard the true total (including idle and
 // unlisted torrents). Returns 0 when the table is empty or the query fails.
 //
-// Takes the same $search/$listed as torrents_select_all() and applies them
-// through the same torrents_filter_sql(), so a filtered listing pages against a
-// filtered total. Called with no filter (the default) it counts every torrent,
+// Takes the same $search/$listed/$info_hash as torrents_select_all() and
+// torrents_traffic() and applies them through the same torrents_filter_sql(),
+// so a filtered listing pages against a filtered total. Called with no filter (the default) it counts every torrent,
 // which is what the dashboard and the sidebar badge want.
 //
 // No peers join: the filter only reaches torrents columns, so counting is one
 // read of one table however the listing was narrowed.
 
 /** @param PhoenixSettings $settings */
-function torrents_count(mysqli $connection, array $settings, string $search = '', int $listed = -1): int
+function torrents_count(mysqli $connection, array $settings, string $search = '', int $listed = -1, string $info_hash = ''): int
 {
     require_once __DIR__.'/db.fetch.once.php';
     require_once __DIR__.'/torrents.filter.sql.php';
 
     $prefix = $settings['db_prefix'];
-    $filter = torrents_filter_sql($search, $listed);
+    $filter = torrents_filter_sql($search, $listed, $info_hash);
 
     if ($filter['where'] === '') {
         $row = db_fetch_once($connection, 'SELECT COUNT(*) AS `count` FROM `'.$prefix.'torrents`;');

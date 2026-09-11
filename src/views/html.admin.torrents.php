@@ -123,6 +123,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
 
             $edit_link = '<a class="btn btn-ghost btn-xs" href="?page=edit&amp;info_hash='.$info_hash.'">Edit</a>';
             $peers_link = '<a class="btn btn-ghost btn-xs" href="?page=peers&amp;info_hash='.$info_hash.'">Peers</a>';
+            $traffic_link = '<a class="btn btn-ghost btn-xs" href="?page=traffic&amp;info_hash='.$info_hash.'">Traffic</a>';
 
             $listed_cell = $listed === 1
                 ? '<span class="listed">Listed</span>'
@@ -151,7 +152,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
                 '<td class="table-col-numeric">'.number_format($torrent['leechers']).'</td>'.
                 '<td class="table-col-numeric">'.number_format($torrent['downloads']).'</td>'.
                 '<td>'.$listed_cell.'</td>'.
-                '<td><div class="row-actions">'.$toggle_form.$edit_link.$peers_link.$delete_form.'</div></td>'.
+                '<td><div class="row-actions">'.$toggle_form.$edit_link.$peers_link.$traffic_link.$delete_form.'</div></td>'.
                 '</tr>';
         }
 
