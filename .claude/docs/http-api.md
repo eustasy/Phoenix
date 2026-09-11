@@ -5,6 +5,10 @@ Every entry point lives in `public/` and is thin (see
 the management API in detail; announce/scrape/index are summarized in
 architecture.
 
+The user-facing endpoint reference — parameters, response shapes, error strings
+— is [API.md](../../API.md) at the repo root. Keep the two in step: this doc
+explains how the surfaces are built, that one documents what they return.
+
 ## Admin panel (`public/admin.php`)
 
 Two modes, chosen by whether `config/phoenix.custom.php` exists:

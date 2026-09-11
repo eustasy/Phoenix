@@ -161,6 +161,7 @@ Phoenix ships with example web server configurations covering document root loca
 
 ## Documentation
 
+- [API.md](./API.md) — every HTTP endpoint: announce, scrape, the public index, and the management API.
 - [MIGRATING.md](./MIGRATING.md) — upgrading from 3.x to 4.0.
 - [APACHE.md](./APACHE.md) — web server configuration for Apache 2.4.
 - [NGINX.md](./NGINX.md) — web server configuration for Nginx.

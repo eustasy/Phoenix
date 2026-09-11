@@ -94,6 +94,7 @@ paths.
 - [testing.md](docs/testing.md) — `tests/`, `phpunit*.xml.dist`, `.qlty/`,
   `.github/workflows/`. PHPUnit setup, smoke suite, CI workflows, qlty.
 
-Repo-level docs: `README.md` (install/config), `CONTRIBUTING.md` (dev env, Docker),
-`MIGRATING.md` (3.x→4.0), `APACHE.md`/`NGINX.md` (server config), `BEPs.md` (spec
-coverage), `CHANGELOG.md`.
+Repo-level docs: `README.md` (install/config), `API.md` (every HTTP endpoint,
+request and response), `CONTRIBUTING.md` (dev env, Docker), `MIGRATING.md`
+(3.x→4.0), `APACHE.md`/`NGINX.md` (server config), `BEPs.md` (spec coverage),
+`CHANGELOG.md`.
