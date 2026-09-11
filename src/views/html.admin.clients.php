@@ -50,7 +50,7 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
                 : 'No peer is currently announcing to this tracker.').'</p>
 		</div>';
 
-        return view_admin_layout_html($settings, 'Clients', $body, 'clients', $csrf_token, 'Tracker', $actions, 'wide');
+        return view_admin_layout_html($settings, 'Clients', $body, 'clients', $csrf_token, 'Tracker', $actions);
     }
 
     ////	Chart
@@ -156,5 +156,5 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
         cdn_assets()['chart']['url'],
     ];
 
-    return view_admin_layout_html($settings, 'Clients', $body, 'clients', $csrf_token, 'Tracker', $actions, 'wide', '', $inline_js, $extra_srcs);
+    return view_admin_layout_html($settings, 'Clients', $body, 'clients', $csrf_token, 'Tracker', $actions, '', '', $inline_js, $extra_srcs);
 }
