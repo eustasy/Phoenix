@@ -49,7 +49,9 @@ class ViewAdminTorrentsHtmlTest extends TestCase
         $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok');
 
         $this->assertStringContainsString('ph-card-table', $html);
-        $this->assertStringContainsString('>Name ', $html);
+        // Headers are sort links now, not client-side sort handles.
+        $this->assertStringContainsString('ph-sort-link', $html);
+        $this->assertStringContainsString('>Name', $html);
         $this->assertStringContainsString('Test Torrent', $html);
         // The hash cell carries the full info hash for click-to-copy.
         $this->assertStringContainsString('data-copy="'.str_repeat('a', 40).'"', $html);
@@ -146,5 +148,74 @@ class ViewAdminTorrentsHtmlTest extends TestCase
     {
         $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok', []);
         $this->assertStringNotContainsString('Unregistered swarms', $html);
+    }
+
+    public function testSearchAndFilterAreAGetForm(): void
+    {
+        // Server-side, because the listing is paged: a browser-side filter would
+        // only ever search the rendered page.
+        $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok', [], 1);
+
+        $this->assertStringContainsString('<form method="GET"', $html);
+        $this->assertStringContainsString('name="q"', $html);
+        $this->assertStringContainsString('name="listed"', $html);
+        $this->assertStringNotContainsString('data-filter-table', $html);
+    }
+
+    public function testFilterStateSurvivesInLinks(): void
+    {
+        $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok', [], 1, 0, 100, 'ubuntu', 1);
+
+        // The search box keeps its term, and the sort headers carry it forward
+        // rather than dropping back to the whole table.
+        $this->assertStringContainsString('value="ubuntu"', $html);
+        $this->assertStringContainsString('q=ubuntu', $html);
+        $this->assertStringContainsString('listed=1', $html);
+        $this->assertStringContainsString('>Clear</a>', $html);
+    }
+
+    public function testPagerAppearsOnlyWhenThereIsAnotherPage(): void
+    {
+        $one = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok', [], 1);
+        $this->assertStringNotContainsString('>Next', $one);
+        $this->assertStringContainsString('Showing 1&ndash;1 of 1', $one);
+
+        $paged = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok', [], 250, 0, 1);
+        $this->assertStringContainsString('offset=1', $paged);
+        $this->assertStringContainsString('Showing 1&ndash;1 of 250', $paged);
+    }
+
+    public function testSecondPageOffersPrevious(): void
+    {
+        $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok', [], 250, 100, 100);
+
+        $this->assertStringContainsString('Showing 101&ndash;101 of 250', $html);
+        $this->assertStringContainsString('offset=0', $html);
+    }
+
+    public function testActiveSortColumnIsMarked(): void
+    {
+        $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok', [], 1, 0, 100, '', -1, 'size', 'asc');
+
+        $this->assertStringContainsString('ph-sort-link is-on', $html);
+        // Clicking the active column flips it back.
+        $this->assertStringContainsString('dir=desc', $html);
+    }
+
+    public function testEmptyFilteredListOffersWayBack(): void
+    {
+        // An empty page under a filter is a different fact from an empty
+        // tracker, and must not read as "no torrents are registered".
+        $html = view_admin_torrents_html($this->settings(), [], false, 'tok', [], 0, 0, 100, 'nothing-matches');
+
+        $this->assertStringContainsString('No torrents match this filter.', $html);
+        $this->assertStringNotContainsString('No torrents are registered.', $html);
+        $this->assertStringContainsString('href="?page=torrents"', $html);
+    }
+
+    public function testHeaderCountIsTheFilterTotalNotThePage(): void
+    {
+        $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok', [], 4096);
+        $this->assertStringContainsString('<b>4,096</b> torrents', $html);
     }
 }

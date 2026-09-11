@@ -151,6 +151,8 @@ $settings['admin_login_delay_max'] = 8;
 $settings['admin_totp_secret'] = '';
 /* rows per page on the admin Peers (swarm-wide) listing */
 $settings['admin_peers_limit'] = 200;
+/* rows per page on the admin Torrents listing */
+$settings['admin_torrents_limit'] = 100;
 
 ////	API Options
 /* API keys permitted to use the management API under public/api/, as */
