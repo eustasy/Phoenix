@@ -261,7 +261,9 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             // needs no argument to find it.
             $charts .= '<div class="geo-toplist ph-chart-card"><h3>Traffic &mdash; last 30 days</h3>'.
                 '<div class="ph-chart"><canvas id="traffic-chart"></canvas></div>'.
-                '<div class="ph-toplist-more"><a href="?page=traffic">'.format_bytes($bytes).' served &middot; all traffic</a></div>'.
+                // Carries the metric: this card is the ledger-derived series,
+                // and the Traffic page now opens on the live swarm.
+                '<div class="ph-toplist-more"><a href="?page=traffic&amp;metric=events">'.format_bytes($bytes).' served &middot; all traffic</a></div>'.
                 '</div>';
         }
 

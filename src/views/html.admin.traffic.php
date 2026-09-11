@@ -52,8 +52,8 @@ function view_admin_traffic_html(
     // uses for its map metric.
     $toggle = '';
     foreach ([
-        'events' => ['clock-fading', 'All time'],
         'peers' => ['share-2', 'Live swarm'],
+        'events' => ['clock-fading', 'All time'],
     ] as $key => [$icon, $label]) {
         $on = $metric === $key;
         $toggle .= '<a class="seg-btn'.($on ? ' is-on' : '').'" role="tab" aria-selected="'.($on ? 'true' : 'false').'"'.

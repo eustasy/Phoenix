@@ -21,7 +21,10 @@ function admin_traffic_controller(mysqli $connection, array $settings): string
     require_once __DIR__.'/../model/db.tables.installed.php';
     $tables_installed = db_tables_installed($connection, $settings);
 
-    $metric = ($_GET['metric'] ?? '') === 'peers' ? 'peers' : 'events';
+    // Live swarm by default, matching the Clients page: what the tracker is
+    // doing now is the more common question, and it is also the cheaper one —
+    // the all-time view scans the whole events ledger.
+    $metric = ($_GET['metric'] ?? '') === 'events' ? 'events' : 'peers';
 
     // Windows the chart can show. Daily buckets for the shorter ones; the
     // all-time view buckets monthly, or a long-lived ledger would draw
