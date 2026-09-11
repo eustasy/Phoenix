@@ -27,6 +27,49 @@ class DbCreateTest extends PhoenixTestCase
         }
     }
 
+    public function testSchemaIsCompleteWithoutMigrations(): void
+    {
+        // 5.0 folds every 3.x/4.x migration into sql/*.sql, so db_create alone
+        // must produce the finished schema. These are the columns those
+        // migrations used to add — if one goes missing from a schema file, a
+        // fresh install silently loses it and there is no migration left to
+        // repair it.
+        $this->assertTrue(db_create(self::$connection, self::$settings));
+
+        $expected = [
+            'torrents' => ['user', 'filename', 'files', 'trackers', 'webseeds'],
+            'peers' => ['uploaded', 'downloaded', 'left'],
+        ];
+        foreach ($expected as $table => $columns) {
+            $result = mysqli_query(
+                self::$connection,
+                'SELECT COLUMN_NAME FROM `information_schema`.`COLUMNS` '.
+                'WHERE TABLE_SCHEMA = \''.self::$settings['db_name'].'\' '.
+                'AND TABLE_NAME = \''.self::$settings['db_prefix'].$table.'\' '.
+                'AND COLUMN_NAME IN (\''.implode('\', \'', $columns).'\');',
+            );
+            $this->assertNotFalse($result);
+            $this->assertSame(count($columns), mysqli_num_rows($result), $table);
+        }
+    }
+
+    public function testPeerLeftColumnIsSigned(): void
+    {
+        // `left` must be SIGNED so the -1 "bytes remaining unknown" sentinel
+        // from an announce without `left` can be stored.
+        $result = mysqli_query(
+            self::$connection,
+            'SELECT `COLUMN_TYPE` FROM `information_schema`.`COLUMNS` '.
+            'WHERE TABLE_SCHEMA = \''.self::$settings['db_name'].'\' '.
+            'AND TABLE_NAME = \''.self::$settings['db_prefix'].'peers\' '.
+            'AND COLUMN_NAME = \'left\';',
+        );
+        $this->assertNotFalse($result);
+        $row = mysqli_fetch_assoc($result);
+        $this->assertNotNull($row);
+        $this->assertStringNotContainsStringIgnoringCase('unsigned', (string) $row['COLUMN_TYPE']);
+    }
+
     public function testIsIdempotent(): void
     {
         // IF NOT EXISTS means a second call must be a no-op, not an error.

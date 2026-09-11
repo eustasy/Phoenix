@@ -14,8 +14,8 @@ class AdminMigrateActionTest extends PhoenixTestCase
 
     public function testReturnsSuccessMessageOnMigrateSuccess(): void
     {
-        // The test DB already has the current schema, so all ADD COLUMN IF NOT
-        // EXISTS statements are no-ops — db_migrate still returns true.
+        // 5.0 ships no migration files, so db_migrate has nothing to apply
+        // and still returns true — the success branch.
         $result = admin_migrate_action(self::$connection, self::$settings, self::$time);
         $this->assertSame('Your schema has been upgraded.', $result);
     }

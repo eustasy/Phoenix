@@ -31,8 +31,14 @@ default prefix `phoenix_`. The actual prefix is `$settings['db_prefix']`.
   `--` line comments, splits on `;`, and executes each statement (mysqli runs
   only the first statement of a multi-statement string). Migration files use the
   literal `phoenix_` prefix, rewritten at run time.
+- **`sql/migrations/` is empty as of 5.0.** Every 3.x/4.x migration is folded
+  into `sql/*.sql`, so `db_create()` produces the finished schema in one step.
+  `db_migrate()` still runs — it globs, finds nothing, and returns true — so the
+  Utilities → Migrate action and the 5.x upgrade path stay intact.
+  `DbCreateTest::testSchemaIsCompleteWithoutMigrations` guards the fold: with no
+  migrations left, a column dropped from a schema file has nothing to repair it.
 - New migration: add `sql/migrations/<date>_<slug>.sql`, idempotent, default
-  prefix.
+  prefix. See `sql/migrations/README.md`.
 
 ## SQL injection defense
 

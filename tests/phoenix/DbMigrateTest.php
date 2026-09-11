@@ -14,52 +14,17 @@ class DbMigrateTest extends PhoenixTestCase
 
     public function testRunsMigrationsSuccessfully(): void
     {
-        // The test DB was created by bootstrap with the current schema, so
-        // every ADD COLUMN IF NOT EXISTS is a no-op — but db_migrate must
-        // still return true.
+        // With no migration files shipped there is nothing to apply, but
+        // db_migrate must still report success.
         $this->assertTrue(db_migrate(self::$connection, self::$settings));
     }
 
     public function testIsIdempotent(): void
     {
-        // Running db_migrate twice must both return true; idempotent statements
-        // (ADD COLUMN IF NOT EXISTS) never produce errors on repeat runs.
+        // db_migrate keeps no bookkeeping and re-runs every file every time,
+        // so repeated calls must behave identically.
         $this->assertTrue(db_migrate(self::$connection, self::$settings));
         $this->assertTrue(db_migrate(self::$connection, self::$settings));
-    }
-
-    public function testMetaColumnsExistAfterMigration(): void
-    {
-        // After running migrations the torrent meta columns introduced in the
-        // 4.1 migration must be present in the TESTING_-prefixed table.
-        db_migrate(self::$connection, self::$settings);
-
-        $result = mysqli_query(
-            self::$connection,
-            'SELECT COLUMN_NAME FROM `information_schema`.`COLUMNS` '.
-            'WHERE TABLE_SCHEMA = \''.self::$settings['db_name'].'\' '.
-            'AND TABLE_NAME = \''.self::$settings['db_prefix'].'torrents\''.
-            ' AND COLUMN_NAME IN (\'user\', \'filename\', \'files\', \'trackers\', \'webseeds\');',
-        );
-        $this->assertNotFalse($result);
-        $this->assertSame(5, mysqli_num_rows($result));
-    }
-
-    public function testPeerColumnsExistAfterMigration(): void
-    {
-        // After running migrations the peer columns introduced in the 3.2
-        // migration must be present in the TESTING_-prefixed table.
-        db_migrate(self::$connection, self::$settings);
-
-        $result = mysqli_query(
-            self::$connection,
-            'SELECT COLUMN_NAME FROM `information_schema`.`COLUMNS` '.
-            'WHERE TABLE_SCHEMA = \''.self::$settings['db_name'].'\' '.
-            'AND TABLE_NAME = \''.self::$settings['db_prefix'].'peers\''.
-            ' AND COLUMN_NAME IN (\'uploaded\', \'downloaded\');',
-        );
-        $this->assertNotFalse($result);
-        $this->assertSame(2, mysqli_num_rows($result));
     }
 
     public function testDebugPrintsSuccessMessage(): void
@@ -72,30 +37,47 @@ class DbMigrateTest extends PhoenixTestCase
         $this->assertStringContainsString('Database Migration successful.', $output);
     }
 
-    public function testReturnsTrueWhenNoMigrationFilesExist(): void
+    public function testShippedMigrationsDirectoryIsEmpty(): void
     {
-        // glob() returns an empty array (not false) when the directory exists
-        // but has no matching files. With no files to run there are no failures,
-        // so db_migrate should return true. Use a non-existent prefix for the
-        // glob pattern by pointing to a temp directory that has no .sql files.
-        $tmpDir = sys_get_temp_dir().'/phoenix_migrate_test_empty_'.mt_rand();
-        mkdir($tmpDir);
+        // 5.0 is a clean-install release: every 3.x/4.x migration is folded
+        // into sql/*.sql, so db_create alone produces the finished schema and
+        // db_migrate has nothing to apply. It must still report success.
+        $this->assertSame([], glob(__DIR__.'/../../sql/migrations/*.sql'));
+        $this->assertTrue(db_migrate(self::$connection, self::$settings));
+    }
 
-        // Temporarily symlink so db_migrate finds our empty directory.
+    public function testRunsAFileAndRewritesTheDefaultPrefix(): void
+    {
+        // Files use the literal `phoenix_` prefix, which db_migrate rewrites to
+        // the install's own before executing — here the TESTING_ one.
         $migrationsDir = __DIR__.'/../../sql/migrations';
-        $backup = $migrationsDir.'_dbmigrate_empty_test_bak';
-        $this->assertTrue(rename($migrationsDir, $backup));
-        mkdir($migrationsDir);
+        $tmpFile = $migrationsDir.'/9999-99-99-test-prefix.sql';
+        file_put_contents(
+            $tmpFile,
+            '-- A comment; with a semicolon in it.'.PHP_EOL.
+            'ALTER TABLE `phoenix_peers` ADD COLUMN IF NOT EXISTS `migrate_probe` int;',
+        );
 
         try {
-            $ok = db_migrate(self::$connection, self::$settings);
-        } finally {
-            rmdir($migrationsDir);
-            rename($backup, $migrationsDir);
-            rmdir($tmpDir);
-        }
+            $this->assertTrue(db_migrate(self::$connection, self::$settings));
 
-        $this->assertTrue($ok);
+            $result = mysqli_query(
+                self::$connection,
+                'SELECT COLUMN_NAME FROM `information_schema`.`COLUMNS` '.
+                'WHERE TABLE_SCHEMA = \''.self::$settings['db_name'].'\' '.
+                'AND TABLE_NAME = \''.self::$settings['db_prefix'].'peers\' '.
+                'AND COLUMN_NAME = \'migrate_probe\';',
+            );
+            $this->assertNotFalse($result);
+            $this->assertSame(1, mysqli_num_rows($result));
+        } finally {
+            unlink($tmpFile);
+            mysqli_query(
+                self::$connection,
+                'ALTER TABLE `'.self::$settings['db_prefix'].'peers` '.
+                'DROP COLUMN IF EXISTS `migrate_probe`;',
+            );
+        }
     }
 
     public function testReturnsFalseWhenStatementFails(): void
@@ -120,31 +102,5 @@ class DbMigrateTest extends PhoenixTestCase
         $this->assertFalse($ok);
         $this->assertStringContainsString('Error #', $output);
         $this->assertStringContainsString('Database Migration failed.', $output);
-    }
-
-    public function testPeerLeftColumnIsSignedAfterMigration(): void
-    {
-        // Force the pre-migration state (unsigned `left`), then confirm the
-        // migration widens it back to signed so the -1 "bytes remaining
-        // unknown" sentinel from an announce without `left` can be stored.
-        mysqli_query(
-            self::$connection,
-            'ALTER TABLE `'.self::$settings['db_prefix'].'peers` '.
-            'MODIFY `left` bigint(20) unsigned NOT NULL DEFAULT \'0\';',
-        );
-
-        $this->assertTrue(db_migrate(self::$connection, self::$settings));
-
-        $result = mysqli_query(
-            self::$connection,
-            'SELECT `COLUMN_TYPE` FROM `information_schema`.`COLUMNS` '.
-            'WHERE TABLE_SCHEMA = \''.self::$settings['db_name'].'\' '.
-            'AND TABLE_NAME = \''.self::$settings['db_prefix'].'peers\' '.
-            'AND COLUMN_NAME = \'left\';',
-        );
-        $this->assertNotFalse($result);
-        $row = mysqli_fetch_assoc($result);
-        $this->assertNotNull($row);
-        $this->assertStringNotContainsStringIgnoringCase('unsigned', (string) $row['COLUMN_TYPE']);
     }
 }

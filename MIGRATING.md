@@ -11,6 +11,16 @@ a few idempotent migrations.
 This guide covers a 3.x → 4.3 upgrade. For per-release detail, see
 [CHANGELOG.md](CHANGELOG.md).
 
+> **Running 5.0?** 5.0 is a clean-install release. `sql/migrations/` ships empty
+> — every 3.x/4.x migration is folded into `sql/*.sql`, so `db_create()` builds
+> the finished schema in one step and there is nothing left for **Upgrade
+> Schema** to apply. To upgrade an existing 3.x or 4.x database, run this guide
+> against a **v4.3 checkout**, which still carries the migration files:
+>
+> ```bash
+> git checkout v4.3    # or download the v4.3 release
+> ```
+
 ## At a glance
 
 | What | 3.x | 4.3 |
@@ -136,12 +146,13 @@ or `CREATE TABLE IF NOT EXISTS`, so re-running is safe).
 **Via the admin panel (recommended):** navigate to `public/admin.php`, log in,
 and click **Upgrade Schema**. It creates any new tables and runs every migration
 in filename order — covering all of 4.1 and 4.3 in one click — and reports
-success or failure.
+success or failure. (In 5.0 this action still runs, but finds nothing to apply:
+see the note at the top of this guide.)
 
-**Manually:** import the new-table file and then the migrations in order. If your
-install uses a prefix other than the default `phoenix_`, edit the table names in
-each file before importing (or just use the panel, which rewrites the prefix for
-you):
+**Manually:** import the new-table file and then the migrations in order, from a
+**v4.3 checkout** — 5.0 no longer ships `sql/migrations/`. If your install uses a
+prefix other than the default `phoenix_`, edit the table names in each file
+before importing (or just use the panel, which rewrites the prefix for you):
 
 ```bash
 # 4.1's events table has no migration — create it from its schema file.
@@ -162,13 +173,13 @@ install you can add it once — optional, but it speeds the public index:
 ALTER TABLE `phoenix_torrents` ADD INDEX `listed` (`listed`);
 ```
 
-New installs created with 4.3 get the complete schema directly from `sql/*.sql`
-via `db_create()` and need no migrations.
+New installs get the complete schema directly from `sql/*.sql` via
+`db_create()` and need no migrations — in 4.3, and by construction in 5.0.
 
 ## Checklist
 
 - [ ] Runtime is PHP >= 8.2 with `mysqli` and `xml`.
-- [ ] Database upgraded — **Upgrade Schema** in the panel, or `sql/events.sql` plus the `sql/migrations/*.sql` files imported in order (3.1 or earlier: the 3.2 migration is the first of those).
+- [ ] Database upgraded — **Upgrade Schema** in the panel, or `sql/events.sql` plus the `sql/migrations/*.sql` files imported in order (3.1 or earlier: the 3.2 migration is the first of those). Run this from a v4.3 checkout; 5.0 ships no migrations.
 - [ ] (Optional) `torrents.listed` index added on existing installs for faster public-index reads.
 - [ ] Document root re-pointed at `public/`; `src/`, `bin/`, `config/`, `tests/` are above the web root and not reachable over HTTP.
 - [ ] Config copied to `config/phoenix.custom.php`.

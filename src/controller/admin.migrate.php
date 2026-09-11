@@ -5,7 +5,9 @@ declare(strict_types=1);
 ////	admin_migrate_action
 //  Handles schema upgrade migration action: creates any tables added since
 //  the install (db_create is CREATE TABLE IF NOT EXISTS, so existing tables
-//  are untouched), then applies the sql/migrations/ files.
+//  are untouched), then applies the sql/migrations/ files. As of 5.0 that
+//  directory ships empty — db_create alone produces the finished schema — so
+//  this is a no-op that reports success until the first 5.x migration lands.
 //  Returns message string on completion.
 
 /** @param PhoenixSettings $settings */

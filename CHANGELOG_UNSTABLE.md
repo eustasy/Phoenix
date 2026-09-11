@@ -1,5 +1,9 @@
 # Phoenix Changelog (Unstable Releases)
 
+## Unreleased (5.0)
+
+- CHANGES: Drop every 3.x/4.x migration from `sql/migrations/`. Each one's schema change is already in `sql/*.sql`, so `db_create()` produces the finished schema in one step and the migrations only re-applied no-ops on every run. `db_migrate()`, the **Upgrade Schema** action, and the `sql/migrations/` directory all remain for the first 5.x schema change; with no files present they report success and do nothing. Operators still upgrading from 3.x or 4.x should run [MIGRATING.md](MIGRATING.md) against a **v4.3 checkout**, which still carries the files.
+
 ## v4.3beta10 - 10/09/2026
 
 An interface release. The admin Torrents and Peers tables and the public index all gain searchable meta, sensible default sorting and layouts that stop fighting their own column widths; the Geography map now draws its data on load rather than after a toggle; and byte counts render as sizes instead of raw digits. Magnet links carry more of what the tracker already knows. The tracker protocol and database schema are unchanged — **no DB migration is required.**
