@@ -43,6 +43,69 @@ class ViewAdminHtmlTest extends TestCase
         ];
     }
 
+    public function testCountMapCardsAreRankedNotJustSliced(): void
+    {
+        // peers_geo_counts() returns whatever order it resolved addresses in,
+        // so slicing without sorting showed five arbitrary countries.
+        $html = view_admin_html(
+            $this->settings(),
+            true,
+            false,
+            'tok',
+            false,
+            [],
+            [],
+            ['countries' => ['AF' => 3, 'GB' => 120, 'US' => 75, 'BR' => 90, 'DE' => 12, 'FR' => 1]],
+        );
+
+        preg_match_all('#<span class="nm">([A-Z]{2})</span>#', $html, $m);
+        $this->assertSame(['GB', 'BR', 'US', 'DE', 'AF'], $m[1]);
+    }
+
+    public function testCountMapRowsDoNotEachLinkToTheSamePage(): void
+    {
+        // Every row pointing at the same destination is noise; the card's
+        // footer link covers it once.
+        $html = view_admin_html(
+            $this->settings(),
+            true,
+            false,
+            'tok',
+            false,
+            [],
+            [],
+            ['countries' => ['GB' => 5]],
+        );
+
+        $this->assertStringNotContainsString('<a class="nm"', $html);
+        $this->assertStringContainsString('ph-toplist-more', $html);
+    }
+
+    public function testTopSeedersAndLeechersRankPeersNotTorrents(): void
+    {
+        $peers = [[
+            'address' => '81.78.207.83', 'peer_id' => 'x', 'info_hash' => str_repeat('a', 40),
+            'name' => 'A', 'bytes' => 1610612736,
+        ]];
+        $html = view_admin_html(
+            $this->settings(),
+            true,
+            false,
+            'tok',
+            false,
+            [],
+            [],
+            [],
+            ['seeders' => $peers, 'leechers' => $peers],
+        );
+
+        $this->assertStringContainsString('>Top seeders<', $html);
+        $this->assertStringContainsString('>Top leechers<', $html);
+        // A row links to every swarm that peer is in.
+        $this->assertStringContainsString('?page=peers&amp;q=81.78.207.83', $html);
+        $this->assertStringContainsString('1.5 GB', $html);
+    }
+
     public function testMiniTableCardsLinkIntoTheListingTheySummarise(): void
     {
         $html = view_admin_html(

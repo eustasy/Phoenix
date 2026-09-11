@@ -19,6 +19,7 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
     $tasks = [];
     $torrent_cards = [];
     $count_cards = [];
+    $peer_cards = [];
     if ($tables_installed) {
         // Surface the already-computed tracker stats (same aggregation the
         // ?stats scrape uses) plus the total registered-torrent count and the
@@ -51,6 +52,14 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
         ];
         $count_cards = ['clients' => peers_client_counts($connection, $settings)];
 
+        // Peers ranked by bytes moved — the peer-side counterpart to the
+        // torrent cards, which rank torrents by how many peers they have.
+        require_once __DIR__.'/../model/peers.top.php';
+        $peer_cards = [
+            'seeders' => peers_top($connection, $settings, 'seeders'),
+            'leechers' => peers_top($connection, $settings, 'leechers'),
+        ];
+
         // Countries reuse the Geography page's aggregation rather than a second
         // copy of it; it returns [] when geo is not configured, and the card
         // then simply does not render.
@@ -72,5 +81,6 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
         $tasks,
         $torrent_cards,
         $count_cards,
+        $peer_cards,
     );
 }

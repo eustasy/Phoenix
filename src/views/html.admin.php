@@ -28,8 +28,9 @@ declare(strict_types=1);
  * @param array<string, array{value: int, source: string}> $tasks
  * @param array<string, list<array{info_hash: string, name: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>> $torrent_cards
  * @param array<string, array<string, int>> $count_cards
+ * @param array<string, list<array{address: string, peer_id: string, info_hash: string, name: string|null, bytes: int}>> $peer_cards
  */
-function view_admin_html(array $settings, bool $tables_installed, bool $show_installed = false, string $csrf_token = '', array|false $stats = false, array $tasks = [], array $torrent_cards = [], array $count_cards = []): string
+function view_admin_html(array $settings, bool $tables_installed, bool $show_installed = false, string $csrf_token = '', array|false $stats = false, array $tasks = [], array $torrent_cards = [], array $count_cards = [], array $peer_cards = []): string
 {
     require_once __DIR__.'/html.admin.layout.php';
     require_once __DIR__.'/../functions/format.bytes.php';
@@ -107,7 +108,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
     // Ranked cards, three columns each, linking into the listing they
     // summarise. A card with no rows is dropped rather than shown empty — a
     // tracker with no unhealthy swarms should not be told about it every visit.
-    if ($torrent_cards !== [] || $count_cards !== []) {
+    if ($torrent_cards !== [] || $count_cards !== [] || $peer_cards !== []) {
         require_once __DIR__.'/html.toplist.php';
 
         $hash_link = static fn (string $hash): string => '?page=peers&amp;info_hash='.htmlspecialchars($hash, ENT_QUOTES, 'UTF-8');
@@ -136,7 +137,11 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
         };
 
         // A label => count map (clients, countries) as ranked rows, top 5.
-        $rank_rows = static function (array $counts, ?string $href): array {
+        // Sorted here rather than trusted from the caller: peers_geo_counts()
+        // returns whatever order it resolved addresses in, so slicing an
+        // unsorted map would show five arbitrary countries, not the top five.
+        $rank_rows = static function (array $counts): array {
+            arsort($counts);
             $counts = array_slice($counts, 0, 5, true);
             $max = $counts === [] ? 0 : max($counts);
             $rows = [];
@@ -145,12 +150,18 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                     'label' => (string) $label,
                     'value' => number_format((int) $n),
                     'bar' => $max > 0 ? (int) round((int) $n / $max * 100) : 0,
-                    'href' => $href,
+                    // No per-row link: every row would point at the same page,
+                    // which the card's footer link already covers.
+                    'href' => null,
                 ];
             }
 
             return $rows;
         };
+
+        // A peer's address is what the listing filters on, so a row links to
+        // every swarm that peer is in.
+        $query_peer = static fn (string $address): string => '?page=peers&amp;q='.rawurlencode($address);
 
         $panels = [];
         if (! empty($torrent_cards['seeded'])) {
@@ -185,13 +196,49 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                 null,
             );
         }
+        // Peers ranked by bytes moved — distinct from the torrent cards above,
+        // which rank torrents by how many peers they have.
+        $peer_rows = static function (array $peers) use ($query_peer): array {
+            $max = 0;
+            foreach ($peers as $p) {
+                $max = max($max, $p['bytes']);
+            }
+            $rows = [];
+            foreach ($peers as $p) {
+                $rows[] = [
+                    'label' => $p['address'],
+                    'value' => format_bytes($p['bytes']),
+                    'bar' => $max > 0 ? (int) round($p['bytes'] / $max * 100) : 0,
+                    'href' => $query_peer($p['address']),
+                ];
+            }
+
+            return $rows;
+        };
+
+        if (! empty($peer_cards['seeders'])) {
+            $panels[] = view_toplist_html(
+                'Top seeders',
+                $peer_rows($peer_cards['seeders']),
+                '#66800b',
+                ['label' => 'All seeders', 'href' => '?page=peers&amp;state=1'],
+            );
+        }
+        if (! empty($peer_cards['leechers'])) {
+            $panels[] = view_toplist_html(
+                'Top leechers',
+                $peer_rows($peer_cards['leechers']),
+                '#205ea6',
+                ['label' => 'All leechers', 'href' => '?page=peers&amp;state=0'],
+            );
+        }
         if (! empty($count_cards['clients'])) {
-            $panels[] = view_toplist_html('Top clients', $rank_rows($count_cards['clients'], null), '#5e409d');
+            $panels[] = view_toplist_html('Top clients', $rank_rows($count_cards['clients']), '#5e409d');
         }
         if (! empty($count_cards['countries'])) {
             $panels[] = view_toplist_html(
                 'Top countries',
-                $rank_rows($count_cards['countries'], '?page=geography'),
+                $rank_rows($count_cards['countries']),
                 '#24837b',
                 ['label' => 'Geography', 'href' => '?page=geography'],
             );
