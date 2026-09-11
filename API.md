@@ -9,6 +9,28 @@ Every HTTP surface Phoenix exposes, and what it returns. Three groups:
 - **[Management API](#management-api)** — `/api/`, for adding and editing
   torrents. Authenticated.
 
+| Path | Method | Auth | Formats | Does |
+| --- | --- | --- | --- | --- |
+| [`/announce`](#get-announce) | GET | none | bencode, `?json`, `?xml` | Register a peer, get others in the swarm. |
+| [`/scrape`](#get-scrape) | GET | none | bencode, `?json`, `?xml` | Swarm counts, one or many torrents. |
+| [`/scrape?stats`](#get-scrapestats) | GET | none | HTML, `?json`, `?xml` | Tracker-wide totals. |
+| [`/`](#get--torrent-index) | GET | none | HTML, `?json`, `?xml` | The public torrent index. |
+| [`/api`](#get-api) | GET | none | JSON, `?xml` | Version probe. |
+| [`/api/torrents`](#get-apitorrents) | GET | key or session | JSON, `?xml` | List torrents with swarm stats. |
+| [`/api/torrent/add`](#post-apitorrentadd) | POST | key or session + CSRF | JSON, `?xml` | Add a torrent, or upload a `.torrent`. |
+| [`/api/torrent/update`](#post-apitorrentupdate) | POST | key or session + CSRF | JSON, `?xml` | Edit a torrent's fields. |
+| [`/api/torrent/list`](#post-apitorrentlist-and-apitorrentdelist) | POST | key or session + CSRF | JSON, `?xml` | Show on the public index. |
+| [`/api/torrent/delist`](#post-apitorrentlist-and-apitorrentdelist) | POST | key or session + CSRF | JSON, `?xml` | Hide from the public index. |
+| [`/api/torrent/delete`](#post-apitorrentdelete) | POST | key or session + CSRF | JSON, `?xml` | Delete a torrent and its peers. Gated off by default. |
+
+"Key or session" is an `Authorization: Bearer` key **or** a logged-in
+`admin.php` session; CSRF applies only to the session form, since a bearer key
+cannot be forged cross-site. See [Authentication](#authentication).
+
+Three endpoints are off unless enabled: the public index needs `public_index`,
+a full `/scrape` needs `full_scrape`, and `/api/torrent/delete` needs
+`api_allow_delete` for anyone but the admin.
+
 Two browser surfaces are out of scope because they are pages, not APIs:
 `admin.php` (the admin panel and first-run installer) and `magnet.php` (a
 client-side magnet generator that talks to nothing).

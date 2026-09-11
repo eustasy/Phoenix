@@ -24,6 +24,7 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
   - [Recovering admin access](#recovering-admin-access)
   - [Reverse proxies & client IP address](#reverse-proxies--client-ip-address)
   - [Error reporting (optional)](#error-reporting-optional)
+- [API](#api)
 - [Server Configuration](#server-configuration)
 - [Documentation](#documentation)
 
@@ -151,6 +152,10 @@ Optional tuning, all in `config/phoenix.default.php`:
 | `sentry_enable_logs` | `false` | Forwards log records through Sentry's logging API. |
 
 **Tracing does nothing yet.** Phoenix starts no transactions or spans, and the bare PHP SDK does not instrument requests on its own — that is a framework-SDK feature. So `sentry_traces_sample_rate` has nothing to sample whatever you set it to, and profiling, being a fraction of tracing, has nothing either. Error reporting is unaffected and works on its own. Both settings exist so the wiring is ready if instrumentation is added; leave them at `0.0` until then, and if you do add it, pick a rate well under `1.0` — announce is the hot path and a modest swarm can drive thousands of requests an hour.
+
+## API
+
+Every HTTP endpoint Phoenix exposes is documented in [API.md](./API.md) — the tracker protocol (`announce`, `scrape`), the public read endpoints (torrent index, tracker stats), and the authenticated management API for adding and editing torrents. Each entry lists its parameters, response shape in JSON and XML, and the errors it can return.
 
 ## Server Configuration
 
