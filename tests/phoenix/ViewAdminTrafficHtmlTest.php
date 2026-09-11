@@ -202,4 +202,32 @@ class ViewAdminTrafficHtmlTest extends TestCase
         $this->assertStringContainsString('No torrents match this filter.', $html);
         $this->assertStringNotContainsString('No torrents are registered.', $html);
     }
+
+    public function testSelectedWindowIsMarked(): void
+    {
+        // Regression: $windows' numeric-looking keys are ints by the time they
+        // are read back, so a strict compare against the string $window matched
+        // nothing and no window was ever marked selected.
+        $windows = [
+            '30' => ['days' => 30, 'bucket' => 86400, 'label' => '30 days'],
+            '90' => ['days' => 90, 'bucket' => 86400, 'label' => '90 days'],
+            'all' => ['days' => 4000, 'bucket' => 2592000, 'label' => 'All time'],
+        ];
+        $series = [['time' => 1788739200, 'completions' => 76, 'bytes' => 250263275520]];
+
+        foreach (['30', '90', 'all'] as $window) {
+            $html = view_admin_traffic_html(
+                $this->settings(),
+                $series,
+                $this->torrents(),
+                'events',
+                $window,
+                $windows,
+                'tok',
+            );
+
+            preg_match_all('/btn-xs is-on" href="[^"]*days=([^"&]*)"/', $html, $matches);
+            $this->assertSame([$window], $matches[1], 'window '.$window);
+        }
+    }
 }

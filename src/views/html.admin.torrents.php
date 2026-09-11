@@ -188,7 +188,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
 			'.$sort_state.'
 			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" name="q" value="'.htmlspecialchars($search, ENT_QUOTES, 'UTF-8').'" aria-label="Search torrents" placeholder="Search name, owner, hash, file, tracker&hellip;"></span>
 			<select name="listed" aria-label="Filter by listing" class="ph-select">'.$listed_options.'</select>
-			<button class="btn btn-sm" type="submit">Search</button>'.
+			<button class="btn btn-secondary btn-sm" type="submit">Search</button>'.
             ($search !== '' || $listed_filter !== -1
                 ? '<a class="btn btn-ghost btn-sm" href="'.$query(['q' => null, 'listed' => null, 'offset' => null]).'">Clear</a>'
                 : '').'

@@ -246,7 +246,7 @@ function view_admin_peers_html(
 			'.$sort_state.'
 			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" name="q" value="'.htmlspecialchars($search, ENT_QUOTES, 'UTF-8').'" aria-label="Search peers" placeholder="Search address, torrent, hash&hellip;"></span>
 			<select name="state" aria-label="Filter by state" class="ph-select">'.$state_options.'</select>
-			<button class="btn btn-sm" type="submit">Search</button>'.
+			<button class="btn btn-secondary btn-sm" type="submit">Search</button>'.
             ($search !== '' || $state !== -1
                 ? '<a class="btn btn-ghost btn-sm" href="'.$query(['q' => null, 'state' => null, 'offset' => null]).'">Clear</a>'
                 : '').'

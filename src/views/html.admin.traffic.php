@@ -125,7 +125,10 @@ function view_admin_traffic_html(
 
     $ranges = '';
     foreach ($windows as $key => $w) {
-        $ranges .= '<a class="btn btn-ghost btn-xs'.($window === $key ? ' is-on' : '').
+        // Cast: a numeric-looking key ('90') is an int by the time it is read
+        // back out of the array, so a strict compare against the string $window
+        // never matched and no window was ever marked selected.
+        $ranges .= '<a class="btn btn-ghost btn-xs'.((string) $key === $window ? ' is-on' : '').
             '" href="?page=traffic&amp;metric='.$metric.'&amp;days='.$key.'">'.
             htmlspecialchars($w['label'], ENT_QUOTES, 'UTF-8').'</a>';
     }
@@ -256,7 +259,7 @@ function view_admin_traffic_html(
 			'.($info_hash !== '' ? '<input type="hidden" name="info_hash" value="'.htmlspecialchars($info_hash, ENT_QUOTES, 'UTF-8').'">' : '').'
 			'.$sort_state.'
 			<span class="ph-search"><span class="ph-ico" data-lucide="search"></span><input type="search" name="q" value="'.htmlspecialchars($search, ENT_QUOTES, 'UTF-8').'" aria-label="Search torrents" placeholder="Search name, filename, owner, hash&hellip;"></span>
-			<button class="btn btn-sm" type="submit">Search</button>'.
+			<button class="btn btn-secondary btn-sm" type="submit">Search</button>'.
             ($search !== '' || $info_hash !== ''
                 ? '<a class="btn btn-ghost btn-sm" href="'.$query(['q' => null, 'info_hash' => null, 'offset' => null]).'">Clear</a>'
                 : '').'
