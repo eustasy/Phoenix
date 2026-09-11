@@ -28,10 +28,11 @@ parameters:
             paths:
                 - %currentWorkingDirectory%/src/hooks
         # Hooks call into OPTIONAL composer packages (Sentry), guarded at runtime
-        # by class_exists() and by the setting that turns the integration on. CI
-        # analyses without those packages installed, so the symbols genuinely are
-        # not there — which is the supported configuration, not a fault. Scoped
-        # to src/hooks so a real typo anywhere else still fails the build.
+        # by class_exists() and by the setting that turns the integration on.
+        # GitHub CI installs dev deps and resolves them; qlty Cloud analyses
+        # without vendor/, so there the symbols genuinely are absent — which is
+        # a supported way to run Phoenix, not a fault. Scoped to src/hooks so a
+        # real typo anywhere else still fails the build.
         -
             identifier: function.notFound
             paths:
