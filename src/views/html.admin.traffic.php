@@ -55,6 +55,7 @@ function view_admin_traffic_html(
     string $dir = 'desc',
 ): string {
     require_once __DIR__.'/html.admin.layout.php';
+    require_once __DIR__.'/../functions/cdn.assets.php';
     require_once __DIR__.'/html.hash.php';
     require_once __DIR__.'/html.filename.php';
     require_once __DIR__.'/../functions/format.bytes.php';
@@ -289,12 +290,12 @@ function view_admin_traffic_html(
     // cells still want copy.js.
     $extra_srcs = ['/assets/copy.js'];
     if ($peers_metric && $swarm !== []) {
-        $extra_srcs[] = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js';
+        $extra_srcs[] = cdn_assets()['chart']['url'];
         $inline_js = 'var SWARM = '.
             (string) json_encode($swarm, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
             (string) file_get_contents(__DIR__.'/../../public/assets/_swarm.js');
     } elseif (! $peers_metric && $series !== []) {
-        $extra_srcs[] = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js';
+        $extra_srcs[] = cdn_assets()['chart']['url'];
         $inline_js = 'var TRAFFIC = '.
             (string) json_encode($series, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
             'var TRAFFIC_BUCKET = '.intval($windows[$window]['bucket']).";\n".

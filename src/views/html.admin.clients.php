@@ -24,6 +24,7 @@ declare(strict_types=1);
 function view_admin_clients_html(array $settings, string $metric, array $families, int $total, string $csrf_token): string
 {
     require_once __DIR__.'/html.admin.layout.php';
+    require_once __DIR__.'/../functions/cdn.assets.php';
     require_once __DIR__.'/../functions/stats.client.majors.php';
 
     $historical = $metric === 'events';
@@ -152,7 +153,7 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
         (string) file_get_contents(__DIR__.'/../../public/assets/_clients.js');
     $extra_srcs = [
         '/assets/tables.js',
-        'https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js',
+        cdn_assets()['chart']['url'],
     ];
 
     return view_admin_layout_html($settings, 'Clients', $body, 'clients', $csrf_token, 'Tracker', $actions, 'wide', '', $inline_js, $extra_srcs);

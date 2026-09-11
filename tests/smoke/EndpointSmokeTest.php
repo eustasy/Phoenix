@@ -118,9 +118,14 @@ class EndpointSmokeTest extends SmokeTestCase
         $indexCsp = (string) $this->headerValue($index, 'Content-Security-Policy');
         $this->assertStringContainsString("default-src 'self'", $indexCsp);
         $this->assertStringContainsString("frame-ancestors 'self'", $indexCsp);
-        // Split: public pages don't advertise jsDelivr (admin Geography only) or
-        // the pwnedpasswords connect (admin set-password gate only).
-        $this->assertStringNotContainsString('cdn.jsdelivr.net', $indexCsp);
+        // jsDelivr is the only third-party script origin, public and admin
+        // alike, since Lucide moved there from unpkg.
+        $this->assertStringContainsString("script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;", $indexCsp);
+        $this->assertStringNotContainsString('unpkg.com', $indexCsp);
+        // Split: a public page still advertises less than admin — no jsDelivr
+        // stylesheet (the Geography map's CSS) and no pwnedpasswords connect
+        // (the admin set-password gate's breach check).
+        $this->assertStringContainsString("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;", $indexCsp);
         $this->assertStringNotContainsString('pwnedpasswords', $indexCsp);
 
         // Admin -> nosniff + DENY framing + no-store + a page CSP locked to
@@ -133,9 +138,12 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertStringContainsString('no-store', (string) $this->headerValue($admin, 'Cache-Control'));
         $adminCsp = (string) $this->headerValue($admin, 'Content-Security-Policy');
         $this->assertStringContainsString("frame-ancestors 'none'", $adminCsp);
-        // Admin carries jsDelivr (Geography map) and the pwnedpasswords connect-src
-        // that the set-password gate's client-side breach check needs.
+        // Admin carries jsDelivr in style-src too (the Geography map's CSS) and
+        // the pwnedpasswords connect-src the set-password gate's breach check
+        // needs. Neither profile mentions unpkg any more.
         $this->assertStringContainsString('cdn.jsdelivr.net', $adminCsp);
+        $this->assertStringNotContainsString('unpkg.com', $adminCsp);
+        $this->assertStringContainsString('style-src', $adminCsp);
         $this->assertStringContainsString("connect-src 'self' https://api.pwnedpasswords.com", $adminCsp);
 
         // API -> nosniff + DENY + no-store + the locked-down default-src 'none'

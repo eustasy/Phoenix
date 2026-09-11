@@ -11,6 +11,7 @@ class ViewAdminHtmlTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
+        require_once __DIR__.'/../../src/functions/cdn.assets.php';
         require_once __DIR__.'/../../src/views/html.admin.php';
     }
 
@@ -63,10 +64,17 @@ class ViewAdminHtmlTest extends TestCase
             $traffic,
         );
 
-        // Both charts, and the library pulled once for the pair.
+        // Both charts, and the library pulled once for the pair. Asserted
+        // against the pinned table rather than a literal version, so a bump is
+        // one edit in cdn_assets() and not a test failure.
         $this->assertStringContainsString('<canvas id="clients-chart">', $html);
         $this->assertStringContainsString('<canvas id="traffic-chart">', $html);
-        $this->assertSame(1, substr_count($html, 'chart.js@4.4.3'));
+        $this->assertSame(1, substr_count($html, \cdn_assets()['chart']['url']));
+        // …and it carries its integrity hash.
+        $this->assertStringContainsString(
+            'integrity="'.\cdn_assets()['chart']['integrity'].'" crossorigin="anonymous"',
+            $html,
+        );
         // The card footers through to the full page.
         $this->assertStringContainsString('476 GB', $html);
         $this->assertStringContainsString('?page=traffic', $html);

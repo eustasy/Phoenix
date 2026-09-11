@@ -35,6 +35,7 @@ declare(strict_types=1);
 function view_admin_html(array $settings, bool $tables_installed, bool $show_installed = false, string $csrf_token = '', array|false $stats = false, array $tasks = [], array $torrent_cards = [], array $count_cards = [], array $peer_cards = [], array $clients = [], array $traffic = []): string
 {
     require_once __DIR__.'/html.admin.layout.php';
+    require_once __DIR__.'/../functions/cdn.assets.php';
     require_once __DIR__.'/../functions/format.bytes.php';
     require_once __DIR__.'/../functions/stats.client.majors.php';
 
@@ -310,7 +311,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
     $inline_js = '';
     $extra_srcs = [];
     if ($clients !== [] || $traffic !== []) {
-        $extra_srcs[] = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js';
+        $extra_srcs[] = cdn_assets()['chart']['url'];
     }
     if ($clients !== []) {
         // Charted by major rather than exact version, as the Clients page is:

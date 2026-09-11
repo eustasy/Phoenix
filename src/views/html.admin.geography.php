@@ -24,6 +24,7 @@ declare(strict_types=1);
 function view_admin_geography_html(array $settings, string $metric, array $values, array $available, string $csrf_token): string
 {
     require_once __DIR__.'/html.admin.layout.php';
+    require_once __DIR__.'/../functions/cdn.assets.php';
 
     ////	Not configured / no data
     if ($available === [] || $metric === '') {
@@ -107,12 +108,17 @@ function view_admin_geography_html(array $settings, string $metric, array $value
     $actions = '<div class="seg" role="tablist" aria-label="Map metric">'.$toggle.'</div>';
 
     // Load the jsVectorMap stylesheet before phoenix.css so Phoenix's .jvm-*
-    // overrides win by source order (no !important needed).
+    // overrides win by source order (no !important needed). Pinned and
+    // integrity-checked like the scripts, since a stylesheet can move content
+    // around the page just as readily.
+    $map_css = cdn_assets()['jsvectormap_css'];
     $head_pre = '
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/css/jsvectormap.min.css">';
+	<link rel="stylesheet" href="'.htmlspecialchars($map_css['url'], ENT_QUOTES, 'UTF-8').'"'.
+        ' integrity="'.htmlspecialchars($map_css['integrity'], ENT_QUOTES, 'UTF-8').'"'.
+        ' crossorigin="anonymous">';
     $extra_srcs = [
-        'https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js',
-        'https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js',
+        cdn_assets()['jsvectormap']['url'],
+        cdn_assets()['jsvectormap_world']['url'],
     ];
 
     $body = '<div class="geo-wrap">

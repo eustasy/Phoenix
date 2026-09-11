@@ -28,10 +28,11 @@ declare(strict_types=1);
 // handlers) and loads a handful of third-party CDN assets, so it ships
 // 'unsafe-inline' plus the exact origins those assets come from. It is split by
 // profile so public pages advertise only what they load: Google Fonts
-// (fonts.googleapis.com + fonts.gstatic.com) and unpkg (Lucide icons) on both;
-// jsDelivr (jsVectorMap on the Geography page) and a connect-src to
-// api.pwnedpasswords.com (the set-password gate's client-side breach check) on
-// ADMIN only. It still delivers frame-ancestors, object-src, base-uri and
+// (fonts.googleapis.com + fonts.gstatic.com) and jsDelivr (Lucide icons) on
+// both; a connect-src to api.pwnedpasswords.com (the set-password gate's
+// client-side breach check) on ADMIN only. Every script origin is jsDelivr —
+// Lucide everywhere, plus jsVectorMap and Chart.js on admin pages — so there
+// is one third-party script origin to trust rather than two. It still delivers frame-ancestors, object-src, base-uri and
 // form-action, and blocks injected external script sources.
 
 function http_security_headers(string $profile): void
@@ -64,14 +65,15 @@ function http_security_headers(string $profile): void
         ."form-action 'self'; ";
 
     if ($profile === 'admin') {
-        // Admin additionally loads jsVectorMap (jsDelivr) on the Geography page,
-        // and the set-password gate runs a client-side Pwned Passwords check
-        // against api.pwnedpasswords.com — both admin-only, so scoped here.
+        // Admin additionally loads jsVectorMap and Chart.js (both jsDelivr, the
+        // same origin Lucide comes from), and the set-password gate runs a
+        // client-side Pwned Passwords check against api.pwnedpasswords.com —
+        // admin-only, so scoped here.
         header('X-Frame-Options: DENY');
         header('Referrer-Policy: no-referrer');
         header('Cache-Control: no-store');
         header('Content-Security-Policy: '.$base
-            ."script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; "
+            ."script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
             ."style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
             ."connect-src 'self' https://api.pwnedpasswords.com; "
             ."frame-ancestors 'none'");
@@ -80,12 +82,12 @@ function http_security_headers(string $profile): void
     }
 
     // 'public_html' (and any unrecognised profile falls through here). Public
-    // pages load only Lucide (unpkg) + Google Fonts — no jsDelivr, no
-    // pwnedpasswords connect.
+    // pages load only Lucide (jsDelivr) + Google Fonts — no jsDelivr stylesheet,
+    // no pwnedpasswords connect.
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('X-Frame-Options: SAMEORIGIN');
     header('Content-Security-Policy: '.$base
-        ."script-src 'self' 'unsafe-inline' https://unpkg.com; "
+        ."script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         ."style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         ."connect-src 'self'; "
         ."frame-ancestors 'self'");
