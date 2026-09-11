@@ -30,7 +30,14 @@ declare(strict_types=1);
 // profile so public pages advertise only what they load: Google Fonts
 // (fonts.googleapis.com + fonts.gstatic.com) and jsDelivr (Lucide icons) on
 // both; a connect-src to api.pwnedpasswords.com (the set-password gate's
-// client-side breach check) on ADMIN only. Every script origin is jsDelivr —
+// client-side breach check) on ADMIN only.
+//
+// jsDelivr is in connect-src as well as script-src because the minified
+// bundles advertise a //# sourceMappingURL, and a browser fetches that through
+// connect-src when devtools is open. It costs nothing: script-src already
+// trusts the origin, so this grants no reach an injected script did not have,
+// and a CDN is not somewhere data can be exfiltrated TO. Without it every admin
+// page logs a CSP violation the moment anyone opens devtools. Every script origin is jsDelivr —
 // Lucide everywhere, plus jsVectorMap and Chart.js on admin pages — so there
 // is one third-party script origin to trust rather than two. It still delivers frame-ancestors, object-src, base-uri and
 // form-action, and blocks injected external script sources.
@@ -75,7 +82,7 @@ function http_security_headers(string $profile): void
         header('Content-Security-Policy: '.$base
             ."script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
             ."style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
-            ."connect-src 'self' https://api.pwnedpasswords.com; "
+            ."connect-src 'self' https://api.pwnedpasswords.com https://cdn.jsdelivr.net; "
             ."frame-ancestors 'none'");
 
         return;
@@ -89,6 +96,6 @@ function http_security_headers(string $profile): void
     header('Content-Security-Policy: '.$base
         ."script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         ."style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-        ."connect-src 'self'; "
+        ."connect-src 'self' https://cdn.jsdelivr.net; "
         ."frame-ancestors 'self'");
 }

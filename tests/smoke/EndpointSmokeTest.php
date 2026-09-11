@@ -126,6 +126,7 @@ class EndpointSmokeTest extends SmokeTestCase
         // stylesheet (the Geography map's CSS) and no pwnedpasswords connect
         // (the admin set-password gate's breach check).
         $this->assertStringContainsString("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;", $indexCsp);
+        $this->assertStringContainsString("connect-src 'self' https://cdn.jsdelivr.net;", $indexCsp);
         $this->assertStringNotContainsString('pwnedpasswords', $indexCsp);
 
         // Admin -> nosniff + DENY framing + no-store + a page CSP locked to
@@ -145,6 +146,10 @@ class EndpointSmokeTest extends SmokeTestCase
         $this->assertStringNotContainsString('unpkg.com', $adminCsp);
         $this->assertStringContainsString('style-src', $adminCsp);
         $this->assertStringContainsString("connect-src 'self' https://api.pwnedpasswords.com", $adminCsp);
+        // jsDelivr is in connect-src too: the minified bundles advertise a
+        // source map, which devtools fetches through connect-src.
+        $this->assertStringContainsString('connect-src', $adminCsp);
+        $this->assertStringContainsString('https://cdn.jsdelivr.net', $adminCsp);
 
         // API -> nosniff + DENY + no-store + the locked-down default-src 'none'
         // CSP (the API loads no assets). No admin/public page CSP leaks here.
