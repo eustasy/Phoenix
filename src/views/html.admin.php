@@ -72,7 +72,9 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
 			</div>
 		</div>';
 
-        // Last-run timestamp for each maintenance task that has ever run.
+        // Last-run timestamp per maintenance task. The four that task_alerts()
+        // monitors appear whether or not they have ever run; the rest are
+        // history and only show once they have.
         $task_labels = [
             'install' => ['wand-2', 'Installed'],
             'migrate' => ['git-merge', 'Migrated'],
@@ -97,16 +99,58 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             return '<span class="'.$class.'">'.htmlspecialchars(ucfirst($source), ENT_QUOTES, 'UTF-8').'</span>';
         };
 
+        // How long ago, in the coarsest unit that still says something useful.
+        $ago = static function (int $seconds): string {
+            if ($seconds < 90) {
+                return 'just now';
+            }
+            foreach ([86400 => 'd', 3600 => 'h', 60 => 'm'] as $unit => $suffix) {
+                if ($seconds >= $unit) {
+                    return intdiv($seconds, $unit).$suffix.' ago';
+                }
+            }
+
+            return 'just now';
+        };
+
         $rows = '';
         foreach ($task_labels as $task_name => [$icon, $label]) {
-            if (isset($tasks[$task_name])) {
-                $run = $tasks[$task_name];
-                $by = $source_badge($run['source']);
-                $rows .= '<tr><td><span class="flex items-center gap-2"><span class="ph-ico ph-li-ico" data-lucide="'.$icon.'"></span>'.$label.'</span></td>'.
-                    '<td class="mono muted">'.date('Y-m-d H:i', $run['value']).'</td>'.
-                    '<td>'.$by.'</td>'.
-                    '<td class="table-col-numeric"><span class="badge badge-green">done</span></td></tr>';
+            $run = $tasks[$task_name] ?? null;
+            $state = $run['state'] ?? null;
+
+            // Unmonitored tasks that have never run are history that has not
+            // happened — nothing to report.
+            if ($run === null || ($state === null && ! isset($run['value']))) {
+                continue;
             }
+
+            if ($state === 'never') {
+                // The loudest case: not late, but never started. Usually a
+                // crontab entry that was never added, which no amount of
+                // waiting will fix.
+                $rows .= '<tr class="is-critical"><td><span class="flex items-center gap-2"><span class="ph-ico ph-li-ico" data-lucide="'.$icon.'"></span>'.$label.'</span></td>'.
+                    '<td class="mono"><span class="ph-task-alert is-critical">Never'.
+                    '<span class="ph-ico" data-lucide="circle-alert"></span></span></td>'.
+                    '<td><span class="dim">&mdash;</span></td>'.
+                    '<td class="table-col-numeric"><span class="badge badge-red">never run</span></td></tr>';
+                continue;
+            }
+
+            $when = date('Y-m-d H:i', $run['value']);
+            if ($state === 'overdue') {
+                $stamp = '<span class="ph-task-alert is-warning" title="'.
+                    htmlspecialchars('Last run '.$ago((int) $run['age']).', expected within '.$ago((int) $run['after']), ENT_QUOTES, 'UTF-8').'">'.
+                    $when.'<span class="ph-ico" data-lucide="triangle-alert"></span></span>';
+                $status = '<span class="badge badge-yellow">overdue</span>';
+            } else {
+                $stamp = '<span class="muted">'.$when.'</span>';
+                $status = '<span class="badge badge-green">done</span>';
+            }
+
+            $rows .= '<tr'.($state === 'overdue' ? ' class="is-warning"' : '').'><td><span class="flex items-center gap-2"><span class="ph-ico ph-li-ico" data-lucide="'.$icon.'"></span>'.$label.'</span></td>'.
+                '<td class="mono">'.$stamp.'</td>'.
+                '<td>'.$source_badge($run['source']).'</td>'.
+                '<td class="table-col-numeric">'.$status.'</td></tr>';
         }
         if ($rows !== '') {
             $body .= '<div class="ph-section-head"><h3>Maintenance</h3><div class="row-actions"><a class="btn btn-ghost btn-sm" href="?page=tasks">History<span class="ph-ico" data-lucide="history"></span></a><a class="btn btn-ghost btn-sm" href="?page=utilities">Run tasks<span class="ph-ico" data-lucide="arrow-right"></span></a></div></div>

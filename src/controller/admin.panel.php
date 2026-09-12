@@ -118,6 +118,6 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
         default:
             require_once __DIR__.'/admin.dashboard.php';
 
-            return admin_dashboard_page($connection, $settings);
+            return admin_dashboard_page($connection, $settings, $time);
     }
 }

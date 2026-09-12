@@ -10,7 +10,7 @@ declare(strict_types=1);
 // Dispatched by admin_panel_controller() for page=dashboard.
 
 /** @param PhoenixSettings $settings */
-function admin_dashboard_page(mysqli $connection, array $settings): string
+function admin_dashboard_page(mysqli $connection, array $settings, int $time): string
 {
     require_once __DIR__.'/../model/db.tables.installed.php';
     $tables_installed = db_tables_installed($connection, $settings);
@@ -39,7 +39,11 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
         }
 
         require_once __DIR__.'/../model/tasks.select.php';
-        $tasks = tasks_select($connection, $settings);
+        require_once __DIR__.'/../functions/task.alerts.php';
+        // Judged here rather than in the view: whether a task is overdue
+        // depends on the clock, and the view stays a pure function of what it
+        // is handed.
+        $tasks = task_alerts(tasks_select($connection, $settings), $settings, $time);
 
         // Mini-table cards. Each is a short ranked list that links into the
         // listing it summarises, so the dashboard is a way in rather than a

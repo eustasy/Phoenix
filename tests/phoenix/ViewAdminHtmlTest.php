@@ -362,4 +362,48 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertStringContainsString('?page=bandwidth&amp;info_hash='.str_repeat('a', 40), $html);
         $this->assertStringContainsString('?page=peers&amp;info_hash='.str_repeat('a', 40), $html);
     }
+
+    public function testOverdueTaskHighlightsItsTimestamp(): void
+    {
+        $tasks = [
+            'clean' => ['value' => 1700000000, 'source' => 'cron', 'state' => 'overdue', 'age' => 7200, 'after' => 3600],
+        ];
+
+        $html = view_admin_html($this->settings(), true, false, '', $this->stats(), $tasks);
+
+        // The timestamp carries the alert, so the thing that is wrong and the
+        // reading that says so are the same word.
+        $this->assertStringContainsString('ph-task-alert is-warning', $html);
+        $this->assertStringContainsString('data-lucide="triangle-alert"', $html);
+        $this->assertStringContainsString('badge-yellow">overdue', $html);
+    }
+
+    public function testNeverRunTaskGetsItsOwnRowAndHighlight(): void
+    {
+        // Not late, but never started — a different problem with a different
+        // fix, so it reads differently.
+        $tasks = [
+            'backup' => ['value' => 0, 'source' => '', 'state' => 'never', 'age' => null, 'after' => 172800],
+        ];
+
+        $html = view_admin_html($this->settings(), true, false, '', $this->stats(), $tasks);
+
+        $this->assertStringContainsString('Backed up', $html);
+        $this->assertStringContainsString('ph-task-alert is-critical', $html);
+        $this->assertStringContainsString('data-lucide="circle-alert"', $html);
+        $this->assertStringContainsString('never run', $html);
+        $this->assertStringNotContainsString('1970-01-01', $html);
+    }
+
+    public function testHealthyTaskIsNotHighlighted(): void
+    {
+        $tasks = [
+            'clean' => ['value' => 1700000000, 'source' => 'cron', 'state' => 'ok', 'age' => 60, 'after' => 3600],
+        ];
+
+        $html = view_admin_html($this->settings(), true, false, '', $this->stats(), $tasks);
+
+        $this->assertStringContainsString('badge-green">done', $html);
+        $this->assertStringNotContainsString('ph-task-alert', $html);
+    }
 }

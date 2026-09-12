@@ -844,3 +844,30 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-srv.is-critical { --ph-srv-color: var(--color-danger); }
 .ph-srv.is-warning .ph-srv-val,
 .ph-srv.is-critical .ph-srv-val { color: var(--ph-srv-color); }
+
+/* --------------------------------------------------------------------------
+   Dashboard maintenance alerts — an overdue or never-run task (view_admin_html).
+   -------------------------------------------------------------------------- */
+
+/* The timestamp carries the alert rather than a separate column, so the thing
+   that is wrong and the reading that says so are the same word. */
+.ph-task-alert {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: var(--font-weight-medium);
+}
+.ph-task-alert .ph-ico {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+.ph-task-alert.is-warning { color: var(--color-warning); }
+.ph-task-alert.is-critical { color: var(--color-danger); }
+/* A tint across the whole row, so a busy table still shows where to look. */
+.ph-card-table tbody tr.is-warning > td {
+  background-color: color-mix(in srgb, var(--color-warning) 7%, transparent);
+}
+.ph-card-table tbody tr.is-critical > td {
+  background-color: color-mix(in srgb, var(--color-danger) 7%, transparent);
+}

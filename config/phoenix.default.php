@@ -81,6 +81,13 @@ $settings['clean_request_percent'] = 1;
 /* should your tracker clean with cron */
 /* means clean_request_percent can be disabled for faster responses */
 $settings['clean_with_cron'] = false;
+/* how long since the last successful run before the dashboard flags a */
+/* maintenance task as overdue, in seconds. 0 disables that task's alert. */
+/* Defaults assume the crontab in CONFIGURATION.md: pruning every 15 */
+/* minutes, backup and optimize daily. */
+$settings['alert_prune_after'] = 3600;
+$settings['alert_backup_after'] = 172800;
+$settings['alert_optimize_after'] = 1209600;
 /* days of maintenance-task run history to keep in the task_runs log; */
 /* 0 = keep forever. pruned during the regular cleanup (announce or cron) */
 $settings['task_retention'] = 0;
