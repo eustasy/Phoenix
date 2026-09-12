@@ -31,7 +31,7 @@ function cdn_assets(): array
             'url' => 'https://cdn.jsdelivr.net/npm/lucide@1.44.0/dist/umd/lucide.min.js',
             'integrity' => 'sha256-VSX/Muw2o9JWn2tkUpFFTU3+eQfHMfHo7BqP2qnki/0=',
         ],
-        // Charts: the dashboard, Clients and Traffic.
+        // Charts: the dashboard, Clients and Bandwidth.
         'chart' => [
             'url' => 'https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js',
             'integrity' => 'sha256-SERKgtTty1vsDxll+qzd4Y2cF9swY9BCq62i9wXJ9Uo=',

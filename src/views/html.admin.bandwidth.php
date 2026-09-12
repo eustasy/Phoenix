@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 ////	view_admin_bandwidth_html
-// Render the admin Traffic page: a time series of traffic served, and a table
+// Render the admin Bandwidth page: a time series of bandwidth served, and a table
 // of it per torrent.
 //
 // The metric toggle is the point of the page. The tracker holds two different
-// traffic figures and neither replaces the other:
+// bandwidth figures and neither replaces the other:
 //   * All-time — size x downloads, available for every torrent, but an estimate
 //     that counts no partial and no repeat downloads.
 //   * Active peers — the uploaded/downloaded counters peers currently report.
@@ -24,9 +24,9 @@ declare(strict_types=1);
 // The table below is one page of a searched, sorted listing — $total is what
 // the filter matched, not what was rendered, so the pager knows there is a next
 // page. ?info_hash narrows it to one torrent, which is how a row elsewhere
-// links here for that torrent's traffic.
+// links here for that torrent's bandwidth.
 //
-// Marks the Traffic nav active. Returns HTML string.
+// Marks the Bandwidth nav active. Returns HTML string.
 
 /**
  * @param PhoenixSettings $settings
@@ -149,7 +149,7 @@ function view_admin_bandwidth_html(
 				<p class="dim geo-empty-note">Peers report their own cumulative totals on announce; a swarm that has only just formed has nothing to show yet.</p>
 			</div>'
             : '<div class="geo-toplist ph-chart-card">
-				<div class="ph-traffic-head">
+				<div class="ph-bandwidth-head">
 					<div>
 						<div class="geo-metric-label">Busiest peers</div>
 						<div class="dim geo-sub">'.format_bytes($up).' up &middot; '.format_bytes($down).' down, across the '.count($swarm).' busiest</div>
@@ -160,7 +160,7 @@ function view_admin_bandwidth_html(
 			</div>';
     } else {
         $body = '<div class="geo-toplist ph-chart-card">
-			<div class="ph-traffic-head">
+			<div class="ph-bandwidth-head">
 				<div>
 					<div class="geo-metric-label">Bandwidth served</div>
 					<div class="dim geo-sub">'.format_bytes($totals).' across '.number_format($completions).
@@ -174,7 +174,7 @@ function view_admin_bandwidth_html(
 
         if ($series === []) {
             $body = '<div class="ph-empty"><span class="ph-ico" data-lucide="chart-line"></span>
-				<p>No traffic recorded for this period.</p>
+				<p>No bandwidth recorded for this period.</p>
 				<p class="dim geo-empty-note">The chart is derived from the events ledger: turn on <code>stats_enabled</code> and keep <code>completed</code> in <code>stats_events</code> to populate it. The per-torrent figures below do not depend on it.</p>
 			</div>';
         }
@@ -267,7 +267,7 @@ function view_admin_bandwidth_html(
 			<span class="ph-spacer"></span>
 			<span class="dim text-sm">'.$window_text.'</span>
 		</form>
-		<div class="ph-card-table wide"><table id="tbl-traffic">'.
+		<div class="ph-card-table wide"><table id="tbl-bandwidth">'.
             '<thead><tr>'.
                 '<th>'.$sort_link('name', 'Torrent').'</th>'.
                 '<th>'.$sort_link('filename', 'Filename').'</th>'.
@@ -296,10 +296,10 @@ function view_admin_bandwidth_html(
             (string) file_get_contents(__DIR__.'/../../public/assets/_swarm.js');
     } elseif (! $peers_metric && $series !== []) {
         $extra_srcs[] = cdn_assets()['chart']['url'];
-        $inline_js = 'var TRAFFIC = '.
+        $inline_js = 'var BANDWIDTH = '.
             (string) json_encode($series, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
-            'var TRAFFIC_BUCKET = '.intval($windows[$window]['bucket']).";\n".
-            (string) file_get_contents(__DIR__.'/../../public/assets/_traffic.js');
+            'var BANDWIDTH_BUCKET = '.intval($windows[$window]['bucket']).";\n".
+            (string) file_get_contents(__DIR__.'/../../public/assets/_bandwidth.js');
     }
 
     return view_admin_layout_html($settings, 'Bandwidth', $body, 'bandwidth', $csrf_token, 'Tracker', $actions, 'wide', '', $inline_js, $extra_srcs);

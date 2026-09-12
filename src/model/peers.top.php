@@ -38,7 +38,7 @@ function peers_top(mysqli $connection, array $settings, string $measure = 'seede
     $limit = max(1, min(50, $limit));
 
     // Literals from a fixed map — no untrusted string reaches the query. A null
-    // state means "any", for the traffic ranking.
+    // state means "any", for the bandwidth ranking.
     $measures = [
         'seeders' => ['`p`.`uploaded`', '1'],
         'leechers' => ['`p`.`downloaded`', '0'],

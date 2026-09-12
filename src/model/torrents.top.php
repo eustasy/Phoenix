@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 /**
  * @param PhoenixSettings $settings
- * @return list<array{info_hash: string, name: string|null, filename: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>
+ * @return list<array{info_hash: string, name: string|null, filename: string|null, seeders: int, leechers: int, downloads: int, bandwidth: int}>
  */
 function torrents_top(mysqli $connection, array $settings, string $measure = 'seeders', int $limit = 5): array
 {
@@ -64,7 +64,7 @@ function torrents_top(mysqli $connection, array $settings, string $measure = 'se
         $connection,
         'SELECT `t`.`info_hash`, `t`.`name`, `t`.`filename`, `t`.`downloads`, '.
         $seeders.' AS `seeders`, '.$leechers.' AS `leechers`, '.
-        'IFNULL('.$bandwidth.', 0) AS `traffic` '.
+        'IFNULL('.$bandwidth.', 0) AS `bandwidth` '.
         'FROM `'.$prefix.'torrents` `t` '.
         'LEFT JOIN `'.$prefix.'peers` `p` ON `p`.`info_hash` = `t`.`info_hash` '.
         ($where === '' ? '' : 'WHERE '.$where.' ').

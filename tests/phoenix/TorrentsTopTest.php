@@ -102,7 +102,7 @@ class TorrentsTopTest extends PhoenixTestCase
         $this->assertSame(2, $rows[array_search('__TEST_tt_a__', array_column($rows, 'info_hash'), true)]['leechers']);
     }
 
-    public function testTrafficMeasureNeedsASizeAndADownload(): void
+    public function testBandwidthMeasureNeedsASizeAndADownload(): void
     {
         // The row-level conditions are in WHERE, not HAVING — a plain column
         // cannot be filtered after grouping.

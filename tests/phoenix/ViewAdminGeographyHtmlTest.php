@@ -20,7 +20,7 @@ class ViewAdminGeographyHtmlTest extends TestCase
         return ['phoenix_version' => 'Phoenix Test v.0', 'admin_password' => 'hash'];
     }
 
-    public function testTrafficMetricRendersAsSizesNotRawByteCounts(): void
+    public function testBandwidthMetricRendersAsSizesNotRawByteCounts(): void
     {
         $html = view_admin_geography_html(
             $this->settings(),

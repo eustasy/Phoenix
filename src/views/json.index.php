@@ -9,7 +9,7 @@ declare(strict_types=1);
 // Arguments:
 //   $index: array of torrents from torrents_select_listed(), each with keys:
 //           info_hash, name, size, downloads, seeders, leechers, peers,
-//           traffic, the four meta fields (filename, files, trackers,
+//           bandwidth, the four meta fields (filename, files, trackers,
 //           webseeds), and the magnet link public/index.php builds.
 //   $show_meta: when false (default) the four meta keys are omitted from
 //               every row. When true they are passed through as-is. The
@@ -26,7 +26,7 @@ declare(strict_types=1);
  *     seeders: int,
  *     leechers: int,
  *     peers: int,
- *     traffic: int,
+ *     bandwidth: int,
  *     filename: string|null,
  *     files: list<array{path: string, length: int}>|null,
  *     trackers: list<string>|null,
@@ -50,7 +50,7 @@ function view_index_json(array $index, bool $show_meta = false): string
             'seeders' => $torrent['seeders'],
             'leechers' => $torrent['leechers'],
             'peers' => $torrent['peers'],
-            'traffic' => $torrent['bandwidth'],
+            'bandwidth' => $torrent['bandwidth'],
             'magnet' => $torrent['magnet'] ?? null,
         ];
     }

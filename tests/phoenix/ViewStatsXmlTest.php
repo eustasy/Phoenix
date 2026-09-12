@@ -35,7 +35,7 @@ class ViewStatsXmlTest extends TestCase
         $this->assertStringContainsString('<leechers>5</leechers>', $output);
         $this->assertStringContainsString('<torrents>3</torrents>', $output);
         $this->assertStringContainsString('<downloads>100</downloads>', $output);
-        $this->assertStringContainsString('<traffic>5000000</traffic>', $output);
+        $this->assertStringContainsString('<bandwidth>5000000</bandwidth>', $output);
         $this->assertStringContainsString('</tracker>', $output);
     }
 

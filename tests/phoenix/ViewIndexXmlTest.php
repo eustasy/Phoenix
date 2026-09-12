@@ -50,7 +50,7 @@ class ViewIndexXmlTest extends PhoenixTestCase
         $this->assertStringContainsString('<seeders>2</seeders>', $xml);
         $this->assertStringContainsString('<leechers>1</leechers>', $xml);
         $this->assertStringContainsString('<peers>3</peers>', $xml);
-        $this->assertStringContainsString('<traffic>7168</traffic>', $xml);
+        $this->assertStringContainsString('<bandwidth>7168</bandwidth>', $xml);
     }
 
     public function testTorrentNameIsXmlEscaped(): void

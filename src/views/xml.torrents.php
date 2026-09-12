@@ -24,7 +24,7 @@ declare(strict_types=1);
  *     seeders: int,
  *     leechers: int,
  *     peers: int,
- *     traffic: int,
+ *     bandwidth: int,
  *     filename: string|null,
  *     files: list<array{path: string, length: int}>|null,
  *     trackers: list<string>|null,
@@ -47,7 +47,7 @@ function view_torrents_xml(array $torrents): string
             '<seeders>'.$torrent['seeders'].'</seeders>'.
             '<leechers>'.$torrent['leechers'].'</leechers>'.
             '<peers>'.$torrent['peers'].'</peers>'.
-            '<traffic>'.$torrent['bandwidth'].'</traffic>';
+            '<bandwidth>'.$torrent['bandwidth'].'</bandwidth>';
 
         ////	filename
         // Emit only when the value is non-null.

@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 ////	stats_fetch_download_totals
-// Fetch download and traffic totals from the database.
-// Returns array with downloads and traffic, or false on failure.
+// Fetch download and bandwidth totals from the database.
+// Returns array with downloads and bandwidth, or false on failure.
 /**
  * @param PhoenixSettings $settings
  * @return array<string, float|int|string|null>|false
@@ -15,7 +15,7 @@ function stats_fetch_download_totals(mysqli $connection, array $settings): array
 
     $sql = 'SELECT '.
         'SUM(`downloads`) AS `downloads`, '.
-        'SUM(`downloads` * IFNULL(`size`, 0)) AS `traffic` '.
+        'SUM(`downloads` * IFNULL(`size`, 0)) AS `bandwidth` '.
         'FROM `'.$settings['db_prefix'].'torrents`;';
 
     return db_fetch_once($connection, $sql);

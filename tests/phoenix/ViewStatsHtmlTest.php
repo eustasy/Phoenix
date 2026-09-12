@@ -30,7 +30,7 @@ class ViewStatsHtmlTest extends TestCase
         $this->assertStringContainsString('<div class="stats-hero-num">15</div>', $output);
         $this->assertStringContainsString('<div class="b-num seed">10</div>', $output);
         $this->assertStringContainsString('<div class="b-num leech">5</div>', $output);
-        // Cards: torrents-with-peers, completed downloads, traffic.
+        // Cards: torrents-with-peers, completed downloads, bandwidth.
         $this->assertStringContainsString('<div class="ph-stat-value">3</div>', $output);
         $this->assertStringContainsString('<div class="ph-stat-value">100</div>', $output);
         $this->assertStringContainsString('4.8 MB', $output);

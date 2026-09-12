@@ -128,8 +128,8 @@ conservative — a scrape reads counts, not meta, so its real ceiling is higher.
 the whole torrents table on a public request, and the torrent ceiling becomes
 disk and admin-page latency rather than a hard limit.
 
-Admin listings are paged (`admin_torrents_limit=100`, `admin_peers_limit=200`,
-`admin_bandwidth_limit=100`), so they do not grow with the table.
+Admin listings are paged (`admin_torrents_rows=100`, `admin_peers_rows=200`,
+`admin_bandwidth_rows=100`), so they do not grow with the table.
 
 ## Database behaviour worth knowing
 

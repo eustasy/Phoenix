@@ -7,7 +7,7 @@ declare(strict_types=1);
 // pass, for the admin Peers table's Country column. Same gate as
 // stats_geo_lookup() (stats_geo on, the reader present, readable .mmdb), but the
 // reader is opened ONCE for the whole batch and each distinct address is looked
-// up once — a page of peers is up to admin_peers_limit rows, and per-row reader
+// up once — a page of peers is up to admin_peers_rows rows, and per-row reader
 // construction would dominate the render.
 //
 // The name comes from the database record rather than a table of our own, so it

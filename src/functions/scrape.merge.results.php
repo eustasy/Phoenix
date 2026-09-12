@@ -10,11 +10,11 @@ declare(strict_types=1);
 // reply) are preserved and overwritten by query results when present.
 //
 // Each returned entry has integer seeders, leechers, peers (= seeders +
-// leechers), size, downloads, and traffic (= size * downloads). intval()
+// leechers), size, downloads, and bandwidth (= size * downloads). intval()
 // guards against NULL from SUM() over an empty group.
 /**
  * @param array<string, array<string, int|string|null>> $scrape
- * @return array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, traffic: int}>
+ * @return array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, bandwidth: int}>
  */
 function scrape_merge_results(mysqli_result $peers, mysqli_result $torrents, array $scrape = []): array
 {

@@ -76,7 +76,7 @@ class PeersTopTest extends PhoenixTestCase
         );
     }
 
-    public function testTrafficMeasureIgnoresStateSoABusyLeecherCounts(): void
+    public function testBandwidthMeasureIgnoresStateSoABusyLeecherCounts(): void
     {
         // A leecher that is also serving belongs in a chart of who is moving
         // the most data; the state-filtered measures would hide it.

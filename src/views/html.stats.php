@@ -5,7 +5,7 @@ declare(strict_types=1);
 ////	view_stats_html
 // Render tracker statistics for humans: a hero active-peer count with a
 // seeder/leecher split bar, then cards for torrents-with-peers, completed
-// downloads, and traffic served (human-readable, with the exact byte count
+// downloads, and bandwidth served (human-readable, with the exact byte count
 // beneath). The figures are the same aggregation the operator dashboard shows.
 // Wrapped in the public page chrome (Stats nav active).
 // Returns HTML string. Caller is responsible for setting Content-Type header.

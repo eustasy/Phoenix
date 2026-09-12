@@ -14,7 +14,7 @@ class ViewTorrentsJsonTest extends PhoenixTestCase
 
     /**
      * @param array<string, mixed> $overrides
-     * @return array{info_hash: string|null, user: string|null, name: string|null, size: int, listed: int, downloads: int, seeders: int, leechers: int, peers: int, traffic: int, filename: string|null, files: list<array{path: string, length: int}>|null, trackers: list<string>|null, webseeds: list<string>|null}
+     * @return array{info_hash: string|null, user: string|null, name: string|null, size: int, listed: int, downloads: int, seeders: int, leechers: int, peers: int, bandwidth: int, filename: string|null, files: list<array{path: string, length: int}>|null, trackers: list<string>|null, webseeds: list<string>|null}
      */
     private function torrent(array $overrides = []): array
     {

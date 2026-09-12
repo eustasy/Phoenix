@@ -6,11 +6,11 @@ declare(strict_types=1);
 
 //	Returns scrape results as a JSON-encoded string.
 //	Input: $scrape array of torrent arrays, each with keys:
-//	       info_hash, seeders, leechers, peers, size, downloads, traffic.
+//	       info_hash, seeders, leechers, peers, size, downloads, bandwidth.
 //	Output: JSON string with torrents indexed by info_hash.
 
 /**
- * @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, traffic: int}> $scrape
+ * @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, bandwidth: int}> $scrape
  * @param int $min_request_interval BEP 48 scrape-throttle hint (seconds); 0 omits it
  */
 function view_scrape_json(array $scrape, int $min_request_interval = 0): string
@@ -24,7 +24,7 @@ function view_scrape_json(array $scrape, int $min_request_interval = 0): string
             'peers' => $torrent['peers'],
             'size' => $torrent['size'],
             'downloads' => $torrent['downloads'],
-            'traffic' => $torrent['bandwidth'],
+            'bandwidth' => $torrent['bandwidth'],
         ];
     }
 

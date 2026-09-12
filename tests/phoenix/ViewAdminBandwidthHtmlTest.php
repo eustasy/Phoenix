@@ -51,7 +51,7 @@ class ViewAdminBandwidthHtmlTest extends TestCase
         $html = view_admin_bandwidth_html($this->settings(), $series, $this->torrents(), 'events', '90', $this->windows(), 'tok');
 
         $this->assertStringContainsString('canvas id="bandwidth-chart"', $html);
-        $this->assertStringContainsString('var TRAFFIC =', $html);
+        $this->assertStringContainsString('var BANDWIDTH =', $html);
         // Windows only make sense against a series.
         $this->assertStringContainsString('>90 days<', $html);
     }

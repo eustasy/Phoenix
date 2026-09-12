@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 ////	events_geo_bandwidth
-// Aggregate traffic by country for the admin Geography page: the same
+// Aggregate bandwidth by country for the admin Geography page: the same
 // completed-download events events_geo_counts() counts, weighted by the size of
 // the torrent each one finished. So the two metrics are one dataset read two
 // ways — how many downloads a country completed, and how many bytes that moved.
 //
-// That makes this the same ESTIMATE the rest of the all-time traffic figures
+// That makes this the same ESTIMATE the rest of the all-time bandwidth figures
 // are: each completion counted as exactly one full transfer, so no partial and
 // no repeat downloads. A completion whose torrent has no recorded size, or
 // whose torrent has since been removed, contributes nothing.

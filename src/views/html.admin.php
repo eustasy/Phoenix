@@ -17,7 +17,7 @@ declare(strict_types=1);
 //   $show_installed - bool, whether to show the "Installation complete" banner
 //   $csrf_token - string, per-session token for the layout's logout form
 //   $stats - array<string,int>|false, merged tracker stats (seeders, leechers,
-//            peers, torrents, downloads, traffic) plus 'registered' (total
+//            peers, torrents, downloads, bandwidth) plus 'registered' (total
 //            torrents). False hides the stats block (e.g. tables not installed).
 //   $tasks - maintenance task name => {value: last-run Unix timestamp, source:
 //            who ran it ('admin'|'cron'|'auto', '' if pre-source-tracking)}.
@@ -26,7 +26,7 @@ declare(strict_types=1);
  * @param PhoenixSettings $settings
  * @param array<string, int>|false $stats
  * @param array<string, array{value: int, source: string}> $tasks
- * @param array<string, list<array{info_hash: string, name: string|null, filename: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>> $torrent_cards
+ * @param array<string, list<array{info_hash: string, name: string|null, filename: string|null, seeders: int, leechers: int, downloads: int, bandwidth: int}>> $torrent_cards
  * @param array<string, array<string, int>> $count_cards
  * @param array<string, list<array{address: string, peer_id: string, info_hash: string, name: string|null, bytes: int}>> $peer_cards
  * @param array<string, array<string, int>> $clients client family => version => peers
@@ -278,7 +278,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
         }
 
         // Charts lead the section, two to a row. The right slot is reserved for
-        // traffic over time; until that exists the client chart simply sits in
+        // bandwidth over time; until that exists the client chart simply sits in
         // the left half rather than stretching across.
         $charts = '';
         if ($clients !== []) {
@@ -302,7 +302,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                 '<div class="ph-chart"><canvas id="bandwidth-chart"></canvas></div>'.
                 // Carries the metric: this card is the ledger-derived series,
                 // and the Bandwidth page opens on the live swarm.
-                '<div class="ph-toplist-more"><a href="?page=bandwidth&amp;metric=events">'.format_bytes($bytes).' served &middot; all traffic</a></div>'.
+                '<div class="ph-toplist-more"><a href="?page=bandwidth&amp;metric=events">'.format_bytes($bytes).' served &middot; all bandwidth</a></div>'.
                 '</div>';
         }
 
@@ -344,10 +344,10 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             (string) file_get_contents(__DIR__.'/../../public/assets/_clients.js')."\n";
     }
     if ($bandwidth !== []) {
-        $inline_js .= 'var TRAFFIC = '.
+        $inline_js .= 'var BANDWIDTH = '.
             (string) json_encode($bandwidth, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
-            'var TRAFFIC_BUCKET = 86400;'."\n".
-            (string) file_get_contents(__DIR__.'/../../public/assets/_traffic.js');
+            'var BANDWIDTH_BUCKET = 86400;'."\n".
+            (string) file_get_contents(__DIR__.'/../../public/assets/_bandwidth.js');
     }
 
     return view_admin_layout_html($settings, 'Dashboard', $body, 'dashboard', $csrf_token, 'Tracker', $actions, '', '', $inline_js, $extra_srcs);

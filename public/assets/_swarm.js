@@ -1,4 +1,4 @@
-/* Phoenix — live swarm traffic (admin Traffic page, Active peers metric).
+/* Phoenix — live swarm bandwidth (admin Bandwidth page, Active peers metric).
  * Inlined by PHP inside a <script> tag, prefixed with `var SWARM = […];` — the
  * busiest peers, each { label, client, torrent, uploaded, downloaded }.
  *

@@ -61,7 +61,7 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
 
     $unit = $historical ? 'completed download' : 'peer';
     $body = '<div class="geo-toplist ph-chart-card">
-			<div class="ph-traffic-head">
+			<div class="ph-bandwidth-head">
 				<div>
 					<div class="geo-metric-label">'.($historical ? 'Clients, all time' : 'Clients, active peers').'</div>
 					<div class="dim geo-sub">'.number_format($total).' '.$unit.($total === 1 ? '' : 's').

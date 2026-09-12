@@ -16,7 +16,7 @@ declare(strict_types=1);
 // enhancements (assets/tables.js) — the table is complete without JavaScript.
 // Returns HTML string. Caller is responsible for setting Content-Type header.
 
-/** @param list<array{info_hash: string|null, name: string|null, size: int, downloads: int, seeders: int, leechers: int, peers: int, traffic: int, filename?: string|null, files?: list<array{path: string, length: int}>|null, trackers?: list<string>|null, webseeds?: list<string>|null, magnet?: string|null}> $index */
+/** @param list<array{info_hash: string|null, name: string|null, size: int, downloads: int, seeders: int, leechers: int, peers: int, bandwidth: int, filename?: string|null, files?: list<array{path: string, length: int}>|null, trackers?: list<string>|null, webseeds?: list<string>|null, magnet?: string|null}> $index */
 function view_index_html(array $index, bool $show_meta = false, string $version = ''): string
 {
     require_once __DIR__.'/html.public.layout.php';

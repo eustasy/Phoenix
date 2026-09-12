@@ -92,7 +92,7 @@ class TorrentsSelectAllTest extends PhoenixTestCase
     public function testReturnsTorrentWithComputedFields(): void
     {
         // Listed torrent with no peers — exercises the no-peer
-        // IFNULL(SUM(...),0) branch and the peers/traffic derivations, plus the
+        // IFNULL(SUM(...),0) branch and the peers/bandwidth derivations, plus the
         // new user/listed columns. Meta NULL -> normalized to null.
         $this->insertTorrent('__TEST_solo__', 'Solo', 1024, 1, 5, 'alice');
 

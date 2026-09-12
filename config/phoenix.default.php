@@ -170,13 +170,13 @@ $settings['admin_login_delay_max'] = 8;
 /* the QR). Lost your authenticator? Remove this line to disable 2FA. */
 $settings['admin_totp_secret'] = '';
 /* rows per page on the admin Peers (swarm-wide) listing */
-$settings['admin_peers_limit'] = 200;
+$settings['admin_peers_rows'] = 200;
 /* rows per page on the admin Torrents listing */
-$settings['admin_torrents_limit'] = 100;
+$settings['admin_torrents_rows'] = 100;
 /* rows per page on the admin Task History listing */
-$settings['admin_tasks_limit'] = 100;
-/* rows per page on the admin Traffic listing */
-$settings['admin_bandwidth_limit'] = 100;
+$settings['admin_tasks_rows'] = 100;
+/* rows per page on the admin Bandwidth listing */
+$settings['admin_bandwidth_rows'] = 100;
 
 ////	API Options
 /* API keys permitted to use the management API under public/api/, as */

@@ -56,7 +56,7 @@ class ScrapeFullControllerTest extends PhoenixTestCase
     }
 
     // Expected per-torrent rendering for HASH: 1 seeder, 1 leecher, size
-    // 4096, 3 downloads → peers = 2, traffic = size * downloads = 12288.
+    // 4096, 3 downloads → peers = 2, bandwidth = size * downloads = 12288.
     // Full-scrape mirrors specific-scrape's field set.
 
     private const HASH_BENCODE = 'd8:completei1e10:downloadedi3e10:incompletei1ee';
@@ -68,7 +68,7 @@ class ScrapeFullControllerTest extends PhoenixTestCase
         '<peers>2</peers>'.
         '<size>4096</size>'.
         '<downloads>3</downloads>'.
-        '<traffic>12288</traffic>'.
+        '<bandwidth>12288</bandwidth>'.
         '</torrent>';
     private const HASH_JSON = [
         'info_hash' => self::HASH,
@@ -95,13 +95,13 @@ class ScrapeFullControllerTest extends PhoenixTestCase
         );
         // BEP 48 specifies exactly three keys per torrent dict (complete,
         // downloaded, incomplete). Phoenix's XML/JSON renders extend that
-        // with peers/size/traffic for caller convenience, but the bencode
+        // with peers/size/bandwidth for caller convenience, but the bencode
         // output must stay strictly conformant — strict BitTorrent clients
         // are within their rights to reject responses with unknown keys.
         $this->assertStringNotContainsString('9:info_hash', $bencode);
         $this->assertStringNotContainsString('5:peers', $bencode);
         $this->assertStringNotContainsString('4:size', $bencode);
-        $this->assertStringNotContainsString('7:traffic', $bencode);
+        $this->assertStringNotContainsString('9:bandwidth', $bencode);
     }
 
     public function testBencodeCarriesScrapeMinIntervalFromSettings(): void

@@ -54,7 +54,7 @@ function admin_torrents_controller(mysqli $connection, array $settings): string
     // and $listed is narrowed to the two valid flags here. Seeders descending is
     // the default because the first question of a tracker listing is what is
     // actually being served.
-    $limit = max(1, intval($settings['admin_torrents_limit']));
+    $limit = max(1, intval($settings['admin_torrents_rows']));
     $offset = max(0, (int) ($_GET['offset'] ?? 0));
     $search = is_string($_GET['q'] ?? null) ? trim((string) $_GET['q']) : '';
     $listed = isset($_GET['listed']) && ($_GET['listed'] === '0' || $_GET['listed'] === '1')

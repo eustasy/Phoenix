@@ -34,7 +34,7 @@ class ViewAdminHtmlTest extends TestCase
     }
 
     /**
-     * @return list<array{info_hash: string, name: string|null, filename: string|null, seeders: int, leechers: int, downloads: int, traffic: int}>
+     * @return list<array{info_hash: string, name: string|null, filename: string|null, seeders: int, leechers: int, downloads: int, bandwidth: int}>
      */
     private function topTorrents(): array
     {
@@ -44,7 +44,7 @@ class ViewAdminHtmlTest extends TestCase
         ];
     }
 
-    public function testTrafficChartFillsTheOtherHalfOfTheChartRow(): void
+    public function testBandwidthChartFillsTheOtherHalfOfTheChartRow(): void
     {
         $bandwidth = [
             ['time' => 1788739200, 'completions' => 76, 'bytes' => 250263275520],
@@ -345,7 +345,7 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertStringContainsString('<h3>Most leeched</h3>', $html);
     }
 
-    public function testTrafficCardRowsLinkToTheTrafficDrillDown(): void
+    public function testBandwidthCardRowsLinkToTheBandwidthDrillDown(): void
     {
         // A row links into the view that answers the question its card asked:
         // the swarm cards to Peers, the bytes card to Bandwidth.

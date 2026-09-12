@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 ////	torrents_bandwidth
-// Per-torrent traffic, for the Traffic page's table. Two measures, because the
+// Per-torrent bandwidth, for the Bandwidth page's table. Two measures, because the
 // tracker holds two genuinely different numbers and neither is a substitute
 // for the other:
 //

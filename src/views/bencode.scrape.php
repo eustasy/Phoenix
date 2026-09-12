@@ -22,7 +22,7 @@ declare(strict_types=1);
 //
 // Returns: bencoded scrape response string.
 /**
- * @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, traffic: int}> $scrape
+ * @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, bandwidth: int}> $scrape
  * @param int $min_request_interval BEP 48 scrape-throttle hint (seconds); 0 omits it
  */
 function view_scrape_bencode(array $scrape, int $min_request_interval = 0): string

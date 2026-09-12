@@ -67,7 +67,7 @@ class ViewScrapeXmlTest extends PhoenixTestCase
         $this->assertStringContainsString('<peers>3</peers>', $xml);
         $this->assertStringContainsString('<size>1024</size>', $xml);
         $this->assertStringContainsString('<downloads>7</downloads>', $xml);
-        $this->assertStringContainsString('<traffic>7168</traffic>', $xml);
+        $this->assertStringContainsString('<bandwidth>7168</bandwidth>', $xml);
     }
 
     public function testWrappingTorrentTagsArePresent(): void

@@ -197,7 +197,7 @@ The response is keyed by info_hash, one entry per torrent, in the order given:
     "peers": 114,
     "size": 3335405568,
     "downloads": 28693,
-    "traffic": 95702791962624
+    "bandwidth": 95702791962624
   },
   "90b3382caff769f4c7779ef90a5ab30eedda73d4": {
     "info_hash": "90b3382caff769f4c7779ef90a5ab30eedda73d4",
@@ -206,7 +206,7 @@ The response is keyed by info_hash, one entry per torrent, in the order given:
     "peers": 33,
     "size": 3191691264,
     "downloads": 5403,
-    "traffic": 17244707899392
+    "bandwidth": 17244707899392
   },
   "min_request_interval": 900
 }
@@ -238,7 +238,7 @@ filter, so turn it off when the list should be private.
 
 `min_request_interval` (BEP 48) appears alongside the torrents when
 `scrape_min_interval` is non-zero. A 40-hex info_hash can never collide with
-that key. `traffic` is `size × downloads` — an estimate that counts no partial
+that key. `bandwidth` is `size × downloads` — an estimate that counts no partial
 or repeat downloads.
 
 The bencode form uses BEP 48's standard `files` dict with `complete`,
@@ -262,7 +262,7 @@ The public torrent list, when `public_index` is on. HTML for browsers, with
     "seeders": 0,
     "leechers": 0,
     "peers": 0,
-    "traffic": 14893541228544,
+    "bandwidth": 14893541228544,
     "filename": "elementaryos-6.0-daily.20210430.iso",
     "files": null,
     "trackers": ["https://tracker.ashrise.com/announce"],
@@ -292,7 +292,7 @@ Unauthenticated.
     "leechers": 3,
     "torrents": 26,
     "downloads": 1288564,
-    "traffic": 2396397965244416
+    "bandwidth": 2396397965244416
   }
 }
 ```
@@ -379,7 +379,7 @@ curl -H "Authorization: Bearer $KEY" https://tracker.example.com/api/torrents
       "seeders": 112,
       "leechers": 1,
       "peers": 113,
-      "traffic": 95702791962624,
+      "bandwidth": 95702791962624,
       "filename": "elementaryos-0.3.2-stable-amd64.20151209.iso",
       "files": null,
       "trackers": ["https://tracker.example.com/announce"],

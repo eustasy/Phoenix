@@ -61,7 +61,7 @@ class ScrapeSpecificControllerTest extends PhoenixTestCase
     }
 
     // Expected per-torrent rendering. HASH_A: size=1024, downloads=7, 2
-    // seeders, 1 leecher → peers=3, traffic=size*downloads=7168.
+    // seeders, 1 leecher → peers=3, bandwidth=size*downloads=7168.
     // HASH_B: zero-initialised by scrape_initialize_results because no
     // peers exist for it; size & downloads come from the torrents row.
 
@@ -74,7 +74,7 @@ class ScrapeSpecificControllerTest extends PhoenixTestCase
         '<peers>3</peers>'.
         '<size>1024</size>'.
         '<downloads>7</downloads>'.
-        '<traffic>7168</traffic>'.
+        '<bandwidth>7168</bandwidth>'.
         '</torrent>';
     private const HASH_A_JSON = [
         'info_hash' => self::HASH_A,
@@ -95,7 +95,7 @@ class ScrapeSpecificControllerTest extends PhoenixTestCase
         '<peers>0</peers>'.
         '<size>0</size>'.
         '<downloads>0</downloads>'.
-        '<traffic>0</traffic>'.
+        '<bandwidth>0</bandwidth>'.
         '</torrent>';
     private const HASH_B_JSON = [
         'info_hash' => self::HASH_B,
@@ -110,7 +110,7 @@ class ScrapeSpecificControllerTest extends PhoenixTestCase
     /**
      * BEP 48 specifies exactly three keys per torrent dict (complete,
      * downloaded, incomplete). Phoenix's XML/JSON renders extend that with
-     * peers/size/traffic for caller convenience, but the bencode output
+     * peers/size/bandwidth for caller convenience, but the bencode output
      * must stay strictly conformant — strict BitTorrent clients are within
      * their rights to reject responses that carry unknown keys.
      */
@@ -123,7 +123,7 @@ class ScrapeSpecificControllerTest extends PhoenixTestCase
         $this->assertStringNotContainsString('9:info_hash', $bencode);
         $this->assertStringNotContainsString('5:peers', $bencode);
         $this->assertStringNotContainsString('4:size', $bencode);
-        $this->assertStringNotContainsString('7:traffic', $bencode);
+        $this->assertStringNotContainsString('9:bandwidth', $bencode);
     }
 
     public function testRendersBencodeForSingleHash(): void

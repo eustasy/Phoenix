@@ -54,7 +54,7 @@ class StatsBandwidthSeriesTest extends PhoenixTestCase
     {
         // A part-elapsed day always reads as a fall, and the most recent point
         // is the one read hardest — so it is omitted rather than shown as a
-        // collapse in traffic.
+        // collapse in bandwidth.
         $today = intdiv(time(), 86400) * 86400;
         $yesterday = $today - 86400;
 

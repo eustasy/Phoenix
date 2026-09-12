@@ -1,15 +1,15 @@
-/* Phoenix — traffic over time (admin Traffic page, and the dashboard summary).
- * Inlined by PHP inside a <script> tag, prefixed with `var TRAFFIC = […]; var
- * TRAFFIC_BUCKET = <seconds>;` — the bucketed series, oldest first.
+/* Phoenix — bandwidth over time (admin Bandwidth page, and the dashboard summary).
+ * Inlined by PHP inside a <script> tag, prefixed with `var BANDWIDTH = […]; var
+ * BANDWIDTH_BUCKET = <seconds>;` — the bucketed series, oldest first.
  *
  * Empty buckets are omitted by the query rather than filled with zeroes, so the
  * x axis is time-based and spans the gaps itself: a quiet week should read as a
  * flat stretch, not as the line skipping forward. */
-/* global TRAFFIC, TRAFFIC_BUCKET, Chart */
+/* global BANDWIDTH, BANDWIDTH_BUCKET, Chart */
 
 // Theme colours, read at paint time rather than captured once: the class on
 // <html> flips under a live chart when the reader toggles the theme.
-function phTrafficTheme() {
+function phBandwidthTheme() {
   var dark = document.documentElement.classList.contains("theme-dark")
   return {
     line: dark ? "#879a39" : "#66800b",
@@ -18,17 +18,17 @@ function phTrafficTheme() {
   }
 }
 
-function phTrafficChart(canvasId) {
+function phBandwidthChart(canvasId) {
   var el = document.getElementById(canvasId || "bandwidth-chart")
-  if (!el || typeof Chart === "undefined" || !TRAFFIC.length) return
+  if (!el || typeof Chart === "undefined" || !BANDWIDTH.length) return
 
-  var c = phTrafficTheme()
+  var c = phBandwidthTheme()
   var line = c.line
   var grid = c.grid
   var text = c.text
 
   // A bucket wider than a week is a month's worth; label accordingly.
-  var monthly = TRAFFIC_BUCKET > 604800
+  var monthly = BANDWIDTH_BUCKET > 604800
 
   function unit(bytes) {
     var u = ["B", "KB", "MB", "GB", "TB", "PB"]
@@ -43,7 +43,7 @@ function phTrafficChart(canvasId) {
   return new Chart(el, {
     type: "line",
     data: {
-      labels: TRAFFIC.map(function (p) {
+      labels: BANDWIDTH.map(function (p) {
         var d = new Date(p.time * 1000)
         return monthly
           ? d.toLocaleDateString(undefined, { year: "numeric", month: "short" })
@@ -51,7 +51,7 @@ function phTrafficChart(canvasId) {
       }),
       datasets: [
         {
-          data: TRAFFIC.map(function (p) {
+          data: BANDWIDTH.map(function (p) {
             return p.bytes
           }),
           borderColor: line,
@@ -73,7 +73,7 @@ function phTrafficChart(canvasId) {
         tooltip: {
           callbacks: {
             label: function (ctx) {
-              var p = TRAFFIC[ctx.dataIndex]
+              var p = BANDWIDTH[ctx.dataIndex]
               return unit(p.bytes) + " · " + p.completions.toLocaleString() + " completed"
             },
           },
@@ -96,20 +96,20 @@ function phTrafficChart(canvasId) {
   })
 }
 
-var phTrafficInstance = phTrafficChart()
+var phBandwidthInstance = phBandwidthChart()
 
 // Repaint on theme change. Without this the chart keeps the palette it was
 // built with, so a grid sized for one background all but vanishes on the other.
 document.addEventListener("phoenix:theme", function () {
-  if (!phTrafficInstance) return
-  var c = phTrafficTheme()
-  var o = phTrafficInstance.options
+  if (!phBandwidthInstance) return
+  var c = phBandwidthTheme()
+  var o = phBandwidthInstance.options
   o.scales.x.ticks.color = c.text
   o.scales.y.ticks.color = c.text
   o.scales.y.grid.color = c.grid
-  phTrafficInstance.data.datasets.forEach(function (d) {
+  phBandwidthInstance.data.datasets.forEach(function (d) {
     d.borderColor = c.line
     d.backgroundColor = c.line + "22"
   })
-  phTrafficInstance.update("none")
+  phBandwidthInstance.update("none")
 })

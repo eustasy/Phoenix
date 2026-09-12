@@ -13,7 +13,7 @@ declare(strict_types=1);
 //           - leechers: int
 //           - torrents: int
 //           - downloads: int
-//           - traffic: int
+//           - bandwidth: int
 //   $settings: config array (needs phoenix_version)
 //
 // Returns: XML string.
@@ -32,6 +32,6 @@ function view_stats_xml(array $stats, array $settings): string
         '<leechers>'.$stats['leechers'].'</leechers>'.
         '<torrents>'.$stats['torrents'].'</torrents>'.
         '<downloads>'.$stats['downloads'].'</downloads>'.
-        '<traffic>'.$stats['bandwidth'].'</traffic>'.
+        '<bandwidth>'.$stats['bandwidth'].'</bandwidth>'.
         '</tracker>';
 }

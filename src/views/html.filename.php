@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ////	view_filename_html
 // Render a torrent's filename as a table cell's contents, for the Torrents and
-// Traffic listings — the two places it gets a column of its own.
+// Bandwidth listings — the two places it gets a column of its own.
 //
 // The filename is what the torrent actually delivers, and routinely the thing
 // that distinguishes two rows sharing a display name. It is also longer than

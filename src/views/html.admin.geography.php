@@ -58,7 +58,7 @@ function view_admin_geography_html(array $settings, string $metric, array $value
         'bandwidth' => [
             'short' => 'Bandwidth',
             'label' => 'Bandwidth by country',
-            'listTitle' => 'Top countries — traffic',
+            'listTitle' => 'Top countries — bandwidth',
             'unit' => ' bytes',
             // Values are byte counts, so the panel and tooltip render them as
             // sizes rather than as 22098152264304.

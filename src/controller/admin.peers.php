@@ -6,7 +6,7 @@ declare(strict_types=1);
 // Renders the admin global Peers page: a page of peers across every swarm, each
 // tagged with a detected client label, newest-seen first. The swarm-wide totals
 // (active peers, distinct swarms) come from the same aggregation the dashboard
-// uses; the rows are paged via admin_peers_limit and an ?offset, and searched,
+// uses; the rows are paged via admin_peers_rows and an ?offset, and searched,
 // filtered and sorted server-side via ?q / ?state / ?sort / ?dir, and narrowed
 // to one swarm by ?info_hash — which is the per-torrent drill-down, served by
 // this same paged view rather than a separate unpaged one. Dispatched by
@@ -23,7 +23,7 @@ function admin_peers_controller(mysqli $connection, array $settings): string
 
     // Page window. Offset arrives from the query string; a non-numeric value
     // collapses to 0. The limit is an operator setting.
-    $limit = max(1, intval($settings['admin_peers_limit']));
+    $limit = max(1, intval($settings['admin_peers_rows']));
     $offset = max(0, (int) ($_GET['offset'] ?? 0));
 
     // Search, filter and sort are applied in SQL rather than in the browser, so

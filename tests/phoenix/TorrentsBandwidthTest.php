@@ -54,7 +54,7 @@ class TorrentsBandwidthTest extends PhoenixTestCase
         return null;
     }
 
-    public function testEstimatedTrafficIsSizeTimesDownloads(): void
+    public function testEstimatedBandwidthIsSizeTimesDownloads(): void
     {
         $this->torrent('__TEST_tt_a__', 1000, 7);
 

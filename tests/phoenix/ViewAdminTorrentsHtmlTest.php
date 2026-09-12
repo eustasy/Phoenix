@@ -219,7 +219,7 @@ class ViewAdminTorrentsHtmlTest extends TestCase
         $this->assertStringContainsString('<b>4,096</b> torrents', $html);
     }
 
-    public function testEachRowLinksToItsTrafficView(): void
+    public function testEachRowLinksToItsBandwidthView(): void
     {
         $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok', [], 1);
 

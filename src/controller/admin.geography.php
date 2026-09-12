@@ -17,7 +17,7 @@ declare(strict_types=1);
 //                 configured, even with zero current peers.
 //   * downloads — Completed downloads by country, from the events ledger's
 //                 stored coarse codes.
-//   * traffic   — The same completions weighted by torrent size: one dataset
+//   * bandwidth   — The same completions weighted by torrent size: one dataset
 //                 read two ways, so it is offered on the same condition as
 //                 downloads, and carries the same estimate caveat.
 //

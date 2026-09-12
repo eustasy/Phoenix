@@ -31,7 +31,7 @@ function admin_tasks_controller(mysqli $connection, array $settings): string
         $source = '';
     }
 
-    $limit = max(1, intval($settings['admin_tasks_limit']));
+    $limit = max(1, intval($settings['admin_tasks_rows']));
     $offset = isset($_GET['offset']) ? max(0, intval($_GET['offset'])) : 0;
 
     $runs = task_runs_select($connection, $settings, $name, $source, $limit, $offset);

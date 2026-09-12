@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 ////	admin_bandwidth_controller
-// Renders the admin Traffic page: a time series of traffic served, and a table
+// Renders the admin Bandwidth page: a time series of bandwidth served, and a table
 // of it per torrent, with a metric toggle between the two figures the tracker
 // actually holds — the all-time estimate derived from the events ledger, and
 // the live swarm's client-reported byte counters. Read-only. Dispatched by
@@ -18,7 +18,7 @@ declare(strict_types=1);
 // The table below the chart is paged, searched and sorted in SQL via ?q /
 // ?info_hash / ?sort / ?dir / ?offset, the same shape the Peers and Torrents
 // listings use. ?info_hash narrows to one torrent, so a row elsewhere can link
-// here for that torrent's traffic without a second view to keep in step.
+// here for that torrent's bandwidth without a second view to keep in step.
 
 /** @param PhoenixSettings $settings */
 function admin_bandwidth_controller(mysqli $connection, array $settings): string
@@ -45,7 +45,7 @@ function admin_bandwidth_controller(mysqli $connection, array $settings): string
         : '90';
 
     // All untrusted: the model binds $search and whitelists $sort/$dir.
-    $limit = max(1, intval($settings['admin_bandwidth_limit']));
+    $limit = max(1, intval($settings['admin_bandwidth_rows']));
     $offset = max(0, (int) ($_GET['offset'] ?? 0));
     $search = is_string($_GET['q'] ?? null) ? trim((string) $_GET['q']) : '';
     $sort = is_string($_GET['sort'] ?? null) ? (string) $_GET['sort'] : 'bandwidth';

@@ -15,7 +15,7 @@ declare(strict_types=1);
 //           - seeders: int
 //           - leechers: int
 //           - peers: int
-//           - traffic: int
+//           - bandwidth: int
 //           - filename: string|null    (meta, present in rows from torrents_select_listed)
 //           - files: list|null         (meta)
 //           - trackers: list|null      (meta)
@@ -37,7 +37,7 @@ declare(strict_types=1);
  *     seeders: int,
  *     leechers: int,
  *     peers: int,
- *     traffic: int,
+ *     bandwidth: int,
  *     filename?: string|null,
  *     files?: list<array{path: string, length: int}>|null,
  *     trackers?: list<string>|null,
@@ -59,7 +59,7 @@ function view_index_xml(array $index, bool $show_meta = false): string
             '<seeders>'.$torrent['seeders'].'</seeders>'.
             '<leechers>'.$torrent['leechers'].'</leechers>'.
             '<peers>'.$torrent['peers'].'</peers>'.
-            '<traffic>'.$torrent['bandwidth'].'</traffic>';
+            '<bandwidth>'.$torrent['bandwidth'].'</bandwidth>';
 
         ////	magnet
         // Built by public/index.php; emitted in both modes when non-null.
