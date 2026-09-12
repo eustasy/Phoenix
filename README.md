@@ -15,16 +15,8 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
   - [Requirements](#requirements)
   - [With server access](#with-server-access)
   - [Managed LAMP / shared hosting](#managed-lamp--shared-hosting)
-- [Cron (Automating Maintenance)](#cron-automating-maintenance)
 - [Configuration](#configuration)
-  - [Stat-Tracking](#stat-tracking)
-    - [Geo enrichment](#geo-enrichment)
-  - [Two-Factor Authentication (optional)](#two-factor-authentication-optional)
-  - [Admin password requirements](#admin-password-requirements)
-  - [Recovering admin access](#recovering-admin-access)
-  - [Reverse proxies & client IP address](#reverse-proxies--client-ip-address)
-  - [Error reporting (optional)](#error-reporting-optional)
-- [Server Configuration](#server-configuration)
+- [Web Server Configuration](#web-server-configuration)
 - [API](#api)
 - [Documentation](#documentation)
 
@@ -60,100 +52,13 @@ Use this path when you use a cPanel-style host with no direct web server configu
     - Or import the schema files manually (`sql/peers.sql`, `sql/torrents.sql`, `sql/tasks.sql`, `sql/events.sql`), copy `config/phoenix.default.php` to `config/phoenix.custom.php`, and fill in your database credentials.
 6. After setup, secure `admin.php` as described above.
 
-## Cron (Automating Maintenance)
-
-1. Edit `config/phoenix.custom.php` and set:
-    - `$settings['backup_dir']` to change the backup directory. Defaults to `backups/` in the project root.
-    - `$settings['clean_with_cron']` to `true` to enable the script and disable occasional cleanup on announce.
-2. Edit your crontab with `crontab -e`, and add entries like the following. Adjust the times and verify the paths are correct.
-
-```cron
-*/15 * * * * php ~/phoenix/bin/clean-and-optimize.php
-30 3 * * * php ~/phoenix/bin/backup-database.php
-```
-
 ## Configuration
 
 Configuration should take place in `config/phoenix.custom.php`, NOT `config/phoenix.default.php`. Phoenix _will_ attempt to use the default configuration if yours is missing.
 
-### Stat-Tracking
+**[CONFIGURATION.md](./CONFIGURATION.md)** covers every option in detail: stat-tracking and geo enrichment, two-factor authentication, admin password policy, reverse proxies and client IP address, error reporting, and the backup and maintenance cron jobs. Every settable value is listed with its default in `config/phoenix.default.php`.
 
-Phoenix can log torrent events (completions by default; optionally started/stopped via `stats_events`) to an `events` table. Enable it with `$settings['stats_enabled'] = true;`, or from the **Statistics** section of the installer or the admin **Settings** flags — the table exists from install, so it's just a flag. The ledger is privacy-preserving by design — a coarse client label and minified location are derived from the peer_id and IP, and the event row keeps only those derived codes, never the address itself. (The `peers` table does store each peer's address: that is the swarm index a tracker exists to serve.) See the `stats_*` settings (including `stats_retention`, which prunes old rows) in `config/phoenix.default.php`.
-
-#### Geo enrichment
-
-With a GeoLite2 database, events are tagged with a coarse country/continent, and the admin **Geography** page maps active peers and completed downloads by country.
-
-1. Run `composer require maxmind-db/reader`, and install `ext-maxminddb` if your distribution packages it (`apt install php-maxminddb`) — the pure-PHP reader works but is around 40× slower, which matters on a busy tracker.
-2. Get a free [GeoLite2-Country database](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) from MaxMind (their licence forbids Phoenix bundling it). Drop it where Phoenix finds it automatically — `/usr/share/GeoIP/GeoLite2-Country.mmdb` (kept current by MaxMind's `geoipupdate`), `/var/lib/GeoIP/`, or the project's `config/` directory — or set `$settings['stats_geo_database']` to a custom path.
-3. Enable it with `$settings['stats_geo'] = true;`, or tick it in the installer / admin Settings — the toggle is greyed out there until both the library and a database are present.
-
-The "active peers by country" map works as soon as geo is configured; "completed downloads by country" fills in from the events ledger as completions are logged, so it also needs `stats_enabled`. Geo degrades gracefully: with the library or database missing or unreadable, events are still logged (just with empty location codes) and the Geography page shows a "not configured" state.
-
-### Two-Factor Authentication (optional)
-
-The admin panel supports an optional TOTP second factor (the codes from authenticator apps like Google Authenticator or Aegis), on top of the admin password.
-
-1. Run `composer require eustasy/authenticatron` (the QR code needs PHP's `gd` extension; without it the installer falls back to showing the secret and `otpauth://` URL for manual entry).
-2. During install, scan the displayed QR code with your authenticator app, then enter a current code to confirm and enable 2FA. Leave the code blank to skip it — the panel stays password-only.
-
-Once enabled, the login page asks for the 6-digit code alongside the password. To recover from a lost authenticator, remove the `$settings['admin_totp_secret'] = '...';` line from `config/phoenix.custom.php`; the panel reverts to password-only and you can re-enrol.
-
-### Admin password requirements
-
-The admin password is set in three places — the installer, the **Settings** page's _Change password_ action, and the first-run set-password gate — all sharing one policy (following NIST SP 800-63B: length over composition):
-
-- **At least 12 characters.**
-- **At most 72 bytes** — bcrypt (`PASSWORD_DEFAULT`) silently truncates beyond 72 bytes, so a longer passphrase would have its tail ignored.
-
-An optional TOTP second factor can be enrolled alongside the password (see [Two-Factor Authentication](#two-factor-authentication-optional)).
-
-### Recovering admin access
-
-The admin password is stored as a bcrypt hash (`$settings['admin_password']`) in `config/phoenix.custom.php`, and you normally change it from the panel's **Settings** page. If you're locked out, choose whichever path fits:
-
-- **Reset from the panel.** Remove the `$settings['admin_password']` line from `config/phoenix.custom.php` (or set it to `''`). On the next load, `admin.php` presents a one-time **"set admin password"** gate — the same ≥12-character policy, with optional TOTP re-enrolment — and writes the new hash for you, so no manual hashing is needed. This needs `config/` to be writable, and you should only do it while `public/admin.php` is not publicly reachable, because the gate itself is unauthenticated. (Setting `$settings['admin_auth_optional'] = true` instead runs the panel with **no** password at all — only for an `admin.php` already protected by other means, such as reverse-proxy auth or an IP allowlist.)
-- **Set a hash directly.** When `config/` isn't writable — or you'd rather not expose the gate — generate a hash and paste it in yourself:
-
-  ```bash
-  php -r "echo password_hash('your-new-password', PASSWORD_DEFAULT), PHP_EOL;"
-  ```
-
-  Set `$settings['admin_password']` to the printed value. Editing the file directly bypasses the length policy, so pick a strong password yourself.
-
-If you relocated `public/admin.php` out of the web root after setup, restore it first. To start over completely, delete `config/phoenix.custom.php` and re-run **Setup**; the installer writes a fresh [setup token](#installation) to `config/.phoenix-setup-token` that you must supply again. Lost your two-factor device as well? Removing `$settings['admin_totp_secret']` reverts the panel to password-only (see [Two-Factor Authentication](#two-factor-authentication-optional)).
-
-### Reverse proxies & client IP address
-
-Phoenix identifies each peer by its connecting IP, so behind a reverse proxy or CDN it must know which forwarded-address header to trust — otherwise it either sees only the proxy or lets clients spoof their address. By default it trusts **nothing** and uses the direct connection (`REMOTE_ADDR`) only: safe, but wrong behind a proxy. Two settings (both empty and fail-closed by default) control it:
-
-- `$settings['forwarded_headers']` — an ordered list of headers to trust, e.g. `['x-forwarded-for']` or `['cf-connecting-ip']`. Recognised: `x-forwarded-for`, `forwarded` (RFC 7239), `x-real-ip`, `cf-connecting-ip`, `true-client-ip`, and the legacy `client-ip`. List **only** headers your proxy sets and strips from client input.
-- `$settings['trusted_proxies']` — CIDR ranges of your proxies. A forwarded header is honoured only when `REMOTE_ADDR` falls inside one of these ranges; chain headers (`X-Forwarded-For` / `Forwarded`) are walked from the right, skipping these ranges, to find the real client.
-
-If `trusted_proxies` is empty, forwarded headers are **not** trusted unless you explicitly set `$settings['trust_any_forwarded'] = true` — which trusts the header from any direct connection and so lets anyone reaching the tracker spoof their address. Leave it off unless you fully control who can connect. Often it is cleaner to let the web server rewrite `REMOTE_ADDR` itself (Apache `mod_remoteip`, Nginx `real_ip`) and leave these empty — see [APACHE.md](./APACHE.md) / [NGINX.md](./NGINX.md).
-
-### Error reporting (optional)
-
-Phoenix can hand server-side failures and uncaught exceptions to an external monitor. Two hooks drive it — `src/hooks/phoenix.init.php` starts the monitor at the top of each request, before the database connects, so even a connection failure is reported; `src/hooks/phoenix.error.php` sends each error. Both ship wired for [Sentry](https://sentry.io) and inert, so a default install reports nothing and costs nothing.
-
-1. Run `composer require sentry/sentry`.
-2. Set `$settings['report_errors'] = true;` — this is what makes the hooks fire at all.
-3. Set `$settings['sentry_dsn'] = 'https://…';` in `config/phoenix.custom.php`, which is gitignored, so the DSN stays out of your repository and `git pull` upgrades stay clean.
-
-Errors arrive tagged with `phoenix.source` — which part of the tracker failed, e.g. `peer_insert`, `tracker_error`, `shutdown` — and carry the running `phoenix_version` as the release. Reporting is best-effort by design: `phoenix_hook_event()` swallows anything the hooks throw, so a bad DSN or an unreachable Sentry degrades to "no reporting", never a broken tracker.
-
-Optional tuning, all in `config/phoenix.default.php`:
-
-| Setting | Default | Notes |
-| --- | --- | --- |
-| `sentry_environment` | `'production'` | Tags events; use it to separate staging from live. |
-| `sentry_traces_sample_rate` | `0.0` | Performance tracing. See the caveat below. |
-| `sentry_profiles_sample_rate` | `0.0` | Fraction of _traced_ requests profiled. Needs `ext-excimer`; inert without it. |
-| `sentry_enable_logs` | `false` | Forwards log records through Sentry's logging API. |
-
-**Tracing does nothing yet.** Phoenix starts no transactions or spans, and the bare PHP SDK does not instrument requests on its own — that is a framework-SDK feature. So `sentry_traces_sample_rate` has nothing to sample whatever you set it to, and profiling, being a fraction of tracing, has nothing either. Error reporting is unaffected and works on its own. Both settings exist so the wiring is ready if instrumentation is added; leave them at `0.0` until then, and if you do add it, pick a rate well under `1.0` — announce is the hot path and a modest swarm can drive thousands of requests an hour.
-
-## Server Configuration
+## Web Server Configuration
 
 Phoenix ships with example web server configurations covering document root location, `.php` extension stripping, admin endpoint rate limiting, https redirection, and auth passthrough:
 
@@ -166,6 +71,8 @@ Every HTTP endpoint Phoenix exposes is documented in [API.md](./API.md) — the 
 
 ## Documentation
 
+- [CONFIGURATION.md](./CONFIGURATION.md) — every configuration option, with defaults.
+- [RECOVERY.md](./RECOVERY.md) — admin lockout, disabling 2FA, and restoring the database from a backup.
 - [API.md](./API.md) — every HTTP endpoint: announce, scrape, the public index, and the management API.
 - [MIGRATING.md](./MIGRATING.md) — upgrading from 3.x to 4.0.
 - [LIMITS.md](./LIMITS.md) — how many peers and torrents an install carries, and what binds first.

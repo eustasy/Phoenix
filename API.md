@@ -134,7 +134,7 @@ swarm.
 
 The address Phoenix registers comes from the connection (`REMOTE_ADDR`), or a
 forwarded header when you have configured `forwarded_headers` and
-`trusted_proxies`. See [README.md](./README.md#reverse-proxies--client-ip-address);
+`trusted_proxies`. See [CONFIGURATION.md](./CONFIGURATION.md#reverse-proxies--client-ip-address);
 misconfiguring it either hides every peer behind your proxy or lets clients
 spoof each other.
 
