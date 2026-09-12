@@ -807,8 +807,6 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
   flex-direction: column;
   gap: var(--space-2);
   padding-block-end: var(--space-3);
-  margin-block-end: var(--space-3);
-  border-bottom: var(--border-width) solid var(--color-border);
 }
 .ph-srv-head {
   display: flex;
