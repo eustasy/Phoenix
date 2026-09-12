@@ -17,6 +17,15 @@
 .idx-table tbody { border-bottom: var(--border-width) solid var(--color-border); }
 .idx-table tbody:last-child { border-bottom: none; }
 .idx-table tbody tr td { border-bottom: none; }
+/* …and from the last group still SHOWING, which is a different group once the
+   filter has hidden the ones below it. The filter sets [hidden] on the <tbody>
+   (tables.js groups a torrent's rows there), so a hidden group still counts as
+   :last-child and the last visible one keeps a border that doubles against the
+   card's own. Guarded by @supports: without :has() only the filtered case looks
+   slightly off, never the unfiltered one. */
+@supports selector(:has(*)) {
+  .idx-table tbody:not([hidden]):not(:has(~ tbody:not([hidden]))) { border-bottom: none; }
+}
 
 .idx-meta td {
   padding-block: 0 var(--space-3);
