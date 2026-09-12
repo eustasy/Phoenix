@@ -66,9 +66,9 @@ Restoring is covered in [RECOVERY.md](./RECOVERY.md#restore-the-database-from-a-
 
 ## Cron (automating maintenance)
 
-Phoenix cleans up after itself either way — the question is _when_. By default
+Phoenix prunes expired rows either way — the question is _when_. By default
 `clean_with_cron` is `false`, and roughly `clean_request_percent` (1%) of
-announces pay for a cleanup pass inline. That keeps a zero-configuration install
+announces pay for a pruning pass inline. That keeps a zero-configuration install
 correct, but it means one unlucky peer in a hundred waits on table maintenance
 instead of getting a fast announce.
 
@@ -88,9 +88,10 @@ entry leaves the tracker doing no cleanup from either route.
 
 **The two maintenance jobs run on deliberately different schedules.**
 
-`prune-database.php` prunes stale peers, prunes `events` and `task_runs`
+`prune-database.php` drops stale peers, drops `events` and `task_runs` rows
 past their retention, and refreshes index statistics with `ANALYZE`. All of that
-is cheap — an analyze measured 1.6 ms — so it runs often.
+is cheap — an analyze measured 1.6 ms — so it runs often. It is the same work as
+**Utilities → Prune** plus the analyze.
 
 `optimize-database.php` runs `OPTIMIZE TABLE`, which on InnoDB is a **full table
 rebuild**. It is the only thing that reclaims space from deleted rows: after
@@ -107,8 +108,8 @@ from **Utilities → Check** when something looks wrong.
 
 | Setting | Default | Notes |
 | --- | --- | --- |
-| `clean_with_cron` | `false` | `true` moves cleanup to cron and disables the per-announce fallback. |
-| `clean_request_percent` | `1` | Percent of announces that clean inline, when `clean_with_cron` is off. |
+| `clean_with_cron` | `false` | `true` moves pruning to cron and disables the per-announce fallback. |
+| `clean_request_percent` | `1` | Percent of announces that prune inline, when `clean_with_cron` is off. |
 | `task_retention` | `0` | Days of task-run history to keep in `task_runs`. `0` keeps everything. |
 | `stats_retention` | `0` | Days of `events` history to keep. `0` keeps everything — see below. |
 

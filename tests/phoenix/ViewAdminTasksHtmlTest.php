@@ -37,7 +37,7 @@ class ViewAdminTasksHtmlTest extends PhoenixTestCase
         $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', '', 'tok');
 
         $this->assertStringContainsString('Backed up', $html);
-        $this->assertStringContainsString('Cleaned', $html);
+        $this->assertStringContainsString('Pruned', $html);
         $this->assertStringContainsString('Optimized', $html);
         // The trigger is the column worth reading: cron vs auto vs admin.
         $this->assertStringContainsString('>Cron</span>', $html);

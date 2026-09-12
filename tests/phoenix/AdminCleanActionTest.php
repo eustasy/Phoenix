@@ -17,7 +17,7 @@ class AdminCleanActionTest extends PhoenixTestCase
         // admin_clean_action delegates to task_clean, which deletes its own
         // sentinel rows and so always succeeds against a healthy DB.
         $result = admin_clean_action(self::$connection, self::$settings, self::$time);
-        $this->assertSame('The peers list has been cleaned.', $result);
+        $this->assertSame('Expired rows have been pruned.', $result);
     }
 
     public function testReturnsFailureMessageWhenCleanFails(): void

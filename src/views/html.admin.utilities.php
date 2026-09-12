@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 ////	view_admin_utilities_html
 // Render the admin Utilities page: the database setup/reset action plus the
-// clean, analyze, optimize, check, and schema-migrate maintenance actions. The setup action
+// prune, analyze, optimize, check, and schema-migrate maintenance actions. The setup action
 // also appears when the tables are missing (so the operator can install); the
-// clean/optimize/migrate actions need live tables. Any action message is shown
+// prune/analyze/optimize/check/migrate actions need live tables. Any action message is shown
 // above. Wrapped in the shared admin layout (narrow). Returns HTML string.
 //
 // Parameters:
@@ -57,7 +57,7 @@ function view_admin_utilities_html(array $settings, bool $tables_installed, stri
 
     // Maintenance actions (only with installed tables).
     if ($tables_installed) {
-        $rows .= $action('brush-cleaning', 'Clean', 'Remove redundant / stale peers', 'clean', 'Clean peers', $csrf_field);
+        $rows .= $action('brush-cleaning', 'Prune', 'Drop stale peers, expired events and task history', 'clean', 'Prune', $csrf_field);
         $rows .= $action('gauge', 'Analyze', 'Refresh index statistics &mdash; fast, reclaims nothing', 'analyze', 'Analyze', $csrf_field);
         $rows .= $action('chart-no-axes-column', 'Optimize', 'Rebuild tables to reclaim space from deleted rows', 'optimize', 'Optimize', $csrf_field);
         $rows .= $action('shield-check', 'Check', 'Scan every table for integrity errors', 'check', 'Check', $csrf_field);

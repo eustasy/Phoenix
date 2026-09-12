@@ -259,7 +259,7 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertStringContainsString('123,456 bytes', $html);
         // Maintenance rows render only for tasks that have run, with a By column
         // naming who ran each (capitalised source).
-        $this->assertStringContainsString('Cleaned', $html);
+        $this->assertStringContainsString('Pruned', $html);
         $this->assertStringContainsString('Optimized', $html);
         $this->assertStringNotContainsString('Migrated', $html);
         $this->assertStringContainsString('<th>By</th>', $html);

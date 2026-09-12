@@ -20,7 +20,7 @@ declare(strict_types=1);
 //
 // Filtering is a GET form, not a client-side filter — the table is paged, so
 // filtering in the browser would only ever search the rendered page. The
-// trigger filter is the useful half: "clean, triggered by announce" answers
+// trigger filter is the useful half: "prune, triggered by announce" answers
 // whether the cron entry is running, which the unfiltered list buries.
 // `auto` is labelled Announce here — the stored value says where it came from,
 // the label says what a reader needs to know. Wrapped in
@@ -37,7 +37,7 @@ function view_admin_tasks_html(array $settings, array $runs, int $total, int $of
     $labels = [
         'install' => ['wand-2', 'Installed'],
         'migrate' => ['git-merge', 'Migrated'],
-        'clean' => ['brush-cleaning', 'Cleaned'],
+        'clean' => ['brush-cleaning', 'Pruned'],
         'analyze' => ['gauge', 'Analyzed'],
         'optimize' => ['chart-no-axes-column', 'Optimized'],
         'check' => ['shield-check', 'Checked'],

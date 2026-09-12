@@ -76,7 +76,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
         $task_labels = [
             'install' => ['wand-2', 'Installed'],
             'migrate' => ['git-merge', 'Migrated'],
-            'clean' => ['brush-cleaning', 'Cleaned'],
+            'clean' => ['brush-cleaning', 'Pruned'],
             'analyze' => ['gauge', 'Analyzed'],
             'optimize' => ['chart-no-axes-column', 'Optimized'],
             'check' => ['shield-check', 'Checked'],

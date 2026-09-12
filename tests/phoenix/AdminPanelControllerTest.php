@@ -47,7 +47,7 @@ class AdminPanelControllerTest extends PhoenixTestCase
         $this->assertIsString($html);
         $this->assertStringContainsString('Phoenix', $html);
         // No action submitted → no action message text in output.
-        $this->assertStringNotContainsString('peers list has been cleaned', $html);
+        $this->assertStringNotContainsString('Expired rows have been pruned', $html);
         $this->assertStringNotContainsString('Tracker Database has been optimized', $html);
     }
 
@@ -72,7 +72,7 @@ class AdminPanelControllerTest extends PhoenixTestCase
         $_POST['process'] = 'clean';
         $html = \admin_panel_controller(self::$connection, $settings, self::$time);
 
-        $this->assertStringContainsString('The peers list has been cleaned.', $html);
+        $this->assertStringContainsString('Expired rows have been pruned.', $html);
     }
 
     public function testProcessOptimizeRendersOptimizeMessage(): void
@@ -119,7 +119,7 @@ class AdminPanelControllerTest extends PhoenixTestCase
 
         $this->assertIsString($html);
         $this->assertStringContainsString('Phoenix', $html);
-        $this->assertStringNotContainsString('has been cleaned', $html);
+        $this->assertStringNotContainsString('have been pruned', $html);
         $this->assertStringNotContainsString('has been optimized', $html);
     }
 
@@ -137,7 +137,7 @@ class AdminPanelControllerTest extends PhoenixTestCase
         $html = \admin_panel_controller(self::$connection, $settings, self::$time);
 
         $this->assertStringContainsString('Security check failed', $html);
-        $this->assertStringNotContainsString('The peers list has been cleaned.', $html);
+        $this->assertStringNotContainsString('Expired rows have been pruned.', $html);
     }
 
     public function testAcceptsProcessWithValidCsrfWhenPasswordSet(): void
@@ -152,7 +152,7 @@ class AdminPanelControllerTest extends PhoenixTestCase
 
         $html = \admin_panel_controller(self::$connection, $settings, self::$time);
 
-        $this->assertStringContainsString('The peers list has been cleaned.', $html);
+        $this->assertStringContainsString('Expired rows have been pruned.', $html);
         $this->assertStringNotContainsString('Security check failed', $html);
     }
 
