@@ -42,7 +42,7 @@ Full list with comments is in `config/phoenix.default.php`. Highlights:
 
 **Cleanup**
 - `clean_request_percent` — % of announces that trigger idle-peer cleanup.
-- `clean_with_cron` — move cleanup to cron (`bin/clean-and-optimize.php`) for
+- `clean_with_cron` — move cleanup to cron (`bin/clean-database.php`) for
   faster responses.
 - `task_retention`, `stats_retention`, `backup_retention` — pruning windows.
 

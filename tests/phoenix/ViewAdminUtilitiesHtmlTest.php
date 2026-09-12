@@ -69,15 +69,20 @@ class ViewAdminUtilitiesHtmlTest extends TestCase
 
     public function testEmbedsCsrfTokenInEveryForm(): void
     {
-        // setup, clean, optimize, migrate (4 page forms) + the layout's logout
-        // form (needs admin_password) = 5 occurrences of the token.
+        // Every POST form on the page carries the token, including the
+        // layout's logout form. Counted rather than hardcoded: a missing token
+        // is the bug worth catching, and pinning the number only means every
+        // new maintenance action edits this test.
         $html = view_admin_utilities_html(
             $this->settings(['admin_password' => 'hash', 'db_reset' => true]),
             true,
             false,
             'deadbeefToken',
         );
-        $this->assertSame(5, substr_count($html, 'name="csrf" value="deadbeefToken"'));
+
+        $forms = substr_count($html, '<form');
+        $this->assertGreaterThan(1, $forms);
+        $this->assertSame($forms, substr_count($html, 'name="csrf" value="deadbeefToken"'));
     }
 
     public function testEscapesActionMessage(): void

@@ -55,14 +55,13 @@ class DbMaintenanceTest extends PhoenixTestCase
     public function testMysqliReportingIsRestored(): void
     {
         // The function turns mysqli's exception mode off while it reads the
-        // result sets; it must not leave it that way for the rest of the request.
-        $before = mysqli_report(MYSQLI_REPORT_OFF);
-        mysqli_report($before);
-
+        // result sets; it must not leave it that way for the rest of the
+        // request. mysqli_report() returns a bool rather than the previous
+        // mode, so the only honest check is behavioural: a bad query afterwards
+        // must still throw.
         \db_maintenance(self::$connection, self::$settings, 'ANALYZE', ['peers']);
 
-        $after = mysqli_report(MYSQLI_REPORT_OFF);
-        mysqli_report($after);
-        $this->assertSame($before, $after);
+        $this->expectException(\mysqli_sql_exception::class);
+        mysqli_query(self::$connection, 'SELECT * FROM `__definitely_not_a_table__`;');
     }
 }

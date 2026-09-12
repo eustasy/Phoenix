@@ -181,7 +181,7 @@ phoenix/
 │   └── phoenix.custom.php     # Your configuration (gitignored)
 ├── bin/                 # Cron maintenance scripts
 │   ├── backup-database.php
-│   └── clean-and-optimize.php
+│   └── clean-database.php
 └── tests/               # PHPUnit test suite
 ```
 

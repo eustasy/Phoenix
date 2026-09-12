@@ -76,19 +76,19 @@ Setting `clean_with_cron` to `true` moves that work to a schedule and turns the
 per-request fallback **off**, so no announce ever pays for it:
 
 ```cron
-*/15 * * * * php ~/phoenix/bin/clean-and-optimize.php
+*/15 * * * * php ~/phoenix/bin/clean-database.php
 15  3 * * * php ~/phoenix/bin/optimize-database.php
 30  3 * * * php ~/phoenix/bin/backup-database.php
 ```
 
-Adjust the times and verify the paths. `clean-and-optimize.php` exits
+Adjust the times and verify the paths. `clean-database.php` exits
 immediately unless `clean_with_cron` is set, so adding the entry without the
 setting does nothing at all — and clearing the setting without removing the
 entry leaves the tracker doing no cleanup from either route.
 
 **The two maintenance jobs run on deliberately different schedules.**
 
-`clean-and-optimize.php` prunes stale peers, prunes `events` and `task_runs`
+`clean-database.php` prunes stale peers, prunes `events` and `task_runs`
 past their retention, and refreshes index statistics with `ANALYZE`. All of that
 is cheap — an analyze measured 1.6 ms — so it runs often.
 

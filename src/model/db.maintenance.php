@@ -38,7 +38,12 @@ function db_maintenance(mysqli $connection, array $settings, string $op, array $
         $sql .= $op.' TABLE `'.$settings['db_prefix'].$table.'`;';
     }
 
-    $previous = mysqli_report(MYSQLI_REPORT_OFF);
+    // Reporting is turned off around the loop so a bad statement in the
+    // sequence surfaces as a false return rather than an exception. It is
+    // restored to the PHP 8.1+ default afterwards, the same way the rest of the
+    // codebase does it — mysqli_report() returns a bool, not the previous mode,
+    // so there is nothing to capture and put back.
+    mysqli_report(MYSQLI_REPORT_OFF);
     $ok = mysqli_multi_query($connection, $sql);
 
     if ($ok) {
@@ -58,7 +63,7 @@ function db_maintenance(mysqli $connection, array $settings, string $op, array $
         } while (mysqli_next_result($connection));
     }
 
-    mysqli_report($previous);
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
     return $ok;
 }

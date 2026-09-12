@@ -181,7 +181,7 @@ peers-shaped table:
 
 `ANALYZE` updates index statistics and frees nothing; `OPTIMIZE` shrank the
 table by 99%. They are not interchangeable, which is why Phoenix runs them on
-separate schedules: `bin/clean-and-optimize.php` analyses often, and
+separate schedules: `bin/clean-database.php` analyses often, and
 `bin/optimize-database.php` rebuilds daily. On a table in steady state a rebuild
 reclaims nothing anyway — InnoDB reuses the pages its own deletes freed — so it
 earns its cost only after a bulk deletion.

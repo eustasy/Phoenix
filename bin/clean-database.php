@@ -5,6 +5,8 @@ declare(strict_types=1);
 // Scheduled maintenance entry point: prune stale rows, then refresh index
 // statistics. Both are cheap, so this wants to run often.
 //
+// Named for what it does rather than what it used to: it no longer optimizes.
+//
 // It does NOT rebuild tables. OPTIMIZE TABLE is a full rebuild on InnoDB and
 // lives in bin/optimize-database.php on its own, slower schedule — running it
 // every few minutes rebuilt tables that had nothing to reclaim.
