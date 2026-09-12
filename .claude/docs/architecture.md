@@ -98,7 +98,7 @@ strip the `p:` prefix. See [database.md](database.md).
 
 ## `bin/` cron scripts
 
-`backup-database.php` and `clean-database.php` `require_once`
+`backup-database.php` and `prune-database.php` `require_once`
 `../src/phoenix.php` to bootstrap, then call models/functions. PHP-native, not
 shell, so config stays in `$settings`. See [configuration.md](configuration.md)
 for the cron settings.

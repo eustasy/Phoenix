@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-// Scheduled table rebuild. Separate from bin/clean-database.php because the
+// Scheduled table rebuild. Separate from bin/prune-database.php because the
 // two want completely different schedules: cleaning and analysing are cheap and
 // want to run often, while OPTIMIZE TABLE is a full rebuild on InnoDB and wants
 // to run rarely — daily is plenty, and only really earns its cost after a bulk

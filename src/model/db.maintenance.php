@@ -10,10 +10,11 @@ declare(strict_types=1);
 // Reading the results is the point. These statements do not fail the way a
 // normal query does: a problem comes back as a ROW inside the result set —
 // `Msg_type` of `Error`, then a `status` row saying `Operation failed` — while
-// mysqli_errno() stays 0 and mysqli_multi_query() still returns true. Returning
-// that value, as this used to, meant a rebuild that died partway (a full disk
-// is the realistic case) was indistinguishable from a clean run, and got logged
-// as a success. So each result set is walked and any `Error` row fails the run.
+// mysqli_errno() stays 0 and mysqli_multi_query() still returns true. Its
+// return value therefore says only that the first statement was accepted, which
+// cannot distinguish a rebuild that died partway (a full disk being the
+// realistic case) from one that worked. So each result set is walked, and any
+// `Error` row fails the run.
 //
 // $op is a controlled literal from the three callers, never request input.
 // Table names are built from db_prefix and a fixed list for the same reason:
@@ -38,11 +39,10 @@ function db_maintenance(mysqli $connection, array $settings, string $op, array $
         $sql .= $op.' TABLE `'.$settings['db_prefix'].$table.'`;';
     }
 
-    // Reporting is turned off around the loop so a bad statement in the
-    // sequence surfaces as a false return rather than an exception. It is
-    // restored to the PHP 8.1+ default afterwards, the same way the rest of the
-    // codebase does it — mysqli_report() returns a bool, not the previous mode,
-    // so there is nothing to capture and put back.
+    // Reporting is off around the loop so a bad statement in the sequence
+    // surfaces as a false return rather than an exception, then restored to the
+    // PHP 8.1+ default. Restored by literal, not by capture: mysqli_report()
+    // returns a bool rather than the previous mode.
     mysqli_report(MYSQLI_REPORT_OFF);
     $ok = mysqli_multi_query($connection, $sql);
 

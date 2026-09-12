@@ -410,7 +410,7 @@ class EndpointSmokeTest extends SmokeTestCase
             );
         }
 
-        $r = $this->runCli('clean-database.php');
+        $r = $this->runCli('prune-database.php');
         $this->assertSame(0, $r['exit'], $r['stdout'].$r['stderr']);
 
         // Cleanup is selective: the stale peer is gone, the fresh one survives.

@@ -93,4 +93,26 @@ class ViewAdminUtilitiesHtmlTest extends TestCase
         $this->assertStringNotContainsString('<script>alert(1)</script>', $html);
         $this->assertStringContainsString('&lt;script&gt;', $html);
     }
+
+    public function testEachActionCarriesItsIcon(): void
+    {
+        // The icons match the dashboard and Task History, so an action and its
+        // history entry read as the same thing.
+        $html = view_admin_utilities_html($this->settings(['admin_password' => 'hash']), true, false, 'tok');
+
+        foreach (['brush-cleaning', 'gauge', 'chart-no-axes-column', 'shield-check', 'git-merge'] as $icon) {
+            $this->assertStringContainsString('data-lucide="'.$icon.'"', $html);
+        }
+    }
+
+    public function testAnalyzeAndOptimizeAreSeparateActions(): void
+    {
+        // They are not interchangeable: analyze refreshes statistics, optimize
+        // rebuilds to reclaim space.
+        $html = view_admin_utilities_html($this->settings(['admin_password' => 'hash']), true, false, 'tok');
+
+        $this->assertStringContainsString('value="analyze"', $html);
+        $this->assertStringContainsString('value="optimize"', $html);
+        $this->assertStringContainsString('value="check"', $html);
+    }
 }

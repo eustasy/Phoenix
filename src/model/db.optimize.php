@@ -16,9 +16,9 @@ declare(strict_types=1);
 // state, where InnoDB simply reuses the pages its own deletes freed.
 //
 // REPAIR TABLE is deliberately absent. On MariaDB it reports `status: OK` on an
-// InnoDB table and performs a second full rebuild — verified by watching
-// information_schema.TABLES.CREATE_TIME change across it — so including it
-// rebuilt every table twice per run for no benefit.
+// InnoDB table and performs a full rebuild of its own — verified by watching
+// information_schema.TABLES.CREATE_TIME change across it — so pairing it with
+// OPTIMIZE rebuilds every table twice for one table's worth of benefit.
 //
 // `events` is excluded: it is by far the largest table and is append-mostly, so
 // a rebuild costs the most and reclaims the least. Prune it with

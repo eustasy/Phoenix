@@ -181,7 +181,7 @@ peers-shaped table:
 
 `ANALYZE` updates index statistics and frees nothing; `OPTIMIZE` shrank the
 table by 99%. They are not interchangeable, which is why Phoenix runs them on
-separate schedules: `bin/clean-database.php` analyses often, and
+separate schedules: `bin/prune-database.php` analyses often, and
 `bin/optimize-database.php` rebuilds daily. On a table in steady state a rebuild
 reclaims nothing anyway — InnoDB reuses the pages its own deletes freed — so it
 earns its cost only after a bulk deletion.
@@ -206,11 +206,12 @@ box. The other tables took under 0.05 s each — and `events` is excluded from t
 rebuild entirely, being the largest and the most append-mostly. Prune it with
 `stats_retention` and optimize it by hand afterwards.
 
-**Failures used to be invisible here.** These statements report problems as rows
+**Failures here are easy to miss.** These statements report problems as rows
 inside their result sets — `Msg_type: Error`, then `status: Operation failed` —
-while `mysqli_errno()` stays `0` and `mysqli_multi_query()` still returns true.
-`db_maintenance()` now walks every result set and fails the run on any `Error`
-row, so a rebuild that dies partway (a full disk) no longer logs a success.
+while `mysqli_errno()` stays `0` and `mysqli_multi_query()` returns true, so its
+return value cannot distinguish a rebuild that died partway from one that
+worked. `db_maintenance()` walks every result set and fails the run on any
+`Error` row.
 
 ### Disk and the buffer pool
 

@@ -56,7 +56,7 @@ returns true.
 The three differ in cost, and that is why they are separate:
 
 - `db_analyze()` — statistics only, reclaims nothing, ~1.6 ms. On the frequent
-  cron (`bin/clean-database.php`).
+  cron (`bin/prune-database.php`).
 - `db_optimize()` — a full rebuild on InnoDB, the only one that reclaims space.
   On its own slow cron (`bin/optimize-database.php`). Excludes `events`.
 - `db_check()` — a full integrity scan, Utilities action only.

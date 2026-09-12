@@ -47,7 +47,7 @@ This guide covers a 3.x → 4.3 upgrade. For per-release detail, see
 | Default config | `_settings/phoenix.default.php` | `config/phoenix.default.php` |
 | Custom config | `_settings/phoenix.custom.php` | `config/phoenix.custom.php` |
 | Backup cron | `_cron/hourly/backup-database.php` | `bin/backup-database.php` |
-| Cleanup cron | `_cron/hourly/clean-database.php` | `bin/clean-database.php` |
+| Cleanup cron | `_cron/hourly/prune-database.php` | `bin/prune-database.php` |
 | Backups dir | `_backups` | `backups` |
 | Minimum PHP | 7.1 | 8.2 |
 
@@ -130,11 +130,11 @@ your crontab to the new paths (adjust the leading path to wherever you deployed
 Phoenix, and confirm each command runs by hand first):
 
 ```cron
-15 * * * * php ~/phoenix/bin/clean-database.php
+15 * * * * php ~/phoenix/bin/prune-database.php
 30 * * * * php ~/phoenix/bin/backup-database.php
 ```
 
-- `bin/clean-database.php` replaces `_cron/hourly/clean-database.php`.
+- `bin/prune-database.php` replaces `_cron/hourly/prune-database.php`.
   Set `$settings['clean_with_cron'] = true;` in your config to run cleanup from
   cron and disable the occasional cleanup-on-announce.
 - `bin/backup-database.php` replaces `_cron/hourly/backup-database.php`. The
@@ -201,5 +201,5 @@ New installs get the complete schema directly from `sql/*.sql` via
 - [ ] (Optional) `torrents.listed` index added on existing installs for faster public-index reads.
 - [ ] Document root re-pointed at `public/`; `src/`, `bin/`, `config/`, `tests/` are above the web root and not reachable over HTTP.
 - [ ] Config copied to `config/phoenix.custom.php`.
-- [ ] Cron jobs updated to `bin/clean-database.php` and `bin/backup-database.php`.
+- [ ] Cron jobs updated to `bin/prune-database.php` and `bin/backup-database.php`.
 - [ ] `public/admin.php` moved back to `src/` after setup.
