@@ -51,7 +51,10 @@ function server_stats(): array
                 $hardware[] = sprintf('%.2f GHz', $cpu['mhz'] / 1000);
             }
             if ($cpu['cache'] !== null) {
-                $hardware[] = format_bytes($cpu['cache']).' cache';
+                // Named by level, since L2 and L3 are different claims and the
+                // figure is meaningless without knowing which one it is.
+                $hardware[] = format_bytes($cpu['cache']).
+                    ($cpu['cache_level'] !== null ? ' L'.$cpu['cache_level'] : '').' cache';
             }
 
             $stats['cpu'] = [

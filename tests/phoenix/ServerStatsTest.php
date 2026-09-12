@@ -92,6 +92,25 @@ class ServerStatsTest extends TestCase
         }
     }
 
+    public function testCacheIsTheLastLevelAndKnowsWhichLevelThatIs(): void
+    {
+        // /proc/cpuinfo's `cache size` cannot be interpreted without the
+        // vendor — on a Ryzen it is the per-pair L2, not the L3 that anyone
+        // means by "CPU cache" — so the figure comes from /sys with its level.
+        require_once __DIR__.'/../../src/functions/server.stats.cpuinfo.php';
+        $cpu = \server_stats_cpuinfo();
+
+        if ($cpu['cache'] === null) {
+            $this->assertNull($cpu['cache_level']);
+            $this->markTestSkipped('/sys cache hierarchy unavailable on this host');
+        }
+
+        $this->assertNotNull($cpu['cache_level']);
+        $this->assertGreaterThanOrEqual(1, $cpu['cache_level']);
+        // The last level, so never L1 on a machine that reports more than one.
+        $this->assertGreaterThan(0, $cpu['cache']);
+    }
+
     public function testCpuDetailPutsHardwareOnItsOwnLine(): void
     {
         $stats = \server_stats();
