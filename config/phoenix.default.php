@@ -173,6 +173,8 @@ $settings['admin_totp_secret'] = '';
 $settings['admin_peers_limit'] = 200;
 /* rows per page on the admin Torrents listing */
 $settings['admin_torrents_limit'] = 100;
+/* rows per page on the admin Task History listing */
+$settings['admin_tasks_limit'] = 100;
 /* rows per page on the admin Traffic listing */
 $settings['admin_traffic_limit'] = 100;
 

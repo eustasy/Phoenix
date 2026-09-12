@@ -59,6 +59,7 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
         'Server' => [
             'support' => ['server', 'Server Support'],
             'utilities' => ['wrench', 'Utilities'],
+            'tasks' => ['history', 'Task History'],
             'backups' => ['archive', 'Backups'],
             'apikeys' => ['key-round', 'API Keys'],
             'settings' => ['settings', 'Settings'],

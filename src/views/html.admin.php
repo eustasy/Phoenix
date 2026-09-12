@@ -94,7 +94,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             }
         }
         if ($rows !== '') {
-            $body .= '<div class="ph-section-head"><h3>Maintenance</h3><a class="btn btn-ghost btn-sm" href="?page=utilities">Run tasks<span class="ph-ico" data-lucide="arrow-right"></span></a></div>
+            $body .= '<div class="ph-section-head"><h3>Maintenance</h3><div class="row-actions"><a class="btn btn-ghost btn-sm" href="?page=tasks">History<span class="ph-ico" data-lucide="history"></span></a><a class="btn btn-ghost btn-sm" href="?page=utilities">Run tasks<span class="ph-ico" data-lucide="arrow-right"></span></a></div></div>
 		<div class="ph-card-table">
 			<table>
 				<thead><tr><th>Task</th><th>Last run</th><th>By</th><th class="table-col-numeric">Status</th></tr></thead>

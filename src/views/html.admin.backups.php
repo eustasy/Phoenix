@@ -27,7 +27,8 @@ function view_admin_backups_html(array $settings, array $backups, string|false $
 
     // Run-now button lives in the topbar. class="mysql" so the layout's
     // double-submit guard disables it on submit (a dump can take a while).
-    $actions = '<form class="mysql m-0" method="POST">'.
+    $actions = '<a class="btn btn-ghost btn-sm" href="?page=tasks&amp;name=backup"><span class="ph-ico" data-lucide="history"></span>Backup history</a>'.
+        '<form class="mysql m-0" method="POST">'.
         '<input type="hidden" name="process" value="backup">'.$csrf_field.
         '<button type="submit" name="submit" class="btn btn-primary btn-sm"><span class="ph-ico" data-lucide="play"></span>Run backup now</button>'.
         '</form>';

@@ -1,0 +1,103 @@
+<?php
+
+declare(strict_types=1);
+
+////	view_admin_tasks_html
+// Render the admin Task History page: every recorded maintenance run, newest
+// first, with a task filter and a pager. Columns: Task, Run at, Triggered by.
+//
+// "Triggered by" is the column worth reading. `cron` means the scheduled job
+// fired; `auto` means clean_with_cron is off and an announce paid for the
+// cleanup inline; `admin` means someone pressed a button. A history of `auto`
+// where cron was expected is the signal that the crontab entry is not running.
+//
+// Filtering is a GET form, not a client-side filter — the table is paged, so
+// filtering in the browser would only ever search the rendered page. Wrapped in
+// the shared admin layout. Returns HTML string.
+
+/**
+ * @param PhoenixSettings $settings
+ * @param list<array{id: int, name: string, value: int, source: string}> $runs
+ */
+function view_admin_tasks_html(array $settings, array $runs, int $total, int $offset, int $limit, string $name, string $csrf_token): string
+{
+    require_once __DIR__.'/html.admin.layout.php';
+
+    $labels = [
+        'install' => ['wand-2', 'Installed'],
+        'migrate' => ['git-merge', 'Migrated'],
+        'clean' => ['brush-cleaning', 'Cleaned'],
+        'optimize' => ['gauge', 'Optimized'],
+        'backup' => ['archive', 'Backed up'],
+    ];
+
+    $query = static function (array $overrides) use ($name): string {
+        $params = array_merge(['page' => 'tasks', 'name' => $name], $overrides);
+        $params = array_filter($params, static fn (mixed $v): bool => $v !== '' && $v !== null);
+
+        return '?'.htmlspecialchars(http_build_query($params), ENT_QUOTES, 'UTF-8');
+    };
+
+    $body = '';
+
+    // Filter bar.
+    $options = '<option value=""'.($name === '' ? ' selected' : '').'>All tasks</option>';
+    foreach ($labels as $key => [, $label]) {
+        $options .= '<option value="'.$key.'"'.($name === $key ? ' selected' : '').'>'.$label.'</option>';
+    }
+    $body .= '<form method="GET" class="ph-toolbar">'.
+        '<input type="hidden" name="page" value="tasks">'.
+        '<select name="name" class="ph-select">'.$options.'</select>'.
+        '<button type="submit" class="btn btn-secondary btn-sm">Filter</button>'.
+        ($name !== '' ? '<a class="btn btn-ghost btn-sm" href="?page=tasks">Clear</a>' : '').
+        '<span class="ph-toolbar-count muted">'.number_format($total).' run'.($total === 1 ? '' : 's').'</span>'.
+        '</form>';
+
+    if ($runs === []) {
+        $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="history"></span><p>'.
+            ($total === 0 && $name === ''
+                ? 'No maintenance has run yet. Tasks are recorded as cron, the announce-time fallback, or the Utilities page runs them.'
+                : 'No runs recorded for this task.').
+            '</p></div>';
+    } else {
+        $rows = '';
+        foreach ($runs as $run) {
+            [$icon, $label] = $labels[$run['name']] ?? ['circle-dot', ucfirst($run['name'])];
+            $by = $run['source'] !== ''
+                ? '<span class="badge">'.htmlspecialchars(ucfirst($run['source']), ENT_QUOTES, 'UTF-8').'</span>'
+                : '<span class="dim">&mdash;</span>';
+            $rows .= '<tr>'.
+                '<td><span class="flex items-center gap-2"><span class="ph-ico ph-li-ico" data-lucide="'.$icon.'"></span>'.htmlspecialchars($label).'</span></td>'.
+                '<td class="mono muted" data-sort="'.$run['value'].'">'.date('Y-m-d H:i:s', $run['value']).'</td>'.
+                '<td>'.$by.'</td>'.
+                '</tr>';
+        }
+        $body .= '<div class="ph-card-table">'.
+            '<table><thead><tr><th>Task</th><th>Run at</th><th>Triggered by</th></tr></thead>'.
+            '<tbody>'.$rows.'</tbody></table></div>';
+    }
+
+    $last = $offset + count($runs);
+    if ($offset > 0 || $last < $total) {
+        $prev = $offset > 0
+            ? '<a class="btn btn-ghost btn-sm" href="'.$query(['offset' => max(0, $offset - $limit)]).'"><span class="ph-ico" data-lucide="arrow-left"></span>Previous</a>'
+            : '<span class="btn btn-ghost btn-sm" aria-disabled="true"><span class="ph-ico" data-lucide="arrow-left"></span>Previous</span>';
+        $next = $last < $total
+            ? '<a class="btn btn-ghost btn-sm" href="'.$query(['offset' => $offset + $limit]).'">Next<span class="ph-ico" data-lucide="arrow-right"></span></a>'
+            : '<span class="btn btn-ghost btn-sm" aria-disabled="true">Next<span class="ph-ico" data-lucide="arrow-right"></span></span>';
+        $body .= '<div class="flex items-center gap-2 justify-end mt-4">'.$prev.$next.'</div>';
+    }
+
+    // History is pruned by task_retention; say so rather than let a short
+    // window read as "maintenance stopped running".
+    $retention = intval($settings['task_retention']);
+    $body .= '<p class="muted text-sm mt-4">'.
+        ($retention > 0
+            ? 'History is pruned to the last '.$retention.' day'.($retention === 1 ? '' : 's').' by <code>task_retention</code>.'
+            : 'Every run is kept &mdash; <code>task_retention</code> is <code>0</code>.').
+        '</p>';
+
+    $actions = '<a class="btn btn-ghost btn-sm" href="?page=utilities"><span class="ph-ico" data-lucide="wrench"></span>Run tasks</a>';
+
+    return view_admin_layout_html($settings, 'Task History', $body, 'tasks', $csrf_token, 'Server', $actions);
+}

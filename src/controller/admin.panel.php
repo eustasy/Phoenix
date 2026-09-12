@@ -91,6 +91,11 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
 
             return admin_backups_controller($connection, $settings, $time);
 
+        case 'tasks':
+            require_once __DIR__.'/admin.tasks.php';
+
+            return admin_tasks_controller($connection, $settings);
+
         case 'settings':
             require_once __DIR__.'/admin.settings.php';
 
