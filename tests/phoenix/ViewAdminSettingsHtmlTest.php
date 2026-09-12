@@ -176,4 +176,20 @@ class ViewAdminSettingsHtmlTest extends TestCase
         // A real setting still shows.
         $this->assertStringContainsString('>open_tracker<', $html);
     }
+
+    public function testNestedArrayValueRendersWithoutAConversionNotice(): void
+    {
+        // strval cannot flatten an array of arrays. Stringifying members one by
+        // one keeps a nested setting from emitting a PHP notice into a page
+        // whose whole job is being readable.
+        $settings = $this->settings();
+        $settings['forwarded_headers'] = ['x-forwarded-for', 'x-real-ip'];
+        $settings['deep'] = ['a' => ['nested' => 1]];
+
+        $html = view_admin_settings_html($settings, true, false, 'tok');
+
+        $this->assertStringContainsString('x-forwarded-for, x-real-ip', $html);
+        $this->assertStringContainsString('(nested)', $html);
+        $this->assertStringNotContainsString('Array to string', $html);
+    }
 }

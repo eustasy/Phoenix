@@ -47,9 +47,16 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
         } elseif (is_bool($value)) {
             $display = $value ? '<span class="badge badge-green">true</span>' : '<span class="badge">false</span>';
         } elseif (is_array($value)) {
+            // Members are stringified individually rather than with strval,
+            // which cannot flatten a nested array: a setting holding one would
+            // otherwise emit an "Array to string conversion" notice into a page
+            // whose whole job is being readable.
             $display = $value === []
                 ? '<span class="dim">(empty)</span>'
-                : htmlspecialchars(implode(', ', array_map('strval', $value)));
+                : htmlspecialchars(implode(', ', array_map(
+                    static fn (mixed $item): string => is_scalar($item) ? (string) $item : '(nested)',
+                    $value,
+                )));
         } else {
             $display = '<span class="muted mono">'.htmlspecialchars((string) $value).'</span>';
         }
