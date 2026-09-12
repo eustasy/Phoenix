@@ -9,8 +9,9 @@ declare(strict_types=1);
 // the Task History page nothing ever read the table back.
 //
 // $name filters to one task ('clean', 'optimize', 'backup', 'migrate',
-// 'install'); '' returns every task. It is bound as a parameter, never
-// interpolated, even though the call sites pass controlled values.
+// 'install') and $source to one trigger ('cron', 'auto', 'admin'); '' for
+// either means "any". Both go through task_runs_filter_sql(), shared with
+// task_runs_count() so the listing and its pager agree.
 //
 // Returns a list of ['id' => int, 'name' => string, 'value' => int (Unix
 // timestamp of the run), 'source' => string ('admin'|'cron'|'auto', '' on rows
@@ -20,24 +21,25 @@ declare(strict_types=1);
  * @param PhoenixSettings $settings
  * @return list<array{id: int, name: string, value: int, source: string}>
  */
-function task_runs_select(mysqli $connection, array $settings, string $name = '', int $limit = 100, int $offset = 0): array
+function task_runs_select(mysqli $connection, array $settings, string $name = '', string $source = '', int $limit = 100, int $offset = 0): array
 {
+    require_once __DIR__.'/task.runs.filter.sql.php';
+
     // LIMIT/OFFSET are ints from the caller, clamped rather than bound: mysqli
     // cannot bind a LIMIT placeholder on every server version.
     $limit = max(1, min(1000, $limit));
     $offset = max(0, $offset);
 
-    $where = $name === '' ? '' : ' WHERE `name` = ?';
-    $params = $name === '' ? [] : [$name];
+    $filter = task_runs_filter_sql($name, $source);
 
     $result = mysqli_execute_query(
         $connection,
         'SELECT `id`, `name`, `value`, `source` FROM `'.$settings['db_prefix'].'task_runs`'.
-        $where.
+        $filter['where'].
         // id as the tiebreaker: several tasks can share a timestamp when one
         // cron run logs a clean and an optimize in the same second.
         ' ORDER BY `value` DESC, `id` DESC LIMIT '.$limit.' OFFSET '.$offset.';',
-        $params,
+        $filter['params'],
     );
     if (! $result instanceof mysqli_result) {
         return [];

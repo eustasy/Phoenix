@@ -79,8 +79,8 @@ class TaskRunsSelectTest extends PhoenixTestCase
             $this->seed('t_clean', $value, 'cron');
         }
 
-        $first = \task_runs_select(self::$connection, self::$settings, 't_clean', 2, 0);
-        $second = \task_runs_select(self::$connection, self::$settings, 't_clean', 2, 2);
+        $first = \task_runs_select(self::$connection, self::$settings, 't_clean', '', 2, 0);
+        $second = \task_runs_select(self::$connection, self::$settings, 't_clean', '', 2, 2);
 
         $this->assertSame([3000, 2000], array_column($first, 'value'));
         $this->assertSame([1000], array_column($second, 'value'));
@@ -114,8 +114,44 @@ class TaskRunsSelectTest extends PhoenixTestCase
         $this->seed('t_clean', 1000, 'cron');
 
         // A caller cannot ask for an unbounded or negative page.
-        $this->assertCount(1, \task_runs_select(self::$connection, self::$settings, 't_clean', 0));
-        $this->assertCount(1, \task_runs_select(self::$connection, self::$settings, 't_clean', -5));
-        $this->assertCount(1, \task_runs_select(self::$connection, self::$settings, 't_clean', 99999));
+        $this->assertCount(1, \task_runs_select(self::$connection, self::$settings, 't_clean', '', 0));
+        $this->assertCount(1, \task_runs_select(self::$connection, self::$settings, 't_clean', '', -5));
+        $this->assertCount(1, \task_runs_select(self::$connection, self::$settings, 't_clean', '', 99999));
+    }
+
+    public function testFiltersBySource(): void
+    {
+        $this->seed('t_clean', 1000, 'cron');
+        $this->seed('t_clean', 2000, 'auto');
+        $this->seed('t_clean', 3000, 'admin');
+
+        $runs = \task_runs_select(self::$connection, self::$settings, 't_clean', 'auto');
+
+        $this->assertCount(1, $runs);
+        $this->assertSame(2000, $runs[0]['value']);
+    }
+
+    public function testNameAndSourceApplyTogether(): void
+    {
+        // The question the page exists to answer: did *this* task run from
+        // cron, or did an announce end up paying for it?
+        $this->seed('t_clean', 1000, 'cron');
+        $this->seed('t_clean', 2000, 'auto');
+        $this->seed('t_backup', 3000, 'auto');
+
+        $runs = \task_runs_select(self::$connection, self::$settings, 't_clean', 'auto');
+
+        $this->assertCount(1, $runs);
+        $this->assertSame('t_clean', $runs[0]['name']);
+        $this->assertSame('auto', $runs[0]['source']);
+    }
+
+    public function testCountMatchesASourceFilter(): void
+    {
+        $this->seed('t_clean', 1000, 'cron');
+        $this->seed('t_clean', 2000, 'auto');
+
+        $this->assertSame(1, \task_runs_count(self::$connection, self::$settings, 't_clean', 'cron'));
+        $this->assertSame(2, \task_runs_count(self::$connection, self::$settings, 't_clean'));
     }
 }

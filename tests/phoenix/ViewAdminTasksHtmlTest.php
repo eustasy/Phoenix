@@ -34,7 +34,7 @@ class ViewAdminTasksHtmlTest extends PhoenixTestCase
 
     public function testRendersEachRunWithItsTrigger(): void
     {
-        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', 'tok');
+        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', '', 'tok');
 
         $this->assertStringContainsString('Backed up', $html);
         $this->assertStringContainsString('Cleaned', $html);
@@ -49,7 +49,7 @@ class ViewAdminTasksHtmlTest extends PhoenixTestCase
     {
         // cron and auto are the expected background noise; a person stepping in
         // should stand out in a page of scheduled runs.
-        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', 'tok');
+        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', '', 'tok');
 
         $this->assertStringContainsString('<span class="badge">Cron</span>', $html);
         $this->assertStringContainsString('<span class="badge">Auto</span>', $html);
@@ -62,7 +62,7 @@ class ViewAdminTasksHtmlTest extends PhoenixTestCase
         // manual action, so it gets its own colour rather than passing as cron.
         $runs = [['id' => 1, 'name' => 'clean', 'value' => 1700000000, 'source' => 'weird']];
 
-        $html = \view_admin_tasks_html($this->settings(), $runs, 1, 0, 100, '', 'tok');
+        $html = \view_admin_tasks_html($this->settings(), $runs, 1, 0, 100, '', '', 'tok');
 
         $this->assertStringContainsString('<span class="badge badge-yellow">Weird</span>', $html);
     }
@@ -73,7 +73,7 @@ class ViewAdminTasksHtmlTest extends PhoenixTestCase
         // than an empty coloured badge.
         $runs = [['id' => 1, 'name' => 'clean', 'value' => 1700000000, 'source' => '']];
 
-        $html = \view_admin_tasks_html($this->settings(), $runs, 1, 0, 100, '', 'tok');
+        $html = \view_admin_tasks_html($this->settings(), $runs, 1, 0, 100, '', '', 'tok');
 
         $this->assertStringContainsString('<span class="dim">&mdash;</span>', $html);
         $this->assertStringNotContainsString('badge-yellow', $html);
@@ -81,31 +81,31 @@ class ViewAdminTasksHtmlTest extends PhoenixTestCase
 
     public function testShowsTheTotalAndPluralisesIt(): void
     {
-        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', 'tok');
+        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', '', 'tok');
         $this->assertStringContainsString('3 runs', $html);
 
         $one = [$this->runs()[0]];
-        $html = \view_admin_tasks_html($this->settings(), $one, 1, 0, 100, '', 'tok');
+        $html = \view_admin_tasks_html($this->settings(), $one, 1, 0, 100, '', '', 'tok');
         $this->assertStringContainsString('1 run<', $html);
     }
 
     public function testEmptyHistoryExplainsWhereRunsComeFrom(): void
     {
-        $html = \view_admin_tasks_html($this->settings(), [], 0, 0, 100, '', 'tok');
+        $html = \view_admin_tasks_html($this->settings(), [], 0, 0, 100, '', '', 'tok');
 
         $this->assertStringContainsString('No maintenance has run yet', $html);
     }
 
     public function testFilteredEmptyStateDiffersFromNeverRun(): void
     {
-        $html = \view_admin_tasks_html($this->settings(), [], 0, 0, 100, 'backup', 'tok');
+        $html = \view_admin_tasks_html($this->settings(), [], 0, 0, 100, 'backup', '', 'tok');
 
-        $this->assertStringContainsString('No runs recorded for this task.', $html);
+        $this->assertStringContainsString('No runs match this filter.', $html);
     }
 
     public function testFilterIsMarkedSelectedAndOffersAWayOut(): void
     {
-        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, 'backup', 'tok');
+        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, 'backup', '', 'tok');
 
         $this->assertStringContainsString('value="backup" selected', $html);
         $this->assertStringContainsString('href="?page=tasks"', $html);
@@ -113,29 +113,29 @@ class ViewAdminTasksHtmlTest extends PhoenixTestCase
 
     public function testPagerAppearsOnlyWhenThereIsAnotherPage(): void
     {
-        $single = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', 'tok');
+        $single = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', '', 'tok');
         $this->assertStringNotContainsString('Next<span', $single);
 
-        $paged = \view_admin_tasks_html($this->settings(), $this->runs(), 300, 0, 3, '', 'tok');
+        $paged = \view_admin_tasks_html($this->settings(), $this->runs(), 300, 0, 3, '', '', 'tok');
         $this->assertStringContainsString('offset=3', $paged);
     }
 
     public function testPagerKeepsTheFilter(): void
     {
         // Paging out of a filtered view must not silently widen it.
-        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 300, 0, 3, 'backup', 'tok');
+        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 300, 0, 3, 'backup', '', 'tok');
 
         $this->assertStringContainsString('name=backup', $html);
     }
 
     public function testRetentionNoteReflectsTheSetting(): void
     {
-        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', 'tok');
+        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', '', 'tok');
         $this->assertStringContainsString('Every run is kept', $html);
 
         $settings = $this->settings();
         $settings['task_retention'] = 30;
-        $html = \view_admin_tasks_html($settings, $this->runs(), 3, 0, 100, '', 'tok');
+        $html = \view_admin_tasks_html($settings, $this->runs(), 3, 0, 100, '', '', 'tok');
         $this->assertStringContainsString('last 30 days', $html);
     }
 
@@ -144,8 +144,49 @@ class ViewAdminTasksHtmlTest extends PhoenixTestCase
         // A row written by a future Phoenix must not blank the page.
         $runs = [['id' => 1, 'name' => 'defrag', 'value' => 1700000000, 'source' => 'cron']];
 
-        $html = \view_admin_tasks_html($this->settings(), $runs, 1, 0, 100, '', 'tok');
+        $html = \view_admin_tasks_html($this->settings(), $runs, 1, 0, 100, '', '', 'tok');
 
         $this->assertStringContainsString('Defrag', $html);
+    }
+
+    public function testTriggerFilterIsMarkedSelected(): void
+    {
+        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', 'cron', 'tok');
+
+        $this->assertStringContainsString('value="cron" selected', $html);
+        $this->assertStringContainsString('Any trigger', $html);
+    }
+
+    public function testAutoIsLabelledAnnounce(): void
+    {
+        // The stored value says where it came from; the label says what a
+        // reader needs to know — that an announce paid for the run.
+        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', '', 'tok');
+
+        $this->assertStringContainsString('<option value="auto">Announce</option>', $html);
+    }
+
+    public function testPagerKeepsBothFilters(): void
+    {
+        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 300, 0, 3, 'clean', 'auto', 'tok');
+
+        $this->assertStringContainsString('name=clean', $html);
+        $this->assertStringContainsString('source=auto', $html);
+    }
+
+    public function testClearAppearsForEitherFilter(): void
+    {
+        $none = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', '', 'tok');
+        $this->assertStringNotContainsString('>Clear</a>', $none);
+
+        $by_source = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', 'admin', 'tok');
+        $this->assertStringContainsString('>Clear</a>', $by_source);
+    }
+
+    public function testFilteredEmptyStateMentionsTheFilter(): void
+    {
+        $html = \view_admin_tasks_html($this->settings(), [], 0, 0, 100, '', 'cron', 'tok');
+
+        $this->assertStringContainsString('No runs match this filter.', $html);
     }
 }

@@ -70,4 +70,36 @@ class AdminTasksControllerTest extends PhoenixTestCase
         $this->assertStringContainsString('Task History', $html);
         $this->assertStringNotContainsString('offset=-', $html);
     }
+
+    public function testKnownTriggerIsKept(): void
+    {
+        $_GET['source'] = 'cron';
+
+        $html = \admin_tasks_controller(self::$connection, $this->settings());
+
+        $this->assertStringContainsString('value="cron" selected', $html);
+    }
+
+    public function testUnknownTriggerWidensBackToAny(): void
+    {
+        // An unrecognised ?source must not reach the query — it would match
+        // nothing and read as "no maintenance has ever run".
+        $_GET['source'] = "' OR 1=1 --";
+
+        $html = \admin_tasks_controller(self::$connection, $this->settings());
+
+        $this->assertStringContainsString('>Any trigger</option>', $html);
+        $this->assertStringNotContainsString('OR 1=1', $html);
+    }
+
+    public function testBothFiltersApplyTogether(): void
+    {
+        $_GET['name'] = 'clean';
+        $_GET['source'] = 'auto';
+
+        $html = \admin_tasks_controller(self::$connection, $this->settings());
+
+        $this->assertStringContainsString('value="clean" selected', $html);
+        $this->assertStringContainsString('value="auto" selected', $html);
+    }
 }

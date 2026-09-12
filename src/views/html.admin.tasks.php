@@ -19,14 +19,18 @@ declare(strict_types=1);
 // failure. Do not read this page as "everything is fine".
 //
 // Filtering is a GET form, not a client-side filter — the table is paged, so
-// filtering in the browser would only ever search the rendered page. Wrapped in
+// filtering in the browser would only ever search the rendered page. The
+// trigger filter is the useful half: "clean, triggered by announce" answers
+// whether the cron entry is running, which the unfiltered list buries.
+// `auto` is labelled Announce here — the stored value says where it came from,
+// the label says what a reader needs to know. Wrapped in
 // the shared admin layout. Returns HTML string.
 
 /**
  * @param PhoenixSettings $settings
  * @param list<array{id: int, name: string, value: int, source: string}> $runs
  */
-function view_admin_tasks_html(array $settings, array $runs, int $total, int $offset, int $limit, string $name, string $csrf_token): string
+function view_admin_tasks_html(array $settings, array $runs, int $total, int $offset, int $limit, string $name, string $source, string $csrf_token): string
 {
     require_once __DIR__.'/html.admin.layout.php';
 
@@ -55,8 +59,8 @@ function view_admin_tasks_html(array $settings, array $runs, int $total, int $of
         return '<span class="'.$class.'">'.htmlspecialchars(ucfirst($source), ENT_QUOTES, 'UTF-8').'</span>';
     };
 
-    $query = static function (array $overrides) use ($name): string {
-        $params = array_merge(['page' => 'tasks', 'name' => $name], $overrides);
+    $query = static function (array $overrides) use ($name, $source): string {
+        $params = array_merge(['page' => 'tasks', 'name' => $name, 'source' => $source], $overrides);
         $params = array_filter($params, static fn (mixed $v): bool => $v !== '' && $v !== null);
 
         return '?'.htmlspecialchars(http_build_query($params), ENT_QUOTES, 'UTF-8');
@@ -69,19 +73,25 @@ function view_admin_tasks_html(array $settings, array $runs, int $total, int $of
     foreach ($labels as $key => [, $label]) {
         $options .= '<option value="'.$key.'"'.($name === $key ? ' selected' : '').'>'.$label.'</option>';
     }
+    $source_options = '<option value=""'.($source === '' ? ' selected' : '').'>Any trigger</option>';
+    foreach (['cron' => 'Cron', 'auto' => 'Announce', 'admin' => 'Admin'] as $key => $label) {
+        $source_options .= '<option value="'.$key.'"'.($source === $key ? ' selected' : '').'>'.$label.'</option>';
+    }
+
     $body .= '<form method="GET" class="ph-toolbar">'.
         '<input type="hidden" name="page" value="tasks">'.
         '<select name="name" class="ph-select">'.$options.'</select>'.
+        '<select name="source" class="ph-select">'.$source_options.'</select>'.
         '<button type="submit" class="btn btn-secondary btn-sm">Filter</button>'.
-        ($name !== '' ? '<a class="btn btn-ghost btn-sm" href="?page=tasks">Clear</a>' : '').
+        ($name !== '' || $source !== '' ? '<a class="btn btn-ghost btn-sm" href="?page=tasks">Clear</a>' : '').
         '<span class="ph-toolbar-count muted">'.number_format($total).' run'.($total === 1 ? '' : 's').'</span>'.
         '</form>';
 
     if ($runs === []) {
         $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="history"></span><p>'.
-            ($total === 0 && $name === ''
+            ($total === 0 && $name === '' && $source === ''
                 ? 'No maintenance has run yet. Tasks are recorded as cron, the announce-time fallback, or the Utilities page runs them.'
-                : 'No runs recorded for this task.').
+                : 'No runs match this filter.').
             '</p></div>';
     } else {
         $rows = '';
@@ -121,5 +131,5 @@ function view_admin_tasks_html(array $settings, array $runs, int $total, int $of
 
     $actions = '<a class="btn btn-ghost btn-sm" href="?page=utilities"><span class="ph-ico" data-lucide="wrench"></span>Run tasks</a>';
 
-    return view_admin_layout_html($settings, 'Task History', $body, 'tasks', $csrf_token, 'Server', $actions);
+    return view_admin_layout_html($settings, 'Task History', $body, 'tasks', $csrf_token, 'Server', $actions, 'narrow');
 }

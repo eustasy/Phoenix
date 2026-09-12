@@ -19,24 +19,28 @@ function admin_tasks_controller(mysqli $connection, array $settings): string
     require_once __DIR__.'/../model/task.runs.select.php';
     require_once __DIR__.'/../model/task.runs.count.php';
 
-    // Only the task names Phoenix writes; anything else filters to nothing
-    // rather than reaching the query as an unknown value.
-    $known = ['install', 'migrate', 'clean', 'optimize', 'backup'];
+    // Only the values Phoenix writes; anything else widens back to "any"
+    // rather than reaching the query as an unknown value and matching nothing.
     $name = isset($_GET['name']) && is_string($_GET['name']) ? $_GET['name'] : '';
-    if ($name !== '' && ! in_array($name, $known, true)) {
+    if (! in_array($name, ['install', 'migrate', 'clean', 'optimize', 'backup'], true)) {
         $name = '';
+    }
+
+    $source = isset($_GET['source']) && is_string($_GET['source']) ? $_GET['source'] : '';
+    if (! in_array($source, ['cron', 'auto', 'admin'], true)) {
+        $source = '';
     }
 
     $limit = max(1, intval($settings['admin_tasks_limit']));
     $offset = isset($_GET['offset']) ? max(0, intval($_GET['offset'])) : 0;
 
-    $runs = task_runs_select($connection, $settings, $name, $limit, $offset);
-    $total = task_runs_count($connection, $settings, $name);
+    $runs = task_runs_select($connection, $settings, $name, $source, $limit, $offset);
+    $total = task_runs_count($connection, $settings, $name, $source);
 
     require_once __DIR__.'/../functions/auth.csrf.token.php';
     $csrf_token = ! empty($settings['admin_password']) ? auth_csrf_token() : '';
 
     require_once __DIR__.'/../views/html.admin.tasks.php';
 
-    return view_admin_tasks_html($settings, $runs, $total, $offset, $limit, $name, $csrf_token);
+    return view_admin_tasks_html($settings, $runs, $total, $offset, $limit, $name, $source, $csrf_token);
 }
