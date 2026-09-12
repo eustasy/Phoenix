@@ -89,13 +89,13 @@ function view_admin_support_html(array $settings, bool $tables_installed, array|
         ////	Two-factor
         $totp = $extras['totp'];
         if (! $totp['password']) {
-            $extras_html .= $alert('warning', 'triangle-alert', 'The admin panel has no password.', 'Anyone who can reach this page can use it. Set <code>admin_password</code>.');
+            $extras_html .= $alert('warning', 'triangle-alert', 'The admin panel has no password.<br>', 'Anyone who can reach this page can use it. Set <code>admin_password</code>.');
         } elseif ($totp['enabled']) {
             $extras_html .= $alert('success', 'shield-check', 'Two-factor authentication is enabled.');
         } elseif (! $totp['installed']) {
-            $extras_html .= $alert('warning', 'triangle-alert', 'Two-factor authentication is not available.', 'The admin panel is password-only. Run <code>composer require eustasy/authenticatron</code> to add a second factor.');
+            $extras_html .= $alert('warning', 'triangle-alert', 'Two-factor authentication is not available.<br>', 'The admin panel is password-only. Run <code>composer require eustasy/authenticatron</code> to add a second factor.');
         } else {
-            $extras_html .= $alert('warning', 'triangle-alert', 'Two-factor authentication is off.', 'The admin panel is password-only. Enable it from <a href="?page=settings">Settings</a>.');
+            $extras_html .= $alert('warning', 'triangle-alert', 'Two-factor authentication is off.<br>', 'The admin panel is password-only. Enable it from <a href="?page=settings">Settings</a>.');
         }
 
         ////	Backup compression
@@ -117,26 +117,26 @@ function view_admin_support_html(array $settings, bool $tables_installed, array|
         if (! $geo['enabled']) {
             $extras_html .= $alert('info', 'globe', 'Geo enrichment is off.', 'Set <code>stats_geo</code> to map peers and tag events by country.');
         } elseif ($geo['reader'] === 'missing') {
-            $extras_html .= $alert('danger', 'circle-alert', 'Geo is on but the reader is not installed.', 'Run <code>composer require maxmind-db/reader</code>.');
+            $extras_html .= $alert('danger', 'circle-alert', 'Geo is on but the reader is not installed.<br>', 'Run <code>composer require maxmind-db/reader</code>.');
         } elseif (! $geo['readable']) {
-            $extras_html .= $alert('danger', 'circle-alert', 'Geo is on but no database was found.', 'Point <code>stats_geo_database</code> at a GeoLite2 <code>.mmdb</code>, or drop one in <code>/usr/share/GeoIP</code>, <code>/var/lib/GeoIP</code> or <code>config/</code>.');
+            $extras_html .= $alert('danger', 'circle-alert', 'Geo is on but no database was found.<br>', 'Point <code>stats_geo_database</code> at a GeoLite2 <code>.mmdb</code>, or drop one in <code>/usr/share/GeoIP</code>, <code>/var/lib/GeoIP</code> or <code>config/</code>.');
         } else {
             $where = '<code>'.htmlspecialchars($geo['database'], ENT_QUOTES, 'UTF-8').'</code>';
             if ($geo['reader'] === 'extension') {
-                $extras_html .= $alert('success', 'globe', 'Geo enrichment is active, using the <strong>C extension</strong>.', 'Reading '.$where.'.');
+                $extras_html .= $alert('success', 'globe', 'Geo enrichment is active, using the <strong>C extension</strong>.<br>', 'Reading '.$where.'.');
             } else {
                 // Works, but slowly, and it is on the announce path.
-                $extras_html .= $alert('warning', 'triangle-alert', 'Geo enrichment is active, but using the <strong>pure-PHP reader</strong>.', 'Around 40&times; slower than <code>ext-maxminddb</code>, on every announce. Install it (Debian/Ubuntu: <code>php-maxminddb</code>) and it is picked up automatically. Reading '.$where.'.');
+                $extras_html .= $alert('warning', 'triangle-alert', 'Geo enrichment is active, but using the <strong>pure-PHP reader</strong>.<br>', 'Around 40&times; slower than <code>ext-maxminddb</code>, on every announce. Install it (Debian/Ubuntu: <code>php-maxminddb</code>) and it is picked up automatically. Reading '.$where.'.');
             }
         }
 
         ////	Error reporting
         $sentry = $extras['sentry'];
         if (! $sentry['installed']) {
-            $extras_html .= $alert('info', 'bug', 'Error reporting is not installed.', 'Run <code>composer require sentry/sentry</code> to report failures to Sentry.');
+            $extras_html .= $alert('info', 'bug', 'Error reporting is not installed.<br>', 'Run <code>composer require sentry/sentry</code> to report failures to Sentry.');
         } elseif (! $sentry['reporting'] || ! $sentry['dsn']) {
             $missing = ! $sentry['reporting'] ? '<code>report_errors</code>' : '<code>sentry_dsn</code>';
-            $extras_html .= $alert('info', 'bug', 'Sentry is installed but not reporting.', 'Set '.$missing.' to turn it on.');
+            $extras_html .= $alert('info', 'bug', 'Sentry is installed but not reporting.<br>', 'Set '.$missing.' to turn it on.');
         } else {
             $extras_html .= $alert('success', 'bug', 'Errors are being reported to Sentry.');
         }
