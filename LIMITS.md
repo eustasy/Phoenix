@@ -17,7 +17,7 @@ numbers](#scaling-these-numbers) says which move with what.
 | Torrents, public index on | `index.php` memory | **~20,500** with meta, **~61,000** without |
 | Torrents, full scrape on | `scrape.php` memory | **~54,500** |
 | Torrents, full scrape off | Nothing in Phoenix | Disk and admin-page latency |
-| Admin dashboard latency | `COUNT(*)` over the ledger | **~0.24 s per million rows** |
+| Admin dashboard latency | `COUNT(*)` over the ledger | **~0.22 s per million rows**, once the pool holds it |
 
 The tracker hot path is **CPU-bound, not database-bound**: the whole announce
 costs 6.4 ms, of which under 1 ms is querying. Everything else is bound by
@@ -30,7 +30,7 @@ costs 6.4 ms, of which under 1 ms is querying. Everything else is bound by
 | CPU | 1 vCPU (Intel Xeon E5 v4, 2.5 Ghz, 4 MB) |
 | RAM | 1 GB + 2 GB Swap |
 | PHP | 8.5 FPM, `memory_limit=128M`, `max_execution_time=30`, `ext-maxminddb` |
-| Database | MariaDB 11.8, local socket, `innodb_buffer_pool_size=128M`, `innodb_flush_log_at_trx_commit=1` |
+| Database | MariaDB 11.8, local socket, `innodb_buffer_pool_size=512M`, `innodb_flush_log_at_trx_commit=1` |
 | Tables | 1.25M events, 48 torrents, 383 peers |
 | Settings | `announce_rec_interval=1800`, closed tracker, `stats_enabled`, `public_index`, `full_scrape` |
 
@@ -138,16 +138,18 @@ Admin listings are paged (`admin_torrents_limit=100`, `admin_peers_limit=200`,
 There is no stored row counter, so an unqualified `SELECT COUNT(*)` scans an
 index. Measured against the 1.25M-row events ledger:
 
-| Query | Rows | Time |
-| --- | --- | --- |
-| `COUNT(*)` events | 1,252,956 | **303.69 ms** |
-| `COUNT(*)` peers | 383 | 0.23 ms |
-| `COUNT(*)` torrents | 48 | 0.11 ms |
-| `GROUP BY country`, `event='completed'` (uses `geo`) | 1,252,956 | 667.23 ms |
-| `SUM` over an unindexed column | 1,252,956 | 1,595.92 ms |
+| Query | Rows | Cold | Warm |
+| --- | --- | --- | --- |
+| `COUNT(*)` events | 1,252,956 | 353 ms | **279 ms** |
+| `COUNT(*)` peers | 383 | — | 0.23 ms |
+| `COUNT(*)` torrents | 48 | — | 0.11 ms |
+| `GROUP BY country`, `event='completed'` (uses `geo`) | 1,252,956 | 805 ms | **522 ms** |
+| `SUM` over an unindexed column | 1,252,956 | 751 ms | **427 ms** |
 
-That is **~0.24 s per million rows** counting, **~1.3 s per million** for an
-aggregate that cannot use an index.
+Warm means the pages are already in the buffer pool, which on this box they now
+stay — see [below](#disk-and-the-buffer-pool). That is **~0.22 s per million
+rows** counting, **~0.34 s per million** for an aggregate that cannot use an
+index.
 
 Phoenix does the unqualified count in exactly two places — `torrents_count()`
 (dashboard, sidebar badge, paged Torrents and Traffic listings) and
@@ -178,18 +180,48 @@ and give the disk headroom for the largest table.
 ### Disk and the buffer pool
 
 Storage is roughly **2.1×** the row data: the events ledger measured 154.1 MB
-before conversion and 328.9 MB after, same rows.
+before conversion and 328.9 MB after, same rows. Sizes by index, all of it the
+ledger — everything else on this box rounds to 0.1 MB:
 
-Pages are cached in `innodb_buffer_pool_size`, 128 MB by default. On this box
-the Phoenix tables total 329 MB, so **the working set does not fit** and the
-ledger aggregates above are reading from disk. That is why they cost hundreds of
-milliseconds while the announce queries — which touch only the clustered primary
-key for one `info_hash`, and stay resident — cost fractions of one.
+| Index | Size |
+| --- | --- |
+| `events.PRIMARY` (the clustered rows) | 147.7 MB |
+| `events.geo` | 85.9 MB |
+| `events.info_hash` | 70.8 MB |
+| `events.time` | 24.5 MB |
+| **Total InnoDB** | **329.1 MB** |
 
-The peers table is the part worth keeping resident. At ~250 bytes/row, 280,000
-peers is around 70 MB, so the default pool covers the announce ceiling even
-though it cannot cover the ledger. Raise it if you carry both a large swarm and
-a large ledger.
+Pages are cached in `innodb_buffer_pool_size`, **128 MB by default — which this
+dataset does not fit**. The failure mode is worth recognising, because it is not
+a gentle slope: at 128 MB the two cheap aggregates (24.5 MB + 85.9 MB) very
+nearly fit, but any query touching the clustered index pulls 147.7 MB through
+the pool and evicts everything. Repeat runs then measured a **~100% miss rate** —
+every pass re-read from disk, and a warm cache never formed.
+
+Raising the pool past the dataset fixes it outright: misses go to **0% from the
+second pass on**, and the aggregates above drop by a third. Sizing is just the
+data plus InnoDB's own overhead — roughly 10% for control blocks and the
+adaptive hash index, so **~360 MB** is the real requirement here and 384 MB is
+the round number. This box runs 512 MB, which measured 250 MB of resident pages
+against 257 MB free: comfortably more than needed.
+
+Two other caches ship at 128 MB by default and are worth checking, because on an
+all-InnoDB install both are nearly pure waste:
+
+- **`key_buffer_size`** is the MyISAM key cache. With no MyISAM tables it does
+  nothing at all — verified here by watching every `Key_%` counter sit at a zero
+  delta over 60 seconds. It cannot be set to 0 (`Cannot drop default keycache`),
+  so 8M is the floor.
+- **`aria_pagecache_buffer_size`** backs the system tables and on-disk internal
+  temp tables, which totalled 5.5 MB here against its 128 MB default.
+
+Trimming those two freed ~216 MB, which is where this box's larger InnoDB pool
+came from — no extra RAM. `innodb_buffer_pool_size` and `key_buffer_size` are
+both dynamic; `aria_pagecache_buffer_size` needs a restart.
+
+None of this speeds up the tracker. Announce queries touch one `info_hash` in
+the clustered index, stay resident under any pool size, and measured fractions
+of a millisecond. This is admin page latency only.
 
 ## Where it breaks first
 
@@ -200,8 +232,9 @@ In the order you will actually hit them:
    index off — it is off by default.
 2. **`full_scrape` memory**, at ~54,500 torrents. Turn it off; clients fall back
    to per-hash scrapes, which are indexed and cheap.
-3. **Admin `COUNT(*)`**, once the ledger passes a few million rows. Set
-   `stats_retention` so it is pruned.
+3. **Admin `COUNT(*)`**, once the ledger outgrows the buffer pool — the cliff
+   described above, not a gradual slope. Set `stats_retention` so the ledger is
+   pruned, or size the pool past the dataset.
 4. **Announce CPU**, at ~140,000 peers per core with headroom. Add cores, or
    raise `announce_rec_interval`.
 5. **Peer cleanup.** `peers_clean()` deletes on `updated < threshold` and there
@@ -216,7 +249,7 @@ In the order you will actually hit them:
 | Announce rate, peer ceiling | CPU cores and clock, linearly |
 | Peer write cost | Disk fsync latency, and `innodb_flush_log_at_trx_commit` |
 | Memory ceilings | `memory_limit`, linearly; and `index_show_meta`, ~9× |
-| Aggregate query time | Row count linearly, buffer-pool residency sharply |
+| Aggregate query time | Row count linearly; buffer-pool residency as a cliff, not a slope |
 | GeoIP throughput | `ext-maxminddb` present or not — a ~40× step, not a slope |
 | Disk | Row count × ~2.1 |
 
