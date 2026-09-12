@@ -376,6 +376,9 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertStringContainsString('ph-task-alert is-warning', $html);
         $this->assertStringContainsString('data-lucide="triangle-alert"', $html);
         $this->assertStringContainsString('badge-yellow">overdue', $html);
+        // The hover says how late and how often, so the threshold reads as a
+        // period rather than as another point in the past.
+        $this->assertStringContainsString('Last run 2h ago, expected every 1h', $html);
     }
 
     public function testNeverRunTaskGetsItsOwnRowAndHighlight(): void

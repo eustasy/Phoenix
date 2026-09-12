@@ -101,18 +101,20 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             return '<span class="'.$class.'">'.htmlspecialchars(ucfirst($source), ENT_QUOTES, 'UTF-8').'</span>';
         };
 
-        // How long ago, in the coarsest unit that still says something useful.
-        $ago = static function (int $seconds): string {
-            if ($seconds < 90) {
-                return 'just now';
-            }
+        // A span in the coarsest unit that still says something useful. Kept
+        // separate from the "ago" phrasing because the same helper also has to
+        // read a threshold, which is a duration rather than a point in time.
+        $duration = static function (int $seconds): string {
             foreach ([86400 => 'd', 3600 => 'h', 60 => 'm'] as $unit => $suffix) {
                 if ($seconds >= $unit) {
-                    return intdiv($seconds, $unit).$suffix.' ago';
+                    return intdiv($seconds, $unit).$suffix;
                 }
             }
 
-            return 'just now';
+            return $seconds.'s';
+        };
+        $ago = static function (int $seconds) use ($duration): string {
+            return $seconds < 90 ? 'just now' : $duration($seconds).' ago';
         };
 
         $rows = '';
@@ -141,7 +143,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             $when = date('Y-m-d H:i', $run['value']);
             if ($state === 'overdue') {
                 $stamp = '<span class="ph-task-alert is-warning" title="'.
-                    htmlspecialchars('Last run '.$ago((int) $run['age']).', expected within '.$ago((int) $run['after']), ENT_QUOTES, 'UTF-8').'">'.
+                    htmlspecialchars('Last run '.$ago((int) ($run['age'] ?? 0)).', expected every '.$duration((int) ($run['after'] ?? 0)), ENT_QUOTES, 'UTF-8').'">'.
                     $when.'<span class="ph-ico" data-lucide="triangle-alert"></span></span>';
                 $status = '<span class="badge badge-yellow">overdue</span>';
             } else {
