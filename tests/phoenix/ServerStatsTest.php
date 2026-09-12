@@ -70,9 +70,41 @@ class ServerStatsTest extends TestCase
     {
         // Falls back to 1 rather than 0 — dividing load by zero would be worse
         // than over-reporting on a host that hides /proc.
-        require_once __DIR__.'/../../src/functions/server.stats.cores.php';
+        require_once __DIR__.'/../../src/functions/server.stats.cpuinfo.php';
 
-        $this->assertGreaterThanOrEqual(1, \server_stats_cores());
+        $this->assertGreaterThanOrEqual(1, \server_stats_cpuinfo()['cores']);
+    }
+
+    public function testClockAndCacheAreNullableNotZero(): void
+    {
+        // Plenty of kernels and containers report no `cpu MHz` or `cache size`.
+        // A zero there would read as a measurement rather than a silence, so
+        // the hover omits what it does not have.
+        require_once __DIR__.'/../../src/functions/server.stats.cpuinfo.php';
+        $cpu = \server_stats_cpuinfo();
+
+        foreach (['mhz', 'cache'] as $key) {
+            if ($cpu[$key] !== null) {
+                $this->assertGreaterThan(0, $cpu[$key], $key);
+            } else {
+                $this->assertNull($cpu[$key], $key);
+            }
+        }
+    }
+
+    public function testCpuDetailPutsHardwareOnItsOwnLine(): void
+    {
+        $stats = \server_stats();
+        if (! $stats['cpu']['available']) {
+            $this->markTestSkipped('sys_getloadavg() unavailable on this host');
+        }
+
+        // Load on the first line, the hardware it is measured against on the
+        // second, so the hover reads as two facts rather than one long one.
+        $lines = explode("\n", $stats['cpu']['detail']);
+        $this->assertCount(2, $lines);
+        $this->assertStringStartsWith('Load ', $lines[0]);
+        $this->assertMatchesRegularExpression('/^\d+ cores?/', $lines[1]);
     }
 
     public function testMeminfoValuesAreBytes(): void

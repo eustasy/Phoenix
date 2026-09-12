@@ -26,7 +26,7 @@ declare(strict_types=1);
 function server_stats(): array
 {
     require_once __DIR__.'/format.bytes.php';
-    require_once __DIR__.'/server.stats.cores.php';
+    require_once __DIR__.'/server.stats.cpuinfo.php';
     require_once __DIR__.'/server.stats.meminfo.php';
 
     $blank = ['available' => false, 'percent' => null, 'detail' => 'Unavailable', 'note' => 'n/a'];
@@ -40,12 +40,24 @@ function server_stats(): array
     if (function_exists('sys_getloadavg')) {
         $load = sys_getloadavg();
         if (is_array($load) && isset($load[0])) {
-            $cores = server_stats_cores();
-            $percent = (int) round(($load[0] / $cores) * 100);
+            $cpu = server_stats_cpuinfo();
+            $percent = (int) round(($load[0] / $cpu['cores']) * 100);
+
+            // The hardware goes on its own line, and only the parts the kernel
+            // actually reported — a missing clock or cache is common, and a
+            // zero there would read as a measurement rather than a silence.
+            $hardware = [$cpu['cores'].' core'.($cpu['cores'] === 1 ? '' : 's')];
+            if ($cpu['mhz'] !== null) {
+                $hardware[] = sprintf('%.2f GHz', $cpu['mhz'] / 1000);
+            }
+            if ($cpu['cache'] !== null) {
+                $hardware[] = format_bytes($cpu['cache']).' cache';
+            }
+
             $stats['cpu'] = [
                 'available' => true,
                 'percent' => $percent,
-                'detail' => sprintf('Load %.2f, %.2f, %.2f over %d core%s', $load[0], $load[1], $load[2], $cores, $cores === 1 ? '' : 's'),
+                'detail' => sprintf("Load %.2f, %.2f, %.2f\n%s", $load[0], $load[1], $load[2], implode(' · ', $hardware)),
                 'note' => '',
             ];
         }
