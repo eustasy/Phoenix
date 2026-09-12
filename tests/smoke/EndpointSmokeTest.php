@@ -427,13 +427,21 @@ class EndpointSmokeTest extends SmokeTestCase
     public function testBackupDatabaseCronRuns(): void
     {
         $root = dirname(__DIR__, 2);
-        @mkdir($root.'/backups');
+        $backupDir = $root.'/backups';
+        @mkdir($backupDir);
+        $dbName = $this->dbCreds()['db_name'];
 
-        // Seed a backup old enough to be rotated out (backup_retention defaults to
-        // 30 days) so the rotation pass actually deletes something.
-        $oldBackup = $root.'/backups/'.$this->dbCreds()['db_name'].'.20000101_0000.sql';
-        file_put_contents($oldBackup, "-- stale backup\n");
-        touch($oldBackup, time() - (40 * 86400));
+        // Seed two backups old enough to be rotated out (backup_retention
+        // defaults to 30 days): one in the current directory layout, one in the
+        // single-file layout an upgraded install still has lying around.
+        $staleDir = $backupDir.'/'.$dbName.'.20000101_000000';
+        @mkdir($staleDir);
+        file_put_contents($staleDir.'/schema.sql', "-- stale schema\n");
+        file_put_contents($staleDir.'/torrents.sql', "-- stale data\n");
+        touch($staleDir, time() - (40 * 86400));
+        $staleFile = $backupDir.'/'.$dbName.'.20000101_0000.sql';
+        file_put_contents($staleFile, "-- stale backup\n");
+        touch($staleFile, time() - (40 * 86400));
 
         // Seed a torrent row so the dump has real torrent data to check: a
         // completed announce creates one via torrent_increment_downloads (and a
@@ -453,32 +461,63 @@ class EndpointSmokeTest extends SmokeTestCase
         $r = $this->runCli('backup-database.php');
         $this->assertSame(0, $r['exit'], $r['stdout'].$r['stderr']);
 
-        // backup_compress is on by default, so the dump lands as .sql.gz; glob
-        // both so this still passes with compression turned off.
-        $pattern = $root.'/backups/'.$this->dbCreds()['db_name'].'.*.sql';
-        $dumps = array_merge(glob($pattern) ?: [], glob($pattern.'.gz') ?: []);
-        $this->assertNotEmpty($dumps, 'backup-database should write a dump');
+        // A backup is a dated directory, not a file.
+        $dirs = array_filter(glob($backupDir.'/'.$dbName.'.*') ?: [], 'is_dir');
+        $dirs = array_values(array_filter($dirs, static fn (string $d): bool => $d !== $staleDir));
+        $this->assertNotEmpty($dirs, 'backup-database should write a backup directory');
+        $backup = $dirs[0];
 
-        $raw = (string) file_get_contents($dumps[0]);
-        if (str_ends_with($dumps[0], '.gz')) {
-            // Both mysqldump passes must be readable from the one gzip stream,
-            // not just the first — pass 2 appends the peers structure.
-            $raw = (string) gzdecode($raw);
-            $this->assertNotSame('', $raw, 'compressed dump should decompress');
-        }
-        $dump = $raw;
+        // backup_compress is on by default, so each dump lands as .sql.gz; read
+        // either so this still passes with compression turned off.
+        $read = function (string $name) use ($backup): string|false {
+            foreach ([$backup.'/'.$name.'.sql.gz', $backup.'/'.$name.'.sql'] as $path) {
+                if (! is_file($path)) {
+                    continue;
+                }
+                $raw = (string) file_get_contents($path);
+                if (str_ends_with($path, '.gz')) {
+                    $raw = (string) gzdecode($raw);
+                    $this->assertNotSame('', $raw, $name.' should decompress');
+                }
+
+                return $raw;
+            }
+
+            return false;
+        };
+
         $prefix = $this->dbCreds()['db_prefix'];
-        // torrents + tasks + the peers structure are all present...
-        $this->assertStringContainsString($prefix.'torrents', $dump);
-        $this->assertStringContainsString($prefix.'tasks', $dump);
-        $this->assertStringContainsString($prefix.'peers', $dump);
-        // ...the torrent row IS dumped (its info_hash appears as data), but the
-        // peer row is NOT — peers is schema-only.
-        $this->assertStringContainsString(self::HASH, $dump);
-        $this->assertStringNotContainsString($completePeer, $dump);
 
-        // Rotation deleted the stale backup (older than backup_retention days).
-        $this->assertFileDoesNotExist($oldBackup);
+        // schema.sql carries every table's structure, peers included.
+        $schema = $read('schema');
+        $this->assertIsString($schema, 'schema dump should exist');
+        foreach (['torrents', 'tasks', 'task_runs', 'events', 'peers'] as $table) {
+            $this->assertStringContainsString($prefix.$table, $schema);
+        }
+
+        // The torrent row is in the torrents data file, and nowhere else.
+        $torrents = $read('torrents');
+        $this->assertIsString($torrents, 'torrents data dump should exist');
+        $this->assertStringContainsString(self::HASH, $torrents);
+
+        // task_runs IS dumped — nothing reads it back, but restoring it is the
+        // operator's call to make, not the backup's.
+        $this->assertIsString($read('task_runs'), 'task_runs data dump should exist');
+
+        // peers gets no data file: the swarm is ephemeral, so the peer row that
+        // completed announce just created must not be anywhere in the backup.
+        $this->assertFalse($read('peers'), 'peers must have no data dump');
+        foreach (glob($backup.'/*') ?: [] as $file) {
+            $raw = (string) file_get_contents($file);
+            if (str_ends_with($file, '.gz')) {
+                $raw = (string) gzdecode($raw);
+            }
+            $this->assertStringNotContainsString($completePeer, $raw, basename($file).' must not carry peer data');
+        }
+
+        // Rotation deleted both stale backups, in either layout.
+        $this->assertDirectoryDoesNotExist($staleDir);
+        $this->assertFileDoesNotExist($staleFile);
     }
 
     #[Depends('testInstallSucceeds')]
