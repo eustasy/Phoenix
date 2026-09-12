@@ -325,6 +325,18 @@ a.btn-outline:hover { color: var(--color-action); }
 @supports selector(:has(*)) {
   .ph-card-table tbody tr:not([hidden]):not(:has(~ tr:not([hidden]))) td { border-bottom: none; }
 }
+/* The index renders a torrent across two rows and groups them in a <tbody>
+   each, so its filter hides whole <tbody> elements (tables.js phRowGroups) and
+   the rule above never fires: a main row always has its meta row after it, and
+   a display:none row is not [hidden]. The last row showing is therefore in the
+   last GROUP showing, which is what this matches. Both of the group's rows lose
+   the border — with the drawer open they read as one unit anyway, which is
+   already how the shared hover treats them. Scoped to .idx-table because it is
+   the tbody-per-record table; a single-tbody table would match its only tbody
+   and lose every border. */
+@supports selector(:has(*)) {
+  .idx-table tbody:not([hidden]):not(:has(~ tbody:not([hidden]))) td { border-bottom: none; }
+}
 .ph-card-table tbody tr:hover { background-color: var(--color-surface-raised); }
 /* Single-line rows. Byte counts ("1.5 GB") and timestamps read badly broken
    across two lines, and wrapping them buys no width back — the unbreakable

@@ -117,4 +117,14 @@ class ViewAdminBackupsHtmlTest extends TestCase
         $this->assertStringContainsString('is-danger', $html);
         $this->assertStringNotContainsString('href="?page=backups&amp;delete=', $html);
     }
+
+    public function testEnvironmentNoteLinksTaskHistory(): void
+    {
+        // task_runs has a reader now, so the note points at it rather than
+        // calling it history nothing reads.
+        $html = view_admin_backups_html($this->settings(), [], false, 'tok');
+
+        $this->assertStringContainsString('?page=tasks', $html);
+        $this->assertStringNotContainsString('nothing reads', $html);
+    }
 }

@@ -40,7 +40,7 @@ function view_admin_backups_html(array $settings, array $backups, string|false $
     }
 
     // Environment caveat (the run fails with a clear message when unmet).
-    $body .= '<p class="muted mt-0 text-sm">Backups require the <code>mysqldump</code> binary, <code>proc_open</code>, and a writable backup directory available to the web-server user. Each backup is a directory holding <code>schema.sql</code> and one data file per table, gzipped as written unless <code>backup_compress</code> is off. Import <code>schema.sql</code> first, then whichever tables you want back &mdash; <code>task_runs</code> is maintenance history nothing reads, and <code>peers</code> repopulates itself.</p>';
+    $body .= '<p class="muted mt-0 text-sm">Backups require the <code>mysqldump</code> binary, <code>proc_open</code>, and a writable backup directory available to the web-server user. Each backup is a directory holding <code>schema.sql</code> and one data file per table, gzipped as written unless <code>backup_compress</code> is off. Import <code>schema.sql</code> first, then whichever tables you want back &mdash; <code>peers</code> repopulates itself from announces, and <code>task_runs</code> is only the <a href="?page=tasks">maintenance history</a>.</p>';
 
     if ($backups === []) {
         $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="archive"></span><p>No backups yet.</p></div>';
