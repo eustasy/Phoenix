@@ -28,6 +28,14 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
         ];
     }
 
+    ////	Server gauges
+    // Read once per request and handed to the layout in $settings, the same
+    // way nav_counts is. Outside the tables-installed guard: a machine's CPU
+    // and disk are worth seeing on the installer too, and they do not touch
+    // the database.
+    require_once __DIR__.'/../functions/server.stats.php';
+    $settings['server_stats'] = server_stats();
+
     ////	Page selection
     // Normalise the requested page up front. Unknown pages fall through to
     // the dashboard (lenient — never error on a bogus ?page=).

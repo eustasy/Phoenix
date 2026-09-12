@@ -797,3 +797,52 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
    via the head's $head_pre slot, so no !important is needed. */
 .jvm-container { background-color: transparent; }
 .jvm-tooltip { background-color: var(--color-surface-overlay); color: var(--color-text); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); font-family: var(--font-body); font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); padding: var(--space-1) var(--space-2); }
+
+/* --------------------------------------------------------------------------
+   Sidebar server gauges — CPU, memory, swap and disk (view_server_stats_html).
+   -------------------------------------------------------------------------- */
+
+.ph-srv-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-block-end: var(--space-3);
+  margin-block-end: var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+.ph-srv-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+.ph-srv-name { color: var(--color-text-secondary); }
+.ph-srv-val { color: var(--color-text-tertiary); }
+/* The track is the bar's own colour at low alpha, so an empty gauge still reads
+   as belonging to its row rather than as a generic grey slot. */
+.ph-srv-bar {
+  height: 4px;
+  border-radius: var(--radius-full);
+  background-color: color-mix(in srgb, var(--ph-srv-color) 18%, transparent);
+  overflow: hidden;
+}
+.ph-srv-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--ph-srv-color);
+  transition: width var(--duration-normal, 200ms) ease;
+}
+/* One hue per metric, so the four rows are distinguishable at a glance. */
+.ph-srv--cpu { --ph-srv-color: var(--color-blue); }
+.ph-srv--memory { --ph-srv-color: var(--color-purple); }
+.ph-srv--swap { --ph-srv-color: var(--color-cyan); }
+.ph-srv--disk { --ph-srv-color: var(--color-orange); }
+/* Pressure outranks identity: which metric it is matters less than that it is
+   nearly full, so these override the per-metric hue. */
+.ph-srv.is-warning { --ph-srv-color: var(--color-warning); }
+.ph-srv.is-critical { --ph-srv-color: var(--color-danger); }
+.ph-srv.is-warning .ph-srv-val,
+.ph-srv.is-critical .ph-srv-val { color: var(--ph-srv-color); }

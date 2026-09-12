@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 ////	view_admin_layout_html
 // Render the admin panel chrome around a page-specific body: the sticky flame-
-// marked sidebar (Tracker + Server nav groups, theme toggle, logout) and the
+// marked sidebar (Tracker + Server nav groups, server gauges, theme toggle,
+// logout) and the
 // main column's top bar (crumb + title + optional actions). The per-page
 // controller assembles $body (trusted HTML) and passes it in, so this view
 // stays pure — no auth, no session, no side effects. The CSRF token rides in
@@ -40,6 +41,7 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
     require_once __DIR__.'/html.head.php';
     require_once __DIR__.'/html.mark.php';
     require_once __DIR__.'/html.theme.toggle.php';
+    require_once __DIR__.'/html.server.stats.php';
     require_once __DIR__.'/html.scripts.php';
 
     ////	Navigation
@@ -95,6 +97,12 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
         $nav_html .= '<div class="ph-navlabel">'.$label.'</div><nav class="ph-nav">'.$links.'</nav>';
     }
 
+    ////	Server gauges
+    // Injected by admin_panel_controller() the same way nav_counts is, so this
+    // view stays free of side effects — reading /proc is not a view's job. The
+    // installer and isolated view tests pass no stats and simply show none.
+    $server_stats_html = view_server_stats_html($settings['server_stats'] ?? []);
+
     ////	Logout — POST only (a cross-site GET cannot end the session) and only
     // when auth is configured.
     $logout_html = '';
@@ -131,7 +139,7 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
 		'.$nav_html.'
 
 		<div class="ph-sidebar-foot">
-			'.view_theme_toggle_html('Light mode', 'Dark mode').'
+			'.$server_stats_html.view_theme_toggle_html('Light mode', 'Dark mode').'
 			<div class="flex items-center justify-between gap-2">
 				<span class="dim mono text-xs">eustasy</span>
 				'.$logout_html.'
