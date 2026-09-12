@@ -21,11 +21,12 @@ declare(strict_types=1);
 // with no entry for a page that has nothing to say. The badge is an icon
 // rather than a count because the number is never the point — one overdue task
 // and three are the same instruction.
-//
-// @param array<string, array{value: int, source: string, state?: string}> $tasks
-// @return array<string, array{level: string, title: string}>
 
-/** @param PhoenixSettings $settings */
+/**
+ * @param PhoenixSettings $settings
+ * @param array<string, array{value: int, source: string, state?: string}> $tasks
+ * @return array<string, array{level: string, title: string}>
+ */
 function nav_alerts(array $tasks, array $settings): array
 {
     $alerts = [];

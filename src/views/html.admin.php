@@ -21,11 +21,13 @@ declare(strict_types=1);
 //            torrents). False hides the stats block (e.g. tables not installed).
 //   $tasks - maintenance task name => {value: last-run Unix timestamp, source:
 //            who ran it ('admin'|'cron'|'auto', '' if pre-source-tracking)}.
+//            The four tasks task_alerts() monitors also carry state/age/after,
+//            which is what drives the overdue and never-run styling.
 
 /**
  * @param PhoenixSettings $settings
  * @param array<string, int>|false $stats
- * @param array<string, array{value: int, source: string}> $tasks
+ * @param array<string, array{value: int, source: string, state?: string, age?: int|null, after?: int}> $tasks
  * @param array<string, list<array{info_hash: string, name: string|null, filename: string|null, seeders: int, leechers: int, downloads: int, bandwidth: int}>> $torrent_cards
  * @param array<string, array<string, int>> $count_cards
  * @param array<string, list<array{address: string, peer_id: string, info_hash: string, name: string|null, bytes: int}>> $peer_cards
@@ -120,7 +122,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
 
             // Unmonitored tasks that have never run are history that has not
             // happened — nothing to report.
-            if ($run === null || ($state === null && ! isset($run['value']))) {
+            if ($run === null) {
                 continue;
             }
 

@@ -23,11 +23,12 @@ declare(strict_types=1);
 //
 // A threshold of 0 disables that task's alert, so an operator who prunes by
 // hand is not nagged forever.
-//
-// @param array<string, array{value: int, source: string}> $tasks
-// @return array<string, array{value: int, source: string, state?: string, age?: int|null, after?: int}>
 
-/** @param PhoenixSettings $settings */
+/**
+ * @param PhoenixSettings $settings
+ * @param array<string, array{value: int, source: string}> $tasks
+ * @return array<string, array{value: int, source: string, state?: string, age?: int|null, after?: int}>
+ */
 function task_alerts(array $tasks, array $settings, int $time): array
 {
     $monitored = [
