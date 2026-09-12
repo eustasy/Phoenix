@@ -161,4 +161,41 @@ admin_backups_controller($GLOBALS[\'phoenix_connection\'], $settings, $GLOBALS[\
         // Only the requested dump, not the whole backup.
         $this->assertStringNotContainsString('-- schema', $result['stdout']);
     }
+
+    public function testDeletePostRemovesTheBackup(): void
+    {
+        $dir = sys_get_temp_dir().'/phx_delctl_'.bin2hex(random_bytes(4)).'/';
+        mkdir($dir);
+        $name = self::$settings['db_name'].'.20240101_000000';
+        mkdir($dir.$name);
+        file_put_contents($dir.$name.'/schema.sql', '-- sql');
+
+        $settings = self::$settings;
+        $settings['backup_dir'] = $dir;
+        // No admin_password means no session, so CSRF is not in play here —
+        // the same condition the run-backup POST is tested under.
+        $settings['admin_password'] = '';
+
+        $_POST = ['process' => 'backup_delete', 'name' => $name];
+
+        $html = \admin_backups_controller(self::$connection, $settings, self::$time);
+
+        $this->assertStringContainsString('Deleted '.$name, $html);
+        $this->assertDirectoryDoesNotExist($dir.$name);
+
+        $_POST = [];
+        @rmdir($dir);
+    }
+
+    public function testDeletePostWithABadNameSaysNotFound(): void
+    {
+        $settings = self::$settings;
+        $settings['admin_password'] = '';
+        $_POST = ['process' => 'backup_delete', 'name' => '../../etc/passwd'];
+
+        $html = \admin_backups_controller(self::$connection, $settings, self::$time);
+
+        $this->assertStringContainsString('Backup not found.', $html);
+        $_POST = [];
+    }
 }

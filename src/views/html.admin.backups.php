@@ -5,9 +5,11 @@ declare(strict_types=1);
 ////	view_admin_backups_html
 // Render the admin Backups page: a "Run backup now" button (CSRF-protected
 // POST) and a table of the existing backups (name, total size, created time),
-// each listing its individual dumps as separate downloads — a backup is a dated
-// directory holding schema.sql plus one file per table, so restoring one table
-// means downloading one file. Legacy single-file dumps list as one download.
+// each listing its individual dumps as separate downloads and a delete action —
+// a backup is a dated directory holding schema.sql plus one file per table, so
+// restoring one table means downloading one file. Legacy single-file dumps list
+// as one download. Delete is a CSRF-protected POST with a confirm, matching the
+// Torrents and API Keys pages.
 // The environment note flags the mysqldump / writable-directory requirement, and
 // any action message (a success line or the engine's error) is shown above.
 // Wrapped in the shared admin layout. Returns HTML string.
@@ -57,15 +59,24 @@ function view_admin_backups_html(array $settings, array $backups, string|false $
                     '</a>';
             }
 
+            // Deletion is a POST behind CSRF, never a link — a GET delete can be
+            // fired by a prefetch or an <img> pointed at the panel.
+            $delete = '<form method="POST" class="d-inline" data-confirm="Delete '.
+                htmlspecialchars($backup['name'], ENT_QUOTES, 'UTF-8').'? This cannot be undone.">'.
+                '<input type="hidden" name="process" value="backup_delete">'.
+                '<input type="hidden" name="name" value="'.htmlspecialchars($backup['name'], ENT_QUOTES, 'UTF-8').'">'.$csrf_field.
+                '<button type="submit" class="btn btn-ghost btn-xs is-danger"><span class="ph-ico" data-lucide="trash-2"></span>Delete</button></form>';
+
             $rows .= '<tr>'.
                 '<td class="mono text-xs">'.htmlspecialchars($backup['name']).'</td>'.
                 '<td class="table-col-numeric mono" data-sort="'.$backup['size'].'">'.format_bytes($backup['size']).'</td>'.
                 '<td class="mono muted">'.date('Y-m-d H:i', $backup['mtime']).'</td>'.
                 '<td><div class="row-actions">'.$downloads.'</div></td>'.
+                '<td class="tar"><div class="row-actions">'.$delete.'</div></td>'.
                 '</tr>';
         }
         $body .= '<div class="ph-card-table">'.
-            '<table><thead><tr><th>Backup</th><th class="table-col-numeric">Size</th><th>Created</th><th class="tar">Download</th></tr></thead>'.
+            '<table><thead><tr><th>Backup</th><th class="table-col-numeric">Size</th><th>Created</th><th>Download</th><th class="tar">Actions</th></tr></thead>'.
             '<tbody>'.$rows.'</tbody></table></div>';
     }
 

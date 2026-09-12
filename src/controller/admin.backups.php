@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 ////	admin_backups_controller
 // Renders the admin Backups page: a "Run backup now" button and a list of the
-// existing dumps. Verifies the CSRF token on the backup POST (process=backup)
-// before running it, then lists the backups via the shared layout. Dispatched
-// by admin_panel_controller() for page=backups.
+// existing backups, each with per-file downloads and a delete action. Verifies
+// the CSRF token on both POSTs (process=backup, process=backup_delete) before
+// acting, then lists the backups via the shared layout. Dispatched by
+// admin_panel_controller() for page=backups.
 
 /** @param PhoenixSettings $settings */
 function admin_backups_controller(mysqli $connection, array $settings, int $time): string
@@ -57,6 +58,14 @@ function admin_backups_controller(mysqli $connection, array $settings, int $time
     if ($process === 'backup') {
         require_once __DIR__.'/admin.backup.php';
         $message = admin_backup_action($connection, $settings, $time);
+    }
+
+    // Deletion is a POST behind the same CSRF check as the run action — never a
+    // link, so it cannot be triggered by a prefetch or an <img> on another site.
+    if ($process === 'backup_delete') {
+        require_once __DIR__.'/admin.backup.delete.php';
+        $name = ! empty($_POST['name']) && is_string($_POST['name']) ? $_POST['name'] : '';
+        $message = admin_backup_delete_action($settings, $name);
     }
 
     require_once __DIR__.'/../functions/db.backup.list.php';

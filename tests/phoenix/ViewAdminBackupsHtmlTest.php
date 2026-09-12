@@ -99,4 +99,22 @@ class ViewAdminBackupsHtmlTest extends TestCase
         $html = view_admin_backups_html($this->settings(), [], false, 'tok');
         $this->assertStringContainsString('href="?page=backups" class="is-active" aria-current="page"', $html);
     }
+
+    public function testEachBackupHasADeleteAction(): void
+    {
+        $backups = [
+            ['name' => 'phoenix.20240102_000000', 'size' => 30, 'mtime' => 1700000000, 'files' => [
+                ['name' => 'schema.sql.gz', 'size' => 10],
+            ]],
+        ];
+        $html = view_admin_backups_html($this->settings(), $backups, false, 'tok');
+
+        // A CSRF-protected POST with a confirm, never a link: a GET delete can
+        // be fired by a prefetch or an <img> pointed at the panel.
+        $this->assertStringContainsString('name="process" value="backup_delete"', $html);
+        $this->assertStringContainsString('name="name" value="phoenix.20240102_000000"', $html);
+        $this->assertStringContainsString('data-confirm="Delete phoenix.20240102_000000?', $html);
+        $this->assertStringContainsString('is-danger', $html);
+        $this->assertStringNotContainsString('href="?page=backups&amp;delete=', $html);
+    }
 }
