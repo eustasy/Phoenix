@@ -871,3 +871,23 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-card-table tbody tr.is-critical > td {
   background-color: color-mix(in srgb, var(--color-danger) 7%, transparent);
 }
+
+/* An alert badge stands in for a nav count when a page has something wrong.
+   Sized to the count badge it replaces so the nav does not shift. */
+.ph-nav .ph-nav-badge.is-warning,
+.ph-nav .ph-nav-badge.is-critical {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background-color: transparent;
+}
+.ph-nav .ph-nav-badge.is-warning { color: var(--color-warning); }
+.ph-nav .ph-nav-badge.is-critical { color: var(--color-danger); }
+.ph-nav .ph-nav-badge .ph-ico { width: 1em; height: 1em; }
+/* The sidebar paints its own badge colours over the defaults; the alert hues
+   have to win there too or they read as an ordinary count. */
+.ph-sidebar .ph-nav-badge.is-warning,
+.ph-sidebar .ph-nav-badge.is-critical { background-color: transparent; }
+.ph-sidebar .ph-nav-badge.is-warning { color: var(--flexoki-yellow-300); }
+.ph-sidebar .ph-nav-badge.is-critical { color: var(--flexoki-red-300); }

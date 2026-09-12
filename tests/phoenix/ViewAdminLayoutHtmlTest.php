@@ -115,4 +115,41 @@ class ViewAdminLayoutHtmlTest extends TestCase
         $this->assertStringContainsString('Phoenix Test v.0', $html);
     }
 
+    public function testNavAlertReplacesTheCountWithAnIcon(): void
+    {
+        // The number is never the point — one overdue task and three say the
+        // same thing — so an alert outranks a count on a page with both.
+        $settings = $this->settings();
+        $settings['nav_counts'] = ['utilities' => 9];
+        $settings['nav_alerts'] = ['utilities' => ['level' => 'warning', 'title' => 'One maintenance task is overdue']];
+
+        $html = view_admin_layout_html($settings, 'T', '<p>b</p>', 'dashboard');
+
+        $this->assertStringContainsString('ph-nav-badge is-warning', $html);
+        $this->assertStringContainsString('data-lucide="triangle-alert"', $html);
+        $this->assertStringContainsString('title="One maintenance task is overdue"', $html);
+        $this->assertStringNotContainsString('ph-nav-badge">9<', $html);
+    }
+
+    public function testCriticalNavAlertUsesItsOwnIcon(): void
+    {
+        $settings = $this->settings();
+        $settings['nav_alerts'] = ['support' => ['level' => 'critical', 'title' => 'Nothing has ever run']];
+
+        $html = view_admin_layout_html($settings, 'T', '<p>b</p>', 'dashboard');
+
+        $this->assertStringContainsString('ph-nav-badge is-critical', $html);
+        $this->assertStringContainsString('data-lucide="circle-alert"', $html);
+    }
+
+    public function testCountsStillRenderWithoutAnAlert(): void
+    {
+        $settings = $this->settings();
+        $settings['nav_counts'] = ['torrents' => 42];
+
+        $html = view_admin_layout_html($settings, 'T', '<p>b</p>', 'dashboard');
+
+        $this->assertStringContainsString('ph-nav-badge">42<', $html);
+        $this->assertStringNotContainsString('ph-nav-badge is-', $html);
+    }
 }

@@ -28,6 +28,19 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
         ];
     }
 
+    ////	Sidebar alerts
+    // Same task_alerts() judgement the dashboard's Maintenance block uses, so
+    // the badge and the table can never disagree. Needs the tables, since it
+    // reads the task log.
+    require_once __DIR__.'/../functions/nav.alerts.php';
+    $task_states = [];
+    if (db_tables_installed($connection, $settings)) {
+        require_once __DIR__.'/../model/tasks.select.php';
+        require_once __DIR__.'/../functions/task.alerts.php';
+        $task_states = task_alerts(tasks_select($connection, $settings), $settings, $time);
+    }
+    $settings['nav_alerts'] = nav_alerts($task_states, $settings);
+
     ////	Server gauges
     // Read once per request and handed to the layout in $settings, the same
     // way nav_counts is. Outside the tables-installed guard: a machine's CPU

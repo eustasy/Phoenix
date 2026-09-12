@@ -84,14 +84,27 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
         return (string) $n;
     };
 
+    // A page with something wrong shows an icon where its count would go. The
+    // number is never the point — one overdue task and three say the same
+    // thing — and an alert outranks a count on the pages that have both.
+    $nav_alerts = $settings['nav_alerts'] ?? [];
+
     $nav_html = '';
     foreach ($groups as $label => $items) {
         $links = '';
         foreach ($items as $key => [$icon, $text]) {
             $attrs = $key === $active ? ' class="is-active" aria-current="page"' : '';
-            $badge = isset($nav_counts[$key])
-                ? '<span class="ph-nav-badge">'.$abbrev((int) $nav_counts[$key]).'</span>'
-                : '';
+            if (isset($nav_alerts[$key])) {
+                $alert = $nav_alerts[$key];
+                $badge = '<span class="ph-nav-badge is-'.($alert['level'] === 'critical' ? 'critical' : 'warning').'"'.
+                    ' title="'.htmlspecialchars($alert['title'], ENT_QUOTES, 'UTF-8').'">'.
+                    '<span class="ph-ico" data-lucide="'.($alert['level'] === 'critical' ? 'circle-alert' : 'triangle-alert').'"></span>'.
+                    '</span>';
+            } else {
+                $badge = isset($nav_counts[$key])
+                    ? '<span class="ph-nav-badge">'.$abbrev((int) $nav_counts[$key]).'</span>'
+                    : '';
+            }
             $links .= '<a href="?page='.$key.'"'.$attrs.'><span class="ph-ico" data-lucide="'.$icon.'"></span>'.$text.$badge.'</a>';
         }
         $nav_html .= '<div class="ph-navlabel">'.$label.'</div><nav class="ph-nav">'.$links.'</nav>';
