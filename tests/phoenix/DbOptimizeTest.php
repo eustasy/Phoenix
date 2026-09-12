@@ -43,4 +43,29 @@ class DbOptimizeTest extends PhoenixTestCase
         $this->assertTrue(db_optimize(self::$connection, self::$settings, self::$time, 'peers', true));
     }
 
+    public function testFailsWhenATableDoesNotExist(): void
+    {
+        // A rebuild that cannot run must not report success — the failure
+        // arrives as a row inside the result set, not as a query error.
+        $this->assertFalse(db_optimize(self::$connection, self::$settings, self::$time, '__no_such_table__', false));
+    }
+
+    public function testDoesNotLogARunItDidNotComplete(): void
+    {
+        $prefix = self::$settings['db_prefix'];
+        $before = mysqli_fetch_assoc(mysqli_query(
+            self::$connection,
+            'SELECT COUNT(*) AS `n` FROM `'.$prefix.'task_runs` WHERE `name` = \'optimize\';',
+        ));
+
+        db_optimize(self::$connection, self::$settings, self::$time, '__no_such_table__', false);
+
+        $after = mysqli_fetch_assoc(mysqli_query(
+            self::$connection,
+            'SELECT COUNT(*) AS `n` FROM `'.$prefix.'task_runs` WHERE `name` = \'optimize\';',
+        ));
+        $this->assertIsArray($before);
+        $this->assertIsArray($after);
+        $this->assertSame($before['n'], $after['n']);
+    }
 }

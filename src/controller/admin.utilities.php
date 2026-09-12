@@ -54,6 +54,9 @@ function admin_utilities_controller(mysqli $connection, array $settings, int $ti
     } elseif ($process === 'optimize') {
         require_once __DIR__.'/admin.optimize.php';
         $message = admin_optimize_action($connection, $settings, $time);
+    } elseif ($process === 'check') {
+        require_once __DIR__.'/admin.check.php';
+        $message = admin_check_action($connection, $settings, $time);
     } elseif ($process === 'migrate') {
         require_once __DIR__.'/admin.migrate.php';
         $message = admin_migrate_action($connection, $settings, $time);

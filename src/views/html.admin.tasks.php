@@ -38,7 +38,9 @@ function view_admin_tasks_html(array $settings, array $runs, int $total, int $of
         'install' => ['wand-2', 'Installed'],
         'migrate' => ['git-merge', 'Migrated'],
         'clean' => ['brush-cleaning', 'Cleaned'],
+        'analyze' => ['chart-no-axes-column', 'Analyzed'],
         'optimize' => ['gauge', 'Optimized'],
+        'check' => ['shield-check', 'Checked'],
         'backup' => ['archive', 'Backed up'],
     ];
 

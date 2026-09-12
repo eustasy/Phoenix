@@ -22,7 +22,7 @@ function admin_tasks_controller(mysqli $connection, array $settings): string
     // Only the values Phoenix writes; anything else widens back to "any"
     // rather than reaching the query as an unknown value and matching nothing.
     $name = isset($_GET['name']) && is_string($_GET['name']) ? $_GET['name'] : '';
-    if (! in_array($name, ['install', 'migrate', 'clean', 'optimize', 'backup'], true)) {
+    if (! in_array($name, ['install', 'migrate', 'clean', 'analyze', 'optimize', 'check', 'backup'], true)) {
         $name = '';
     }
 

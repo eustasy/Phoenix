@@ -77,7 +77,9 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             'install' => ['wand-2', 'Installed'],
             'migrate' => ['git-merge', 'Migrated'],
             'clean' => ['brush-cleaning', 'Cleaned'],
+            'analyze' => ['chart-no-axes-column', 'Analyzed'],
             'optimize' => ['gauge', 'Optimized'],
+            'check' => ['shield-check', 'Checked'],
             'backup' => ['archive', 'Backed up'],
         ];
         // Matches the Task History page: cron and auto are the expected

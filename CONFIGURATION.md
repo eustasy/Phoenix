@@ -77,6 +77,7 @@ per-request fallback **off**, so no announce ever pays for it:
 
 ```cron
 */15 * * * * php ~/phoenix/bin/clean-and-optimize.php
+15  3 * * * php ~/phoenix/bin/optimize-database.php
 30  3 * * * php ~/phoenix/bin/backup-database.php
 ```
 
@@ -85,9 +86,24 @@ immediately unless `clean_with_cron` is set, so adding the entry without the
 setting does nothing at all — and clearing the setting without removing the
 entry leaves the tracker doing no cleanup from either route.
 
-Each run prunes stale peers, prunes `events` and `task_runs` past their
-retention, and then runs `CHECK`, `ANALYZE`, `REPAIR` and `OPTIMIZE` over the
-tables.
+**The two maintenance jobs run on deliberately different schedules.**
+
+`clean-and-optimize.php` prunes stale peers, prunes `events` and `task_runs`
+past their retention, and refreshes index statistics with `ANALYZE`. All of that
+is cheap — an analyze measured 1.6 ms — so it runs often.
+
+`optimize-database.php` runs `OPTIMIZE TABLE`, which on InnoDB is a **full table
+rebuild**. It is the only thing that reclaims space from deleted rows: after
+deleting 118,800 of 120,000 rows a table still measured 25.7 MB, and `ANALYZE`
+left it there while `OPTIMIZE` brought it to 0.2 MB. That makes it worth running
+after a bulk deletion and wasteful on a table in steady state, where InnoDB just
+reuses the pages its own deletes freed — so daily, not every few minutes. It
+ignores `clean_with_cron`; a rebuild never happens at announce time either way.
+
+`CHECK TABLE` is not on either schedule. It is a full scan of every row and
+index, and InnoDB verifies page checksums as it reads, so corruption surfaces
+during normal use without paying for a scan every few minutes. Run it by hand
+from **Utilities → Check** when something looks wrong.
 
 | Setting | Default | Notes |
 | --- | --- | --- |

@@ -44,6 +44,26 @@ default prefix `phoenix_`. The actual prefix is `$settings['db_prefix']`.
 - New migration: add `sql/migrations/<date>_<slug>.sql`, idempotent, default
   prefix. See `sql/migrations/README.md`.
 
+## Maintenance
+
+`db_maintenance()` (`src/model/db.maintenance.php`) runs one maintenance
+statement over a list of tables and is the shared engine behind `db_check()`,
+`db_analyze()` and `db_optimize()`. **Read its result sets, never its return
+value alone** — `CHECK`/`ANALYZE`/`OPTIMIZE` report failures as rows with
+`Msg_type: Error` while `mysqli_errno()` stays `0` and `mysqli_multi_query()`
+returns true.
+
+The three differ in cost, and that is why they are separate:
+
+- `db_analyze()` — statistics only, reclaims nothing, ~1.6 ms. On the frequent
+  cron (`bin/clean-and-optimize.php`).
+- `db_optimize()` — a full rebuild on InnoDB, the only one that reclaims space.
+  On its own slow cron (`bin/optimize-database.php`). Excludes `events`.
+- `db_check()` — a full integrity scan, Utilities action only.
+
+`REPAIR TABLE` is deliberately unused: on MariaDB it silently performs a second
+full rebuild on InnoDB. See [LIMITS.md](../../LIMITS.md) for the measurements.
+
 ## SQL injection defense
 
 The `src/model/` layer is fully parameterized (`mysqli_execute_query` with bound

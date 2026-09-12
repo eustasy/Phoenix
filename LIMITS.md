@@ -163,19 +163,54 @@ InnoDB — the ledger reports 1,252,956 against an exact 1,261,343.
 
 ### `OPTIMIZE TABLE` is a full rebuild
 
-`db_optimize()` issues `CHECK`, `ANALYZE`, `REPAIR`, `OPTIMIZE` for `peers`,
-`tasks`, `task_runs` and `torrents`. Of those:
+On InnoDB `OPTIMIZE TABLE` maps to `ALTER TABLE … FORCE`: a full rebuild that
+repacks sparsely-filled pages and re-analyses. It needs **free disk equal to the
+table's size**, is mostly but not entirely online, and reports a routine `note:
+Table does not support optimize, doing recreate + analyze instead` before its
+`status: OK`.
 
-- `OPTIMIZE TABLE` maps to `ALTER TABLE … FORCE`, a full rebuild. It needs
-  **free disk equal to the table's size** and is mostly, not entirely, online.
-- `CHECK TABLE` is a full scan.
-- `REPAIR TABLE` is **not supported** and returns a note — a no-op.
+It is also the only statement that reclaims anything. Measured on a
+peers-shaped table:
+
+| Step | Data on disk | Free | Time |
+| --- | --- | --- | --- |
+| 120,000 rows | 25.7 MB | 7.0 MB | |
+| deleted all but 1,200 | 25.7 MB | 7.0 MB | |
+| after `ANALYZE` | 25.7 MB | 7.0 MB | 1.6 ms |
+| after `OPTIMIZE` | **0.2 MB** | 0.0 MB | 37.5 ms |
+
+`ANALYZE` updates index statistics and frees nothing; `OPTIMIZE` shrank the
+table by 99%. They are not interchangeable, which is why Phoenix runs them on
+separate schedules: `bin/clean-and-optimize.php` analyses often, and
+`bin/optimize-database.php` rebuilds daily. On a table in steady state a rebuild
+reclaims nothing anyway — InnoDB reuses the pages its own deletes freed — so it
+earns its cost only after a bulk deletion.
+
+`DATA_FREE` is a poor trigger for deciding when to rebuild: above it read
+7.0 MB while the real waste was 25.5 MB, because it counts fully-free extents
+rather than half-empty pages.
+
+Two statements are deliberately absent from the scheduled runs:
+
+- **`REPAIR TABLE`**, which on MariaDB reports `status: OK` on an InnoDB table
+  and performs a **second full rebuild** — verified by watching
+  `information_schema.TABLES.CREATE_TIME` change across it. It is not the no-op
+  MySQL's "doesn't support repair" note suggests, and including it rebuilt every
+  table twice per run for no benefit.
+- **`CHECK TABLE`**, a full scan of every row and index. InnoDB verifies page
+  checksums as it reads, so corruption surfaces during normal use; it is a
+  Utilities action rather than a schedule.
 
 For scale: rebuilding the 1.25M-row, 154 MB events table took **22.6 s** on this
-box. The other four tables took under 0.05 s each.
+box. The other tables took under 0.05 s each — and `events` is excluded from the
+rebuild entirely, being the largest and the most append-mostly. Prune it with
+`stats_retention` and optimize it by hand afterwards.
 
-Leave `clean_with_cron` on so this runs on a schedule rather than on a request,
-and give the disk headroom for the largest table.
+**Failures used to be invisible here.** These statements report problems as rows
+inside their result sets — `Msg_type: Error`, then `status: Operation failed` —
+while `mysqli_errno()` stays `0` and `mysqli_multi_query()` still returns true.
+`db_maintenance()` now walks every result set and fails the run on any `Error`
+row, so a rebuild that dies partway (a full disk) no longer logs a success.
 
 ### Disk and the buffer pool
 
