@@ -66,7 +66,7 @@ Restoring is covered in [RECOVERY.md](./RECOVERY.md#restore-the-database-from-a-
 
 ## Cron (automating maintenance)
 
-Phoenix cleans up after itself either way — the question is *when*. By default
+Phoenix cleans up after itself either way — the question is _when_. By default
 `clean_with_cron` is `false`, and roughly `clean_request_percent` (1%) of
 announces pay for a cleanup pass inline. That keeps a zero-configuration install
 correct, but it means one unlucky peer in a hundred waits on table maintenance
