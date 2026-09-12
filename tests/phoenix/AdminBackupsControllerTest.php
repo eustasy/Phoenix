@@ -121,4 +121,44 @@ admin_backups_controller($GLOBALS[\'phoenix_connection\'], $settings, $GLOBALS[\
         $this->assertSame(0, $result['exit']);
         $this->assertStringContainsString($content, $result['stdout']);
     }
+
+    public function testValidDownloadStreamsAFileFromInsideABackup(): void
+    {
+        // The directory layout: ?download=<backup>&file=<dump>. Streaming calls
+        // header() + readfile() + exit, so run in a subprocess.
+        $db_name = self::$settings['db_name'];
+        $backup = $db_name.'.20240101_000000';
+        $content = '-- torrents dump '.bin2hex(random_bytes(4));
+
+        $bootstrapPath = var_export(dirname(__DIR__).'/bootstrap.php', true);
+        $controllerPath = var_export(dirname(__DIR__, 2).'/src/controller/admin.backups.php', true);
+
+        $script = '<?php
+$tmpDir = sys_get_temp_dir().\'/phx_dl_\'.bin2hex(random_bytes(4)).\'/\';
+mkdir($tmpDir, 0700, true);
+$backup = '.var_export($backup, true).';
+mkdir($tmpDir.$backup, 0700);
+file_put_contents($tmpDir.$backup.\'/schema.sql\', \'-- schema\');
+file_put_contents($tmpDir.$backup.\'/torrents.sql\', '.var_export($content, true).');
+$_GET = [\'download\' => $backup, \'file\' => \'torrents.sql\', \'page\' => \'backups\'];
+$_POST = [];
+$_SESSION = [];
+require_once '.$bootstrapPath.';
+require_once '.$controllerPath.';
+$settings = $GLOBALS[\'phoenix_settings\'];
+$settings[\'backup_dir\'] = $tmpDir;
+admin_backups_controller($GLOBALS[\'phoenix_connection\'], $settings, $GLOBALS[\'phoenix_time\']);
+@unlink($tmpDir.$backup.\'/schema.sql\');
+@unlink($tmpDir.$backup.\'/torrents.sql\');
+@rmdir($tmpDir.$backup);
+@rmdir($tmpDir);
+';
+
+        $result = $this->runPhpSubprocess($script);
+
+        $this->assertSame(0, $result['exit']);
+        $this->assertStringContainsString($content, $result['stdout']);
+        // Only the requested dump, not the whole backup.
+        $this->assertStringNotContainsString('-- schema', $result['stdout']);
+    }
 }

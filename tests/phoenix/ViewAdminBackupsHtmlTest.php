@@ -37,16 +37,48 @@ class ViewAdminBackupsHtmlTest extends TestCase
     public function testListsBackups(): void
     {
         $backups = [
-            ['name' => 'phoenix.20240102_0000.sql', 'size' => 2048, 'mtime' => 1700000000],
-            ['name' => 'phoenix.20240101_0000.sql', 'size' => 1024, 'mtime' => 1699900000],
+            ['name' => 'phoenix.20240102_000000', 'size' => 2048, 'mtime' => 1700000000, 'files' => [
+                ['name' => 'schema.sql.gz', 'size' => 1024],
+                ['name' => 'torrents.sql.gz', 'size' => 1024],
+            ]],
+            ['name' => 'phoenix.20240101_0000.sql', 'size' => 1024, 'mtime' => 1699900000, 'files' => []],
         ];
         $html = view_admin_backups_html($this->settings(), $backups, false, 'tok');
 
         $this->assertStringContainsString('ph-card-table', $html);
-        $this->assertStringContainsString('phoenix.20240102_0000.sql', $html);
+        $this->assertStringContainsString('phoenix.20240102_000000', $html);
         // Rendered as a size, with the raw count kept for sorting.
         $this->assertStringContainsString('2.0 KB', $html);
         $this->assertStringContainsString('data-sort="2048"', $html);
+    }
+
+    public function testEachDumpInABackupIsItsOwnDownload(): void
+    {
+        // The point of the split: you can pull back one table without the rest.
+        $backups = [
+            ['name' => 'phoenix.20240102_000000', 'size' => 30, 'mtime' => 1700000000, 'files' => [
+                ['name' => 'schema.sql.gz', 'size' => 10],
+                ['name' => 'torrents.sql.gz', 'size' => 20],
+            ]],
+        ];
+        $html = view_admin_backups_html($this->settings(), $backups, false, 'tok');
+
+        $this->assertStringContainsString('download=phoenix.20240102_000000&amp;file=schema.sql.gz', $html);
+        $this->assertStringContainsString('download=phoenix.20240102_000000&amp;file=torrents.sql.gz', $html);
+        // Labelled by table, with the extension trimmed off.
+        $this->assertStringContainsString('>torrents</a>', $html);
+    }
+
+    public function testLegacyBackupDownloadsAsOneFile(): void
+    {
+        // No 'files' means the entry is the download itself, with no file=.
+        $backups = [
+            ['name' => 'phoenix.20240101_0000.sql', 'size' => 1024, 'mtime' => 1699900000, 'files' => []],
+        ];
+        $html = view_admin_backups_html($this->settings(), $backups, false, 'tok');
+
+        $this->assertStringContainsString('download=phoenix.20240101_0000.sql"', $html);
+        $this->assertStringNotContainsString('file=', $html);
     }
 
     public function testEmptyShowsMessage(): void
