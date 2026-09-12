@@ -30,9 +30,9 @@ declare(strict_types=1);
  * @param array<string, array<string, int>> $count_cards
  * @param array<string, list<array{address: string, peer_id: string, info_hash: string, name: string|null, bytes: int}>> $peer_cards
  * @param array<string, array<string, int>> $clients client family => version => peers
- * @param list<array{time: int, completions: int, bytes: int}> $traffic
+ * @param list<array{time: int, completions: int, bytes: int}> $bandwidth
  */
-function view_admin_html(array $settings, bool $tables_installed, bool $show_installed = false, string $csrf_token = '', array|false $stats = false, array $tasks = [], array $torrent_cards = [], array $count_cards = [], array $peer_cards = [], array $clients = [], array $traffic = []): string
+function view_admin_html(array $settings, bool $tables_installed, bool $show_installed = false, string $csrf_token = '', array|false $stats = false, array $tasks = [], array $torrent_cards = [], array $count_cards = [], array $peer_cards = [], array $clients = [], array $bandwidth = []): string
 {
     require_once __DIR__.'/html.admin.layout.php';
     require_once __DIR__.'/../functions/cdn.assets.php';
@@ -66,9 +66,9 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
 				<div class="ph-stat-sub">All-time</div>
 			</div>
 			<div class="ph-stat ph-stat-orange">
-				<div class="ph-stat-top"><div class="ph-stat-value">'.format_bytes($stats['traffic']).'</div><div class="ph-stat-ico"><span class="ph-ico" data-lucide="arrow-up-down"></span></div></div>
-				<div class="ph-stat-label">Traffic served</div>
-				<div class="ph-stat-sub mono">'.number_format($stats['traffic']).' bytes</div>
+				<div class="ph-stat-top"><div class="ph-stat-value">'.format_bytes($stats['bandwidth']).'</div><div class="ph-stat-ico"><span class="ph-ico" data-lucide="arrow-up-down"></span></div></div>
+				<div class="ph-stat-label">Bandwidth served</div>
+				<div class="ph-stat-sub mono">'.number_format($stats['bandwidth']).' bytes</div>
 			</div>
 		</div>';
 
@@ -118,7 +118,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
 		</div>';
         }
     } elseif (! $tables_installed) {
-        $body .= '<div class="alert alert-danger"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a>, and check <a href="?page=support">Server Support</a> for diagnostics.</div></div>';
+        $body .= '<div class="alert alert-danger"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">DB Utilities</a>, and check <a href="?page=support">Server Support</a> for diagnostics.</div></div>';
     } else {
         $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="bar-chart-3"></span><p>No tracker statistics yet.</p></div>';
     }
@@ -127,12 +127,12 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
     // Ranked cards, three columns each, linking into the listing they
     // summarise. A card with no rows is dropped rather than shown empty — a
     // tracker with no unhealthy swarms should not be told about it every visit.
-    if ($torrent_cards !== [] || $count_cards !== [] || $peer_cards !== [] || $clients !== [] || $traffic !== []) {
+    if ($torrent_cards !== [] || $count_cards !== [] || $peer_cards !== [] || $clients !== [] || $bandwidth !== []) {
         require_once __DIR__.'/html.toplist.php';
 
         // A row links into the view that answers the question its card asked.
         // Most cards rank torrents by their swarm, so they land on the peers
-        // drill-down; the traffic card ranks bytes, so it lands on Traffic's.
+        // drill-down; the bandwidth card ranks bytes, so it lands on Bandwidth's.
         $hash_link = static fn (string $hash, string $page = 'peers'): string =>
             '?page='.$page.'&amp;info_hash='.htmlspecialchars($hash, ENT_QUOTES, 'UTF-8');
         $torrent_label = static fn (array $t): string => $t['name'] !== null && $t['name'] !== ''
@@ -224,12 +224,12 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                 null,
             );
         }
-        if (! empty($torrent_cards['traffic'])) {
+        if (! empty($torrent_cards['bandwidth'])) {
             $panels[] = view_toplist_html(
-                'Most traffic served',
-                $rows_from($torrent_cards['traffic'], 'traffic', static fn (array $t): string => format_bytes($t['traffic']), 'traffic'),
+                'Most bandwidth served',
+                $rows_from($torrent_cards['bandwidth'], 'bandwidth', static fn (array $t): string => format_bytes($t['bandwidth']), 'bandwidth'),
                 '#bc5215',
-                ['label' => 'All traffic', 'href' => '?page=traffic&amp;metric=events'],
+                ['label' => 'All bandwidth', 'href' => '?page=bandwidth&amp;metric=events'],
             );
         }
         // Peers ranked by bytes moved — distinct from the torrent cards above,
@@ -286,23 +286,23 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
                 '<div class="ph-chart"><canvas id="clients-chart"></canvas></div>'.
                 // Metric named rather than left to the default: the chart is
                 // the live swarm, and the link should still land on it if the
-                // page's default ever moves, as Traffic's did.
+                // page's default ever moves.
                 '<div class="ph-toplist-more"><a href="?page=clients&amp;metric=live">All clients</a></div>'.
                 '</div>';
         }
 
-        if ($traffic !== []) {
+        if ($bandwidth !== []) {
             $bytes = 0;
-            foreach ($traffic as $point) {
+            foreach ($bandwidth as $point) {
                 $bytes += $point['bytes'];
             }
-            // Same canvas id the Traffic page uses, so the shared chart script
+            // Same canvas id the Bandwidth page uses, so the shared chart script
             // needs no argument to find it.
-            $charts .= '<div class="geo-toplist ph-chart-card"><h3>Traffic &mdash; last 30 days</h3>'.
-                '<div class="ph-chart"><canvas id="traffic-chart"></canvas></div>'.
+            $charts .= '<div class="geo-toplist ph-chart-card"><h3>Bandwidth &mdash; last 30 days</h3>'.
+                '<div class="ph-chart"><canvas id="bandwidth-chart"></canvas></div>'.
                 // Carries the metric: this card is the ledger-derived series,
-                // and the Traffic page now opens on the live swarm.
-                '<div class="ph-toplist-more"><a href="?page=traffic&amp;metric=events">'.format_bytes($bytes).' served &middot; all traffic</a></div>'.
+                // and the Bandwidth page opens on the live swarm.
+                '<div class="ph-toplist-more"><a href="?page=bandwidth&amp;metric=events">'.format_bytes($bytes).' served &middot; all traffic</a></div>'.
                 '</div>';
         }
 
@@ -325,7 +325,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
     // scope — hence the "_" name marking it an inlined file.
     $inline_js = '';
     $extra_srcs = [];
-    if ($clients !== [] || $traffic !== []) {
+    if ($clients !== [] || $bandwidth !== []) {
         $extra_srcs[] = cdn_assets()['chart']['url'];
     }
     if ($clients !== []) {
@@ -343,9 +343,9 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             (string) json_encode($chart_clients, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
             (string) file_get_contents(__DIR__.'/../../public/assets/_clients.js')."\n";
     }
-    if ($traffic !== []) {
+    if ($bandwidth !== []) {
         $inline_js .= 'var TRAFFIC = '.
-            (string) json_encode($traffic, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
+            (string) json_encode($bandwidth, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
             'var TRAFFIC_BUCKET = 86400;'."\n".
             (string) file_get_contents(__DIR__.'/../../public/assets/_traffic.js');
     }

@@ -10,7 +10,7 @@ declare(strict_types=1);
 // $measure is one of:
 //   'seeders'  — peers in the seeding state, by bytes uploaded
 //   'leechers' — peers still downloading, by bytes downloaded
-//   'traffic'  — every peer, by bytes uploaded, whatever its state: a leecher
+//   'bandwidth'  — every peer, by bytes uploaded, whatever its state: a leecher
 //                that is also serving belongs in a chart of who is moving the
 //                most data, which the state-filtered measures would hide
 //
@@ -42,7 +42,7 @@ function peers_top(mysqli $connection, array $settings, string $measure = 'seede
     $measures = [
         'seeders' => ['`p`.`uploaded`', '1'],
         'leechers' => ['`p`.`downloaded`', '0'],
-        'traffic' => ['`p`.`uploaded`', null],
+        'bandwidth' => ['`p`.`uploaded`', null],
     ];
     [$column, $state] = $measures[$measure] ?? $measures['seeders'];
 

@@ -25,7 +25,7 @@ function view_stats_json(array $stats, array $settings): string
             'leechers' => $stats['leechers'],
             'torrents' => $stats['torrents'],
             'downloads' => $stats['downloads'],
-            'traffic' => $stats['traffic'],
+            'traffic' => $stats['bandwidth'],
         ],
     ]) ?: '';
 }

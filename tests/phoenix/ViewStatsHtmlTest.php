@@ -18,7 +18,7 @@ class ViewStatsHtmlTest extends TestCase
             'leechers' => 5,
             'torrents' => 3,
             'downloads' => 100,
-            'traffic' => 5000000,
+            'bandwidth' => 5000000,
         ];
         $settings = ['phoenix_version' => '1.0.0'];
 
@@ -49,7 +49,7 @@ class ViewStatsHtmlTest extends TestCase
             'leechers' => 0,
             'torrents' => 0,
             'downloads' => 0,
-            'traffic' => 0,
+            'bandwidth' => 0,
         ];
         $settings = ['phoenix_version' => '1.0.0'];
 
@@ -72,7 +72,7 @@ class ViewStatsHtmlTest extends TestCase
             'leechers' => 580246,
             'torrents' => 9876,
             'downloads' => 543210,
-            'traffic' => 9876543210,
+            'bandwidth' => 9876543210,
         ];
         $settings = ['phoenix_version' => '1.0.0'];
 
@@ -84,7 +84,7 @@ class ViewStatsHtmlTest extends TestCase
         $this->assertStringContainsString('<div class="b-num leech">580,246</div>', $output);
         $this->assertStringContainsString('<div class="ph-stat-value">9,876</div>', $output);
         $this->assertStringContainsString('<div class="ph-stat-value">543,210</div>', $output);
-        // Traffic: human-readable headline + exact bytes.
+        // Bandwidth: human-readable headline + exact bytes.
         $this->assertStringContainsString('9.2 GB', $output);
         $this->assertStringContainsString('9,876,543,210 bytes', $output);
     }

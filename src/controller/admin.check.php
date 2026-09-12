@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 ////	admin_check_action
-//  Handles the Utilities "Check tables" action (process=check). Runs an
+//  Handles the DB Utilities "Check tables" action (process=check). Runs an
 //  integrity scan over every Phoenix table and reports the outcome.
 //  A failure here is the interesting result, so it says so plainly rather than
 //  folding into a generic error.

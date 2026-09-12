@@ -41,7 +41,7 @@ function scrape_merge_results(mysqli_result $peers, mysqli_result $torrents, arr
             'peers' => $seeders + $leechers,
             'size' => $size,
             'downloads' => $downloads,
-            'traffic' => $size * $downloads,
+            'bandwidth' => $size * $downloads,
         ];
     }
 

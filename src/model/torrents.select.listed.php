@@ -65,7 +65,7 @@ function torrents_select_listed(mysqli $connection, array $settings): array
             'seeders' => intval($row['seeders']),
             'leechers' => intval($row['leechers']),
             'peers' => intval($row['seeders']) + intval($row['leechers']),
-            'traffic' => intval($row['size']) * intval($row['downloads']),
+            'bandwidth' => intval($row['size']) * intval($row['downloads']),
             'filename' => $meta['filename'],
             'files' => $meta['files'],
             'trackers' => $meta['trackers'],

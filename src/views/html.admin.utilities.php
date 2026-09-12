@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 ////	view_admin_utilities_html
-// Render the admin Utilities page: the database setup/reset action plus the
+// Render the admin DB Utilities page: the database setup/reset action plus the
 // prune, analyze, optimize, check, and schema-migrate maintenance actions. The setup action
 // also appears when the tables are missing (so the operator can install); the
 // prune/analyze/optimize/check/migrate actions need live tables. Any action message is shown
@@ -66,5 +66,5 @@ function view_admin_utilities_html(array $settings, bool $tables_installed, stri
 
     $body .= '<div class="ph-card-table"><table><tbody>'.$rows.'</tbody></table></div>';
 
-    return view_admin_layout_html($settings, 'Utilities', $body, 'utilities', $csrf_token, 'Server', '', 'narrow');
+    return view_admin_layout_html($settings, 'DB Utilities', $body, 'utilities', $csrf_token, 'Server', '', 'narrow');
 }

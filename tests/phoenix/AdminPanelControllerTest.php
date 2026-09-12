@@ -214,7 +214,7 @@ class AdminPanelControllerTest extends PhoenixTestCase
         $_GET['page'] = 'utilities';
 
         $html = \admin_panel_controller(self::$connection, $settings, self::$time);
-        $this->assertStringContainsString('<title>Phoenix Admin: Utilities</title>', $html);
+        $this->assertStringContainsString('<title>Phoenix Admin: DB Utilities</title>', $html);
     }
 
     public function testPageAddRoutesToAddTorrent(): void

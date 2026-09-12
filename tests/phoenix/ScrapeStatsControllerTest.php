@@ -67,7 +67,7 @@ class ScrapeStatsControllerTest extends PhoenixTestCase
         $decoded = json_decode($json, true);
         $this->assertIsArray($decoded);
         $this->assertArrayHasKey('tracker', $decoded);
-        foreach (['peers', 'seeders', 'leechers', 'torrents', 'downloads', 'traffic'] as $key) {
+        foreach (['peers', 'seeders', 'leechers', 'torrents', 'downloads', 'bandwidth'] as $key) {
             $this->assertArrayHasKey($key, $decoded['tracker']);
             $this->assertIsInt($decoded['tracker'][$key]);
         }

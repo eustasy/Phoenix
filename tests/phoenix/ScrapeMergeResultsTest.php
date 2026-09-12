@@ -66,7 +66,7 @@ class ScrapeMergeResultsTest extends PhoenixTestCase
         $this->assertSame(3, $out[$hashA]['peers']);
         $this->assertSame(1024, $out[$hashA]['size']);
         $this->assertSame(7, $out[$hashA]['downloads']);
-        $this->assertSame(7168, $out[$hashA]['traffic']);
+        $this->assertSame(7168, $out[$hashA]['bandwidth']);
     }
 
     public function testTorrentWithoutPeersHasZeroCounts(): void
@@ -80,7 +80,7 @@ class ScrapeMergeResultsTest extends PhoenixTestCase
         $this->assertSame(0, $out[$hashC]['peers']);
         $this->assertSame(2048, $out[$hashC]['size']);
         $this->assertSame(3, $out[$hashC]['downloads']);
-        $this->assertSame(6144, $out[$hashC]['traffic']);
+        $this->assertSame(6144, $out[$hashC]['bandwidth']);
     }
 
     public function testPeersWithoutTorrentRowHasZeroSizeAndDownloads(): void
@@ -94,7 +94,7 @@ class ScrapeMergeResultsTest extends PhoenixTestCase
         $this->assertSame(5, $out[$hashB]['peers']);
         $this->assertSame(0, $out[$hashB]['size']);
         $this->assertSame(0, $out[$hashB]['downloads']);
-        $this->assertSame(0, $out[$hashB]['traffic']);
+        $this->assertSame(0, $out[$hashB]['bandwidth']);
     }
 
     public function testPreInitialisedScrapeEntriesArePreserved(): void
@@ -109,7 +109,7 @@ class ScrapeMergeResultsTest extends PhoenixTestCase
             'downloads' => 0,
             'peers' => 0,
             'size' => 0,
-            'traffic' => 0,
+            'bandwidth' => 0,
         ]];
         $out = scrape_merge_results($this->emptyResult(), $this->emptyResult(), $pre);
         $this->assertArrayHasKey($hashD, $out);
@@ -119,7 +119,7 @@ class ScrapeMergeResultsTest extends PhoenixTestCase
         $this->assertSame(0, $out[$hashD]['peers']);
         $this->assertSame(0, $out[$hashD]['size']);
         $this->assertSame(0, $out[$hashD]['downloads']);
-        $this->assertSame(0, $out[$hashD]['traffic']);
+        $this->assertSame(0, $out[$hashD]['bandwidth']);
     }
 
     public function testIntvalCoercesStringNumericsFromMysqli(): void
@@ -132,7 +132,7 @@ class ScrapeMergeResultsTest extends PhoenixTestCase
         $this->assertIsInt($out[$hashA]['size']);
         $this->assertIsInt($out[$hashA]['downloads']);
         $this->assertIsInt($out[$hashA]['peers']);
-        $this->assertIsInt($out[$hashA]['traffic']);
+        $this->assertIsInt($out[$hashA]['bandwidth']);
     }
 
 }

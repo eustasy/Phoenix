@@ -176,7 +176,7 @@ $settings['admin_torrents_limit'] = 100;
 /* rows per page on the admin Task History listing */
 $settings['admin_tasks_limit'] = 100;
 /* rows per page on the admin Traffic listing */
-$settings['admin_traffic_limit'] = 100;
+$settings['admin_bandwidth_limit'] = 100;
 
 ////	API Options
 /* API keys permitted to use the management API under public/api/, as */

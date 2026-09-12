@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-class TorrentsTrafficTest extends PhoenixTestCase
+class TorrentsBandwidthTest extends PhoenixTestCase
 {
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        require_once __DIR__.'/../../src/model/torrents.traffic.php';
+        require_once __DIR__.'/../../src/model/torrents.bandwidth.php';
     }
 
     protected function tearDown(): void
@@ -58,7 +58,7 @@ class TorrentsTrafficTest extends PhoenixTestCase
     {
         $this->torrent('__TEST_tt_a__', 1000, 7);
 
-        $row = $this->find(\torrents_traffic(self::$connection, self::$settings, 'events', 500, 0, '__TEST_tt_'), '__TEST_tt_a__');
+        $row = $this->find(\torrents_bandwidth(self::$connection, self::$settings, 'events', 500, 0, '__TEST_tt_'), '__TEST_tt_a__');
 
         $this->assertNotNull($row);
         $this->assertSame(7000, $row['estimated']);
@@ -72,7 +72,7 @@ class TorrentsTrafficTest extends PhoenixTestCase
         $this->peer('__TEST_tt_a__', '__TEST_p1__', 500, 100);
         $this->peer('__TEST_tt_a__', '__TEST_p2__', 250, 50);
 
-        $row = $this->find(\torrents_traffic(self::$connection, self::$settings, 'peers', 500, 0, '__TEST_tt_'), '__TEST_tt_a__');
+        $row = $this->find(\torrents_bandwidth(self::$connection, self::$settings, 'peers', 500, 0, '__TEST_tt_'), '__TEST_tt_a__');
 
         $this->assertNotNull($row);
         $this->assertSame(750, $row['uploaded']);
@@ -87,7 +87,7 @@ class TorrentsTrafficTest extends PhoenixTestCase
         $this->peer('__TEST_tt_a__', '__TEST_p1__', 500, 100);
 
         foreach (['events', 'peers'] as $measure) {
-            $row = $this->find(\torrents_traffic(self::$connection, self::$settings, $measure, 500, 0, '__TEST_tt_'), '__TEST_tt_a__');
+            $row = $this->find(\torrents_bandwidth(self::$connection, self::$settings, $measure, 500, 0, '__TEST_tt_'), '__TEST_tt_a__');
             $this->assertSame(3000, $row['estimated'], $measure);
             $this->assertSame(500, $row['uploaded'], $measure);
         }
@@ -98,7 +98,7 @@ class TorrentsTrafficTest extends PhoenixTestCase
         // A LEFT JOIN, so an idle torrent is not dropped from the listing.
         $this->torrent('__TEST_tt_idle__', 1000, 2);
 
-        $row = $this->find(\torrents_traffic(self::$connection, self::$settings, 'events', 500, 0, '__TEST_tt_'), '__TEST_tt_idle__');
+        $row = $this->find(\torrents_bandwidth(self::$connection, self::$settings, 'events', 500, 0, '__TEST_tt_'), '__TEST_tt_idle__');
 
         $this->assertNotNull($row);
         $this->assertSame(0, $row['uploaded']);
@@ -110,7 +110,7 @@ class TorrentsTrafficTest extends PhoenixTestCase
         $this->torrent('__TEST_tt_a__', 1000, 1, '__TEST_Findable__');
         $this->torrent('__TEST_tt_b__', 1000, 1, '__TEST_Other__');
 
-        $rows = \torrents_traffic(self::$connection, self::$settings, 'events', 500, 0, '__TEST_Findable__');
+        $rows = \torrents_bandwidth(self::$connection, self::$settings, 'events', 500, 0, '__TEST_Findable__');
 
         $this->assertNotNull($this->find($rows, '__TEST_tt_a__'));
         $this->assertNull($this->find($rows, '__TEST_tt_b__'));
@@ -121,7 +121,7 @@ class TorrentsTrafficTest extends PhoenixTestCase
         $this->torrent('__TEST_tt_a__', 1000, 1);
         $this->torrent('__TEST_tt_b__', 1000, 1);
 
-        $rows = \torrents_traffic(self::$connection, self::$settings, 'events', 500, 0, '', '__TEST_tt_a__');
+        $rows = \torrents_bandwidth(self::$connection, self::$settings, 'events', 500, 0, '', '__TEST_tt_a__');
 
         $this->assertCount(1, $rows);
         $this->assertSame('__TEST_tt_a__', $rows[0]['info_hash']);
@@ -132,8 +132,8 @@ class TorrentsTrafficTest extends PhoenixTestCase
         $this->torrent('__TEST_tt_a__', 1000, 9);
         $this->torrent('__TEST_tt_b__', 1000, 8);
 
-        $first = \torrents_traffic(self::$connection, self::$settings, 'events', 1, 0, '__TEST_tt_');
-        $second = \torrents_traffic(self::$connection, self::$settings, 'events', 1, 1, '__TEST_tt_');
+        $first = \torrents_bandwidth(self::$connection, self::$settings, 'events', 1, 0, '__TEST_tt_');
+        $second = \torrents_bandwidth(self::$connection, self::$settings, 'events', 1, 1, '__TEST_tt_');
 
         $this->assertCount(1, $first);
         $this->assertCount(1, $second);
@@ -145,9 +145,9 @@ class TorrentsTrafficTest extends PhoenixTestCase
         $this->torrent('__TEST_tt_a__', 1000, 1, '__TEST_Aaa__');
         $this->torrent('__TEST_tt_b__', 5000, 1, '__TEST_Bbb__');
 
-        // An unknown key must not reach the query; it falls back to 'traffic',
+        // An unknown key must not reach the query; it falls back to 'bandwidth',
         // which for the events measure is size x downloads — so the 5000 leads.
-        $rows = \torrents_traffic(self::$connection, self::$settings, 'events', 500, 0, '__TEST_tt_', '', 'nonsense; DROP TABLE torrents');
+        $rows = \torrents_bandwidth(self::$connection, self::$settings, 'events', 500, 0, '__TEST_tt_', '', 'nonsense; DROP TABLE torrents');
 
         $this->assertSame('__TEST_tt_b__', $rows[0]['info_hash']);
     }
@@ -157,7 +157,7 @@ class TorrentsTrafficTest extends PhoenixTestCase
         $this->torrent('__TEST_tt_a__', 1000, 1);
         $this->torrent('__TEST_tt_b__', 5000, 1);
 
-        $rows = \torrents_traffic(self::$connection, self::$settings, 'events', 500, 0, '__TEST_tt_', '', 'size', 'asc');
+        $rows = \torrents_bandwidth(self::$connection, self::$settings, 'events', 500, 0, '__TEST_tt_', '', 'size', 'asc');
 
         $this->assertSame('__TEST_tt_a__', $rows[0]['info_hash']);
     }

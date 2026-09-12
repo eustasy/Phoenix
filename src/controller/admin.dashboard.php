@@ -6,7 +6,7 @@ declare(strict_types=1);
 // Renders the admin panel's Dashboard page: the tracker-statistics overview
 // (peer/torrent/download aggregates and the last-run maintenance timestamps)
 // plus the post-install confirmation banner. Read-only — the maintenance
-// actions live on their own pages (Server Support, Utilities, Add Torrent).
+// actions live on their own pages (Server Support, DB Utilities, Add Torrent).
 // Dispatched by admin_panel_controller() for page=dashboard.
 
 /** @param PhoenixSettings $settings */
@@ -21,7 +21,7 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
     $count_cards = [];
     $peer_cards = [];
     $clients = [];
-    $traffic = [];
+    $bandwidth = [];
     if ($tables_installed) {
         // Surface the already-computed tracker stats (same aggregation the
         // ?stats scrape uses) plus the total registered-torrent count and the
@@ -49,7 +49,7 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
             'seeded' => torrents_top($connection, $settings, 'seeders'),
             'leeched' => torrents_top($connection, $settings, 'leechers'),
             'trouble' => torrents_top($connection, $settings, 'trouble'),
-            'traffic' => torrents_top($connection, $settings, 'traffic'),
+            'bandwidth' => torrents_top($connection, $settings, 'bandwidth'),
         ];
         $count_cards = [];
 
@@ -73,9 +73,9 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
         $clients = peers_client_breakdown($connection, $settings);
 
         // A short window for the dashboard: enough to show the shape without
-        // the cost of the Traffic page's longer views.
-        require_once __DIR__.'/../model/stats.traffic.series.php';
-        $traffic = stats_traffic_series($connection, $settings, 30, 86400);
+        // the cost of the Bandwidth page's longer views.
+        require_once __DIR__.'/../model/stats.bandwidth.series.php';
+        $bandwidth = stats_bandwidth_series($connection, $settings, 30, 86400);
     }
 
     require_once __DIR__.'/../functions/auth.csrf.token.php';
@@ -94,6 +94,6 @@ function admin_dashboard_page(mysqli $connection, array $settings): string
         $count_cards,
         $peer_cards,
         $clients,
-        $traffic,
+        $bandwidth,
     );
 }

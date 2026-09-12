@@ -86,7 +86,7 @@ class PeersTopTest extends PhoenixTestCase
 
         $this->assertSame(
             ['10.0.0.2', '10.0.0.1'],
-            $this->ours(\peers_top(self::$connection, self::$settings, 'traffic', 50)),
+            $this->ours(\peers_top(self::$connection, self::$settings, 'bandwidth', 50)),
         );
     }
 

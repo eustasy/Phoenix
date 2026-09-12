@@ -83,7 +83,7 @@ class ScrapeSpecificControllerTest extends PhoenixTestCase
         'peers' => 3,
         'size' => 1024,
         'downloads' => 7,
-        'traffic' => 7168,
+        'bandwidth' => 7168,
     ];
 
     private const HASH_B_BENCODE = 'd8:completei0e10:downloadedi0e10:incompletei0ee';
@@ -104,7 +104,7 @@ class ScrapeSpecificControllerTest extends PhoenixTestCase
         'peers' => 0,
         'size' => 0,
         'downloads' => 0,
-        'traffic' => 0,
+        'bandwidth' => 0,
     ];
 
     /**

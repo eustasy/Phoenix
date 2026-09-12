@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-////	view_admin_traffic_html
+////	view_admin_bandwidth_html
 // Render the admin Traffic page: a time series of traffic served, and a table
 // of it per torrent.
 //
@@ -37,7 +37,7 @@ declare(strict_types=1);
  *        string, hence array-key rather than string.
  * @param list<array{label: string, client: string, torrent: string|null, uploaded: int, downloaded: int}> $swarm
  */
-function view_admin_traffic_html(
+function view_admin_bandwidth_html(
     array $settings,
     array $series,
     array $torrents,
@@ -51,7 +51,7 @@ function view_admin_traffic_html(
     int $limit = 100,
     string $search = '',
     string $info_hash = '',
-    string $sort = 'traffic',
+    string $sort = 'bandwidth',
     string $dir = 'desc',
 ): string {
     require_once __DIR__.'/html.admin.layout.php';
@@ -67,7 +67,7 @@ function view_admin_traffic_html(
     // table — or to the other metric. Defaults stay out of the query string.
     $query = static function (array $overrides) use ($metric, $window, $search, $info_hash, $sort, $dir, $offset): string {
         $params = [
-            'page' => 'traffic',
+            'page' => 'bandwidth',
             'metric' => $metric,
             'days' => $window,
             'offset' => $offset > 0 ? (string) $offset : null,
@@ -78,7 +78,7 @@ function view_admin_traffic_html(
         if ($info_hash !== '') {
             $params['info_hash'] = $info_hash;
         }
-        if ($sort !== 'traffic' || $dir !== 'desc') {
+        if ($sort !== 'bandwidth' || $dir !== 'desc') {
             $params['sort'] = $sort;
             $params['dir'] = $dir;
         }
@@ -111,10 +111,10 @@ function view_admin_traffic_html(
     ] as $key => [$icon, $label]) {
         $on = $metric === $key;
         $toggle .= '<a class="seg-btn'.($on ? ' is-on' : '').'" role="tab" aria-selected="'.($on ? 'true' : 'false').'"'.
-            ' href="?page=traffic&amp;metric='.$key.'&amp;days='.htmlspecialchars($window, ENT_QUOTES, 'UTF-8').'">'.
+            ' href="?page=bandwidth&amp;metric='.$key.'&amp;days='.htmlspecialchars($window, ENT_QUOTES, 'UTF-8').'">'.
             '<span class="ph-ico" data-lucide="'.$icon.'"></span>'.$label.'</a>';
     }
-    $actions = '<div class="seg" role="tablist" aria-label="Traffic metric">'.$toggle.'</div>';
+    $actions = '<div class="seg" role="tablist" aria-label="Bandwidth metric">'.$toggle.'</div>';
 
     ////	Chart
     $totals = 0;
@@ -130,7 +130,7 @@ function view_admin_traffic_html(
         // back out of the array, so a strict compare against the string $window
         // never matched and no window was ever marked selected.
         $ranges .= '<a class="btn btn-ghost btn-xs'.((string) $key === $window ? ' is-on' : '').
-            '" href="?page=traffic&amp;metric='.$metric.'&amp;days='.$key.'">'.
+            '" href="?page=bandwidth&amp;metric='.$metric.'&amp;days='.$key.'">'.
             htmlspecialchars($w['label'], ENT_QUOTES, 'UTF-8').'</a>';
     }
 
@@ -162,14 +162,14 @@ function view_admin_traffic_html(
         $body = '<div class="geo-toplist ph-chart-card">
 			<div class="ph-traffic-head">
 				<div>
-					<div class="geo-metric-label">Traffic served</div>
+					<div class="geo-metric-label">Bandwidth served</div>
 					<div class="dim geo-sub">'.format_bytes($totals).' across '.number_format($completions).
                     ' completed download'.($completions === 1 ? '' : 's').'</div>
 				</div>
 				<div class="row-actions">'.$ranges.'</div>
 			</div>
-			<div class="ph-chart ph-chart-tall"><canvas id="traffic-chart"></canvas></div>
-			<p class="dim geo-foot">Estimated from the events ledger &mdash; each completed download counted as one full transfer, so partial and repeat downloads are not included. <a href="?page=geography&amp;metric=traffic">See it by country</a>.</p>
+			<div class="ph-chart ph-chart-tall"><canvas id="bandwidth-chart"></canvas></div>
+			<p class="dim geo-foot">Estimated from the events ledger &mdash; each completed download counted as one full transfer, so partial and repeat downloads are not included. <a href="?page=geography&amp;metric=bandwidth">See it by country</a>.</p>
 		</div>';
 
         if ($series === []) {
@@ -239,7 +239,7 @@ function view_admin_traffic_html(
                 ? htmlspecialchars($first['name'], ENT_QUOTES, 'UTF-8')
                 : '<span class="mono">'.htmlspecialchars(substr($info_hash, 0, 12), ENT_QUOTES, 'UTF-8').'&hellip;</span>';
             $filter_banner = '<div class="alert alert-info mt-5"><span class="ph-ico" data-lucide="filter"></span><div>'.
-                'Traffic for <b>'.$label.'</b> '.
+                'Bandwidth for <b>'.$label.'</b> '.
                 '<a href="'.$query(['info_hash' => null, 'offset' => null]).'">Show all torrents</a></div></div>';
         }
 
@@ -248,13 +248,13 @@ function view_admin_traffic_html(
         // window and sort ride along as hidden fields so a search does not reset
         // the view the reader had chosen.
         $sort_state = '';
-        if ($sort !== 'traffic' || $dir !== 'desc') {
+        if ($sort !== 'bandwidth' || $dir !== 'desc') {
             $sort_state = '<input type="hidden" name="sort" value="'.htmlspecialchars($sort, ENT_QUOTES, 'UTF-8').'">'.
                 '<input type="hidden" name="dir" value="'.htmlspecialchars($dir, ENT_QUOTES, 'UTF-8').'">';
         }
 
         $body .= $filter_banner.'<form method="GET" action="" class="ph-toolbar mt-5">
-			<input type="hidden" name="page" value="traffic">
+			<input type="hidden" name="page" value="bandwidth">
 			<input type="hidden" name="metric" value="'.htmlspecialchars($metric, ENT_QUOTES, 'UTF-8').'">
 			<input type="hidden" name="days" value="'.htmlspecialchars($window, ENT_QUOTES, 'UTF-8').'">
 			'.($info_hash !== '' ? '<input type="hidden" name="info_hash" value="'.htmlspecialchars($info_hash, ENT_QUOTES, 'UTF-8').'">' : '').'
@@ -273,14 +273,14 @@ function view_admin_traffic_html(
                 '<th>'.$sort_link('filename', 'Filename').'</th>'.
                 '<th>'.$sort_link('user', 'Owner').'</th>'.
                 '<th>Hash</th>'.
-                '<th class="table-col-numeric">'.$sort_link('traffic', $peers_metric ? 'Uploaded' : 'Traffic').'</th>'.
+                '<th class="table-col-numeric">'.$sort_link('bandwidth', $peers_metric ? 'Uploaded' : 'Bandwidth').'</th>'.
                 '<th class="table-col-numeric">'.$sort_link('size', 'Size').'</th>'.
                 '<th class="table-col-numeric">'.$sort_link('downloads', 'Downloads').'</th>'.
                 '<th class="table-col-numeric">'.$sort_link('peers', 'Peers').'</th>'.
             '</tr></thead><tbody>'.$rows.'</tbody></table></div>'.$pager.
             '<p class="dim text-sm mt-4">'.($peers_metric
                 ? 'Uploaded is what the peers currently in each swarm report having sent — real bytes, but self-reported, reset when a client restarts, and gone when a peer leaves.'
-                : 'Traffic is size &times; completed downloads: an estimate that counts no partial or repeat downloads.').'</p>';
+                : 'Bandwidth is size &times; completed downloads: an estimate that counts no partial or repeat downloads.').'</p>';
     }
 
     // Whichever chart the metric calls for, inlined with its data like the
@@ -302,5 +302,5 @@ function view_admin_traffic_html(
             (string) file_get_contents(__DIR__.'/../../public/assets/_traffic.js');
     }
 
-    return view_admin_layout_html($settings, 'Traffic', $body, 'traffic', $csrf_token, 'Tracker', $actions, 'wide', '', $inline_js, $extra_srcs);
+    return view_admin_layout_html($settings, 'Bandwidth', $body, 'bandwidth', $csrf_token, 'Tracker', $actions, 'wide', '', $inline_js, $extra_srcs);
 }

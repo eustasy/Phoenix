@@ -124,7 +124,7 @@ function view_admin_torrents_html(array $settings, array $torrents, string|false
 
             $edit_link = '<a class="btn btn-ghost btn-xs" href="?page=edit&amp;info_hash='.$info_hash.'">Edit</a>';
             $peers_link = '<a class="btn btn-ghost btn-xs" href="?page=peers&amp;info_hash='.$info_hash.'">Peers</a>';
-            $traffic_link = '<a class="btn btn-ghost btn-xs" href="?page=traffic&amp;info_hash='.$info_hash.'">Traffic</a>';
+            $traffic_link = '<a class="btn btn-ghost btn-xs" href="?page=bandwidth&amp;info_hash='.$info_hash.'">Bandwidth</a>';
 
             $listed_cell = $listed === 1
                 ? '<span class="listed">Listed</span>'

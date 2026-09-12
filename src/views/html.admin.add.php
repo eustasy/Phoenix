@@ -30,7 +30,7 @@ function view_admin_add_html(array $settings, bool $tables_installed, string|fal
     }
 
     if (! $tables_installed) {
-        $body .= '<div class="alert alert-danger"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a> before adding torrents.</div></div>';
+        $body .= '<div class="alert alert-danger"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">DB Utilities</a> before adding torrents.</div></div>';
 
         return view_admin_layout_html($settings, 'Add a Torrent', $body, 'add', $csrf_token, 'Tracker', '', 'narrow');
     }

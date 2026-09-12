@@ -24,13 +24,13 @@ class ViewAdminGeographyHtmlTest extends TestCase
     {
         $html = view_admin_geography_html(
             $this->settings(),
-            'traffic',
+            'bandwidth',
             ['BR' => 293437328142336],
-            ['downloads', 'traffic'],
+            ['downloads', 'bandwidth'],
             'tok',
         );
 
-        $this->assertStringContainsString('metric=traffic', $html);
+        $this->assertStringContainsString('metric=bandwidth', $html);
         // The script formats byte metrics as sizes; without the flag the panel
         // would read 293437328142336.
         $this->assertStringContainsString('"format":"bytes"', $html);
@@ -43,16 +43,16 @@ class ViewAdminGeographyHtmlTest extends TestCase
         // client-side toggle.
         $html = view_admin_geography_html(
             $this->settings(),
-            'traffic',
+            'bandwidth',
             ['BR' => 1024],
-            ['peers', 'downloads', 'traffic'],
+            ['peers', 'downloads', 'bandwidth'],
             'tok',
         );
 
         preg_match('/var GEO = (\{.*?\});\n/s', $html, $m);
         $this->assertNotEmpty($m, 'GEO should be inlined');
         $geo = json_decode($m[1], true);
-        $this->assertSame(['traffic'], array_keys($geo));
+        $this->assertSame(['bandwidth'], array_keys($geo));
     }
 
     public function testEveryAvailableMetricIsOfferedAsALink(): void
@@ -62,7 +62,7 @@ class ViewAdminGeographyHtmlTest extends TestCase
             $this->settings(),
             'peers',
             ['GB' => 5],
-            ['peers', 'downloads', 'traffic'],
+            ['peers', 'downloads', 'bandwidth'],
             'tok',
         );
 
@@ -117,7 +117,7 @@ class ViewAdminGeographyHtmlTest extends TestCase
     public function testDownloadsOnlyWhenPeersUnavailable(): void
     {
         // the reader missing but the ledger has geo data → no peers segment.
-        $html = view_admin_geography_html($this->settings(), 'downloads', ['GB' => 3], ['downloads', 'traffic'], 'tok');
+        $html = view_admin_geography_html($this->settings(), 'downloads', ['GB' => 3], ['downloads', 'bandwidth'], 'tok');
         $this->assertStringNotContainsString('metric=peers', $html);
         $this->assertStringContainsString('GEO_DEFAULT = "downloads"', $html);
     }

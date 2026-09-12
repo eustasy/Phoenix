@@ -23,7 +23,7 @@ class ViewIndexXmlTest extends PhoenixTestCase
             'seeders' => 2,
             'leechers' => 1,
             'peers' => 3,
-            'traffic' => 7168,
+            'bandwidth' => 7168,
         ]];
     }
 
@@ -59,7 +59,7 @@ class ViewIndexXmlTest extends PhoenixTestCase
             'info_hash' => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
             'name' => 'A & B <Test>',
             'size' => 0, 'downloads' => 0, 'seeders' => 0,
-            'leechers' => 0, 'peers' => 0, 'traffic' => 0,
+            'leechers' => 0, 'peers' => 0, 'bandwidth' => 0,
         ]];
         $xml = view_index_xml($index);
         $this->assertStringContainsString('<name>A &amp; B &lt;Test&gt;</name>', $xml);
@@ -73,7 +73,7 @@ class ViewIndexXmlTest extends PhoenixTestCase
             'info_hash' => 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
             'name' => 'Second Torrent',
             'size' => 0, 'downloads' => 0, 'seeders' => 0,
-            'leechers' => 0, 'peers' => 0, 'traffic' => 0,
+            'leechers' => 0, 'peers' => 0, 'bandwidth' => 0,
         ];
         $xml = view_index_xml($index);
         $this->assertSame(2, substr_count($xml, '<torrent>'));

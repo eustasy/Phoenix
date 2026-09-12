@@ -92,7 +92,7 @@ function view_admin_tasks_html(array $settings, array $runs, int $total, int $of
     if ($runs === []) {
         $body .= '<div class="ph-empty"><span class="ph-ico" data-lucide="history"></span><p>'.
             ($total === 0 && $name === '' && $source === ''
-                ? 'No maintenance has run yet. Tasks are recorded as cron, the announce-time fallback, or the Utilities page runs them.'
+                ? 'No maintenance has run yet. Tasks are recorded as cron, the announce-time fallback, or the DB Utilities page runs them.'
                 : 'No runs match this filter.').
             '</p></div>';
     } else {

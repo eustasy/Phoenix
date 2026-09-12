@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 ////	db_check
 // Run CHECK TABLE over the Phoenix tables — an integrity scan, offered as a
-// Utilities action rather than run on a schedule.
+// DB Utilities action rather than run on a schedule.
 //
 // It is deliberately not part of the routine maintenance run. On InnoDB a CHECK
 // is a full scan of every row and index, and InnoDB already verifies page

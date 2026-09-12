@@ -129,7 +129,7 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
                     $switch($settings, 'full_scrape', 'full_scrape', $full_scrape_note).
                     $switch($settings, 'stats_enabled', 'stats_enabled', ' <span class="dim">&mdash; log torrent events to the events ledger</span>').
                     $switch($settings, 'stats_geo', 'stats_geo', $geo_note, ! $geo_available).
-                    $switch($settings, 'db_reset', 'db_reset', ' <span class="dim">&mdash; permit setup/reset from Utilities</span>').
+                    $switch($settings, 'db_reset', 'db_reset', ' <span class="dim">&mdash; permit setup/reset from DB Utilities</span>').
                 '</div>
 				<div class="ph-form-actions"><button type="submit" name="submit" class="btn btn-primary"><span class="ph-ico" data-lucide="save"></span>Save Flags</button></div>
 			</form>

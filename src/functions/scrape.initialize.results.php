@@ -21,7 +21,7 @@ function scrape_initialize_results(array $info_hashes): array
         $scrape[$info_hash]['downloads'] = 0;
         $scrape[$info_hash]['peers'] = 0;
         $scrape[$info_hash]['size'] = 0;
-        $scrape[$info_hash]['traffic'] = 0;
+        $scrape[$info_hash]['bandwidth'] = 0;
     }
 
     return $scrape;

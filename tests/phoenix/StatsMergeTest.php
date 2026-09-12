@@ -19,7 +19,7 @@ class StatsMergeTest extends TestCase
         ];
         $download_totals = [
             'downloads' => '100',
-            'traffic' => '5000000',
+            'bandwidth' => '5000000',
         ];
 
         $result = stats_merge($peer_counts, $download_totals);
@@ -29,7 +29,7 @@ class StatsMergeTest extends TestCase
         $this->assertSame(5, $result['leechers']);
         $this->assertSame(3, $result['torrents']);
         $this->assertSame(100, $result['downloads']);
-        $this->assertSame(5000000, $result['traffic']);
+        $this->assertSame(5000000, $result['bandwidth']);
         $this->assertSame(15, $result['peers']); // seeders + leechers
     }
 
@@ -44,7 +44,7 @@ class StatsMergeTest extends TestCase
         ];
         $download_totals = [
             'downloads' => '0',
-            'traffic' => '0',
+            'bandwidth' => '0',
         ];
 
         $result = stats_merge($peer_counts, $download_totals);
@@ -54,7 +54,7 @@ class StatsMergeTest extends TestCase
         $this->assertSame(0, $result['leechers']);
         $this->assertSame(0, $result['torrents']);
         $this->assertSame(0, $result['downloads']);
-        $this->assertSame(0, $result['traffic']);
+        $this->assertSame(0, $result['bandwidth']);
         $this->assertSame(0, $result['peers']);
     }
 
@@ -69,7 +69,7 @@ class StatsMergeTest extends TestCase
         ];
         $download_totals = [
             'downloads' => null,
-            'traffic' => null,
+            'bandwidth' => null,
         ];
 
         $result = stats_merge($peer_counts, $download_totals);
@@ -79,7 +79,7 @@ class StatsMergeTest extends TestCase
         $this->assertSame(0, $result['leechers']);
         $this->assertSame(0, $result['torrents']);
         $this->assertSame(0, $result['downloads']);
-        $this->assertSame(0, $result['traffic']);
+        $this->assertSame(0, $result['bandwidth']);
         $this->assertSame(0, $result['peers']);
     }
 
@@ -89,7 +89,7 @@ class StatsMergeTest extends TestCase
 
         $download_totals = [
             'downloads' => '100',
-            'traffic' => '5000000',
+            'bandwidth' => '5000000',
         ];
 
         $result = stats_merge(false, $download_totals);

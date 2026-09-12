@@ -49,7 +49,7 @@ final class TorrentsFilterSqlTest extends TestCase
 
     public function testInfoHashNarrowsToOneTorrent(): void
     {
-        // The Traffic drill-down is this filter, not a second view.
+        // The Bandwidth drill-down is this filter, not a second view.
         $hash = str_repeat('c', 40);
         $filter = torrents_filter_sql('', -1, $hash);
 

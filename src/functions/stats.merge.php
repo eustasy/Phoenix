@@ -22,7 +22,7 @@ function stats_merge(array|false $peer_counts, array|false $download_totals): ar
     $stats['leechers'] = intval($peer_counts['leechers']);
     $stats['torrents'] = intval($peer_counts['torrents']);
     $stats['downloads'] = intval($download_totals['downloads']);
-    $stats['traffic'] = intval($download_totals['traffic']);
+    $stats['bandwidth'] = intval($download_totals['bandwidth']);
     $stats['peers'] = $stats['seeders'] + $stats['leechers'];
 
     return $stats;

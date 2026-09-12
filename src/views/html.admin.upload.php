@@ -24,7 +24,7 @@ function view_admin_upload_html(array $settings, bool $tables_installed, string 
     $back = '<a class="btn btn-secondary btn-sm" href="?page=add"><span class="ph-ico" data-lucide="file-plus"></span>Single add</a>';
 
     if (! $tables_installed) {
-        $body = '<div class="alert alert-danger"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">Utilities</a> before adding torrents.</div></div>';
+        $body = '<div class="alert alert-danger"><span class="ph-ico" data-lucide="triangle-alert"></span><div>The database is not installed yet. Install it from <a href="?page=utilities">DB Utilities</a> before adding torrents.</div></div>';
 
         return view_admin_layout_html($settings, 'Bulk Upload', $body, 'add', $csrf_token, 'Tracker', $back, 'narrow');
     }

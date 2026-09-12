@@ -71,7 +71,7 @@ function view_admin_support_html(array $settings, bool $tables_installed, array|
             }
             $mysql_html .= '<div class="alert alert-success alert-center"><span class="ph-ico" data-lucide="database"></span>All your tables are installed.'.$size_note.'</div>';
         } else {
-            $mysql_html .= '<div class="alert alert-danger alert-center"><span class="ph-ico" data-lucide="circle-alert"></span>Some or all of your tables are not installed. Install them from <a href="?page=utilities">Utilities</a>.</div>';
+            $mysql_html .= '<div class="alert alert-danger alert-center"><span class="ph-ico" data-lucide="circle-alert"></span>Some or all of your tables are not installed. Install them from <a href="?page=utilities">DB Utilities</a>.</div>';
         }
     }
 

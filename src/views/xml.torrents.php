@@ -47,7 +47,7 @@ function view_torrents_xml(array $torrents): string
             '<seeders>'.$torrent['seeders'].'</seeders>'.
             '<leechers>'.$torrent['leechers'].'</leechers>'.
             '<peers>'.$torrent['peers'].'</peers>'.
-            '<traffic>'.$torrent['traffic'].'</traffic>';
+            '<traffic>'.$torrent['bandwidth'].'</traffic>';
 
         ////	filename
         // Emit only when the value is non-null.

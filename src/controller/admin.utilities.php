@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 ////	admin_utilities_controller
-// Renders the admin Utilities page: the database setup/reset, clean, optimize,
+// Renders the admin DB Utilities page: the database setup/reset, clean, optimize,
 // and schema-migrate maintenance actions. Parses any submitted action, verifies
 // the CSRF token on state-changing POSTs, dispatches to the matching
 // admin_*_action helper, then renders the forms via the shared layout.

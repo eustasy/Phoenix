@@ -24,7 +24,7 @@ function view_scrape_json(array $scrape, int $min_request_interval = 0): string
             'peers' => $torrent['peers'],
             'size' => $torrent['size'],
             'downloads' => $torrent['downloads'],
-            'traffic' => $torrent['traffic'],
+            'traffic' => $torrent['bandwidth'],
         ];
     }
 

@@ -91,7 +91,7 @@ entry leaves the tracker doing no cleanup from either route.
 `prune-database.php` drops stale peers, drops `events` and `task_runs` rows
 past their retention, and refreshes index statistics with `ANALYZE`. All of that
 is cheap — an analyze measured 1.6 ms — so it runs often. It is the same work as
-**Utilities → Prune** plus the analyze.
+**DB Utilities → Prune** plus the analyze.
 
 `optimize-database.php` runs `OPTIMIZE TABLE`, which on InnoDB is a **full table
 rebuild**. It is the only thing that reclaims space from deleted rows: after
@@ -104,7 +104,7 @@ ignores `clean_with_cron`; a rebuild never happens at announce time either way.
 `CHECK TABLE` is not on either schedule. It is a full scan of every row and
 index, and InnoDB verifies page checksums as it reads, so corruption surfaces
 during normal use without paying for a scan every few minutes. Run it by hand
-from **Utilities → Check** when something looks wrong.
+from **DB Utilities → Check** when something looks wrong.
 
 | Setting | Default | Notes |
 | --- | --- | --- |

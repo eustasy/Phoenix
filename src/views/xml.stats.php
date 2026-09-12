@@ -32,6 +32,6 @@ function view_stats_xml(array $stats, array $settings): string
         '<leechers>'.$stats['leechers'].'</leechers>'.
         '<torrents>'.$stats['torrents'].'</torrents>'.
         '<downloads>'.$stats['downloads'].'</downloads>'.
-        '<traffic>'.$stats['traffic'].'</traffic>'.
+        '<traffic>'.$stats['bandwidth'].'</traffic>'.
         '</tracker>';
 }

@@ -90,7 +90,7 @@ class TorrentsSelectListedTest extends PhoenixTestCase
             'seeders' => 0,
             'leechers' => 0,
             'peers' => 0,
-            'traffic' => 1024 * 5,
+            'bandwidth' => 1024 * 5,
             'filename' => null,
             'files' => null,
             'trackers' => null,
@@ -187,7 +187,7 @@ class TorrentsSelectListedTest extends PhoenixTestCase
         $this->assertSame(2, $result[0]['seeders']);
         $this->assertSame(1, $result[0]['leechers']);
         $this->assertSame(3, $result[0]['peers']);
-        $this->assertSame(2048 * 10, $result[0]['traffic']);
+        $this->assertSame(2048 * 10, $result[0]['bandwidth']);
     }
 
     public function testOrdersByName(): void

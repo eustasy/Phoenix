@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-////	torrents_traffic
+////	torrents_bandwidth
 // Per-torrent traffic, for the Traffic page's table. Two measures, because the
 // tracker holds two genuinely different numbers and neither is a substitute
 // for the other:
@@ -37,7 +37,7 @@ declare(strict_types=1);
  * @param PhoenixSettings $settings
  * @return list<array{info_hash: string, name: string|null, filename: string|null, user: string|null, size: int, downloads: int, estimated: int, uploaded: int, downloaded: int, peers: int}>
  */
-function torrents_traffic(
+function torrents_bandwidth(
     mysqli $connection,
     array $settings,
     string $measure = 'events',
@@ -58,10 +58,10 @@ function torrents_traffic(
     $uploaded = 'IFNULL(SUM(`p`.`uploaded`), 0)';
 
     // Whitelist: the key arrives from the query string, the value never does.
-    // 'traffic' is whichever figure the metric is showing, so the column the
+    // 'bandwidth' is whichever figure the metric is showing, so the column the
     // table leads with is always sortable under the same name.
     $columns = [
-        'traffic' => $measure === 'peers' ? $uploaded : $estimated,
+        'bandwidth' => $measure === 'peers' ? $uploaded : $estimated,
         'name' => '`t`.`name`',
         'filename' => '`t`.`filename`',
         'user' => '`t`.`user`',
@@ -69,7 +69,7 @@ function torrents_traffic(
         'downloads' => '`t`.`downloads`',
         'peers' => 'COUNT(`p`.`peer_id`)',
     ];
-    $order = $columns[$sort] ?? $columns['traffic'];
+    $order = $columns[$sort] ?? $columns['bandwidth'];
     $direction = strtolower($dir) === 'asc' ? 'ASC' : 'DESC';
 
     $filter = torrents_filter_sql($search, -1, $info_hash);

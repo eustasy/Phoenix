@@ -69,7 +69,7 @@ function torrents_select_all(
         'listed' => '`t`.`listed`',
         'seeders' => '`seeders`',
         'leechers' => '`leechers`',
-        'traffic' => '`t`.`size` * `t`.`downloads`',
+        'bandwidth' => '`t`.`size` * `t`.`downloads`',
     ];
     $order = $columns[$sort] ?? $columns['seeders'];
     $direction = strtolower($dir) === 'asc' ? 'ASC' : 'DESC';
@@ -133,7 +133,7 @@ function torrents_select_all(
             'seeders' => intval($row['seeders']),
             'leechers' => intval($row['leechers']),
             'peers' => intval($row['seeders']) + intval($row['leechers']),
-            'traffic' => intval($row['size']) * intval($row['downloads']),
+            'bandwidth' => intval($row['size']) * intval($row['downloads']),
             'filename' => $meta['filename'],
             'files' => $meta['files'],
             'trackers' => $meta['trackers'],

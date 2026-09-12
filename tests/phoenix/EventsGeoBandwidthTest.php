@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-class EventsGeoTrafficTest extends PhoenixTestCase
+class EventsGeoBandwidthTest extends PhoenixTestCase
 {
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        require_once __DIR__.'/../../src/model/events.geo.traffic.php';
+        require_once __DIR__.'/../../src/model/events.geo.bandwidth.php';
     }
 
     protected function tearDown(): void
@@ -46,9 +46,9 @@ class EventsGeoTrafficTest extends PhoenixTestCase
         $this->torrent('__TEST_egt_a__', 1000);
         $this->completion('__TEST_egt_a__', 'GB', 3);
 
-        $traffic = \events_geo_traffic(self::$connection, self::$settings);
+        $bandwidth = \events_geo_bandwidth(self::$connection, self::$settings);
 
-        $this->assertSame(3000, $traffic['GB'] ?? 0);
+        $this->assertSame(3000, $bandwidth['GB'] ?? 0);
     }
 
     public function testSumsSeveralTorrentsIntoOneCountry(): void
@@ -58,7 +58,7 @@ class EventsGeoTrafficTest extends PhoenixTestCase
         $this->completion('__TEST_egt_a__', 'GB', 2);
         $this->completion('__TEST_egt_b__', 'GB', 1);
 
-        $this->assertSame(2500, \events_geo_traffic(self::$connection, self::$settings)['GB'] ?? 0);
+        $this->assertSame(2500, \events_geo_bandwidth(self::$connection, self::$settings)['GB'] ?? 0);
     }
 
     public function testCountryCodeIsUppercased(): void
@@ -66,10 +66,10 @@ class EventsGeoTrafficTest extends PhoenixTestCase
         $this->torrent('__TEST_egt_a__', 1000);
         $this->completion('__TEST_egt_a__', 'gb');
 
-        $traffic = \events_geo_traffic(self::$connection, self::$settings);
+        $bandwidth = \events_geo_bandwidth(self::$connection, self::$settings);
 
-        $this->assertArrayHasKey('GB', $traffic);
-        $this->assertArrayNotHasKey('gb', $traffic);
+        $this->assertArrayHasKey('GB', $bandwidth);
+        $this->assertArrayNotHasKey('gb', $bandwidth);
     }
 
     public function testCompletionWithNoRecordedSizeContributesNothing(): void
@@ -78,7 +78,7 @@ class EventsGeoTrafficTest extends PhoenixTestCase
         $this->torrent('__TEST_egt_null__', null);
         $this->completion('__TEST_egt_null__', 'FR', 5);
 
-        $this->assertArrayNotHasKey('FR', \events_geo_traffic(self::$connection, self::$settings));
+        $this->assertArrayNotHasKey('FR', \events_geo_bandwidth(self::$connection, self::$settings));
     }
 
     public function testCompletionForARemovedTorrentContributesNothing(): void
@@ -86,7 +86,7 @@ class EventsGeoTrafficTest extends PhoenixTestCase
         // No torrents row at all — the event outlived its torrent.
         $this->completion('__TEST_egt_gone__', 'DE', 4);
 
-        $this->assertArrayNotHasKey('DE', \events_geo_traffic(self::$connection, self::$settings));
+        $this->assertArrayNotHasKey('DE', \events_geo_bandwidth(self::$connection, self::$settings));
     }
 
     public function testIgnoresUntaggedAndNonCompletionEvents(): void
@@ -102,9 +102,9 @@ class EventsGeoTrafficTest extends PhoenixTestCase
             [time(), '__TEST_egt_a__'],
         );
 
-        $traffic = \events_geo_traffic(self::$connection, self::$settings);
+        $bandwidth = \events_geo_bandwidth(self::$connection, self::$settings);
 
-        $this->assertArrayNotHasKey('', $traffic);
-        $this->assertArrayNotHasKey('ES', $traffic);
+        $this->assertArrayNotHasKey('', $bandwidth);
+        $this->assertArrayNotHasKey('ES', $bandwidth);
     }
 }

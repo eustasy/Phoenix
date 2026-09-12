@@ -26,7 +26,7 @@ class ViewIndexHtmlTest extends PhoenixTestCase
             'seeders' => 2,
             'leechers' => 1,
             'peers' => 3,
-            'traffic' => 7168,
+            'bandwidth' => 7168,
             'filename' => 'test.iso',
             'files' => [['path' => 'test.iso', 'length' => 1024]],
             'trackers' => ['https://tracker.example.com/announce'],

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 ////	admin_clean_action
-//  Handles the Utilities "Prune" action: drops stale peers, expired events and
+//  Handles the DB Utilities "Prune" action: drops stale peers, expired events and
 //  task history, and the sentinel rows the test suite leaves behind.
 //  Returns message string on completion.
 

@@ -13,7 +13,7 @@ class ViewStatsJsonTest extends PhoenixTestCase
         'leechers' => 12,
         'torrents' => 5,
         'downloads' => 150,
-        'traffic' => 1073741824, // 1 GB
+        'bandwidth' => 1073741824, // 1 GB
     ];
 
     private const ZEROES = [
@@ -22,7 +22,7 @@ class ViewStatsJsonTest extends PhoenixTestCase
         'leechers' => 0,
         'torrents' => 0,
         'downloads' => 0,
-        'traffic' => 0,
+        'bandwidth' => 0,
     ];
 
     public static function setUpBeforeClass(): void
@@ -62,7 +62,7 @@ class ViewStatsJsonTest extends PhoenixTestCase
     {
         $tracker = $this->tracker(self::SAMPLE);
 
-        foreach (['version', 'peers', 'seeders', 'leechers', 'torrents', 'downloads', 'traffic'] as $field) {
+        foreach (['version', 'peers', 'seeders', 'leechers', 'torrents', 'downloads', 'bandwidth'] as $field) {
             $this->assertArrayHasKey($field, $tracker);
         }
     }

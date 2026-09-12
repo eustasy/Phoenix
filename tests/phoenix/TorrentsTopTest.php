@@ -112,7 +112,7 @@ class TorrentsTopTest extends PhoenixTestCase
 
         $this->assertSame(
             ['__TEST_tt_counted__'],
-            $this->hashes(\torrents_top(self::$connection, self::$settings, 'traffic', 50)),
+            $this->hashes(\torrents_top(self::$connection, self::$settings, 'bandwidth', 50)),
         );
     }
 

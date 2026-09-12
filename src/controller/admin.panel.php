@@ -51,10 +51,10 @@ function admin_panel_controller(mysqli $connection, array $settings, int $time):
 
             return admin_clients_controller($connection, $settings);
 
-        case 'traffic':
-            require_once __DIR__.'/admin.traffic.php';
+        case 'bandwidth':
+            require_once __DIR__.'/admin.bandwidth.php';
 
-            return admin_traffic_controller($connection, $settings);
+            return admin_bandwidth_controller($connection, $settings);
 
         case 'geography':
             require_once __DIR__.'/admin.geography.php';

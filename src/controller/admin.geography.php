@@ -43,7 +43,7 @@ function admin_geography_controller(mysqli $connection, array $settings): string
     }
     if ($ledger_ready) {
         $available[] = 'downloads';
-        $available[] = 'traffic';
+        $available[] = 'bandwidth';
     }
 
     // The requested metric, or the first available. An unknown or unavailable
@@ -59,9 +59,9 @@ function admin_geography_controller(mysqli $connection, array $settings): string
     } elseif ($metric === 'downloads') {
         require_once __DIR__.'/../model/events.geo.counts.php';
         $values = events_geo_counts($connection, $settings);
-    } elseif ($metric === 'traffic') {
-        require_once __DIR__.'/../model/events.geo.traffic.php';
-        $values = events_geo_traffic($connection, $settings);
+    } elseif ($metric === 'bandwidth') {
+        require_once __DIR__.'/../model/events.geo.bandwidth.php';
+        $values = events_geo_bandwidth($connection, $settings);
     }
 
     require_once __DIR__.'/../functions/auth.csrf.token.php';

@@ -22,7 +22,7 @@ class ViewScrapeJsonTest extends PhoenixTestCase
                 'peers' => 15,
                 'size' => 1073741824,
                 'downloads' => 25,
-                'traffic' => 26843545600,
+                'bandwidth' => 26843545600,
             ],
         ];
 
@@ -42,7 +42,7 @@ class ViewScrapeJsonTest extends PhoenixTestCase
                 'peers' => 15,
                 'size' => 1073741824,
                 'downloads' => 25,
-                'traffic' => 26843545600,
+                'bandwidth' => 26843545600,
             ],
         ];
 
@@ -63,7 +63,7 @@ class ViewScrapeJsonTest extends PhoenixTestCase
                 'peers' => 15,
                 'size' => 1073741824,
                 'downloads' => 25,
-                'traffic' => 26843545600,
+                'bandwidth' => 26843545600,
             ],
         ];
 
@@ -77,7 +77,7 @@ class ViewScrapeJsonTest extends PhoenixTestCase
         $this->assertArrayHasKey('peers', $torrent);
         $this->assertArrayHasKey('size', $torrent);
         $this->assertArrayHasKey('downloads', $torrent);
-        $this->assertArrayHasKey('traffic', $torrent);
+        $this->assertArrayHasKey('bandwidth', $torrent);
     }
 
     public function testCorrectTorrentValues()
@@ -90,7 +90,7 @@ class ViewScrapeJsonTest extends PhoenixTestCase
                 'peers' => 15,
                 'size' => 1073741824,
                 'downloads' => 25,
-                'traffic' => 26843545600,
+                'bandwidth' => 26843545600,
             ],
         ];
 
@@ -104,7 +104,7 @@ class ViewScrapeJsonTest extends PhoenixTestCase
         $this->assertEquals(15, $torrent['peers']);
         $this->assertEquals(1073741824, $torrent['size']);
         $this->assertEquals(25, $torrent['downloads']);
-        $this->assertEquals(26843545600, $torrent['traffic']);
+        $this->assertEquals(26843545600, $torrent['bandwidth']);
     }
 
     public function testMultipleTorrents()
@@ -120,7 +120,7 @@ class ViewScrapeJsonTest extends PhoenixTestCase
                 'peers' => 15,
                 'size' => 1073741824,
                 'downloads' => 25,
-                'traffic' => 26843545600,
+                'bandwidth' => 26843545600,
             ],
             [
                 'info_hash' => $hash2,
@@ -129,7 +129,7 @@ class ViewScrapeJsonTest extends PhoenixTestCase
                 'peers' => 5,
                 'size' => 536870912,
                 'downloads' => 10,
-                'traffic' => 5368709120,
+                'bandwidth' => 5368709120,
             ],
         ];
 
@@ -164,7 +164,7 @@ class ViewScrapeJsonTest extends PhoenixTestCase
                 'peers' => 0,
                 'size' => 0,
                 'downloads' => 0,
-                'traffic' => 0,
+                'bandwidth' => 0,
             ],
         ];
 
@@ -177,7 +177,7 @@ class ViewScrapeJsonTest extends PhoenixTestCase
         $this->assertEquals(0, $torrent['peers']);
         $this->assertEquals(0, $torrent['size']);
         $this->assertEquals(0, $torrent['downloads']);
-        $this->assertEquals(0, $torrent['traffic']);
+        $this->assertEquals(0, $torrent['bandwidth']);
     }
 
     public function testMinRequestIntervalKeyOnlyWhenNonZero()
@@ -185,7 +185,7 @@ class ViewScrapeJsonTest extends PhoenixTestCase
         $scrape = [[
             'info_hash' => 'abcdef1234567890abcdef1234567890abcdef12',
             'seeders' => 1, 'leechers' => 0, 'peers' => 1,
-            'size' => 100, 'downloads' => 0, 'traffic' => 0,
+            'size' => 100, 'downloads' => 0, 'bandwidth' => 0,
         ]];
 
         $with = json_decode(view_scrape_json($scrape, 1800), true);

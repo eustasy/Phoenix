@@ -35,7 +35,7 @@ function view_scrape_xml(array $scrape, int $min_request_interval = 0): string
             '<peers>'    .$torrent['peers']    .'</peers>'.
             '<size>'     .$torrent['size']     .'</size>'.
             '<downloads>'.$torrent['downloads'].'</downloads>'.
-            '<traffic>'  .$torrent['traffic']  .'</traffic>'.
+            '<traffic>'  .$torrent['bandwidth']  .'</traffic>'.
         '</torrent>';
     }
 

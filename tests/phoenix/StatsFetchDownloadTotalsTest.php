@@ -24,7 +24,7 @@ class StatsFetchDownloadTotalsTest extends PhoenixTestCase
 
         $this->assertIsArray($result);
         $this->assertEquals('8', $result['downloads']); // 5 + 3
-        $this->assertEquals('11000', $result['traffic']); // 5*1000 + 3*2000
+        $this->assertEquals('11000', $result['bandwidth']); // 5*1000 + 3*2000
     }
 
     public function testFetchDownloadTotalsEmpty()
@@ -35,7 +35,7 @@ class StatsFetchDownloadTotalsTest extends PhoenixTestCase
 
         $this->assertIsArray($result);
         $this->assertNull($result['downloads']);
-        $this->assertNull($result['traffic']);
+        $this->assertNull($result['bandwidth']);
     }
 
     public function testFetchDownloadTotalsWithNullSize()
@@ -53,7 +53,7 @@ class StatsFetchDownloadTotalsTest extends PhoenixTestCase
 
         $this->assertIsArray($result);
         $this->assertEquals('10', $result['downloads']);
-        $this->assertEquals('0', $result['traffic']); // IFNULL handles NULL size
+        $this->assertEquals('0', $result['bandwidth']); // IFNULL handles NULL size
     }
 
     protected function tearDown(): void

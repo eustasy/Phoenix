@@ -23,7 +23,7 @@ class ViewScrapeXmlTest extends PhoenixTestCase
                 'peers' => 3,
                 'size' => 1024,
                 'downloads' => 7,
-                'traffic' => 7168,
+                'bandwidth' => 7168,
             ],
         ];
     }
@@ -83,7 +83,7 @@ class ViewScrapeXmlTest extends PhoenixTestCase
         $scrape['bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'] = [
             'info_hash' => 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
             'seeders' => 0, 'leechers' => 5, 'peers' => 5,
-            'size' => 0, 'downloads' => 0, 'traffic' => 0,
+            'size' => 0, 'downloads' => 0, 'bandwidth' => 0,
         ];
         $xml = view_scrape_xml($scrape);
         $this->assertSame(2, substr_count($xml, '<torrent>'));

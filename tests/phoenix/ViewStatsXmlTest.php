@@ -18,7 +18,7 @@ class ViewStatsXmlTest extends TestCase
             'leechers' => 5,
             'torrents' => 3,
             'downloads' => 100,
-            'traffic' => 5000000,
+            'bandwidth' => 5000000,
         ];
         $settings = ['phoenix_version' => '1.0.0'];
 

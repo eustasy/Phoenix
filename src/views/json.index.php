@@ -50,7 +50,7 @@ function view_index_json(array $index, bool $show_meta = false): string
             'seeders' => $torrent['seeders'],
             'leechers' => $torrent['leechers'],
             'peers' => $torrent['peers'],
-            'traffic' => $torrent['traffic'],
+            'traffic' => $torrent['bandwidth'],
             'magnet' => $torrent['magnet'] ?? null,
         ];
     }

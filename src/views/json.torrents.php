@@ -45,7 +45,7 @@ function view_torrents_json(array $torrents): string
             'seeders' => $torrent['seeders'],
             'leechers' => $torrent['leechers'],
             'peers' => $torrent['peers'],
-            'traffic' => $torrent['traffic'],
+            'traffic' => $torrent['bandwidth'],
             'filename' => $torrent['filename'],
             'files' => $torrent['files'],
             'trackers' => $torrent['trackers'],

@@ -29,7 +29,7 @@ class ViewAdminHtmlTest extends TestCase
     {
         return [
             'seeders' => 3, 'leechers' => 2, 'peers' => 5,
-            'torrents' => 4, 'downloads' => 10, 'traffic' => 123456, 'registered' => 7,
+            'torrents' => 4, 'downloads' => 10, 'bandwidth' => 123456, 'registered' => 7,
         ];
     }
 
@@ -39,14 +39,14 @@ class ViewAdminHtmlTest extends TestCase
     private function topTorrents(): array
     {
         return [
-            ['info_hash' => str_repeat('a', 40), 'name' => 'Alpha', 'filename' => 'alpha.iso', 'seeders' => 50, 'leechers' => 1, 'downloads' => 10, 'traffic' => 0],
-            ['info_hash' => str_repeat('b', 40), 'name' => null, 'filename' => null, 'seeders' => 20, 'leechers' => 0, 'downloads' => 10, 'traffic' => 0],
+            ['info_hash' => str_repeat('a', 40), 'name' => 'Alpha', 'filename' => 'alpha.iso', 'seeders' => 50, 'leechers' => 1, 'downloads' => 10, 'bandwidth' => 0],
+            ['info_hash' => str_repeat('b', 40), 'name' => null, 'filename' => null, 'seeders' => 20, 'leechers' => 0, 'downloads' => 10, 'bandwidth' => 0],
         ];
     }
 
     public function testTrafficChartFillsTheOtherHalfOfTheChartRow(): void
     {
-        $traffic = [
+        $bandwidth = [
             ['time' => 1788739200, 'completions' => 76, 'bytes' => 250263275520],
             ['time' => 1788825600, 'completions' => 79, 'bytes' => 260362334208],
         ];
@@ -61,14 +61,14 @@ class ViewAdminHtmlTest extends TestCase
             [],
             [],
             ['Transmission' => ['4.1.3.0' => 49]],
-            $traffic,
+            $bandwidth,
         );
 
         // Both charts, and the library pulled once for the pair. Asserted
         // against the pinned table rather than a literal version, so a bump is
         // one edit in cdn_assets() and not a test failure.
         $this->assertStringContainsString('<canvas id="clients-chart">', $html);
-        $this->assertStringContainsString('<canvas id="traffic-chart">', $html);
+        $this->assertStringContainsString('<canvas id="bandwidth-chart">', $html);
         $this->assertSame(1, substr_count($html, \cdn_assets()['chart']['url']));
         // …and it carries its integrity hash.
         $this->assertStringContainsString(
@@ -77,7 +77,7 @@ class ViewAdminHtmlTest extends TestCase
         );
         // The card footers through to the full page.
         $this->assertStringContainsString('476 GB', $html);
-        $this->assertStringContainsString('?page=traffic', $html);
+        $this->assertStringContainsString('?page=bandwidth', $html);
     }
 
     public function testClientChartLeadsTheSectionAtHalfWidth(): void
@@ -255,7 +255,7 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertStringContainsString('Registered torrents', $html);
         $this->assertStringContainsString('<div class="ph-stat-value">7</div>', $html);
         $this->assertStringContainsString('with active peers', $html);
-        $this->assertStringContainsString('Traffic served', $html);
+        $this->assertStringContainsString('Bandwidth served', $html);
         $this->assertStringContainsString('123,456 bytes', $html);
         // Maintenance rows render only for tasks that have run, with a By column
         // naming who ran each (capitalised source).
@@ -348,7 +348,7 @@ class ViewAdminHtmlTest extends TestCase
     public function testTrafficCardRowsLinkToTheTrafficDrillDown(): void
     {
         // A row links into the view that answers the question its card asked:
-        // the swarm cards to Peers, the bytes card to Traffic.
+        // the swarm cards to Peers, the bytes card to Bandwidth.
         $html = view_admin_html(
             $this->settings(),
             true,
@@ -356,10 +356,10 @@ class ViewAdminHtmlTest extends TestCase
             'tok',
             $this->stats(),
             [],
-            ['seeded' => $this->topTorrents(), 'traffic' => $this->topTorrents()],
+            ['seeded' => $this->topTorrents(), 'bandwidth' => $this->topTorrents()],
         );
 
-        $this->assertStringContainsString('?page=traffic&amp;info_hash='.str_repeat('a', 40), $html);
+        $this->assertStringContainsString('?page=bandwidth&amp;info_hash='.str_repeat('a', 40), $html);
         $this->assertStringContainsString('?page=peers&amp;info_hash='.str_repeat('a', 40), $html);
     }
 }

@@ -26,7 +26,7 @@ class ViewIndexJsonTest extends PhoenixTestCase
             'seeders' => 2,
             'leechers' => 1,
             'peers' => 3,
-            'traffic' => 7168,
+            'bandwidth' => 7168,
             'filename' => null,
             'files' => null,
             'trackers' => null,
@@ -113,7 +113,7 @@ class ViewIndexJsonTest extends PhoenixTestCase
         $this->assertArrayHasKey('seeders', $row);
         $this->assertArrayHasKey('leechers', $row);
         $this->assertArrayHasKey('peers', $row);
-        $this->assertArrayHasKey('traffic', $row);
+        $this->assertArrayHasKey('bandwidth', $row);
     }
 
     ////	meta included with flag

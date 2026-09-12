@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-////	stats_traffic_series
+////	stats_bandwidth_series
 // Traffic over time, bucketed, for the Traffic page's chart and the dashboard's
 // summary chart.
 //
@@ -38,7 +38,7 @@ declare(strict_types=1);
  * @param PhoenixSettings $settings
  * @return list<array{time: int, completions: int, bytes: int}>
  */
-function stats_traffic_series(mysqli $connection, array $settings, int $days = 90, int $bucket = 86400): array
+function stats_bandwidth_series(mysqli $connection, array $settings, int $days = 90, int $bucket = 86400): array
 {
     $prefix = $settings['db_prefix'];
     $days = max(1, min(4000, $days));

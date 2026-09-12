@@ -129,7 +129,7 @@ the whole torrents table on a public request, and the torrent ceiling becomes
 disk and admin-page latency rather than a hard limit.
 
 Admin listings are paged (`admin_torrents_limit=100`, `admin_peers_limit=200`,
-`admin_traffic_limit=100`), so they do not grow with the table.
+`admin_bandwidth_limit=100`), so they do not grow with the table.
 
 ## Database behaviour worth knowing
 
@@ -152,7 +152,7 @@ rows** counting, **~0.34 s per million** for an aggregate that cannot use an
 index.
 
 Phoenix does the unqualified count in exactly two places — `torrents_count()`
-(dashboard, sidebar badge, paged Torrents and Traffic listings) and
+(dashboard, sidebar badge, paged Torrents and Bandwidth listings) and
 `peers_count()` (sidebar badge, paged Peers listing). **Neither is on the
 announce or scrape path**; the cost lands on admin page loads. If it becomes a
 problem, cache the count or read an approximate one from
@@ -199,7 +199,7 @@ Two statements are deliberately absent from the scheduled runs:
   table twice per run for no benefit.
 - **`CHECK TABLE`**, a full scan of every row and index. InnoDB verifies page
   checksums as it reads, so corruption surfaces during normal use; it is a
-  Utilities action rather than a schedule.
+  DB Utilities action rather than a schedule.
 
 For scale: rebuilding the 1.25M-row, 154 MB events table took **22.6 s** on this
 box. The other tables took under 0.05 s each — and `events` is excluded from the

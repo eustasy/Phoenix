@@ -6,12 +6,12 @@ namespace Phoenix\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-class ViewAdminTrafficHtmlTest extends TestCase
+class ViewAdminBandwidthHtmlTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        require_once __DIR__.'/../../src/views/html.admin.traffic.php';
+        require_once __DIR__.'/../../src/views/html.admin.bandwidth.php';
     }
 
     /** @return array<string, mixed> */
@@ -48,9 +48,9 @@ class ViewAdminTrafficHtmlTest extends TestCase
     public function testAllTimeMetricDrawsTheLedgerSeries(): void
     {
         $series = [['time' => 1788739200, 'completions' => 76, 'bytes' => 250263275520]];
-        $html = view_admin_traffic_html($this->settings(), $series, $this->torrents(), 'events', '90', $this->windows(), 'tok');
+        $html = view_admin_bandwidth_html($this->settings(), $series, $this->torrents(), 'events', '90', $this->windows(), 'tok');
 
-        $this->assertStringContainsString('canvas id="traffic-chart"', $html);
+        $this->assertStringContainsString('canvas id="bandwidth-chart"', $html);
         $this->assertStringContainsString('var TRAFFIC =', $html);
         // Windows only make sense against a series.
         $this->assertStringContainsString('>90 days<', $html);
@@ -61,10 +61,10 @@ class ViewAdminTrafficHtmlTest extends TestCase
         // The live counters are cumulative-since-client-start and vanish when a
         // peer leaves, so plotting them over time would claim something the
         // tracker cannot know.
-        $html = view_admin_traffic_html($this->settings(), [], $this->torrents(), 'peers', '90', $this->windows(), 'tok', $this->swarm());
+        $html = view_admin_bandwidth_html($this->settings(), [], $this->torrents(), 'peers', '90', $this->windows(), 'tok', $this->swarm());
 
         $this->assertStringContainsString('canvas id="swarm-chart"', $html);
-        $this->assertStringNotContainsString('traffic-chart', $html);
+        $this->assertStringNotContainsString('bandwidth-chart', $html);
         $this->assertStringNotContainsString('>90 days<', $html);
         $this->assertStringContainsString('var SWARM =', $html);
         // Said plainly, rather than presented as a total.
@@ -73,7 +73,7 @@ class ViewAdminTrafficHtmlTest extends TestCase
 
     public function testLiveSwarmWithNothingReportedLoadsNoChartLibrary(): void
     {
-        $html = view_admin_traffic_html($this->settings(), [], $this->torrents(), 'peers', '90', $this->windows(), 'tok', []);
+        $html = view_admin_bandwidth_html($this->settings(), [], $this->torrents(), 'peers', '90', $this->windows(), 'tok', []);
 
         $this->assertStringContainsString('No peer is reporting any transfer', $html);
         $this->assertStringNotContainsString('chart.js', $html);
@@ -81,20 +81,20 @@ class ViewAdminTrafficHtmlTest extends TestCase
 
     public function testTableColumnFollowsTheMetric(): void
     {
-        $estimate = view_admin_traffic_html($this->settings(), [], $this->torrents(), 'events', '90', $this->windows(), 'tok');
-        $live = view_admin_traffic_html($this->settings(), [], $this->torrents(), 'peers', '90', $this->windows(), 'tok', $this->swarm());
+        $estimate = view_admin_bandwidth_html($this->settings(), [], $this->torrents(), 'events', '90', $this->windows(), 'tok');
+        $live = view_admin_bandwidth_html($this->settings(), [], $this->torrents(), 'peers', '90', $this->windows(), 'tok', $this->swarm());
 
-        // Matched as the header's own sort link: '>Traffic ' alone also matches
+        // Matched as the header's own sort link: '>Bandwidth ' alone also matches
         // the footnote prose, so it passed whatever the header said.
-        $this->assertStringContainsString('sort=traffic&amp;dir=asc">Traffic<', $estimate);
-        $this->assertStringContainsString('sort=traffic&amp;dir=asc">Uploaded<', $live);
+        $this->assertStringContainsString('sort=bandwidth&amp;dir=asc">Bandwidth<', $estimate);
+        $this->assertStringContainsString('sort=bandwidth&amp;dir=asc">Uploaded<', $live);
         $this->assertStringNotContainsString('>Uploaded<', $estimate);
-        $this->assertStringNotContainsString('">Traffic<', $live);
+        $this->assertStringNotContainsString('">Bandwidth<', $live);
     }
 
     public function testTableCarriesFilenameAndOwner(): void
     {
-        $html = view_admin_traffic_html(
+        $html = view_admin_bandwidth_html(
             $this->settings(),
             [['time' => 1788739200, 'completions' => 76, 'bytes' => 250263275520]],
             $this->torrents(),
@@ -116,7 +116,7 @@ class ViewAdminTrafficHtmlTest extends TestCase
     {
         // The listing is paged, so a browser-side filter would only ever search
         // the rendered page.
-        $html = view_admin_traffic_html(
+        $html = view_admin_bandwidth_html(
             $this->settings(),
             [['time' => 1788739200, 'completions' => 76, 'bytes' => 250263275520]],
             $this->torrents(),
@@ -135,7 +135,7 @@ class ViewAdminTrafficHtmlTest extends TestCase
 
     public function testFilterMetricAndWindowSurviveInLinks(): void
     {
-        $html = view_admin_traffic_html(
+        $html = view_admin_bandwidth_html(
             $this->settings(),
             [],
             $this->torrents(),
@@ -161,7 +161,7 @@ class ViewAdminTrafficHtmlTest extends TestCase
 
     public function testInfoHashNarrowsToOneTorrentAndSaysSo(): void
     {
-        $html = view_admin_traffic_html(
+        $html = view_admin_bandwidth_html(
             $this->settings(),
             [],
             $this->torrents(),
@@ -177,14 +177,14 @@ class ViewAdminTrafficHtmlTest extends TestCase
             str_repeat('a', 40),
         );
 
-        $this->assertStringContainsString('Traffic for <b>Alpha</b>', $html);
+        $this->assertStringContainsString('Bandwidth for <b>Alpha</b>', $html);
         $this->assertStringContainsString('info_hash='.str_repeat('a', 40), $html);
         $this->assertStringContainsString('Show all torrents', $html);
     }
 
     public function testEmptyFilteredListOffersWayBack(): void
     {
-        $html = view_admin_traffic_html(
+        $html = view_admin_bandwidth_html(
             $this->settings(),
             [],
             [],
@@ -216,7 +216,7 @@ class ViewAdminTrafficHtmlTest extends TestCase
         $series = [['time' => 1788739200, 'completions' => 76, 'bytes' => 250263275520]];
 
         foreach (['30', '90', 'all'] as $window) {
-            $html = view_admin_traffic_html(
+            $html = view_admin_bandwidth_html(
                 $this->settings(),
                 $series,
                 $this->torrents(),

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-////	events_geo_traffic
+////	events_geo_bandwidth
 // Aggregate traffic by country for the admin Geography page: the same
 // completed-download events events_geo_counts() counts, weighted by the size of
 // the torrent each one finished. So the two metrics are one dataset read two
@@ -29,7 +29,7 @@ declare(strict_types=1);
  * @param PhoenixSettings $settings
  * @return array<string, int>
  */
-function events_geo_traffic(mysqli $connection, array $settings): array
+function events_geo_bandwidth(mysqli $connection, array $settings): array
 {
     $prefix = $settings['db_prefix'];
 
@@ -62,7 +62,7 @@ function events_geo_traffic(mysqli $connection, array $settings): array
         return [];
     }
 
-    $traffic = [];
+    $bandwidth = [];
     while ($row = mysqli_fetch_assoc($result)) {
         $country = is_string($row['country']) ? strtoupper($row['country']) : '';
         $hash = is_string($row['info_hash']) ? $row['info_hash'] : '';
@@ -71,8 +71,8 @@ function events_geo_traffic(mysqli $connection, array $settings): array
         if ($country === '' || ! isset($sizes[$hash])) {
             continue;
         }
-        $traffic[$country] = ($traffic[$country] ?? 0) + ($sizes[$hash] * intval($row['n']));
+        $bandwidth[$country] = ($bandwidth[$country] ?? 0) + ($sizes[$hash] * intval($row['n']));
     }
 
-    return array_filter($traffic, static fn (int $bytes): bool => $bytes > 0);
+    return array_filter($bandwidth, static fn (int $bytes): bool => $bytes > 0);
 }

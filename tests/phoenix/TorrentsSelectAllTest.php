@@ -106,7 +106,7 @@ class TorrentsSelectAllTest extends PhoenixTestCase
             'seeders' => 0,
             'leechers' => 0,
             'peers' => 0,
-            'traffic' => 1024 * 5,
+            'bandwidth' => 1024 * 5,
             'filename' => null,
             'files' => null,
             'trackers' => null,
@@ -135,7 +135,7 @@ class TorrentsSelectAllTest extends PhoenixTestCase
         $this->assertSame(2, $row['seeders']);
         $this->assertSame(1, $row['leechers']);
         $this->assertSame(3, $row['peers']);
-        $this->assertSame(2048 * 10, $row['traffic']);
+        $this->assertSame(2048 * 10, $row['bandwidth']);
     }
 
     public function testMetaDecodedAndSplit(): void

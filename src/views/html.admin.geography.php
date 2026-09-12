@@ -55,9 +55,9 @@ function view_admin_geography_html(array $settings, string $metric, array $value
             // high-value country the palest on the map, which reads inverted.
             'scaleD' => ['#abcfe2', '#4385be'],
         ],
-        'traffic' => [
-            'short' => 'Traffic',
-            'label' => 'Traffic by country',
+        'bandwidth' => [
+            'short' => 'Bandwidth',
+            'label' => 'Bandwidth by country',
             'listTitle' => 'Top countries — traffic',
             'unit' => ' bytes',
             // Values are byte counts, so the panel and tooltip render them as

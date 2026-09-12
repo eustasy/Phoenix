@@ -77,7 +77,7 @@ class ScrapeFullControllerTest extends PhoenixTestCase
         'peers' => 2,
         'size' => 4096,
         'downloads' => 3,
-        'traffic' => 12288,
+        'bandwidth' => 12288,
     ];
 
     public function testRendersBencodeForFullScrape(): void

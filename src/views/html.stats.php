@@ -60,9 +60,9 @@ function view_stats_html(array $stats, array $settings): string
 			<div class="ph-stat-label">Completed downloads</div>
 		</div>
 		<div class="ph-stat ph-stat-orange">
-			<div class="ph-stat-top"><div class="ph-stat-value">'.format_bytes($stats['traffic']).'</div><div class="ph-stat-ico"><span class="ph-ico" data-lucide="arrow-up-down"></span></div></div>
-			<div class="ph-stat-label">Traffic served</div>
-			<div class="ph-stat-sub mono">'.number_format($stats['traffic']).' bytes</div>
+			<div class="ph-stat-top"><div class="ph-stat-value">'.format_bytes($stats['bandwidth']).'</div><div class="ph-stat-ico"><span class="ph-ico" data-lucide="arrow-up-down"></span></div></div>
+			<div class="ph-stat-label">Bandwidth served</div>
+			<div class="ph-stat-sub mono">'.number_format($stats['bandwidth']).' bytes</div>
 		</div>
 	</div>';
 

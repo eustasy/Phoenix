@@ -36,7 +36,7 @@ class ViewAdminTorrentsHtmlTest extends TestCase
             'seeders' => 3,
             'leechers' => 2,
             'peers' => 5,
-            'traffic' => 123456,
+            'bandwidth' => 123456,
             'filename' => null,
             'files' => null,
             'trackers' => null,
@@ -223,7 +223,7 @@ class ViewAdminTorrentsHtmlTest extends TestCase
     {
         $html = view_admin_torrents_html($this->settings(), [$this->torrent()], false, 'tok', [], 1);
 
-        $this->assertStringContainsString('href="?page=traffic&amp;info_hash='.str_repeat('a', 40).'"', $html);
-        $this->assertStringContainsString('>Traffic</a>', $html);
+        $this->assertStringContainsString('href="?page=bandwidth&amp;info_hash='.str_repeat('a', 40).'"', $html);
+        $this->assertStringContainsString('>Bandwidth</a>', $html);
     }
 }

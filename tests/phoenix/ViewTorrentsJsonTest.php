@@ -28,7 +28,7 @@ class ViewTorrentsJsonTest extends PhoenixTestCase
             'seeders' => 2,
             'leechers' => 1,
             'peers' => 3,
-            'traffic' => 3072,
+            'bandwidth' => 3072,
             'filename' => null,
             'files' => null,
             'trackers' => null,
@@ -64,7 +64,7 @@ class ViewTorrentsJsonTest extends PhoenixTestCase
         $this->assertSame(2, $row['seeders']);
         $this->assertSame(1, $row['leechers']);
         $this->assertSame(3, $row['peers']);
-        $this->assertSame(3072, $row['traffic']);
+        $this->assertSame(3072, $row['bandwidth']);
     }
 
     public function testNullUserAndNameSurvive(): void

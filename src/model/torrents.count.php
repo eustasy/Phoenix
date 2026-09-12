@@ -8,7 +8,7 @@ declare(strict_types=1);
 // unlisted torrents). Returns 0 when the table is empty or the query fails.
 //
 // Takes the same $search/$listed/$info_hash as torrents_select_all() and
-// torrents_traffic() and applies them through the same torrents_filter_sql(),
+// torrents_bandwidth() and applies them through the same torrents_filter_sql(),
 // so a filtered listing pages against a filtered total. Called with no filter (the default) it counts every torrent,
 // which is what the dashboard and the sidebar badge want.
 //

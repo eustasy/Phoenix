@@ -19,7 +19,7 @@ function phTrafficTheme() {
 }
 
 function phTrafficChart(canvasId) {
-  var el = document.getElementById(canvasId || "traffic-chart")
+  var el = document.getElementById(canvasId || "bandwidth-chart")
   if (!el || typeof Chart === "undefined" || !TRAFFIC.length) return
 
   var c = phTrafficTheme()

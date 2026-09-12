@@ -27,7 +27,7 @@ class ScrapeInitializeResultsTest extends TestCase
         $this->assertSame(0, $entry['downloads']);
         $this->assertSame(0, $entry['peers']);
         $this->assertSame(0, $entry['size']);
-        $this->assertSame(0, $entry['traffic']);
+        $this->assertSame(0, $entry['bandwidth']);
     }
 
     public function testInitializeResultsWithMultipleHashes()
@@ -54,7 +54,7 @@ class ScrapeInitializeResultsTest extends TestCase
             $this->assertSame(0, $entry['downloads']);
             $this->assertSame(0, $entry['peers']);
             $this->assertSame(0, $entry['size']);
-            $this->assertSame(0, $entry['traffic']);
+            $this->assertSame(0, $entry['bandwidth']);
         }
     }
 

@@ -28,7 +28,7 @@ class ViewTorrentsXmlTest extends PhoenixTestCase
             'seeders' => 2,
             'leechers' => 1,
             'peers' => 3,
-            'traffic' => 3072,
+            'bandwidth' => 3072,
             'filename' => null,
             'files' => null,
             'trackers' => null,

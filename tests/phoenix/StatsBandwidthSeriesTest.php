@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-require_once __DIR__.'/../../src/model/stats.traffic.series.php';
+require_once __DIR__.'/../../src/model/stats.bandwidth.series.php';
 
-class StatsTrafficSeriesTest extends PhoenixTestCase
+class StatsBandwidthSeriesTest extends PhoenixTestCase
 {
     // A sentinel torrent, so the assertions hold regardless of other rows in
     // the ledger: only these events reference this hash.
@@ -25,7 +25,7 @@ class StatsTrafficSeriesTest extends PhoenixTestCase
         mysqli_query(
             self::$connection,
             'INSERT INTO `'.self::$settings['db_prefix'].'torrents` (`info_hash`, `name`, `size`, `listed`, `downloads`) '.
-            'VALUES (\''.self::HASH.'\', \'__TEST_TrafficSeries__\', '.$size.', 1, 0);',
+            'VALUES (\''.self::HASH.'\', \'__TEST_BandwidthSeries__\', '.$size.', 1, 0);',
         );
     }
 
@@ -62,7 +62,7 @@ class StatsTrafficSeriesTest extends PhoenixTestCase
         $this->completedAt($yesterday + 3600);
         $this->completedAt(time());
 
-        $series = \stats_traffic_series(self::$connection, self::$settings, 7, 86400);
+        $series = \stats_bandwidth_series(self::$connection, self::$settings, 7, 86400);
 
         $this->assertNotNull($this->bucketAt($series, $yesterday), 'a complete day is kept');
         $this->assertNull($this->bucketAt($series, $today), 'the day in progress is dropped');
@@ -76,7 +76,7 @@ class StatsTrafficSeriesTest extends PhoenixTestCase
         $this->completedAt($yesterday + 60);
         $this->completedAt($yesterday + 120);
 
-        $point = $this->bucketAt(\stats_traffic_series(self::$connection, self::$settings, 7, 86400), $yesterday);
+        $point = $this->bucketAt(\stats_bandwidth_series(self::$connection, self::$settings, 7, 86400), $yesterday);
 
         $this->assertNotNull($point);
         $this->assertSame(2, $point['completions']);

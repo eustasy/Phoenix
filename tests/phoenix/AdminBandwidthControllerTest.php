@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Phoenix\Tests;
 
-require_once __DIR__.'/../../src/controller/admin.traffic.php';
+require_once __DIR__.'/../../src/controller/admin.bandwidth.php';
 
-class AdminTrafficControllerTest extends PhoenixTestCase
+class AdminBandwidthControllerTest extends PhoenixTestCase
 {
     private const HASH = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
@@ -41,9 +41,9 @@ class AdminTrafficControllerTest extends PhoenixTestCase
 
     public function testDefaultsToActivePeersOnTheNinetyDayWindow(): void
     {
-        $html = \admin_traffic_controller(self::$connection, self::$settings);
+        $html = \admin_bandwidth_controller(self::$connection, self::$settings);
 
-        $this->assertStringContainsString('Traffic', $html);
+        $this->assertStringContainsString('Bandwidth', $html);
         $this->assertStringContainsString('metric=peers', $html);
         $this->assertStringContainsString('days=90', $html);
     }
@@ -52,7 +52,7 @@ class AdminTrafficControllerTest extends PhoenixTestCase
     {
         $_GET['metric'] = 'events';
 
-        $html = \admin_traffic_controller(self::$connection, self::$settings);
+        $html = \admin_bandwidth_controller(self::$connection, self::$settings);
 
         $this->assertStringContainsString('metric=events', $html);
     }
@@ -63,7 +63,7 @@ class AdminTrafficControllerTest extends PhoenixTestCase
         $_GET['metric'] = 'nonsense';
         $_GET['days'] = '9999';
 
-        $html = \admin_traffic_controller(self::$connection, self::$settings);
+        $html = \admin_bandwidth_controller(self::$connection, self::$settings);
 
         $this->assertStringContainsString('metric=peers', $html);
         $this->assertStringContainsString('days=90', $html);
@@ -73,7 +73,7 @@ class AdminTrafficControllerTest extends PhoenixTestCase
     {
         $_GET['days'] = '30';
 
-        $this->assertStringContainsString('days=30', \admin_traffic_controller(self::$connection, self::$settings));
+        $this->assertStringContainsString('days=30', \admin_bandwidth_controller(self::$connection, self::$settings));
     }
 
     public function testSearchNarrowsTheListing(): void
@@ -82,7 +82,7 @@ class AdminTrafficControllerTest extends PhoenixTestCase
         $this->torrent('__TEST_atc_b__', '__TEST_Hidden__');
         $_GET['q'] = '__TEST_Findable__';
 
-        $html = \admin_traffic_controller(self::$connection, self::$settings);
+        $html = \admin_bandwidth_controller(self::$connection, self::$settings);
 
         $this->assertStringContainsString('__TEST_Findable__', $html);
         $this->assertStringNotContainsString('__TEST_Hidden__', $html);
@@ -94,7 +94,7 @@ class AdminTrafficControllerTest extends PhoenixTestCase
         $this->torrent('__TEST_atc_b__', '__TEST_Other__');
         $_GET['info_hash'] = self::HASH;
 
-        $html = \admin_traffic_controller(self::$connection, self::$settings);
+        $html = \admin_bandwidth_controller(self::$connection, self::$settings);
 
         $this->assertStringContainsString('__TEST_Only__', $html);
         $this->assertStringNotContainsString('__TEST_Other__', $html);
@@ -106,7 +106,7 @@ class AdminTrafficControllerTest extends PhoenixTestCase
         $_GET['q'] = '__TEST_Findable__';
         $_GET['offset'] = '-50';
 
-        $html = \admin_traffic_controller(self::$connection, self::$settings);
+        $html = \admin_bandwidth_controller(self::$connection, self::$settings);
 
         $this->assertStringContainsString('__TEST_Findable__', $html);
         $this->assertStringContainsString('Showing 1', $html);

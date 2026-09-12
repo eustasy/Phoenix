@@ -37,7 +37,7 @@ default prefix `phoenix_`. The actual prefix is `$settings['db_prefix']`.
 - **`sql/migrations/` is empty** unless a release ships a schema change.
   `sql/*.sql` describes the finished schema on its own, so `db_create()` builds
   it in one step; an empty directory globs to `[]` rather than `false`, so
-  `db_migrate()` and the Utilities → Migrate action report success having done
+  `db_migrate()` and the DB Utilities → Migrate action report success having done
   nothing. `DbCreateTest::testSchemaIsCompleteWithoutMigrations` is what guards
   that: with no migrations, a column missing from a schema file has nothing to
   repair it and a fresh install silently loses it.
@@ -59,7 +59,7 @@ The three differ in cost, and that is why they are separate:
   cron (`bin/prune-database.php`).
 - `db_optimize()` — a full rebuild on InnoDB, the only one that reclaims space.
   On its own slow cron (`bin/optimize-database.php`). Excludes `events`.
-- `db_check()` — a full integrity scan, Utilities action only.
+- `db_check()` — a full integrity scan, DB Utilities action only.
 
 `REPAIR TABLE` is deliberately unused: on MariaDB it silently performs a second
 full rebuild on InnoDB. See [LIMITS.md](../../LIMITS.md) for the measurements.

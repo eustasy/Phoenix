@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 ////	admin_analyze_action
-//  Handles the Utilities "Analyze tables" action (process=analyze). Refreshes
+//  Handles the DB Utilities "Analyze tables" action (process=analyze). Refreshes
 //  index statistics so the query planner keeps choosing sensible plans.
 //  Cheap and non-destructive — it reclaims no space and rebuilds nothing; that
 //  is what Optimize is for.

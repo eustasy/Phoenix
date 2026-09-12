@@ -59,7 +59,7 @@ function view_index_xml(array $index, bool $show_meta = false): string
             '<seeders>'.$torrent['seeders'].'</seeders>'.
             '<leechers>'.$torrent['leechers'].'</leechers>'.
             '<peers>'.$torrent['peers'].'</peers>'.
-            '<traffic>'.$torrent['traffic'].'</traffic>';
+            '<traffic>'.$torrent['bandwidth'].'</traffic>';
 
         ////	magnet
         // Built by public/index.php; emitted in both modes when non-null.

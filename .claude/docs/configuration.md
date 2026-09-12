@@ -71,7 +71,7 @@ Full list with comments is in `config/phoenix.default.php`. Highlights:
 **Admin / 2FA** (see [http-api.md](http-api.md))
 - `admin_password` (bcrypt; empty = no auth), `admin_login_delay` /
   `admin_login_delay_max`, `admin_totp_secret`, `admin_peers_limit`,
-  `admin_torrents_limit`, `admin_traffic_limit`.
+  `admin_torrents_limit`, `admin_bandwidth_limit`.
 
 **Stats / geo** (see [stats-hooks.md](stats-hooks.md))
 - `stats_enabled`, `stats_events`, `stats_geo`, `stats_geo_database`.
