@@ -836,10 +836,10 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
   transition: width var(--duration-normal, 200ms) ease;
 }
 /* One hue per metric, so the four rows are distinguishable at a glance. */
-.ph-srv--cpu { --ph-srv-color: var(--color-blue); }
-.ph-srv--memory { --ph-srv-color: var(--color-purple); }
-.ph-srv--swap { --ph-srv-color: var(--color-cyan); }
-.ph-srv--disk { --ph-srv-color: var(--color-orange); }
+.ph-srv--cpu { --ph-srv-color: var(--color-orange); }
+.ph-srv--memory { --ph-srv-color: var(--color-blue); }
+.ph-srv--swap { --ph-srv-color: var(--color-purple); }
+.ph-srv--disk { --ph-srv-color: var(--color-green); }
 /* Pressure outranks identity: which metric it is matters less than that it is
    nearly full, so these override the per-metric hue. */
 .ph-srv.is-warning { --ph-srv-color: var(--color-warning); }
