@@ -80,13 +80,26 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
             'optimize' => ['gauge', 'Optimized'],
             'backup' => ['archive', 'Backed up'],
         ];
+        // Matches the Task History page: cron and auto are the expected
+        // background noise, anything else is coloured to catch the eye.
+        $source_badge = static function (string $source): string {
+            if ($source === '') {
+                return '<span class="dim">&mdash;</span>';
+            }
+            $class = match ($source) {
+                'cron', 'auto' => 'badge',
+                'admin' => 'badge badge-blue',
+                default => 'badge badge-yellow',
+            };
+
+            return '<span class="'.$class.'">'.htmlspecialchars(ucfirst($source), ENT_QUOTES, 'UTF-8').'</span>';
+        };
+
         $rows = '';
         foreach ($task_labels as $task_name => [$icon, $label]) {
             if (isset($tasks[$task_name])) {
                 $run = $tasks[$task_name];
-                $by = $run['source'] !== ''
-                    ? '<span class="badge">'.htmlspecialchars(ucfirst($run['source']), ENT_QUOTES, 'UTF-8').'</span>'
-                    : '<span class="dim">&mdash;</span>';
+                $by = $source_badge($run['source']);
                 $rows .= '<tr><td><span class="flex items-center gap-2"><span class="ph-ico ph-li-ico" data-lucide="'.$icon.'"></span>'.$label.'</span></td>'.
                     '<td class="mono muted">'.date('Y-m-d H:i', $run['value']).'</td>'.
                     '<td>'.$by.'</td>'.

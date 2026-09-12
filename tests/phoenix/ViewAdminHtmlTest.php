@@ -263,8 +263,20 @@ class ViewAdminHtmlTest extends TestCase
         $this->assertStringContainsString('Optimized', $html);
         $this->assertStringNotContainsString('Migrated', $html);
         $this->assertStringContainsString('<th>By</th>', $html);
-        $this->assertStringContainsString('>Cron</span>', $html);
-        $this->assertStringContainsString('>Admin</span>', $html);
+        // Scheduled runs stay plain; a manual one is coloured, matching the
+        // Task History page.
+        $this->assertStringContainsString('<span class="badge">Cron</span>', $html);
+        $this->assertStringContainsString('<span class="badge badge-blue">Admin</span>', $html);
+    }
+
+    public function testMaintenanceLinksToTheFullHistory(): void
+    {
+        $tasks = ['clean' => ['value' => 1700000000, 'source' => 'cron']];
+
+        $html = view_admin_html($this->settings(), true, false, '', $this->stats(), $tasks);
+
+        // The block shows only the last run of each task; the log is elsewhere.
+        $this->assertStringContainsString('?page=tasks', $html);
     }
 
     public function testShowsNotInstalledNoticeWhenTablesMissing(): void

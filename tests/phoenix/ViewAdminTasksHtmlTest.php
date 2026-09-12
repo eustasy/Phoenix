@@ -45,6 +45,40 @@ class ViewAdminTasksHtmlTest extends PhoenixTestCase
         $this->assertStringContainsString('>Admin</span>', $html);
     }
 
+    public function testScheduledRunsAreNotColouredButManualOnesAre(): void
+    {
+        // cron and auto are the expected background noise; a person stepping in
+        // should stand out in a page of scheduled runs.
+        $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', 'tok');
+
+        $this->assertStringContainsString('<span class="badge">Cron</span>', $html);
+        $this->assertStringContainsString('<span class="badge">Auto</span>', $html);
+        $this->assertStringContainsString('<span class="badge badge-blue">Admin</span>', $html);
+    }
+
+    public function testUnrecognisedSourceIsFlagged(): void
+    {
+        // A row this Phoenix did not write is neither routine nor a known
+        // manual action, so it gets its own colour rather than passing as cron.
+        $runs = [['id' => 1, 'name' => 'clean', 'value' => 1700000000, 'source' => 'weird']];
+
+        $html = \view_admin_tasks_html($this->settings(), $runs, 1, 0, 100, '', 'tok');
+
+        $this->assertStringContainsString('<span class="badge badge-yellow">Weird</span>', $html);
+    }
+
+    public function testMissingSourceStaysADash(): void
+    {
+        // Rows written before source tracking carry ''; a dash reads better
+        // than an empty coloured badge.
+        $runs = [['id' => 1, 'name' => 'clean', 'value' => 1700000000, 'source' => '']];
+
+        $html = \view_admin_tasks_html($this->settings(), $runs, 1, 0, 100, '', 'tok');
+
+        $this->assertStringContainsString('<span class="dim">&mdash;</span>', $html);
+        $this->assertStringNotContainsString('badge-yellow', $html);
+    }
+
     public function testShowsTheTotalAndPluralisesIt(): void
     {
         $html = \view_admin_tasks_html($this->settings(), $this->runs(), 3, 0, 100, '', 'tok');

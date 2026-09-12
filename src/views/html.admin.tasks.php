@@ -10,6 +10,13 @@ declare(strict_types=1);
 // fired; `auto` means clean_with_cron is off and an announce paid for the
 // cleanup inline; `admin` means someone pressed a button. A history of `auto`
 // where cron was expected is the signal that the crontab entry is not running.
+// Those two are the expected background noise and stay plain; anything else is
+// coloured, so a manual intervention stands out in a page of scheduled runs.
+//
+// There is no status column because there is nothing to put in it: task_log()
+// is called only after a task succeeds, at every one of its call sites, so a
+// failed run writes no row at all and shows here as a gap rather than a
+// failure. Do not read this page as "everything is fine".
 //
 // Filtering is a GET form, not a client-side filter — the table is paged, so
 // filtering in the browser would only ever search the rendered page. Wrapped in
@@ -30,6 +37,23 @@ function view_admin_tasks_html(array $settings, array $runs, int $total, int $of
         'optimize' => ['gauge', 'Optimized'],
         'backup' => ['archive', 'Backed up'],
     ];
+
+    // Scheduled and announce-time runs are the expected background noise, so
+    // they stay plain. Anything else is worth catching the eye: `admin` means a
+    // person intervened, and an unrecognised source means a row this Phoenix
+    // did not write.
+    $source_badge = static function (string $source): string {
+        if ($source === '') {
+            return '<span class="dim">&mdash;</span>';
+        }
+        $class = match ($source) {
+            'cron', 'auto' => 'badge',
+            'admin' => 'badge badge-blue',
+            default => 'badge badge-yellow',
+        };
+
+        return '<span class="'.$class.'">'.htmlspecialchars(ucfirst($source), ENT_QUOTES, 'UTF-8').'</span>';
+    };
 
     $query = static function (array $overrides) use ($name): string {
         $params = array_merge(['page' => 'tasks', 'name' => $name], $overrides);
@@ -63,9 +87,7 @@ function view_admin_tasks_html(array $settings, array $runs, int $total, int $of
         $rows = '';
         foreach ($runs as $run) {
             [$icon, $label] = $labels[$run['name']] ?? ['circle-dot', ucfirst($run['name'])];
-            $by = $run['source'] !== ''
-                ? '<span class="badge">'.htmlspecialchars(ucfirst($run['source']), ENT_QUOTES, 'UTF-8').'</span>'
-                : '<span class="dim">&mdash;</span>';
+            $by = $source_badge($run['source']);
             $rows .= '<tr>'.
                 '<td><span class="flex items-center gap-2"><span class="ph-ico ph-li-ico" data-lucide="'.$icon.'"></span>'.htmlspecialchars($label).'</span></td>'.
                 '<td class="mono muted" data-sort="'.$run['value'].'">'.date('Y-m-d H:i:s', $run['value']).'</td>'.
