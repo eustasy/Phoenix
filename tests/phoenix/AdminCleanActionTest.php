@@ -32,7 +32,7 @@ class AdminCleanActionTest extends PhoenixTestCase
         mysqli_report(MYSQLI_REPORT_OFF);
         try {
             $result = admin_clean_action(self::$connection, $brokenSettings, self::$time);
-            $this->assertSame('Could not clean the peers list.', $result);
+            $this->assertSame('Could not prune the expired rows.', $result);
         } finally {
             mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         }
