@@ -7,6 +7,7 @@ Configuration should take place in `config/phoenix.custom.php`, NOT `config/phoe
 - [Admin password requirements](#admin-password-requirements)
 - [Two-Factor Authentication (recommended)](#two-factor-authentication-recommended)
 - [Backups (recommended)](#backups-recommended)
+  - [What a backup contains](#what-a-backup-contains)
 - [Cron (automating maintenance)](#cron-automating-maintenance)
 - [Stat-Tracking](#stat-tracking)
   - [Geo enrichment](#geo-enrichment)
@@ -51,15 +52,49 @@ The script is silent on success and prints the error and exits non-zero on
 failure, so cron will mail you only when something breaks. It needs the
 `mysqldump` binary, `proc_open()`, and a writable backup directory.
 
+### What a backup contains
+
+Each run writes a dated directory holding the schema and one data file per
+table, rather than a single dump:
+
+```text
+backups/phoenix.20260912_033000/
+  schema.sql.gz      every table's CREATE, plus routines and triggers
+  events.sql.gz      data only
+  tasks.sql.gz
+  task_runs.sql.gz
+  torrents.sql.gz
+```
+
+That split is what makes a restore selective — you import the schema and then
+only the tables you want back, instead of a file that recreates everything.
+The admin **Backups** page offers each file as its own download, and can delete
+a whole backup.
+
+`peers` gets no data file. The swarm is ephemeral, so it is dumped
+structure-only inside `schema.sql` and repopulates itself from announces.
+`task_runs` *is* dumped, so whether to restore the maintenance history stays
+your decision at restore time rather than the backup's.
+
+Each file is a separate `mysqldump` run, so each is a standalone importable
+dump carrying its own `SET NAMES` / `TIME_ZONE` / `SQL_MODE` preamble. The
+trade is that each is its own `--single-transaction` snapshot rather than all
+tables sharing one; with no foreign keys and only `torrents.downloads` loosely
+tied to the matching `events` rows, the worst case is a counter off by a few
+across a dump that takes seconds.
+
+### Settings
+
 | Setting | Default | Notes |
 | --- | --- | --- |
 | `backup_dir` | `''` | Absolute path; empty means `backups/` in the project root. Keep it outside the web root. |
-| `backup_retention` | `30` | Days. Dumps older than this are deleted at the end of each run. `0` keeps everything. |
-| `backup_compress` | `true` | Gzips the dump as it streams, to `.sql.gz`, using PHP's zlib — no external binary. Level 1, where a SQL dump reaches roughly 10×. |
+| `backup_retention` | `30` | Days. Backups older than this are deleted at the end of each run. `0` keeps everything. |
+| `backup_compress` | `true` | Gzips each file as it streams, to `.sql.gz`, using PHP's zlib — no external binary. Level 1, where a SQL dump reaches roughly 10×. |
 
 `backup_retention` is a rotation, not an archive: at the default 30 days a fault
 you do not notice for a month leaves you with nothing but copies of the broken
-state. If the data matters, copy the dumps somewhere off the box as well — the
+state. Rotation removes only the `.sql`/`.sql.gz` files it wrote and then the
+directory, so a backup directory you have put anything else into survives. If the data matters, copy the dumps somewhere off the box as well — the
 backup directory is on the same disk as the database it protects.
 
 Restoring is covered in [RECOVERY.md](./RECOVERY.md#restore-the-database-from-a-backup).

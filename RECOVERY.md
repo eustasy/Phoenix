@@ -59,8 +59,8 @@ password you already have. If you have lost both, do this and
 
 ## Restore the database from a backup
 
-Backups are written by `bin/backup-database.php` (cron) and the admin **Backups**
-page, both through the same `db_backup()`.
+Backups are written by `bin/backup-database.php` (cron) and the admin
+**Backups** page, both through the same `db_backup()`.
 
 > **If you are reading this during an incident, check you have backups at all.**
 > Nothing schedules itself — a default install dumps only when someone clicks
@@ -73,65 +73,92 @@ page, both through the same `db_backup()`.
 >
 > See [Backups](./CONFIGURATION.md#backups-recommended) for the settings.
 
-They land in
-`$settings['backup_dir']` — `backups/` in the project root by default — named
-`<db_name>.<YYYYMMDD_HHMM>.sql`, with `.gz` appended when `backup_compress` is
-on, which it is by default:
+A backup is a **dated directory**, not a single file. It lands in
+`$settings['backup_dir']` — `backups/` in the project root by default — and
+holds the schema and one data file per table, each gzipped unless
+`backup_compress` is off:
 
 ```text
-backups/phoenix.20260911_1559.sql.gz
+backups/phoenix.20260912_033000/
+  schema.sql.gz      every table's CREATE, plus routines and triggers
+  events.sql.gz      data only
+  tasks.sql.gz
+  task_runs.sql.gz
+  torrents.sql.gz
 ```
 
-Dumps older than `backup_retention` days (30 by default) are deleted on each
+Splitting it that way is what makes a restore selective: you import the schema
+and then only the tables you actually want back. The admin Backups page offers
+each file as its own download for the same reason.
+
+Backups older than `backup_retention` days (30 by default) are deleted on each
 run, so check the directory holds what you expect before relying on it.
 
-**Know what is in the dump before you import it.** Three properties decide how a
-restore behaves, and none of them are the defaults `mysqldump` would give you:
+**Two things to know before importing.**
 
-- Rows are written as **`REPLACE INTO`**, not `INSERT`. Importing over live data
-  overwrites rows whose primary key matches and leaves everything else in place
-  — it is a merge, not a replacement. Rows created since the dump survive.
-- There is **no `DROP TABLE`**, and the `CREATE TABLE` statements have no
-  `IF NOT EXISTS`. Importing into a database that already has the tables fails
-  on the first `CREATE`, and the client aborts there by default.
-- **`peers` is structure-only.** The swarm is ephemeral, so it is dumped without
-  rows and comes back empty. Clients repopulate it as they announce; nothing is
-  lost that would not have expired anyway.
+Rows are written as **`REPLACE INTO`**, not `INSERT`. Importing over live data
+overwrites rows whose primary key matches and leaves everything else in place —
+it is a merge, not a replacement, so rows created since the dump survive. To
+replace a table outright rather than merge into it, empty it first.
 
-### Into an empty database
-
-The clean restore — the dump recreates the tables and fills them:
-
-```bash
-# Compressed (the default)
-gunzip -c backups/phoenix.20260911_1559.sql.gz | mariadb -u <user> -p <database>
-
-# Uncompressed
-mariadb -u <user> -p <database> < backups/phoenix.20260911_0330.sql
-```
-
-### Into a database that already has the tables
-
-Rolling data back while keeping the schema in place. The `CREATE TABLE`
-statements will error; `--force` skips them so the `REPLACE INTO` rows still
-apply:
-
-```bash
-gunzip -c backups/phoenix.20260911_1559.sql.gz | mariadb --force -u <user> -p <database>
-```
-
-Read the errors it prints rather than ignoring them: `Table ... already exists`
-is the expected one, anything else is not.
+**`peers` has no data file.** The swarm is ephemeral, so it is dumped
+structure-only inside `schema.sql` and comes back empty. Clients repopulate it
+as they announce; nothing is lost that would not have expired anyway.
 
 > Use the **`mariadb`** client where the server is MariaDB. Dumps from MariaDB
 > 11+ open with a `/*M!999999\- enable the sandbox mode */` directive that
 > Oracle's `mysql` client does not understand.
 
+### Into an empty database
+
+Schema first, then whichever data files you want:
+
+```bash
+cd backups/phoenix.20260912_033000
+
+gunzip -c schema.sql.gz   | mariadb -u <user> -p <database>
+gunzip -c torrents.sql.gz | mariadb -u <user> -p <database>
+gunzip -c events.sql.gz   | mariadb -u <user> -p <database>
+```
+
+With `backup_compress` off the files are plain `.sql` and import directly:
+
+```bash
+mariadb -u <user> -p <database> < schema.sql
+```
+
+Order barely matters beyond schema-before-data: Phoenix has no foreign keys, so
+the data files are independent of each other and can go in any order.
+
+### Into a database that already has the tables
+
+Skip `schema.sql` and import only the data files you want. Nothing collides,
+because the `CREATE TABLE` statements live in a file you are not importing:
+
+```bash
+# Roll back just the torrents table, leaving events and tasks alone.
+gunzip -c backups/phoenix.20260912_033000/torrents.sql.gz \
+  | mariadb -u <user> -p <database>
+```
+
+This is the common case — recovering one table after a bad edit, without
+touching the rest of the tracker.
+
+### What you probably do not want back
+
+`task_runs` is the maintenance history behind the
+[Task History](./CONFIGURATION.md#cron-automating-maintenance) page. Restoring
+it brings back a log of when cleanups ran, which is rarely what you are after
+mid-incident. Skip it unless you want the history.
+
 ### Afterwards
 
 Check the tracker responds and the admin dashboard's counts look right. If you
 restored into a fresh database, confirm `config/phoenix.custom.php` still points
-at it.
+at it. If you imported `torrents.sql` without `events.sql`, the dashboard's
+download counters and the Bandwidth page will disagree until new events
+accumulate — `torrents.downloads` is a running total, the ledger is the history
+behind it.
 
 ## Start over completely
 
