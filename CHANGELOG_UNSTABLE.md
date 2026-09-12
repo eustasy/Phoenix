@@ -1,30 +1,76 @@
 # Phoenix Changelog (Unstable Releases)
 
-## Unreleased (5.0)
+## v4.3beta11 - 12/09/2026
 
-5.0 is a clean-install release. The schema files describe the finished schema on
-their own, and every table is InnoDB. **Existing
-installs need manual DB work** — see [MIGRATING.md](MIGRATING.md). Convert each
-table once, during a quiet window (each `ALTER` rebuilds the table and holds it
-locked for the duration):
+The largest release of the 4.3 line. Four new admin surfaces — Clients, Task
+History, per-country Bandwidth and the sidebar's server gauges — arrive
+alongside a rebuilt Bandwidth page and paged, SQL-backed Torrents, Peers and
+Bandwidth listings that no longer load a whole table to render a page. Beneath
+that, the storage engine moves to InnoDB, backups become a directory of
+per-table files you can restore selectively, and scheduled maintenance splits by
+cost so a full table rebuild stops running every fifteen minutes.
 
-```sql
-ALTER TABLE `phoenix_events`    ENGINE=InnoDB;
-ALTER TABLE `phoenix_peers`     ENGINE=InnoDB;
-ALTER TABLE `phoenix_tasks`     ENGINE=InnoDB;
-ALTER TABLE `phoenix_task_runs` ENGINE=InnoDB;
-ALTER TABLE `phoenix_torrents`  ENGINE=InnoDB;
-```
+**This release breaks things.** The database engine changes, two admin pages are
+renamed all the way down to their routes and settings, the maintenance cron is
+renamed and joined by a second, and the `traffic` field in the API becomes
+`bandwidth`. Read the breaking entries below before upgrading.
 
-- BREAKING: Rename two admin pages for what they hold rather than what they do: **Utilities is now DB Utilities**, and **Traffic is now Bandwidth**. DB Utilities is display only — `?page=utilities` still resolves. Bandwidth is a rename all the way down: the route (`?page=bandwidth`), the controller, view and models (`torrents_bandwidth`, `stats_bandwidth_series`, `events_geo_bandwidth`), the sort key, the Geography metric, the top-list measures, the chart asset (`_bandwidth.js`) and its `BANDWIDTH` globals, and the `.ph-bandwidth-head` class. **The API changes with it**: `traffic` is now `bandwidth` in the JSON, XML and scrape responses — see [API.md](API.md). **Update any client reading that field.**
-- BREAKING: Rename the admin listing page-size settings from `_limit` to `_rows`: `admin_peers_rows`, `admin_torrents_rows`, `admin_tasks_rows`, `admin_bandwidth_rows`. They set how many rows a page shows, which "limit" reads as a cap on — badly so for bandwidth, where a `bandwidth_limit` would be taken for throttling. **Update these in your config.**
+- BREAKING: Every table is **InnoDB**. Concurrent announces take row locks on the peers they touch rather than queueing on the table, and an unclean shutdown replays from the redo log. In exchange an unqualified `COUNT(*)` scans an index rather than reading a stored counter, `OPTIMIZE TABLE` is a full rebuild needing free disk equal to the table, and the data takes roughly 2.1x the space — measured, along with everything else here, in the new [LIMITS.md](LIMITS.md). Fresh installs get InnoDB from `sql/*.sql`; **existing installs must convert each table by hand**, during a quiet window, since `db_create()` only creates missing tables:
+
+  ```sql
+  ALTER TABLE `phoenix_events`    ENGINE=InnoDB;
+  ALTER TABLE `phoenix_peers`     ENGINE=InnoDB;
+  ALTER TABLE `phoenix_tasks`     ENGINE=InnoDB;
+  ALTER TABLE `phoenix_task_runs` ENGINE=InnoDB;
+  ALTER TABLE `phoenix_torrents`  ENGINE=InnoDB;
+  ```
+
+- BREAKING: Rename the **Traffic page to Bandwidth**, all the way down: the route is `?page=bandwidth`, the setting is `admin_bandwidth_rows`, and the controller, view, models, sort key, Geography metric, chart asset and CSS follow. **The API changes with it** — `traffic` is now `bandwidth` in the JSON, XML and scrape responses, documented in [API.md](API.md). **Update any client reading that field, and any bookmark.**
+- BREAKING: Rename the admin listing page-size settings from `_limit` to `_rows`: `admin_peers_rows`, `admin_torrents_rows`, `admin_tasks_rows`, `admin_bandwidth_rows`. They set how many rows a page shows, which "limit" reads as a cap on — worst for bandwidth, where `admin_bandwidth_limit` would be taken for throttling. **Update these in your config.**
 - BREAKING: Split scheduled maintenance in two. **`bin/clean-and-optimize.php` is now `bin/prune-database.php`** and prunes expired rows then runs `ANALYZE` — both cheap, so it keeps the frequent schedule. The new **`bin/optimize-database.php`** runs `OPTIMIZE TABLE`, which on InnoDB is a full table rebuild and the only statement that reclaims space: after deleting 118,800 of 120,000 rows a table measured 25.7 MB, `ANALYZE` left it there, `OPTIMIZE` brought it to 0.2 MB. A table in steady state has nothing for it to reclaim, so daily is plenty. **Both crontab entries must be updated** — see [CONFIGURATION.md](CONFIGURATION.md#cron-automating-maintenance).
-- FIX: Drop `REPAIR TABLE` from maintenance. On MariaDB it reports `status: OK` on an InnoDB table and performs a full rebuild of its own — verified by watching `information_schema.TABLES.CREATE_TIME` — so pairing it with `OPTIMIZE` rebuilds every table twice for one table's worth of benefit.
-- FIX: Notice when maintenance fails. `CHECK`/`ANALYZE`/`OPTIMIZE` report problems as rows inside their result sets (`Msg_type: Error`) while `mysqli_errno()` stays `0` and `mysqli_multi_query()` returns true, so its return value cannot tell a failed run from a clean one. The shared `db_maintenance()` reads every result set and fails the run on any error row.
-- FEATURE: Add **DB Utilities → Analyze**, refreshing index statistics on demand — fast, and reclaims nothing, which is the distinction from Optimize.
-- CHANGES: Move `CHECK TABLE` off the schedule and into **DB Utilities → Check**. It is a full scan of every row and index, and InnoDB verifies page checksums as it reads, so corruption surfaces during normal use without paying for a scan every few minutes.
-- CHANGES: Every table is **InnoDB**. Concurrent announces take row locks on the peers they touch rather than queueing on the table, and an unclean shutdown replays from the redo log. The costs, all documented in the new [LIMITS.md](LIMITS.md): an unqualified `COUNT(*)` scans an index rather than reading a stored counter, and `OPTIMIZE TABLE` is a full rebuild needing free disk equal to the table (as is `REPAIR TABLE`, which is not the no-op MySQL's docs suggest). Fresh installs get InnoDB from `sql/*.sql`; **existing installs must convert each table by hand** with `ALTER TABLE <prefix><table> ENGINE=InnoDB;` — `db_create()` only creates missing tables, so it will not change an existing one. **DB schema modification required.**
-- CHANGES: Drop every 3.x/4.x migration from `sql/migrations/`. Each one's schema change is already in `sql/*.sql`, so `db_create()` produces the finished schema in one step and the migrations only re-applied no-ops on every run. `db_migrate()`, the **Upgrade Schema** action, and the `sql/migrations/` directory all remain for the first 5.x schema change; with no files present they report success and do nothing. Operators upgrading an older database should apply the migration files from a **v4.3 checkout**, which still carries them, before moving to 5.0 — see [MIGRATING.md](MIGRATING.md).
+- BREAKING: **A backup is now a dated directory**, holding `schema.sql` and one data file per table rather than a single dump. That is what makes a restore selective: import the schema and then only the tables you want back, instead of a file that recreates everything. `peers` gets no data file — the swarm is ephemeral and repopulates from announces — while `task_runs` is dumped so restoring the maintenance history stays your decision. Single-file backups from before this release still list, download and rotate. See [RECOVERY.md](RECOVERY.md#restore-the-database-from-a-backup).
+- BREAKING: Drop every 3.x/4.x migration from `sql/migrations/`. Each one's schema change is already in `sql/*.sql`, so `db_create()` produces the finished schema in one step. `db_migrate()`, **DB Utilities → Upgrade schema** and the directory all remain for the first future schema change. Operators upgrading an older database should apply the migration files from a **`v4.3beta10` checkout** before moving to this release.
+- BREAKING: Swap `geoip2/geoip2` for `maxmind-db/reader`, which is what the geo lookup actually needs. **Run `composer require maxmind-db/reader`** if you use geo enrichment, and install `ext-maxminddb` if your distribution packages it.
+- BREAKING: Rename **Utilities to DB Utilities** in the interface. `?page=utilities` still resolves.
+- BREAKING: Report the bare version in tracker stats, dropping the `$Id: … $,` wrapper — a Subversion keyword inherited from PeerTracker that git never expanded, plus a stray comma. **A client stripping the wrapper should stop.**
+
+- FEATURE: Add a **Clients page**, breaking the swarm down by client family and version. Versions group by major release so a family with a long tail reads as one bar per major, with the individual builds in the tooltip, and the all-time view reads the events ledger while the live view reads the swarm.
+- FEATURE: Add a **Task History page**, the log behind the dashboard's Maintenance block. `task_runs` had been written since 4.3 and never read. The column worth reading is "Triggered by": `cron` means the scheduled job fired, `auto` means an announce paid for the cleanup inline, `admin` means someone pressed a button — and a history of `auto` where cron was expected is the signal that the crontab entry is not running. Filterable by task and by trigger.
+- FEATURE: Show **CPU, memory, swap and disk** in the admin sidebar, with the detail on hover. Every metric keeps its row whether or not the host lets it be read, so swap that is switched off shows "Off" rather than vanishing.
+- FEATURE: **Flag overdue and never-run maintenance** on the dashboard and in the sidebar. Four tasks are monitored against thresholds — `alert_prune_after`, `alert_backup_after`, `alert_optimize_after`, any of which `0` disables — and a task that has never run is called out separately, because a stale task usually means cron stopped while a never-run one usually means the entry was never added.
+- FEATURE: Add **bandwidth to the Geography metrics**, alongside active peers and completed downloads.
+- FEATURE: Add **DB Utilities → Analyze** and **→ Check**, so each maintenance statement is reachable by hand. Analyze refreshes index statistics and reclaims nothing, which is the distinction from Optimize.
+- FEATURE: **Delete a backup** from the Backups page, and download each file in one individually.
+- FEATURE: Report the **optional extras** on Server Support — which geo reader is live and where its database is, whether Sentry and 2FA are configured, and whether gzip is available for backups — warning on a pure-PHP geo reader and on a panel with no second factor.
+- FEATURE: Ship the **Sentry hooks wired** rather than commented out. Set `report_errors` and `sentry_dsn` and errors arrive tagged with which part of the tracker failed.
+- FEATURE: Show the **filename and info hash** alongside every torrent name, on the dashboard cards, Torrents, Peers and Bandwidth.
+
+- IMPROVES: **Page, search and sort the Torrents, Peers and Bandwidth listings in SQL** rather than loading the table and filtering in the browser. Each pages against a filtered total, so a filtered list no longer trails off into empty pages, and the meta a row does not show as a column is still searchable.
+- IMPROVES: **Answer the closed-tracker permission check with one indexed query** instead of loading every registered info hash. At 200k torrents that read cost 48.8 MB and 57ms per announce to answer a question about one of them; it is now a clustered primary-key lookup that serves multi-hash scrapes too.
+- IMPROVES: **73x faster geo lookups.** The reader was being constructed per call — ~159 µs against a ~9 µs lookup — and the GeoIp2 model objects cost more than the lookup they wrapped. Reading the raw record through a cached reader, with `ext-maxminddb` installed, takes an announce's geo enrichment from 606 µs to 7.5 µs.
+- IMPROVES: Answer "does the ledger hold any geo-tagged completion?" with a seek rather than the full aggregation the Geography page used to run to decide whether to show a button.
+- IMPROVES: **Point the dashboard cards at the listings they summarise**, ranked as they rank, so the dashboard is a way in rather than a dead end.
+- IMPROVES: Name the maintenance action **Prune** rather than Clean. It drops stale peers, expired events and task history — and "clean" collides with InnoDB's own clean/dirty page vocabulary.
+- IMPROVES: Add **nine client codes** that two independent implementations agree on, and replace the code table with the BEP 20 registry. Clients group by major version in the tables and the charts.
+- IMPROVES: Make the charts **theme-aware**, on load and on toggle.
+- IMPROVES: Open the Bandwidth page on the live swarm, and drop the in-progress bucket from its series so the last point is not always a dip.
+
+- FIX: **Notice when maintenance fails.** `CHECK`/`ANALYZE`/`OPTIMIZE` report problems as rows inside their result sets (`Msg_type: Error`) while `mysqli_errno()` stays `0` and `mysqli_multi_query()` returns true, so the return value could not tell a failed run from a clean one. The shared `db_maintenance()` reads every result set and fails the run on any error row.
+- FIX: Drop `REPAIR TABLE` from maintenance. On MariaDB it reports `status: OK` on an InnoDB table and performs a full rebuild of its own — verified by watching `information_schema.TABLES.CREATE_TIME` — so pairing it with `OPTIMIZE` rebuilt every table twice for one table's worth of benefit. `CHECK TABLE` moves off the schedule to DB Utilities for the same reason: it is a full scan, and InnoDB verifies page checksums as it reads.
+- FIX: Stop the last row a filter leaves showing from doubling its border against the card's edge, on the admin tables and on the public index — which needed its own rule, since it groups each torrent in a `<tbody>` and the filter hides groups rather than rows.
+- FIX: Let devtools fetch the CDN source maps, which the `connect-src` policy was blocking.
+- FIX: Move lucide to jsDelivr and drop unpkg from the CSP, pinning every CDN script with an integrity hash ([#78](https://github.com/eustasy/phoenix/issues/78)).
+- FIX: Keep request state off the Settings page. `nav_counts`, `nav_alerts` and `server_stats` ride in `$settings` so the layout can render without doing I/O, and the page was listing them as though an operator had set them.
+- FIX: Mark the selected window on the Bandwidth page, which compared a string against keys PHP had already coerced to ints.
+- FIX: Measure the filename truncation threshold in UTF-8 explicitly, rather than following an internal encoding that differs between hosts.
+- FIX: Stop Chrome offering to save the TOTP code as a username.
+
+- DOCS: Add **[API.md](API.md)**, documenting every HTTP endpoint — announce, scrape, the public index, tracker stats and the management API — with parameters, JSON and XML shapes, errors, and a summary table.
+- DOCS: Add **[LIMITS.md](LIMITS.md)**, with measured ceilings: how many peers and torrents an install carries, what binds first, and what InnoDB costs.
+- DOCS: Split **[CONFIGURATION.md](CONFIGURATION.md)** and **[RECOVERY.md](RECOVERY.md)** out of the README — every operator setting, and admin lockout, 2FA removal and backup restore.
+- DOCS: Record the gotchas the code does not make obvious, in `.claude/docs/` — including that `sanitize_tracker_params()` reads `$_SERVER['QUERY_STRING']` rather than `$_GET`, and that `ConventionsTest` enforces one function per file and nothing else.
+
+- SUPPORTING: Lift test coverage, filling in the models and controllers the report showed at zero, the geo lookup's gate and corrupt-database path, and the dashboard's two ranking models.
 
 ## v4.3beta10 - 10/09/2026
 
