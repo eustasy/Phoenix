@@ -76,7 +76,7 @@ function view_admin_backups_html(array $settings, array $backups, string|false $
                 '</tr>';
         }
         $body .= '<div class="ph-card-table">'.
-            '<table><thead><tr><th>Backup</th><th class="table-col-numeric">Size</th><th>Created</th><th>Download</th><th class="tar">Actions</th></tr></thead>'.
+            '<table><thead><tr><th>Backup</th><th class="table-col-numeric">Size</th><th>Created</th><th class="table-col-numeric">Download</th><th class="tar">Actions</th></tr></thead>'.
             '<tbody>'.$rows.'</tbody></table></div>';
     }
 
