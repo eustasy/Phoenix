@@ -157,4 +157,23 @@ class ViewAdminSettingsHtmlTest extends TestCase
         $html = view_admin_settings_html($this->settings(), true, false, 'tok');
         $this->assertStringContainsString('href="?page=settings" class="is-active" aria-current="page"', $html);
     }
+
+    public function testRequestStateIsNotListedAsASetting(): void
+    {
+        // admin_panel_controller() passes its live figures through the same
+        // array — nav badge counts and the sidebar gauges. Neither is something
+        // the operator set, so neither belongs on a page listing what they did.
+        $settings = $this->settings();
+        $settings['nav_counts'] = ['torrents' => 5, 'peers' => 12];
+        $settings['server_stats'] = [
+            'cpu' => ['available' => true, 'percent' => 10, 'detail' => '', 'note' => ''],
+        ];
+
+        $html = view_admin_settings_html($settings, true, false, 'tok');
+
+        $this->assertStringNotContainsString('>nav_counts<', $html);
+        $this->assertStringNotContainsString('>server_stats<', $html);
+        // A real setting still shows.
+        $this->assertStringContainsString('>open_tracker<', $html);
+    }
 }

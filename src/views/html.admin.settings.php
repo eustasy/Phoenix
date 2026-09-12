@@ -28,8 +28,17 @@ function view_admin_settings_html(array $settings, bool $writable, string|false 
     }
 
     ////	Effective settings (read-only, secrets masked)
+    // admin_panel_controller() hands the layout its live figures through the
+    // same array — nav badge counts and the sidebar's server gauges. They are
+    // request state, not configuration, so they have no business on a page that
+    // lists what the operator has set.
+    $injected = ['nav_counts' => true, 'server_stats' => true];
+
     $rows = '';
     foreach ($settings as $key => $value) {
+        if (isset($injected[$key])) {
+            continue;
+        }
         if ($key === 'db_pass' || $key === 'admin_password' || $key === 'admin_totp_secret') {
             $display = empty($value) ? '<span class="dim">(not set)</span>' : '<span class="mono">********</span>';
         } elseif ($key === 'api_keys') {

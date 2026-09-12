@@ -40,11 +40,16 @@ class ServerStatsTest extends TestCase
 
     public function testAnUnavailableMetricCarriesNoPercentage(): void
     {
+        // Holds on any host: a metric that could not be read reports no figure
+        // and says why, and one that could reports a note only when it has
+        // something to say instead of a percentage (swap that is switched off).
         foreach (\server_stats() as $key => $stat) {
-            if (! $stat['available']) {
-                $this->assertNull($stat['percent'], $key);
-                $this->assertNotSame('', $stat['note'], $key);
+            if ($stat['available']) {
+                $this->assertTrue($stat['percent'] !== null || $stat['note'] !== '', $key);
+                continue;
             }
+            $this->assertNull($stat['percent'], $key);
+            $this->assertNotSame('', $stat['note'], $key);
         }
     }
 
