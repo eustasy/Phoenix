@@ -73,7 +73,7 @@ a whole backup.
 
 `peers` gets no data file. The swarm is ephemeral, so it is dumped
 structure-only inside `schema.sql` and repopulates itself from announces.
-`task_runs` *is* dumped, so whether to restore the maintenance history stays
+`task_runs` _is_ dumped, so whether to restore the maintenance history stays
 your decision at restore time rather than the backup's.
 
 Each file is a separate `mysqldump` run, so each is a standalone importable
