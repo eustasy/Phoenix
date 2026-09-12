@@ -22,7 +22,7 @@ function admin_setup_password_controller(array $settings, string $config_path): 
     require_once __DIR__.'/../functions/install.valid.totp.secret.php';
 
     $writable = is_writable(dirname($config_path));
-    $version = $settings['phoenix_version'];
+    $version = $settings['phoenix_version'].' '.$settings['phoenix_release'];
 
     ////	Optional TOTP candidate
     // Round-trip a valid submitted secret (so a failed attempt keeps the same QR)

@@ -19,6 +19,7 @@ class ViewAdminSettingsHtmlTest extends TestCase
     {
         return array_merge([
             'phoenix_version' => 'Phoenix Test v.0',
+            'phoenix_release' => 'Testing',
             'db_pass' => 'secretpass',
             'admin_password' => 'bcrypthashvalue',
             'api_keys' => ['*' => 'topsecretkey', 'alice' => 'alicekey'],

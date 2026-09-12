@@ -1,4 +1,4 @@
-# Phoenix v4.3beta10
+# Phoenix v5.0 Boulevard
 
 [![Normal (PHP)](https://github.com/eustasy/Phoenix/actions/workflows/php.yml/badge.svg)](https://github.com/eustasy/Phoenix/actions/workflows/php.yml)
 [![Test (PHP)](https://github.com/eustasy/Phoenix/actions/workflows/test-php.yml/badge.svg)](https://github.com/eustasy/Phoenix/actions/workflows/test-php.yml)
@@ -22,7 +22,7 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 
 ## Installation
 
-> **Upgrading from 3.x?** The document root, configuration, and cron paths have all moved in 4.0. Follow the [3.x → 4.0 Migration Guide](./MIGRATING.md) before deploying. See [CHANGELOG.md](./CHANGELOG.md) for the full list of changes.
+> **Upgrading from 3.2.x?** The document root, configuration and cron paths have all moved, and the database schema and storage engine have changed. Follow the [Migration Guide](./MIGRATING.md) before deploying. See [CHANGELOG.md](./CHANGELOG.md) for the full list of changes.
 
 ### Requirements
 
@@ -74,7 +74,7 @@ Every HTTP endpoint Phoenix exposes is documented in [API.md](./API.md) — the 
 - [CONFIGURATION.md](./CONFIGURATION.md) — every configuration option, with defaults.
 - [RECOVERY.md](./RECOVERY.md) — admin lockout, disabling 2FA, and restoring the database from a backup.
 - [API.md](./API.md) — every HTTP endpoint: announce, scrape, the public index, and the management API.
-- [MIGRATING.md](./MIGRATING.md) — upgrading from 3.x to 4.0.
+- [MIGRATING.md](./MIGRATING.md) — upgrading from 3.2.x to 5.0.
 - [LIMITS.md](./LIMITS.md) — how many peers and torrents an install carries, and what binds first.
 - [APACHE.md](./APACHE.md) — web server configuration for Apache 2.4.
 - [NGINX.md](./NGINX.md) — web server configuration for Nginx.

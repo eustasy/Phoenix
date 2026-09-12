@@ -19,7 +19,7 @@ declare(strict_types=1);
 // Returns: XML string.
 /**
  * @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, bandwidth: int}> $scrape
- * @param int $min_request_interval BEP 48 scrape-throttle hint (seconds); 0 omits it
+ * @param int $min_request_interval scrape-throttle hint (seconds); 0 omits it
  */
 function view_scrape_xml(array $scrape, int $min_request_interval = 0): string
 {
@@ -39,7 +39,7 @@ function view_scrape_xml(array $scrape, int $min_request_interval = 0): string
         '</torrent>';
     }
 
-    // BEP 48's min_request_interval (parity with the bencode `flags` dict).
+    // min_request_interval (parity with the bencode `flags` dict).
     if ($min_request_interval > 0) {
         $xml .= '<min_request_interval>'.$min_request_interval.'</min_request_interval>';
     }

@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 /**
  * @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, bandwidth: int}> $scrape
- * @param int $min_request_interval BEP 48 scrape-throttle hint (seconds); 0 omits it
+ * @param int $min_request_interval scrape-throttle hint (seconds); 0 omits it
  */
 function view_scrape_json(array $scrape, int $min_request_interval = 0): string
 {
@@ -28,7 +28,7 @@ function view_scrape_json(array $scrape, int $min_request_interval = 0): string
         ];
     }
 
-    // BEP 48's min_request_interval (parity with the bencode `flags` dict). A
+    // min_request_interval (parity with the bencode `flags` dict). A
     // 40-hex info_hash can never collide with this key.
     if ($min_request_interval > 0) {
         $json['min_request_interval'] = $min_request_interval;

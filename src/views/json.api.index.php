@@ -16,6 +16,7 @@ function view_api_index_json(array $settings): string
     return json_encode([
         'phoenix' => [
             'version' => $settings['phoenix_version'],
+            'release' => $settings['phoenix_release'],
         ],
     ]) ?: '';
 }

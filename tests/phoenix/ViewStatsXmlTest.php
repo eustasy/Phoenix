@@ -20,7 +20,7 @@ class ViewStatsXmlTest extends TestCase
             'downloads' => 100,
             'bandwidth' => 5000000,
         ];
-        $settings = ['phoenix_version' => '1.0.0'];
+        $settings = ['phoenix_version' => 'v1.0', 'phoenix_release' => 'Testing'];
 
         $output = view_stats_xml($stats, $settings);
 
@@ -28,7 +28,7 @@ class ViewStatsXmlTest extends TestCase
         // The bare version, as /api reports it — the '$Id: … $' wrapper was a
         // Subversion keyword this project has not been able to expand since it
         // left SVN.
-        $this->assertStringContainsString('<tracker version="1.0.0">', $output);
+        $this->assertStringContainsString('<tracker version="v1.0" release="Testing">', $output);
         $this->assertStringNotContainsString('$Id', $output);
         $this->assertStringContainsString('<peers>15</peers>', $output);
         $this->assertStringContainsString('<seeders>10</seeders>', $output);

@@ -101,6 +101,6 @@ Repo-level docs: `README.md` (install), `CONFIGURATION.md` (every operator
 setting — the user-facing counterpart to [configuration.md](docs/configuration.md),
 which covers the settings *model*), `RECOVERY.md` (admin lockout, 2FA removal, backup restore),
 `API.md` (every HTTP endpoint, request and
-response), `CONTRIBUTING.md` (dev env, Docker), `MIGRATING.md` (3.x→4.0),
+response), `CONTRIBUTING.md` (dev env, Docker), `MIGRATING.md` (3.2.x→5.0),
 `LIMITS.md` (measured ceilings and what binds first), `APACHE.md`/`NGINX.md`
 (server config), `BEPs.md` (spec coverage), `CHANGELOG.md`.

@@ -145,7 +145,7 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
 			'.view_mark_html().'
 			<div>
 				<div class="ph-wordmark">Phoenix</div>
-				<div class="ph-ver">'.htmlspecialchars($settings['phoenix_version'], ENT_QUOTES, 'UTF-8').'</div>
+				<div class="ph-ver">'.htmlspecialchars($settings['phoenix_version'].' '.$settings['phoenix_release'], ENT_QUOTES, 'UTF-8').'</div>
 			</div>
 		</a>
 

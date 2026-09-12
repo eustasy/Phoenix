@@ -19,5 +19,6 @@ function view_api_index_xml(array $settings): string
     return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
         '<phoenix>'.
         '<version>'.xml_escape($settings['phoenix_version']).'</version>'.
+        '<release>'.xml_escape($settings['phoenix_release']).'</release>'.
         '</phoenix>';
 }

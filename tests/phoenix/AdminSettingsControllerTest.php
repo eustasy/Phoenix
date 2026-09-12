@@ -49,6 +49,7 @@ class AdminSettingsControllerTest extends TestCase
     {
         return [
             'phoenix_version' => 'Phoenix Test v.0',
+            'phoenix_release' => 'Testing',
             'admin_password' => 'hash', // non-empty → CSRF enforced
             'db_pass' => 'x',
             'api_keys' => [],

@@ -236,7 +236,7 @@ With no `info_hash` at all, a **full scrape** returns every torrent on the
 tracker — which is what `full_scrape` controls. It ignores the allowed-torrents
 filter, so turn it off when the list should be private.
 
-`min_request_interval` (BEP 48) appears alongside the torrents when
+`min_request_interval` appears alongside the torrents when
 `scrape_min_interval` is non-zero. A 40-hex info_hash can never collide with
 that key. `bandwidth` is `size × downloads` — an estimate that counts no partial
 or repeat downloads.
@@ -244,6 +244,11 @@ or repeat downloads.
 The bencode form uses BEP 48's standard `files` dict with `complete`,
 `downloaded` and `incomplete`; the JSON and XML forms use the fuller shape
 above.
+
+The bencode response carries no version. BEP 48 describes it as "a bencoded
+dictionary containing one key-value pair: the key `files`", so the tracker
+version and release are reported on the JSON and XML forms and on
+[`/api`](#get-api) instead.
 
 ## Public read endpoints
 
@@ -286,7 +291,8 @@ Unauthenticated.
 ```json
 {
   "tracker": {
-    "version": "v4.3beta10",
+    "version": "v5.0",
+    "release": "Boulevard",
     "peers": 346,
     "seeders": 343,
     "leechers": 3,
@@ -298,10 +304,11 @@ Unauthenticated.
 ```
 
 The XML form puts the version on the root element:
-`<tracker version="v4.3beta10">`.
+`<tracker version="v5.0" release="Boulevard">`.
 
-`version` is the bare version string, matching [`/api`](#get-api) — no wrapper
-or delimiter around it.
+`version` is the version alone (`v5.0`) and `release` its codename
+(`Boulevard`), kept separate so a client comparing versions never has to parse a
+codename out of a display string. The HTML surfaces join them for display.
 
 ## Management API
 
@@ -352,10 +359,10 @@ check the API is present without a key.
 
 ```console
 $ curl https://tracker.example.com/api/
-{"phoenix":{"version":"v4.3beta10"}}
+{"phoenix":{"version":"v5.0","release":"Boulevard"}}
 ```
 
-XML: `<phoenix><version>v4.3beta10</version></phoenix>`.
+XML: `<phoenix><version>v5.0</version><release>Boulevard</release></phoenix>`.
 
 ### GET /api/torrents
 

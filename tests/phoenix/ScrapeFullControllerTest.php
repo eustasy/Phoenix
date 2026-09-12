@@ -107,7 +107,7 @@ class ScrapeFullControllerTest extends PhoenixTestCase
     public function testBencodeCarriesScrapeMinIntervalFromSettings(): void
     {
         // The controller threads $settings['scrape_min_interval'] into the
-        // BEP 48 `flags` dict; a non-zero value is advertised.
+        // The unofficial `flags` dict; a non-zero value is advertised.
         $_GET = [];
         $settings = self::$settings;
         $settings['scrape_min_interval'] = 900;

@@ -23,7 +23,7 @@ declare(strict_types=1);
 // Returns: bencoded scrape response string.
 /**
  * @param array<string, array{info_hash: string, seeders: int, leechers: int, peers: int, size: int, downloads: int, bandwidth: int}> $scrape
- * @param int $min_request_interval BEP 48 scrape-throttle hint (seconds); 0 omits it
+ * @param int $min_request_interval scrape-throttle hint (seconds); 0 omits it
  */
 function view_scrape_bencode(array $scrape, int $min_request_interval = 0): string
 {
@@ -39,8 +39,12 @@ function view_scrape_bencode(array $scrape, int $min_request_interval = 0): stri
     }
 
     $response = ['files' => (object) $files];
-    // BEP 48: advertise the minimum seconds between scrapes in a `flags` dict so
-    // clients can throttle. Omitted when 0; sorts after `files` automatically.
+    // Advertise the minimum seconds between scrapes so clients can throttle.
+    // `flags.min_request_interval` is NOT in BEP 48 — that spec describes the
+    // response as "a bencoded dictionary containing one key-value pair: the key
+    // files" and never mentions flags. It is a widely-implemented unofficial
+    // extension, which is why Phoenix sends it and why nothing else is bolted
+    // on beside it. Omitted when 0; sorts after `files` automatically.
     if ($min_request_interval > 0) {
         $response['flags'] = ['min_request_interval' => $min_request_interval];
     }

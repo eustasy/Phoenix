@@ -80,6 +80,7 @@ class AdminLoginControllerTest extends PhoenixTestCase
         $result = \admin_login_controller([
             'admin_password' => '',
             'phoenix_version' => 'Phoenix Test v.0',
+            'phoenix_release' => 'Testing',
         ]);
         $this->assertIsString($result);
         $this->assertStringContainsString('name="process" value="setup_password"', $result);
@@ -132,6 +133,7 @@ class AdminLoginControllerTest extends PhoenixTestCase
         $result = @\admin_login_controller([
             'admin_password' => password_hash('secret', PASSWORD_DEFAULT),
             'phoenix_version' => 'Phoenix Test v.0',
+            'phoenix_release' => 'Testing',
         ]);
         $this->assertIsString($result);
         $this->assertStringContainsString('<form method="POST"', $result);
@@ -147,6 +149,7 @@ class AdminLoginControllerTest extends PhoenixTestCase
         $result = @\admin_login_controller([
             'admin_password' => password_hash('secret', PASSWORD_DEFAULT),
             'phoenix_version' => 'Phoenix Test v.0',
+            'phoenix_release' => 'Testing',
             // delay 0 exercises the failed-login throttle path without sleeping.
             'admin_login_delay' => 0,
             'admin_login_delay_max' => 0,
@@ -169,6 +172,7 @@ class AdminLoginControllerTest extends PhoenixTestCase
             'admin_login_delay' => 2,
             'admin_login_delay_max' => 8,
             'phoenix_version' => 'Phoenix Test v.0',
+            'phoenix_release' => 'Testing',
         ];
 
         return '<?php '.

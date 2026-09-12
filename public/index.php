@@ -51,5 +51,5 @@ if (isset($_GET['xml'])) {
     // public-HTML set (CSP, Referrer-Policy, SAMEORIGIN frame guard).
     http_security_headers('public_html');
     header('Content-Type: text/html; charset=UTF-8');
-    echo view_index_html($index, $show_meta, $settings['phoenix_version']);
+    echo view_index_html($index, $show_meta, $settings['phoenix_version'].' '.$settings['phoenix_release']);
 }

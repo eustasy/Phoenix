@@ -46,7 +46,8 @@ Full list with comments is in `config/phoenix.default.php`. Highlights:
   browser. Turn it off alongside `public_index` when the list is meant to be
   private — on its own it ignores the allowed-torrents filter, so it does not
   respect a closed tracker.
-- `scrape_min_interval` — advertised as BEP 48 `min_request_interval`.
+- `scrape_min_interval` — advertised as `flags.min_request_interval`, an
+  unofficial scrape extension rather than anything in BEP 48.
 - `random_peers` / `random_peers_threshold` — peer-selection randomization.
 
 **Cleanup**

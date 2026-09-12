@@ -18,6 +18,7 @@ class ViewAdminApikeysHtmlTest extends TestCase
     {
         return [
             'phoenix_version' => 'Phoenix Test v.0',
+            'phoenix_release' => 'Testing',
             'admin_password' => 'hash',
             'api_keys' => $api_keys,
             'nav_counts' => [],

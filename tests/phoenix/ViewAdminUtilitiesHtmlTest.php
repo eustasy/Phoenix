@@ -19,6 +19,7 @@ class ViewAdminUtilitiesHtmlTest extends TestCase
     {
         return array_merge([
             'phoenix_version' => 'Phoenix Test v.0',
+            'phoenix_release' => 'Testing',
             'admin_password' => '',
             'db_reset' => false,
         ], $overrides);

@@ -675,12 +675,24 @@ class EndpointSmokeTest extends SmokeTestCase
         $decoded = json_decode($r['body'], true);
         $this->assertIsArray($decoded);
         $this->assertArrayHasKey('phoenix', $decoded);
-        $this->assertStringContainsString('v4.', (string) $decoded['phoenix']['version']);
+        // Read from the bootstrap rather than hardcoded, so a release bump does
+        // not need an edit here. The smoke suite talks to the server over HTTP
+        // and never loads phoenix.php, so the values are parsed off it — which
+        // also proves the endpoint reports what the source actually sets.
+        $bootstrap = (string) file_get_contents(dirname(__DIR__, 2).'/src/phoenix.php');
+        preg_match("/phoenix_version'\] = '([^']+)'/", $bootstrap, $m);
+        preg_match("/phoenix_release'\] = '([^']+)'/", $bootstrap, $n);
+        $version = $m[1] ?? '';
+        $release = $n[1] ?? '';
+        $this->assertNotSame('', $version, 'phoenix_version not found in src/phoenix.php');
+        $this->assertNotSame('', $release, 'phoenix_release not found in src/phoenix.php');
+        $this->assertSame($version, (string) $decoded['phoenix']['version']);
+        $this->assertSame($release, (string) $decoded['phoenix']['release']);
 
         $xml = $this->get('/api/index.php', ['xml' => '1']);
         $this->assertSame(200, $xml['status']);
-        $this->assertStringContainsString('<version>', $xml['body']);
-        $this->assertStringContainsString('v4.', $xml['body']);
+        $this->assertStringContainsString('<version>'.$version.'</version>', $xml['body']);
+        $this->assertStringContainsString('<release>'.$release.'</release>', $xml['body']);
     }
 
     #[Depends('testInstallSucceeds')]

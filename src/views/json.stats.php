@@ -20,6 +20,7 @@ function view_stats_json(array $stats, array $settings): string
     return json_encode([
         'tracker' => [
             'version' => $settings['phoenix_version'],
+            'release' => $settings['phoenix_release'],
             'peers' => $stats['peers'],
             'seeders' => $stats['seeders'],
             'leechers' => $stats['leechers'],

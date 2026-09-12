@@ -1,205 +1,228 @@
-# Migrating from Phoenix 3.x to 4.3
+# Migrating from Phoenix 3.2.x to 5.0
 
-Phoenix 4.0 was a ground-up refactor of the 3.x codebase, and 4.1–4.3 built on
-it. The tracker protocol behaviour is unchanged — announce, scrape, and stats
-respond as before — but two things every operator upgrading from 3.x must handle
-did change: **where files live on disk** (moved in 4.0), so you re-point the
-**web server document root**, the **configuration file**, and the **cron jobs**;
-and the **database schema** (4.1 and 4.3 added tables and columns), so you apply
-a few idempotent migrations.
+Phoenix 5.0 is a ground-up rebuild of the 3.x codebase. The tracker protocol is
+unchanged — announce and scrape answer as they did — but four things every
+operator must handle did change:
 
-This guide covers a 3.x → 4.3 upgrade. For per-release detail, see
+1. **Where files live.** Only `public/` is web-served now.
+2. **Where configuration lives**, and what some settings are called.
+3. **Where the cron jobs live**, and there are three of them.
+4. **The database** — new columns, new tables, and a new storage engine.
+
+This guide is written for **3.2.x** — the last stable line — and the SQL in
+step 2 assumes that schema. On 3.1 or earlier, upgrade to 3.2.2 first; its own
+schema changes are not repeated here.
+
+Budget an hour, and take a backup first. For per-release detail see
 [CHANGELOG.md](CHANGELOG.md).
-
-> **Running v4.3beta11 or later?** `sql/migrations/` ships empty
-> — every 3.x/4.x migration is folded into `sql/*.sql`, so `db_create()` builds
-> the finished schema in one step and there is nothing left for **Upgrade
-> Schema** to apply. To upgrade an existing 3.x or 4.x database, first run this
-> guide against a **`v4.3beta10` checkout**, which still carries the migration files:
->
-> ```bash
-> git checkout v4.3beta10    # or download that release
-> ```
->
-> Then move to the current release and apply the engine change below, which requires every table
-> to be **InnoDB**; `db_create()` only creates missing tables, so an existing
-> database keeps whatever engine it has. Convert each table once:
->
-> ```sql
-> ALTER TABLE `phoenix_events`    ENGINE=InnoDB;
-> ALTER TABLE `phoenix_peers`     ENGINE=InnoDB;
-> ALTER TABLE `phoenix_tasks`     ENGINE=InnoDB;
-> ALTER TABLE `phoenix_task_runs` ENGINE=InnoDB;
-> ALTER TABLE `phoenix_torrents`  ENGINE=InnoDB;
-> ```
->
-> Each rebuilds the table and holds it locked for the duration, so run them
-> during a quiet window. Phoenix behaves identically on either engine; InnoDB
-> takes row locks instead of table locks, survives an unclean shutdown without a
-> `REPAIR TABLE`, and uses roughly 2–3× the disk.
 
 ## At a glance
 
-| What | 3.x | 4.3 |
+| What | 3.2.x | 5.0 |
 | --- | --- | --- |
 | Web root | repo root (`announce.php`, `scrape.php`, … at top level) | `public/` only |
 | Bootstrap | `_phoenix.php` | `src/phoenix.php` |
 | Default config | `_settings/phoenix.default.php` | `config/phoenix.default.php` |
 | Custom config | `_settings/phoenix.custom.php` | `config/phoenix.custom.php` |
+| Cleanup cron | `_cron/hourly/clean-and-optimize.php` | `bin/prune-database.php` |
+| Rebuild cron | — | `bin/optimize-database.php` |
 | Backup cron | `_cron/hourly/backup-database.php` | `bin/backup-database.php` |
-| Cleanup cron | `_cron/hourly/prune-database.php` | `bin/prune-database.php` |
 | Backups dir | `_backups` | `backups` |
+| Storage engine | MyISAM | InnoDB |
 | Minimum PHP | 7.1 | 8.2 |
 
-## 1. Database — apply the migrations
+## 0. Back up first
 
-**4.0 itself shipped the same schema as 3.2** — its only schema change was
-organisational: the `CREATE TABLE` statements that used to be built in PHP now
-live in standalone files under `sql/` (`sql/peers.sql`, `sql/torrents.sql`,
-`sql/tasks.sql`, plus the newer `sql/events.sql` and `sql/task.runs.sql`),
-loaded automatically by `db_create()`.
+Every step below is reversible except the database ones. Take a dump you can
+return to:
 
-But **4.1 and 4.3 added to the schema**, so a 3.x → 4.3 upgrade does need DB
-changes:
+```bash
+mysqldump --single-transaction <database> | gzip > phoenix-pre-5.0.sql.gz
+```
 
-- **4.1** — a new `events` stat-tracking table, and `user` / `filename` /
-  `files` / `trackers` / `webseeds` columns on `torrents`.
-- **4.3** — a `source` column on `tasks` plus a new `task_runs` history table,
-  and an index on `torrents.listed`.
+## 1. Check the runtime
 
-Apply them with the admin panel's **Upgrade Schema** action, or import a handful
-of files by hand — see step 7. Every migration is idempotent, so re-running is
-safe.
-
-> **Upgrading from 3.1 or earlier?** The **3.2 migration** comes first — it adds
-> the `size`/`listed` torrent columns and the `uploaded`/`downloaded` peer
-> columns. It is the first file listed in step 7; the 4.1 and 4.3 changes follow.
-
-## 2. Minimum PHP is now 8.2
-
-3.x ran on PHP 7.1+. 4.0 requires **PHP >= 8.2** with the `mysqli` and `xml`
-extensions (the bundled `date`, `filter`, `json`, `pcre`, and `session`
-extensions are also used). Confirm your runtime before deploying:
+5.0 requires **PHP >= 8.2** with the `mysqli` and `xml` extensions:
 
 ```bash
 php -v
 php -m | grep -E 'mysqli|xml'
 ```
 
-## 3. Move the web server document root to `public/`
+## 2. Update the database
 
-This is the most important change. In 3.x the repository root was the web root,
-so `announce.php`, `scrape.php`, `admin.php`, `index.php`, and `magnet.php` were
-served directly. In 4.0 **only `public/` is meant to be web-served** — `src/`,
-`bin/`, `config/`, and `tests/` sit one level above the document root so that
-configuration (including your database credentials) can never be requested over
-HTTP.
+Everything the schema needs, in one block. It assumes the default `phoenix_`
+prefix — if yours differs, change the table names before running it.
 
-Re-point your server's document root at the `public/` directory:
-
-- Apache: see [APACHE.md](APACHE.md)
-- Nginx: see [NGINX.md](NGINX.md)
-
-Both files also cover stripping the `.php` extension from URLs and rate-limiting
-the admin endpoint.
-
-If you ran 3.x with the endpoints at the root of a vhost, the public URLs your
-clients announce/scrape against (`/announce`, `/scrape`) do **not** change —
-only the filesystem path the server maps that root to does.
-
-## 4. Move your configuration to `config/`
-
-Your settings file moves from `_settings/phoenix.custom.php` to
-`config/phoenix.custom.php`. The template is now `config/phoenix.default.php`
-(do not edit the template — your overrides go in `phoenix.custom.php`).
-
-Copy your existing `$settings[...] = ...;` overrides across. They are
-forward-compatible: code reads `$settings['key']` directly with no fallback
-layer, and every key still exists in the new default file. While you are there,
-review the new tunables in `config/phoenix.default.php` — notably
-`reject_private_ips` (rejects RFC1918/loopback source addresses by default) and
-`clean_with_cron` (see step 5). Newer 4.x additions worth a look:
-`stats_enabled` (opt-in event/Geography stat-tracking), `announce_external_ip`
-(return the client's own IP per BEP 24), and `task_retention` (how long to keep
-maintenance-task run history; `0` = forever).
-
-## 5. Update your cron jobs
-
-The maintenance scripts moved out of `_cron/hourly/` and into `bin/`. Update
-your crontab to the new paths (adjust the leading path to wherever you deployed
-Phoenix, and confirm each command runs by hand first):
-
-```cron
-15 * * * * php ~/phoenix/bin/prune-database.php
-30 * * * * php ~/phoenix/bin/backup-database.php
-```
-
-- `bin/prune-database.php` replaces `_cron/hourly/prune-database.php`.
-  Set `$settings['clean_with_cron'] = true;` in your config to run cleanup from
-  cron and disable the occasional cleanup-on-announce.
-- `bin/backup-database.php` replaces `_cron/hourly/backup-database.php`. The
-  default backup directory is `backups` (was `_backups`); override it with
-  `$settings['backup_dir']`.
-
-## 6. After setup
-
-If you re-run the installer, `public/admin.php` is web-reachable while you do.
-Once setup is complete, move it back out of the document root so it stops being
-served:
-
-```bash
-mv public/admin.php src/admin.php
-```
-
-Move it back into `public/` temporarily if you ever need to re-run setup.
-
-## 7. Schema upgrades (4.1 through 4.3)
-
-Schema changes ship two ways: **new tables** as standalone files under `sql/`
-(created by `db_create()`), and **changes to existing tables** as idempotent,
-date-ordered files under `sql/migrations/` (each uses `ADD COLUMN IF NOT EXISTS`
-or `CREATE TABLE IF NOT EXISTS`, so re-running is safe).
-
-**Via the admin panel (recommended):** navigate to `public/admin.php`, log in,
-and click **Upgrade Schema**. It creates any new tables and runs every migration
-in filename order — covering all of 4.1 and 4.3 in one click — and reports
-success or failure. (In later releases this action still runs, but finds nothing to apply:
-see the note at the top of this guide.)
-
-**Manually:** import the new-table file and then the migrations in order, from a
-**`v4.3beta10` checkout** — later releases no longer ship `sql/migrations/`. If your install uses a
-prefix other than the default `phoenix_`, edit the table names in each file
-before importing (or just use the panel, which rewrites the prefix for you):
-
-```bash
-# 4.1's events table has no migration — create it from its schema file.
-mysql <database> < sql/events.sql
-
-# Migrations, in order. These add the torrent meta columns (4.1) and the task
-# `source` column + `task_runs` history table (4.3).
-mysql <database> < sql/migrations/2026-05-09_3.2-haggard.sql
-mysql <database> < sql/migrations/2026-06-12_4.0-torrent-meta.sql
-mysql <database> < sql/migrations/2026-06-18_4.3-task-history.sql
-```
-
-The 4.3 **`torrents.listed` index** is a performance-only addition: it ships in
-the base schema (so new installs get it) but has no migration. On an existing
-install you can add it once — optional, but it speeds the public index:
+Run it once. These are plain `ALTER`/`CREATE` statements that work on both MySQL
+and MariaDB, and running them a second time errors rather than doing damage —
+"Duplicate column name" or "Table already exists" means that part is already
+applied.
 
 ```sql
-ALTER TABLE `phoenix_torrents` ADD INDEX `listed` (`listed`);
+-- Torrent ownership and meta: who added a torrent via the API, and the
+-- filename, file list, trackers and webseeds shown on the index and in magnets.
+-- The `listed` index keeps the public index off a full table scan.
+ALTER TABLE `phoenix_torrents`
+  ADD COLUMN `user` varchar(255) NULL FIRST,
+  ADD COLUMN `filename` varchar(255) NULL,
+  ADD COLUMN `files` longtext NULL,
+  ADD COLUMN `trackers` longtext NULL,
+  ADD COLUMN `webseeds` longtext NULL,
+  ADD INDEX `listed` (`listed`);
+
+-- `left` becomes SIGNED, so the -1 "bytes remaining unknown" sentinel a client
+-- sets by omitting `left` can be stored. Unsigned, it threw out-of-range under
+-- a strict-mode database and returned a 500 on the announce.
+ALTER TABLE `phoenix_peers`
+  MODIFY `left` bigint(20) NOT NULL DEFAULT '0';
+
+-- Maintenance runs record who triggered them: cron, an announce, or the panel.
+ALTER TABLE `phoenix_tasks`
+  ADD COLUMN `source` varchar(8) NOT NULL DEFAULT '' AFTER `value`;
+
+-- The full history behind that, shown on the Task History page.
+CREATE TABLE `phoenix_task_runs` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(16) NOT NULL,
+  `value` int(10) NOT NULL,
+  `source` varchar(8) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- The stat-tracking ledger. Created whether or not you enable stats, so
+-- `stats_enabled` is a config flip rather than a schema change later. It stores
+-- a coarse client label and country code, never an address. The `geo` index
+-- covers the Geography aggregations, which would otherwise scan the whole
+-- ledger every time the page loads.
+CREATE TABLE `phoenix_events` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `time` int(10) unsigned NOT NULL,
+  `info_hash` varchar(40) NOT NULL,
+  `event` varchar(16) NOT NULL,
+  `client` varchar(64) NOT NULL DEFAULT '',
+  `user` varchar(255) NOT NULL DEFAULT '',
+  `country` char(2) NOT NULL DEFAULT '',
+  `continent` char(2) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  KEY `time` (`time`),
+  KEY `info_hash` (`info_hash`),
+  KEY `geo` (`event`, `country`, `info_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 ```
 
-New installs get the complete schema directly from `sql/*.sql` via
-`db_create()` and need no migrations.
+## 3. Convert the tables to InnoDB
+
+5.0 assumes InnoDB. `db_create()` only creates missing tables, so an existing
+database keeps whatever engine it has — nothing in the app will convert it for
+you, and a tracker left on MyISAM works but serialises its writes on a table
+lock.
+
+Each `ALTER` rebuilds its table and holds it locked for the duration, so run
+them during a quiet window:
+
+```sql
+ALTER TABLE `phoenix_events`    ENGINE=InnoDB;
+ALTER TABLE `phoenix_peers`     ENGINE=InnoDB;
+ALTER TABLE `phoenix_tasks`     ENGINE=InnoDB;
+ALTER TABLE `phoenix_task_runs` ENGINE=InnoDB;
+ALTER TABLE `phoenix_torrents`  ENGINE=InnoDB;
+```
+
+Confirm afterwards — all five should read `InnoDB`:
+
+```sql
+SELECT TABLE_NAME, ENGINE FROM information_schema.TABLES
+WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME LIKE 'phoenix\_%';
+```
+
+[LIMITS.md](LIMITS.md) covers what InnoDB costs and what it buys.
+
+## 4. Re-point the document root
+
+This is the change most likely to take a site down if missed. In 3.2.x the
+repository root was the web root and every endpoint sat at the top level. In
+5.0 **only `public/` is meant to be served** — `src/`, `bin/`, `config/`,
+`sql/` and `tests/` must all be unreachable over HTTP.
+
+Point your vhost at `<install>/public` and restart. Example configurations,
+including `.php` extension stripping and `Authorization` passthrough, are in
+[APACHE.md](APACHE.md) and [NGINX.md](NGINX.md).
+
+Your public URLs are unchanged if you were serving from a vhost root:
+`/announce`, `/scrape`, `/index.php` all still resolve.
+
+## 5. Move the configuration
+
+Copy `_settings/phoenix.custom.php` to `config/phoenix.custom.php`. The format
+is unchanged, but **several settings were renamed**. An unrecognised key is
+ignored silently and the new default applies, so check these:
+
+| 3.2.x | 5.0 |
+| --- | --- |
+| `external_ip` | `allow_client_ip` |
+| `announce_interval` | `announce_rec_interval` |
+| `min_interval` | `announce_min_interval` |
+| `random_limit` | `random_peers_threshold` |
+| `clean_with_requests` | `clean_request_percent` |
+| `allow_any_proxy` | `trust_any_forwarded` |
+| `backup_rotate` | `backup_retention` |
+
+`config/phoenix.default.php` lists every setting with its default and a comment;
+[CONFIGURATION.md](CONFIGURATION.md) explains the ones worth thinking about.
+
+**If you sit behind a proxy or CDN, read the forwarded-header section.** 3.2.x's
+`honor_xff` is gone, and the replacement trusts **nothing** by default — you
+must name the header your proxy sets in `forwarded_headers` and list the
+proxy's ranges in `trusted_proxies`, or every peer will appear to announce from
+the proxy's address.
+
+## 6. Update the cron jobs
+
+Three entries now, on deliberately different schedules:
+
+```cron
+*/15 * * * * php ~/phoenix/bin/prune-database.php
+15  3 * * * php ~/phoenix/bin/optimize-database.php
+30  3 * * * php ~/phoenix/bin/backup-database.php
+```
+
+`prune-database.php` exits immediately unless `clean_with_cron` is `true`, so
+set that too — otherwise cleanup falls back to running inline on a fraction of
+announces.
+
+## 7. Set an admin password
+
+The panel at `public/admin.php` now requires one. On first load it presents a
+one-time set-password gate; the same page can enrol a TOTP second factor.
+
+> The gate is unauthenticated by nature — anyone who reaches it while it is
+> showing can claim the panel. Complete it promptly, and ideally before the site
+> is publicly reachable.
+
+If you would rather run the panel with no password at all — because a reverse
+proxy or an IP allowlist already protects it — set
+`$settings['admin_auth_optional'] = true;` instead.
+
+## 8. Check it works
+
+- `/announce` answers a bencoded response to a well-formed announce.
+- `/scrape` answers, and reports `version` and `release`.
+- `/index.php` renders if `public_index` is on.
+- `public/admin.php` logs in, and the Dashboard shows your torrent and peer counts.
+- **Server Support** reports no faults.
+- **DB Utilities → Check** reports no table errors.
 
 ## Checklist
 
+- [ ] Pre-upgrade database dump taken.
 - [ ] Runtime is PHP >= 8.2 with `mysqli` and `xml`.
-- [ ] Database upgraded — **Upgrade Schema** in the panel, or `sql/events.sql` plus the `sql/migrations/*.sql` files imported in order (3.1 or earlier: the 3.2 migration is the first of those). Run this from a `v4.3beta10` checkout; later releases ship no migrations.
-- [ ] All five tables converted to InnoDB — see the note at the top.
-- [ ] (Optional) `torrents.listed` index added on existing installs for faster public-index reads.
-- [ ] Document root re-pointed at `public/`; `src/`, `bin/`, `config/`, `tests/` are above the web root and not reachable over HTTP.
-- [ ] Config copied to `config/phoenix.custom.php`.
-- [ ] Cron jobs updated to `bin/prune-database.php` and `bin/backup-database.php`.
-- [ ] `public/admin.php` moved back to `src/` after setup.
+- [ ] Schema updated with the SQL block in step 2.
+- [ ] All five tables converted to InnoDB.
+- [ ] Document root re-pointed at `public/`; `src/`, `bin/`, `config/`, `sql/`, `tests/` unreachable over HTTP.
+- [ ] Config copied to `config/phoenix.custom.php`, renamed settings updated.
+- [ ] `forwarded_headers` and `trusted_proxies` set, if behind a proxy.
+- [ ] Cron jobs updated to the three `bin/` scripts, and `clean_with_cron` enabled.
+- [ ] Admin password set, and 2FA enrolled.
+- [ ] Announce, scrape, index and admin panel all verified.

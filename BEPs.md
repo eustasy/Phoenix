@@ -289,6 +289,12 @@ that entry).
 `view_scrape_bencode()` casts the possibly-empty `files` value to an object so it
 encodes as a bencode dict (`de`), not a list — matching the BEP.
 
+**`flags.min_request_interval` is not part of BEP 48.** That spec describes the
+response as "a bencoded dictionary containing one key-value pair: the key
+`files`" and never mentions `flags`; the throttle hint is one of the unofficial
+scrape extensions. Phoenix sends it because clients implement it — and sends
+nothing else beside it, for the same reason.
+
 ### BEP 52 — The BitTorrent Protocol Specification v2
 
 **Verdict: ➖ N/A (transparently compatible).**
@@ -331,7 +337,7 @@ consumer; this tracks both sides so the gaps are deliberate, not forgotten.
 | Consume client `ip=` | 3 | gated by `allow_client_ip` |
 | `external ip` (returned) | 24 | gated by `announce_external_ip` |
 | `retry in` on errors | 31 | `"never"` or seconds |
-| scrape `min_request_interval` | 48 | `scrape_min_interval` setting (1800s default) |
+| scrape `min_request_interval` | — | `scrape_min_interval` setting (1800s default). An unofficial extension, not in BEP 48. |
 
 ### Not implemented (optional)
 

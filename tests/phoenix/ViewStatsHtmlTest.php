@@ -20,7 +20,7 @@ class ViewStatsHtmlTest extends TestCase
             'downloads' => 100,
             'bandwidth' => 5000000,
         ];
-        $settings = ['phoenix_version' => '1.0.0'];
+        $settings = ['phoenix_version' => 'v1.0', 'phoenix_release' => 'Testing'];
 
         $output = view_stats_html($stats, $settings);
 
@@ -36,7 +36,7 @@ class ViewStatsHtmlTest extends TestCase
         $this->assertStringContainsString('4.8 MB', $output);
         $this->assertStringContainsString('5,000,000 bytes', $output);
         // Version flows into the footer.
-        $this->assertStringContainsString('1.0.0', $output);
+        $this->assertStringContainsString('v1.0 Testing', $output);
     }
 
     public function testRenderHtmlWithZeroStats()
@@ -51,7 +51,7 @@ class ViewStatsHtmlTest extends TestCase
             'downloads' => 0,
             'bandwidth' => 0,
         ];
-        $settings = ['phoenix_version' => '1.0.0'];
+        $settings = ['phoenix_version' => 'v1.0', 'phoenix_release' => 'Testing'];
 
         $output = view_stats_html($stats, $settings);
 
@@ -74,7 +74,7 @@ class ViewStatsHtmlTest extends TestCase
             'downloads' => 543210,
             'bandwidth' => 9876543210,
         ];
-        $settings = ['phoenix_version' => '1.0.0'];
+        $settings = ['phoenix_version' => 'v1.0', 'phoenix_release' => 'Testing'];
 
         $output = view_stats_html($stats, $settings);
 

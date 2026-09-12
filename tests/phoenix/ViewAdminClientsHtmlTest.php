@@ -17,7 +17,8 @@ class ViewAdminClientsHtmlTest extends TestCase
     /** @return array<string, mixed> */
     private function settings(): array
     {
-        return ['phoenix_version' => 'Phoenix Test v.0', 'admin_password' => 'hash'];
+        return ['phoenix_version' => 'Phoenix Test v.0',
+            'phoenix_release' => 'Testing', 'admin_password' => 'hash'];
     }
 
     public function testLiveMetricBreaksFamiliesDownByVersion(): void

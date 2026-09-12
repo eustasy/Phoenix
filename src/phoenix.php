@@ -33,7 +33,12 @@ $settings = settings_load(
     __DIR__.'/../config/phoenix.default.php',
     __DIR__.'/../config/phoenix.custom.php',
 );
-$settings['phoenix_version'] = 'v4.3beta11';
+// The running version, and the release it belongs to. Kept as two values
+// rather than one string so a machine reading the JSON, XML or scrape output
+// gets the version on its own — a client comparing versions should never have
+// to parse a codename out of them. The HTML surfaces join them for display.
+$settings['phoenix_version'] = 'v5.0';
+$settings['phoenix_release'] = 'Boulevard';
 
 ////	Resolve the GeoLite2 database
 // When geo enrichment is on, resolve the database from standard locations

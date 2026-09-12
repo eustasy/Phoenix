@@ -1,5 +1,76 @@
 # Phoenix Changelog
 
+## v5.0 - 12/09/2026 - Boulevard
+
+Phoenix 5.0 is the first stable release of a ground-up rebuild. The whole 4.x
+line was the development series with several sub-versions, and that version
+number has been skipped for stable.
+
+For an operator on 3.x the short version: **everything has changed**.
+Work through [MIGRATING.md](MIGRATING.md) carefully, this upgrade is major.
+
+That guide starts from **3.2.x**, the last stable line. If you are on 3.1 or
+earlier, upgrade to 3.2.2 first — its own schema changes are not repeated
+there.
+
+### Breaking
+
+- BREAKING: **Only `public/` is web-served.** The repository root is no longer the document root — `src/`, `bin/`, `config/`, `sql/` and `tests/` all sit above it. **Re-point your web server at `public/`** ([#48](https://github.com/eustasy/phoenix/issues/48)); see [APACHE.md](APACHE.md) / [NGINX.md](NGINX.md).
+- BREAKING: **Configuration moves** from `_settings/phoenix.custom.php` to `config/phoenix.custom.php`. Existing overrides are forward-compatible; copy the file across.
+- BREAKING: **Cron jobs move and change.** `_cron/hourly/*` becomes `bin/prune-database.php` (prune expired rows, refresh statistics), `bin/optimize-database.php` (rebuild tables, on a slower schedule) and `bin/backup-database.php`. **All entries must be updated.**
+- BREAKING: **Minimum PHP is 8.2**, up from 7.1.
+- BREAKING: **Every table is InnoDB.** Concurrent announces take row locks rather than queueing on the table, and an unclean shutdown replays from the redo log. In exchange an unqualified `COUNT(*)` scans an index, `OPTIMIZE TABLE` is a full rebuild, and the data takes roughly 2.1x the space. Fresh installs get InnoDB automatically; **existing installs convert each table by hand** — see [MIGRATING.md](MIGRATING.md).
+- BREAKING: **The database schema changes.** A `user` column and torrent meta (filename, files, trackers, webseeds) on `torrents`, a signed `left` on `peers`, a `source` column on `tasks`, and new `events` and `task_runs` tables. [MIGRATING.md](MIGRATING.md) carries the whole change as one SQL block.
+- BREAKING: **Settings renamed for consistency.** `external_ip` → `allow_client_ip`, `announce_interval` → `announce_rec_interval`, `min_interval` → `announce_min_interval`, `random_limit` → `random_peers_threshold`, `clean_with_requests` → `clean_request_percent`, `allow_any_proxy` → `trust_any_forwarded`, `backup_rotate` → `backup_retention`. An unrecognised key silently falls back to the new default, so **update any overrides**.
+- BREAKING: **Forwarded-header handling is fail-closed.** The `honor_xff` flag is replaced by a `forwarded_headers` allowlist honoured only when `REMOTE_ADDR` falls inside a `trusted_proxies` range. The default trusts **nothing** but the direct connection, so an install that relied on `honor_xff` must now name the header its proxy sets.
+- BREAKING: **The version is reported as two values, and without its wrapper.** `?stats` used to report a single string wrapped as `$Id: … $,` — a Subversion keyword inherited from PeerTracker that git never expanded, plus a stray comma. It is now `version` (`v5.0`) and `release` (`Boulevard`) as separate values in the JSON and XML forms, so a client comparing versions never parses a codename out of a display string. **Anything stripping that wrapper should stop.**
+
+### Feature
+
+- FEATURE: **A web admin panel** ([#54](https://github.com/eustasy/phoenix/issues/54)) — dashboard, torrents, peers, clients, bandwidth, geography, task history, backups, server support, DB utilities and settings — behind a required password, a hardened session, a failed-login throttle and CSRF on every state-changing form, with an optional TOTP second factor. `admin_auth_optional` runs it unauthenticated for a panel already protected by a reverse proxy or an IP allowlist.
+- FEATURE: **A first-run installer** that writes the configuration, creates the schema and enrols 2FA, protected by a one-time token written to `config/` so only someone with filesystem access can complete setup.
+- FEATURE: **An authenticated management REST API** ([#53](https://github.com/eustasy/phoenix/issues/53)) — add, update, list, delist and delete torrents — keyed per user, with keys stored as SHA-256 hashes and compared timing-safe. Every endpoint answers JSON or XML. Documented end to end in [API.md](API.md).
+- FEATURE: **A redesign onto a shared design system** — a vendored `ds.css`, Lucide icons, the flame mark and a persisted light/dark theme that applies before first paint. The public index and stats pages, previously near-unstyled, are first-class. No build step.
+- FEATURE: **Privacy-preserving stat-tracking.** An optional `events` ledger records completions with a coarse client label and country code derived from the peer_id and IP — never the address itself — feeding the Clients, Bandwidth and Geography pages. Geo enrichment needs `composer require maxmind-db/reader`, and `ext-maxminddb` if your distribution packages it — the pure-PHP reader is around 40x slower.
+- FEATURE: **Torrent meta** — filename, file list, trackers and webseeds — stored, searchable, and served on the public index when `index_show_meta` is on.
+- FEATURE: **Selective backups.** A backup is a dated directory holding `schema.sql` and one data file per table, so restoring one table is importing one file. See [RECOVERY.md](RECOVERY.md).
+- FEATURE: **Maintenance alerts.** Overdue and never-run maintenance is flagged on the dashboard and in the sidebar, against configurable thresholds.
+- FEATURE: **BEP 24 external IP** in the announce response, and a `min_request_interval` scrape-throttle hint.
+- FEATURE: **Retry hints on errors** — `"never"` for a permanent rejection, or the rate-limit window in seconds for a throttled announce ([#69](https://github.com/eustasy/phoenix/issues/69)).
+- FEATURE: **Per-IP announce rate limiting** (`announce_rate_limit`, `announce_rate_window`) that no longer cross-blocks unrelated peers behind one NAT.
+- FEATURE: **Error reporting hooks**, shipping wired for Sentry and inert by default.
+
+### Improvement
+
+- IMPROVES: **The listings page, search and sort in SQL** rather than loading a whole table into the browser, so a million-row install renders a page in constant memory.
+- IMPROVES: **The closed-tracker permission check is one indexed query** rather than a read of every registered info hash — which at 200k torrents cost 48.8 MB and 57 ms per announce to answer a question about one of them.
+- IMPROVES: **Geo lookups are 73x faster** than the first implementation: a cached reader and the raw record rather than a model graph take an announce's enrichment from 606 µs to 7.5 µs.
+- IMPROVES: **An MVC-inspired layout** — `src/controller/`, `src/model/`, `src/views/`, `src/functions/` — one function per file, each requiring its own dependencies.
+- IMPROVES: **A single bencode emitter** owns length prefixes, container tokens and BEP 3 dict-key ordering; no view hand-assembles bencode.
+- IMPROVES: **Announce and scrape answer JSON and XML** as well as bencode, for debugging and tooling.
+- IMPROVES: **Atomic configuration writes** — a temp file under an exclusive lock, renamed over the target — so a concurrent request never includes a half-written config.
+- IMPROVES: **Security headers** on every response, with a Content-Security-Policy scoped per surface.
+- IMPROVES: **A full PHPUnit suite** with smoke tests against a real server, and CI across PHP 8.2–8.6.
+
+### Bugfix
+
+- BUGFIX: **Duplicate `completed` announces no longer double-count downloads.** Transmission sends every announce twice; a completion is counted only on the leech-to-seed transition.
+- BUGFIX: **Announces without `left`, or with an out-of-range port, no longer fail** against a strict-mode database. The `left = -1` sentinel round-trips in a signed column, and an invalid port drops only its own address family.
+- BUGFIX: **Database failures surface as tracker errors, not HTTP 500s.** On PHP 8.1+ every mysqli failure was an uncaught exception.
+- BUGFIX: **Malformed scrape output fixed** — full and multi-hash scrapes emitted invalid bencode whenever more or fewer than exactly one torrent matched, XML scrapes had no root element, and JSON scrapes returned `null` for an empty result.
+- BUGFIX: **The admin redirect cannot be steered off-site**; protocol-relative and absolute targets fall back to a local page.
+- BUGFIX: **Client labels are sanitised** so raw peer_id bytes can never reach the admin views or the stored label.
+- BUGFIX: **Maintenance failures are noticed.** `CHECK`/`ANALYZE`/`OPTIMIZE` report problems as rows inside their result sets while `mysqli_errno()` stays `0`, so a rebuild that died partway used to log a successful run.
+
+### Documentation
+
+- DOCS: **[API.md](API.md)** — every HTTP endpoint, with parameters, JSON and XML shapes, errors and a summary table.
+- DOCS: **[CONFIGURATION.md](CONFIGURATION.md)** — every operator setting, with defaults.
+- DOCS: **[RECOVERY.md](RECOVERY.md)** — admin lockout, disabling 2FA, and restoring the database.
+- DOCS: **[LIMITS.md](LIMITS.md)** — measured ceilings: how many peers and torrents an install carries, and what binds first.
+- DOCS: **[MIGRATING.md](MIGRATING.md)** — the 3.x to 5.0 upgrade, step by step.
+- DOCS: **[BEPs.md](BEPs.md)** — which BEPs Phoenix implements, and which it deliberately does not.
+
 ## v3.2.2 - 15/07/2026 - Haggard
 
 - BUGFIX: Full and multi-hash scrapes emitted malformed bencode whenever more or fewer than exactly one torrent matched; all torrents now share a single sorted `files` dictionary.

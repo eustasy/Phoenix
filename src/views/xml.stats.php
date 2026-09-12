@@ -26,7 +26,7 @@ function view_stats_xml(array $stats, array $settings): string
     require_once __DIR__.'/../functions/xml.escape.php';
 
     return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.
-        '<tracker version="'.xml_escape($settings['phoenix_version']).'">'.
+        '<tracker version="'.xml_escape($settings['phoenix_version']).'" release="'.xml_escape($settings['phoenix_release']).'">'.
         '<peers>'.$stats['peers'].'</peers>'.
         '<seeders>'.$stats['seeders'].'</seeders>'.
         '<leechers>'.$stats['leechers'].'</leechers>'.
