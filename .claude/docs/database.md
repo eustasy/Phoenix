@@ -64,6 +64,16 @@ The three differ in cost, and that is why they are separate:
 `REPAIR TABLE` is deliberately unused: on MariaDB it silently performs a second
 full rebuild on InnoDB. See [LIMITS.md](../../LIMITS.md) for the measurements.
 
+**`mysqli_report()` returns a bool, not the previous mode.** Code that turns
+reporting off around a block restores it by naming the default explicitly —
+`mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT)` — because capturing
+the return value and passing it back sets the mode to `1`. phpstan catches the
+type, not the logic.
+
+Failures also do not always throw. A task that only calls `task_log()` on
+success writes no row when it fails, so the maintenance history shows a gap
+rather than a failure — read it as "what ran", never as "everything is fine".
+
 ## SQL injection defense
 
 The `src/model/` layer is fully parameterized (`mysqli_execute_query` with bound

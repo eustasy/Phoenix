@@ -10,6 +10,26 @@ Every file in `src/functions/`, `src/model/`, `src/views/`, and
 never a second function below the main one. `ConventionsTest` fails the suite
 otherwise.
 
+**That is the only structural rule the test enforces.** The filename↔function
+mapping below is a convention, not a check, so a mismatch ships quietly.
+
+### Naming
+
+The filename is the function's *stem* with `.` for `_`, but most layers wrap it:
+
+| Layer | File | Function |
+| --- | --- | --- |
+| `src/functions/` | `parse.ipv4.php` | `parse_ipv4()` |
+| `src/model/` | `torrents.count.php` | `torrents_count()` |
+| `src/views/` | `html.admin.tasks.php` | `view_admin_tasks_html()` |
+| `src/controller/` | `admin.tasks.php` | `admin_tasks_controller()` |
+| `src/controller/` (action) | `admin.check.php` | `admin_check_action()` |
+
+Views take `view_` + the stem minus its format prefix + `_html`/`_json`/`_xml`.
+Controllers take `_controller` for a page and `_action` for a form handler, and
+the dashboard is `admin_dashboard_page()` — so grep for the function rather than
+deriving its name from the file.
+
 - File name mirrors the function name, `_` → `.`: `parse_ipv4()` →
   `parse.ipv4.php`; `stats_client_version()` → `stats.client.version.php`.
 - Naming is `<category>.<verb>.php` (`peer.resolve.addresses.php`,

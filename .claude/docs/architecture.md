@@ -102,3 +102,24 @@ strip the `p:` prefix. See [database.md](database.md).
 `../src/phoenix.php` to bootstrap, then call models/functions. PHP-native, not
 shell, so config stays in `$settings`. See [configuration.md](configuration.md)
 for the cron settings.
+
+## Tracker input comes from the raw query string
+
+`sanitize_tracker_params()` parses `$_SERVER['QUERY_STRING']` itself — it does
+**not** read `$_GET`. BitTorrent sends `info_hash` and `peer_id` as raw 20-byte
+binary, and PHP's own parsing mangles them, so the announce and scrape paths
+split the query string by hand and run each value through
+`maybe_binary_to_hex()`.
+
+The consequence for anything driving those controllers directly — a test, a
+benchmark, a CLI reproduction — is that setting `$_GET` does nothing. Set
+`$_SERVER['QUERY_STRING']` as well, with the peer_id `rawurlencode()`d:
+
+```php
+$_SERVER['QUERY_STRING'] = 'info_hash='.$hash.'&peer_id='.rawurlencode($peer_id)
+    .'&port=6881&uploaded=0&downloaded=0&left=0&compact=1';
+```
+
+Everything else on the announce (`port`, `left`, `event`, …) does come from
+`$_GET`, so both have to agree.
+

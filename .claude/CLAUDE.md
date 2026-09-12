@@ -24,9 +24,12 @@ tests; qlty orchestrates phpstan (level 9) + php-cs-fixer + other linters.
 
 These break CI or security if violated. Details in the linked docs.
 
-- **One function per file** in `src/{functions,model,views,controller}/`;
-  file name = function name with `.` for `_` (`parse_ipv4()` → `parse.ipv4.php`).
-  Enforced by `ConventionsTest`. → [conventions](docs/conventions.md)
+- **One function per file** in `src/{functions,model,views,controller}/` —
+  the only structural rule `ConventionsTest` enforces. The filename is the
+  function's stem with `.` for `_` (`parse_ipv4()` → `parse.ipv4.php`), but
+  views and controllers wrap it (`html.admin.tasks.php` →
+  `view_admin_tasks_html()`), and that mapping is convention, not a check.
+  → [conventions](docs/conventions.md)
 - **A function `require_once`s its own dependencies** at the top of its body.
   The sole exception is `tracker_error()` (bootstrap-loaded).
   → [architecture](docs/architecture.md)

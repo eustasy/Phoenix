@@ -14,8 +14,17 @@ call.
   the installer as `$settings['key'] = 'value';` lines. The installer only knows
   about the keys it writes; everything else falls back to the default file.
 - `settings_load()` loads default then custom and returns the merged array; the
-  bootstrap then injects `phoenix_version` (and, in the admin panel,
-  `nav_counts`) into `$settings` at runtime — same mechanism, not persisted.
+  bootstrap then injects `phoenix_version` into `$settings` at runtime — same
+  mechanism, not persisted.
+
+**`$settings` also carries request state, and it is not all configuration.**
+`admin_panel_controller()` injects `nav_counts`, `nav_alerts` and `server_stats`
+so the shared layout can render badges and gauges without doing I/O of its own.
+Anything that iterates `$settings` must skip them — the admin Settings page
+lists the array verbatim and rendered them as though an operator had set them,
+until it grew a skip list. Keys are declared optional (`nav_counts?:`) in the
+`PhoenixSettings` alias in `.qlty/configs/phpstan.dist.neon`, which is also
+where a new setting has to be registered or phpstan fails the build.
 
 When adding a tunable: add the key + default + comment here, read
 `$settings['key']` where needed, and (if operator-relevant) make the installer /

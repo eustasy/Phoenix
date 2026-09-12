@@ -52,3 +52,28 @@ covered by round-trip tests).
 mysqli returns numeric columns as strings, which bencode/JSON would emit as
 strings rather than integers. Cast to `int` in the model or before encoding. See
 [database.md](database.md).
+
+## Page-specific CSS and JS
+
+`public/assets/phoenix.css` is the shared admin/public stylesheet, but it is not
+the only one. A page can pass its own via the layout's `$extra_head` — the
+public index loads `index.css` that way — so grep `public/assets/` rather than
+assuming a rule lives in `phoenix.css`. Assets prefixed `_` (`_bandwidth.js`,
+`_swarm.js`) are read off disk by PHP and inlined instead of linked.
+
+## Tables hide rows or groups, depending on the table
+
+`tables.js` `phRowGroups()` decides what the filter and sort operate on:
+
+- a table with **one** `<tbody>` — every admin listing — works on `<tr>`, and
+  the filter sets `[hidden]` on rows;
+- a table with **several** `<tbody>` elements — the public index, which renders
+  a torrent across a main row and a meta row — works on `<tbody>`, so a record's
+  rows can never be split by sorting or half-hidden by filtering.
+
+CSS that reacts to filtering has to match the right level. The shared
+"last visible row" rule in `phoenix.css` is written against `<tr>` siblings and
+cannot fire on the index, which needs its own `<tbody>`-level rule in
+`index.css`. A row hidden by `display: none` (the index's meta drawer) is not
+`[hidden]`, so it still counts as present to those selectors.
+

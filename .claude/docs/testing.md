@@ -68,3 +68,26 @@ and let `.qlty/configs/.sqlfluff`'s `dialect` win. phpstan and most linters skip
 MariaDB service container, PHP 8.2–8.6), `smoke-php.yml` (HTTP smoke against
 `php -S`), `sql.yml` (sqlfluff), `md.yml`, `css.yml`, `html.yml`, `js.yml`,
 `sh.yml`, `yaml.yml`, and `security.yml`.
+
+## A test that asserts nothing fails
+
+PHPUnit is configured to fail a test that performs no assertions, which catches
+a shape that looks fine locally: assertions wrapped in a condition that happens
+not to hold on the runner.
+
+```php
+foreach (server_stats() as $stat) {
+    if (! $stat['available']) {       // never true on CI — every metric reads
+        $this->assertNull($stat['percent']);
+    }
+}
+```
+
+Assert on both branches, or `markTestSkipped()` when the environment genuinely
+cannot exercise the case. The same applies to anything gated on an optional
+extension or a host capability.
+
+Environment-sensitive figures belong behind a skip rather than an assumption —
+CI runs Linux with `/proc` readable and most functions enabled, which is not
+what a shared host looks like.
+
