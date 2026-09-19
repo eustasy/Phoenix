@@ -18,10 +18,17 @@
   "[json]": { "editor.formatOnSave": true, "editor.defaultFormatter": "esbenp.prettier-vscode" },
   "[jsonc]": { "editor.formatOnSave": true, "editor.defaultFormatter": "esbenp.prettier-vscode" },
 
+  // Shell — shfmt (CI-only; there is no shfmt formatter bundled here). Explicitly
+  // OFF so a shell-formatting extension picked up on one machine can't reindent
+  // scripts on save with its own default (tabs) and fight CI's 2 spaces. The
+  // EditorConfig extension still applies .editorconfig's 2-space setting while
+  // you type. Run `qlty fmt` to apply the real formatting.
+  "[shellscript]": { "editor.formatOnSave": false },
+
   // PHP — php-cs-fixer.
   "[php]": { "editor.formatOnSave": true, "editor.defaultFormatter": "junstyle.php-cs-fixer" },
   "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer",
-  "php-cs-fixer.config": "${workspaceFolder}/.qlty/configs/.php-cs-fixer.php",
+  "php-cs-fixer.config": "${workspaceFolder}/.qlty/configs/.php-cs-fixer.dist.php",
   "php-cs-fixer.onsave": true,
 
   "extensions.recommendations": [

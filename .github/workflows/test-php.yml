@@ -1,4 +1,4 @@
-# eustasy/.Normal 4.0beta10
+# eustasy/.Normal 4.0beta14
 name: "Test: PHP"
 on:
   workflow_dispatch:
@@ -54,15 +54,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
+      - uses: eustasy/.normal/php/setup@v4
         with:
           php-version: ${{ matrix.php-version }}
           extensions: mysqli, gd
           tools: composer:v2
           coverage: pcov
-
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
 
       - name: Configure Phoenix for tests
         run: |
@@ -78,12 +75,7 @@ jobs:
           $settings['open_tracker'] = true;
           EOF
 
-      - name: Run PHPUnit with coverage
-        run: vendor/bin/phpunit --coverage-clover coverage/clover.xml
-
-      - name: Upload coverage to Qlty
-        if: matrix.php-version == '8.6'
-        uses: qltysh/qlty-action/coverage@08a0a862c159eae9b9003081da6663d96efef637 # v2.3.0
+      - uses: eustasy/.normal/php/test@v4
         with:
           coverage-token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
-          files: coverage/clover.xml
+          upload: ${{ matrix.php-version == '8.6' }}
