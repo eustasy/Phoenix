@@ -5,7 +5,7 @@ A conformance audit of Phoenix against the
 The BEPs are grouped below by their status on that index, exactly as published.
 
 Phoenix is an **HTTP tracker** — it implements the announce and scrape flows and
-an optional public index. It is *not* a client, a DHT node, a peer-wire
+an optional public index. It is _not_ a client, a DHT node, a peer-wire
 implementation, or a `.torrent`/metainfo toolchain. The large share of the BEP
 catalogue that governs those other roles is therefore out of scope by design,
 and is marked accordingly as we work through it.
@@ -174,7 +174,7 @@ implemented, and realistically won't be without a separate daemon.
 This applies to a tracker, so it's a genuine gap rather than N/A — but a
 deliberate architectural one.
 
-**Not the same as HTTP scrape:** BEP 15 is the *UDP* tracker protocol, which is
+**Not the same as HTTP scrape:** BEP 15 is the _UDP_ tracker protocol, which is
 easy to confuse with Phoenix's scrape endpoints. Those endpoints implement
 **HTTP scrape** — the convention formalised by **BEP 48** — a separate spec from
 BEP 15.
@@ -191,7 +191,7 @@ otherwise the `default_compact` tracker setting decides. The IPv6 companion
 (`peers6`, 18 bytes/peer) is BEP 7 and is emitted alongside in the same path.
 Non-compact responses also drop `peer_id` when the client sends `no_peer_id`.
 
-One spec nuance: BEP 23 lets a tracker that *requires* compact omit the
+One spec nuance: BEP 23 lets a tracker that _requires_ compact omit the
 non-compact path entirely. Phoenix always honours both, which is conformant —
 just noting it offers more than the minimum.
 
@@ -201,7 +201,7 @@ just noting it offers more than the minimum.
 
 BEP 27 has two halves. The `private` flag in the `.torrent` and the resulting
 suppression of DHT / PEX / LSD are **client** responsibilities — N/A to a
-tracker. The tracker-side half is operating as a *private (closed) tracker*,
+tracker. The tracker-side half is operating as a _private (closed) tracker_,
 which Phoenix supports:
 
 - With `open_tracker` off, announces are rejected unless the `info_hash` is in
@@ -245,7 +245,7 @@ carry the same value as a human-readable string. Gated by the
 `announce_external_ip` setting (default on). Implemented in #68.
 
 Not to be confused with the existing `allow_client_ip` setting, which governs the
-*opposite* direction — whether the tracker accepts a client-declared address as
+_opposite_ direction — whether the tracker accepts a client-declared address as
 an input candidate.
 
 ### BEP 31 — Tracker Failure Retry Extension
@@ -320,7 +320,7 @@ tracker-facing proposal Phoenix does not implement.
 
 ## Optional items within the implemented BEPs
 
-Beyond the whole-BEP verdicts above, each tracker BEP carries *optional*
+Beyond the whole-BEP verdicts above, each tracker BEP carries _optional_
 keys/parameters. Phoenix implements essentially all the ones with a real
 consumer; this tracks both sides so the gaps are deliberate, not forgotten.
 
