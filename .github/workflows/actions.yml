@@ -1,32 +1,32 @@
 # eustasy/.Normal 4.0beta16
-name: "Normal: SQL"
+name: "Normal: Actions"
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - "**.sql"
-      - ".github/workflows/sql.yml"
-      - ".qlty/configs/.sqlfluff"
+      - ".github/workflows/**"
+      - ".github/actionlint.yaml"
+      - ".github/zizmor.yml"
       - ".qlty/qlty.toml"
   pull_request:
     branches: [main]
     paths:
-      - "**.sql"
-      - ".github/workflows/sql.yml"
-      - ".qlty/configs/.sqlfluff"
+      - ".github/workflows/**"
+      - ".github/actionlint.yaml"
+      - ".github/zizmor.yml"
       - ".qlty/qlty.toml"
 
 permissions:
   contents: read
 
 jobs:
-  sql:
-    name: Lint + format
+  actions:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - uses: eustasy/.normal/sql@v4
+      - uses: eustasy/.normal/actions@v4

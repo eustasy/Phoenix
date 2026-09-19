@@ -1,4 +1,4 @@
-# eustasy/.Normal 4.0beta14
+# eustasy/.Normal 4.0beta16
 name: "Normal: YAML"
 on:
   workflow_dispatch:
@@ -7,12 +7,20 @@ on:
     paths:
       - "**.yml"
       - "**.yaml"
+      - "!.github/workflows/**"
+      - "!.github/dependabot.yml"
+      - "!.github/zizmor.yml"
+      - "!.github/actionlint.yaml"
       - ".qlty/qlty.toml"
   pull_request:
     branches: [main]
     paths:
       - "**.yml"
       - "**.yaml"
+      - "!.github/workflows/**"
+      - "!.github/dependabot.yml"
+      - "!.github/zizmor.yml"
+      - "!.github/actionlint.yaml"
       - ".qlty/qlty.toml"
 
 permissions:
