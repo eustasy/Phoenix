@@ -141,7 +141,7 @@ function view_admin_layout_html(array $settings, string $title, string $body, st
 <div class="app">
 
 	<aside class="ph-sidebar">
-		<a class="ph-brand" href="admin.php">
+		<a class="ph-brand" href="?page=dashboard">
 			'.view_mark_html().'
 			<div>
 				<div class="ph-wordmark">Phoenix</div>

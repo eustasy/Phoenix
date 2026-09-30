@@ -172,6 +172,6 @@ function admin_install_controller(string $config_path): string
     @unlink($token_path);
 
     mysqli_close($test_conn);
-    header('Location: admin.php?installed=1');
+    header('Location: ?installed=1');
     exit;
 }

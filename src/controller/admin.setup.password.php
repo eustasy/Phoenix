@@ -97,6 +97,6 @@ function admin_setup_password_controller(array $settings, string $config_path): 
         return view_setup_password_html('Could not write the configuration file.', $totp_secret, $totp_qr, $totp_url, $writable, $version);
     }
 
-    header('Location: admin.php');
+    header('Location: ?page=dashboard');
     exit;
 }

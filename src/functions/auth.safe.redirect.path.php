@@ -8,11 +8,12 @@ declare(strict_types=1);
 // same-origin absolute path is allowed through: it must begin with a single '/'
 // and must NOT be protocol-relative — neither '//host' nor the '/\host'
 // backslash variant browsers normalise to it — nor an absolute URL (an
-// absolute-form request target). Anything else falls back to a fixed local page,
-// so a crafted request target can never bounce the admin off-site. header()
-// already blocks CR/LF, so the off-site scheme is the only concern left here.
+// absolute-form request target). Anything else falls back to the dashboard, so a
+// crafted request target can never bounce the admin off-site; the fallback is
+// query-only, so it resolves against the admin script whatever it is named.
+// header() already blocks CR/LF, so the off-site scheme is the only concern left.
 
-function auth_safe_redirect_path(string $uri, string $fallback = 'admin.php'): string
+function auth_safe_redirect_path(string $uri, string $fallback = '?page=dashboard'): string
 {
     if (
         isset($uri[0]) && $uri[0] === '/' &&

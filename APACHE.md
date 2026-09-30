@@ -73,8 +73,9 @@ SetEnvIf Authorization "(.+)" HTTP_AUTHORIZATION=$1
 PHP-FPM (via `mod_proxy_fcgi`) and the built-in dev server pass `Authorization` through
 without any of this.
 
-After initial setup, consider removing `public/admin.php` from the server entirely — see
-the install guide in [README.md](./README.md).
+After initial setup, consider removing `public/admin.php` from the server entirely, or
+moving it to a new, hard-to-guess name and rate-limiting it — see the install guide in
+[README.md](./README.md) and [Rate limiting](#rate-limiting) below.
 
 ## Running behind a proxy (`forwarded_headers` / `trusted_proxies`)
 
@@ -145,4 +146,5 @@ For more aggressive blocking, pair with [fail2ban](https://www.fail2ban.org/) wa
 the access log for repeated `/admin.php` requests.
 
 A safer alternative is to remove `public/admin.php` from the server entirely after initial
-setup — see the install guide in [README.md](./README.md).
+setup, or to move it to a new, hard-to-guess name as well as rate-limiting it — see the
+install guide in [README.md](./README.md).

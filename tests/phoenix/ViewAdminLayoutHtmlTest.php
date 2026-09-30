@@ -153,4 +153,13 @@ class ViewAdminLayoutHtmlTest extends TestCase
         $this->assertStringContainsString('ph-nav-badge">42<', $html);
         $this->assertStringNotContainsString('ph-nav-badge is-', $html);
     }
+
+    public function testBrandLinksToDashboardWithoutNamingTheScript(): void
+    {
+        // Query-only, so it resolves against whatever admin.php is renamed to.
+        $html = view_admin_layout_html($this->settings(), 'T', '', 'torrents');
+
+        $this->assertStringContainsString('<a class="ph-brand" href="?page=dashboard">', $html);
+        $this->assertStringNotContainsString('href="admin.php"', $html);
+    }
 }

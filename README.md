@@ -37,7 +37,7 @@ Use this path when you control the web server configuration (VPS, dedicated serv
 1. Upload Phoenix to your server.
 2. Point your web server's document root at the `public/` directory. Only `public/` should be web-reachable; `src/`, `bin/`, `config/`, and `tests/` must remain outside the document root so configuration (including database credentials) is never served. See [APACHE.md](./APACHE.md) or [NGINX.md](./NGINX.md) for vhost examples and `.php` extension-stripping rules.
 3. Load `public/admin.php` in your browser and run **Setup**. To prove you control the server, setup asks for a one-time token that Phoenix writes to `config/.phoenix-setup-token` on first load — open that file (over SSH or your host's file manager) and paste in its contents. Setup then creates the database tables and writes `config/phoenix.custom.php`; the token is removed once setup completes.
-4. After setup, secure `admin.php` — the simplest approach is to remove it from `public/` (`mv public/admin.php src/admin.php`). Move it back temporarily if you ever need to re-run setup. Alternatively, rate-limit the endpoint; see [APACHE.md](./APACHE.md) or [NGINX.md](./NGINX.md).
+4. After setup, secure `admin.php` — the simplest approach is to remove it from `public/` (`mv public/admin.php src/admin.php`). Move it back temporarily if you ever need to re-run setup. Alternatively, move it to a new, hard-to-guess name (`mv public/admin.php public/<random>.php`) and rate-limit it; see [APACHE.md](./APACHE.md) or [NGINX.md](./NGINX.md).
 
 ### Managed LAMP / shared hosting
 

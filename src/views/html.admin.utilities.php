@@ -47,7 +47,7 @@ function view_admin_utilities_html(array $settings, bool $tables_installed, stri
     // Setup/Reset action. Available when resets are enabled, or whenever the
     // tables are missing (so a fresh install can proceed).
     if ($settings['db_reset'] || ! $tables_installed) {
-        $body .= '<div class="alert alert-warning"><span class="ph-ico" data-lucide="triangle-alert"></span><div>Set <code>$settings[\'db_reset\']</code> to false to disable resets, or delete <code>public/admin.php</code> once you\'re up and running.</div></div>';
+        $body .= '<div class="alert alert-warning"><span class="ph-ico" data-lucide="triangle-alert"></span><div>Set <code>$settings[\'db_reset\']</code> to false to disable resets, or delete <code>public/admin.php</code> once you\'re up and running, or move it to a new location and rate-limit it.</div></div>';
         $rows .= $action('wand-2', 'Setup', 'Install, upgrade, or reset the database', 'setup', 'Setup', $csrf_field);
     } else {
         $rows .= '<tr><td><span class="flex items-center gap-2"><span class="ph-ico ph-li-ico" data-lucide="wand-2"></span><strong>Setup</strong></span>'.

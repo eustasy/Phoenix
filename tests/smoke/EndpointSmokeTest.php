@@ -77,7 +77,8 @@ class EndpointSmokeTest extends SmokeTestCase
         ] + $this->dbCreds());
 
         $this->assertSame(302, $r['status']);
-        $this->assertStringContainsString('installed=1', (string) $this->headerValue($r, 'Location'));
+        // Query-only, so it lands back on the admin whatever it is named.
+        $this->assertSame('?installed=1', $this->headerValue($r, 'Location'));
 
         // The smoke server runs on 127.0.0.1 (loopback), which the default
         // reject_private_ips drops as a reserved address — leaving the announce
@@ -984,6 +985,25 @@ class EndpointSmokeTest extends SmokeTestCase
                 "SELECT COUNT(*) FROM `{$prefix}events` WHERE `info_hash`='{$hash}' AND `event`='completed'",
             ),
         );
+    }
+
+    #[Depends('testInstallSucceeds')]
+    public function testPasswordGateRedirectsWithoutNamingTheScript(): void
+    {
+        // An emptied admin_password (the RECOVERY.md lockout path) reopens the
+        // set-password gate. Its success redirect is query-only, so it lands back
+        // on the admin whatever admin.php is named. The gate rewrites the config
+        // with the new password, so setting the same one again leaves the login
+        // as it was.
+        $this->appendConfigOverride("\$settings['admin_password'] = '';");
+
+        $r = $this->post('/admin.php', [
+            'process' => 'setup_password',
+            'password' => self::ADMIN_PW,
+            'confirm' => self::ADMIN_PW,
+        ]);
+        $this->assertSame(302, $r['status']);
+        $this->assertSame('?page=dashboard', $this->headerValue($r, 'Location'));
     }
 
     #[Depends('testInstallSucceeds')]

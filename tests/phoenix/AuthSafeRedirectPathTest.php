@@ -24,15 +24,17 @@ class AuthSafeRedirectPathTest extends PhoenixTestCase
     public function testFallsBackForOffSiteTargets(): void
     {
         // Protocol-relative and its backslash variant → off-site → fallback.
-        $this->assertSame('admin.php', auth_safe_redirect_path('//evil.com'));
-        $this->assertSame('admin.php', auth_safe_redirect_path('//evil.com/path'));
-        $this->assertSame('admin.php', auth_safe_redirect_path('/\\evil.com'));
+        // The fallback is query-only, so it resolves against the current script
+        // and survives admin.php being renamed.
+        $this->assertSame('?page=dashboard', auth_safe_redirect_path('//evil.com'));
+        $this->assertSame('?page=dashboard', auth_safe_redirect_path('//evil.com/path'));
+        $this->assertSame('?page=dashboard', auth_safe_redirect_path('/\\evil.com'));
         // Absolute URL (absolute-form request target).
-        $this->assertSame('admin.php', auth_safe_redirect_path('https://evil.com'));
+        $this->assertSame('?page=dashboard', auth_safe_redirect_path('https://evil.com'));
         // No leading slash at all → not a same-origin absolute path.
-        $this->assertSame('admin.php', auth_safe_redirect_path('evil.com'));
-        $this->assertSame('admin.php', auth_safe_redirect_path('admin.php?x=1'));
-        $this->assertSame('admin.php', auth_safe_redirect_path(''));
+        $this->assertSame('?page=dashboard', auth_safe_redirect_path('evil.com'));
+        $this->assertSame('?page=dashboard', auth_safe_redirect_path('admin.php?x=1'));
+        $this->assertSame('?page=dashboard', auth_safe_redirect_path(''));
     }
 
     public function testHonoursCustomFallback(): void

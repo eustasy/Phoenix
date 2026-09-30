@@ -139,4 +139,5 @@ location = /admin.php {
 `.php` stripped) match this block too.
 
 A safer alternative is to remove `public/admin.php` from the server entirely after initial
-setup — see the install guide in [README.md](./README.md).
+setup, or to move it to a new, hard-to-guess name as well as rate-limiting it — see the
+install guide in [README.md](./README.md).
