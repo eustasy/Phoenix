@@ -494,6 +494,8 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-pub-brand { display: flex; align-items: center; gap: var(--space-2-5, 0.63rem); text-decoration: none; color: var(--flexoki-paper); }
 .ph-pub-brand:hover { color: var(--flexoki-paper); }
 .ph-pub-brand img, .ph-pub-brand .ph-mark { width: 28px; height: 28px; }
+/* An operator's mark (public_mark) may not be square: fit it, don't stretch it. */
+.ph-pub-brand img { object-fit: contain; }
 .ph-pub-brand .ph-wordmark { font-weight: var(--font-weight-bold); font-size: var(--font-size-lg); letter-spacing: var(--letter-spacing-tight); }
 .ph-pub-nav { display: flex; align-items: center; gap: var(--space-1); }
 .ph-pub-nav a { color: var(--flexoki-red-100); text-decoration: none; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); padding: var(--space-1-5) var(--space-2-5, 0.63rem); border-radius: var(--radius-md); }

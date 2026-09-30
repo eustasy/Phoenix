@@ -21,11 +21,16 @@ declare(strict_types=1);
 //   $inline_js  - inline JS for the rare page that must receive PHP data
 //                 (emitted in a <script> only when non-empty)
 //   $extra_srcs - per-page <script src> URLs (feature/page .js + libraries)
+//   $brand      - the operator's branding, from the public_favicon, public_mark
+//                 and public_wordmark settings: 'favicon' and 'mark' are image
+//                 URLs, 'wordmark' is plain text (escaped here). Each one that
+//                 is missing or empty keeps Phoenix's own.
 
 /**
  * @param list<string> $extra_srcs
+ * @param array{favicon?: string, mark?: string, wordmark?: string} $brand
  */
-function view_public_layout_html(string $title, string $body, string $active, string $version = '', bool $prose = false, string $extra_head = '', string $inline_js = '', array $extra_srcs = []): string
+function view_public_layout_html(string $title, string $body, string $active, string $version = '', bool $prose = false, string $extra_head = '', string $inline_js = '', array $extra_srcs = [], array $brand = []): string
 {
     require_once __DIR__.'/html.head.php';
     require_once __DIR__.'/html.mark.php';
@@ -52,15 +57,24 @@ function view_public_layout_html(string $title, string $body, string $active, st
 
     $main_class = 'ph-pub-main'.($prose ? ' prose' : '');
 
-    return view_head_html($title, $extra_head).'
+    ////	Branding
+    // A custom mark is decorative: the wordmark beside it already names the link.
+    $mark = $brand['mark'] ?? '';
+    $mark_html = $mark !== ''
+        ? '<img src="'.htmlspecialchars($mark, ENT_QUOTES, 'UTF-8').'" alt="">'
+        : view_mark_html();
+    $wordmark = $brand['wordmark'] ?? '';
+    $wordmark = $wordmark !== '' ? $wordmark : 'Phoenix';
+
+    return view_head_html($title, $extra_head, '', $brand['favicon'] ?? '').'
 <body>
 <div class="ph-public">
 
 	<header class="ph-pub-header">
 		<div class="ph-pub-header-in">
 			<a class="ph-pub-brand" href="index.php">
-				'.view_mark_html().'
-				<span class="ph-wordmark">Phoenix</span>
+				'.$mark_html.'
+				<span class="ph-wordmark">'.htmlspecialchars($wordmark, ENT_QUOTES, 'UTF-8').'</span>
 			</a>
 			<nav class="ph-pub-nav">
 				'.$nav_links.'

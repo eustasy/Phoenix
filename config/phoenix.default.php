@@ -126,6 +126,15 @@ $settings['index_show_meta'] = false;
 /* canonical announce URL of this tracker, embedded as the first */
 /* tracker in index magnet links; empty = omit */
 $settings['announce_url'] = '';
+/* favicon for the public pages (index, stats, magnet; the admin keeps */
+/* Phoenix's), as an image URL on this site, e.g. /assets/my-icon.svg — */
+/* their CSP only loads same-origin images; empty = the Phoenix flame */
+$settings['public_favicon'] = '';
+/* image URL replacing the flame mark in the public header, on this */
+/* site like public_favicon; empty = the Phoenix flame */
+$settings['public_mark'] = '';
+/* name beside the mark in the public header; empty = Phoenix */
+$settings['public_wordmark'] = '';
 
 ////	Logging & Debugging
 /* absolute path for PHP's error log; empty = server/PHP default */

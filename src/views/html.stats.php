@@ -66,5 +66,11 @@ function view_stats_html(array $stats, array $settings): string
 		</div>
 	</div>';
 
-    return view_public_layout_html('Tracker Stats — Phoenix', $body, 'stats', $settings['phoenix_version'].' '.$settings['phoenix_release'], true, $extra_head);
+    $brand = [
+        'favicon' => $settings['public_favicon'],
+        'mark' => $settings['public_mark'],
+        'wordmark' => $settings['public_wordmark'],
+    ];
+
+    return view_public_layout_html('Tracker Stats — Phoenix', $body, 'stats', $settings['phoenix_version'].' '.$settings['phoenix_release'], true, $extra_head, '', [], $brand);
 }

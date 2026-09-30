@@ -72,6 +72,10 @@ Full list with comments is in `config/phoenix.default.php`. Highlights:
 **Public index**
 - `public_index`, `index_show_meta`, `announce_url` (first tracker in index
   magnet links).
+- `public_favicon`, `public_mark`, `public_wordmark` — the public pages'
+  branding (index, stats, magnet); empty = Phoenix's own. The admin and login
+  pages keep Phoenix's branding. Image URLs must be same-origin: the public CSP
+  is `img-src 'self' data:`.
 
 **API** (see [http-api.md](http-api.md))
 - `api_keys` — `'user' => 'key'` pairs; `'*'` user is the admin. Empty disables.

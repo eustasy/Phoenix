@@ -12,6 +12,7 @@ Configuration should take place in `config/phoenix.custom.php`, NOT `config/phoe
 - [Stat-Tracking](#stat-tracking)
   - [Geo enrichment](#geo-enrichment)
 - [Reverse proxies & client IP address](#reverse-proxies--client-ip-address)
+- [Public page branding](#public-page-branding)
 - [Error reporting (optional)](#error-reporting-optional)
 - [Recovery: lockout, 2FA, backup restore](./RECOVERY.md)
 
@@ -180,6 +181,16 @@ Phoenix identifies each peer by its connecting IP, so behind a reverse proxy or 
 - `$settings['trusted_proxies']` — CIDR ranges of your proxies. A forwarded header is honoured only when `REMOTE_ADDR` falls inside one of these ranges; chain headers (`X-Forwarded-For` / `Forwarded`) are walked from the right, skipping these ranges, to find the real client.
 
 If `trusted_proxies` is empty, forwarded headers are **not** trusted unless you explicitly set `$settings['trust_any_forwarded'] = true` — which trusts the header from any direct connection and so lets anyone reaching the tracker spoof their address. Leave it off unless you fully control who can connect. Often it is cleaner to let the web server rewrite `REMOTE_ADDR` itself (Apache `mod_remoteip`, Nginx `real_ip`) and leave these empty — see [APACHE.md](./APACHE.md) / [NGINX.md](./NGINX.md).
+
+## Public page branding
+
+The public pages — the torrent index, stats and magnet generator — can carry your own branding in place of Phoenix's. Each setting is empty by default, which keeps Phoenix's own; the admin panel and login pages always keep the Phoenix branding.
+
+- `$settings['public_favicon']` — the browser-tab icon, as an image URL.
+- `$settings['public_mark']` — an image replacing the flame mark in the header. It is shown at 28×28 px; a mark that isn't square is fitted inside that box, not stretched.
+- `$settings['public_wordmark']` — the name beside the mark, as plain text, e.g. `'Ashrise'`.
+
+Serve the images from the tracker's own site, e.g. `/assets/my-mark.svg`: the public pages' Content Security Policy only loads same-origin (and `data:`) images, so a URL on another domain is blocked.
 
 ## Error reporting (optional)
 

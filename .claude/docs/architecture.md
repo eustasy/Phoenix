@@ -51,7 +51,8 @@ controller. `announce.php` is ~12 lines.
   full bootstrap → `admin_login_controller` (auth gate) → `admin_panel_controller`
   (page router). See [http-api.md](http-api.md).
 - **`magnet.php`** — self-contained client-side magnet generator. **Does not
-  bootstrap** `phoenix.php` and never touches the tracker.
+  bootstrap** `phoenix.php` and never touches the tracker; it calls
+  `settings_load()` directly (config files only, no DB) for the public branding.
 - **`api/**`** — the REST management API. Each endpoint is its own entry point
   (no central router); they pre-set `$_GET['json']` before bootstrap so errors
   serialise as JSON, then delegate to an `api_*_controller`.

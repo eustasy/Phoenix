@@ -14,10 +14,14 @@ declare(strict_types=1);
 // by public/index.php) renders either way. Health is the seeder share of the
 // swarm; an empty swarm shows a dash. Filtering and sorting are progressive
 // enhancements (assets/tables.js) — the table is complete without JavaScript.
+// $brand is the operator's branding, passed through to the public layout.
 // Returns HTML string. Caller is responsible for setting Content-Type header.
 
-/** @param list<array{info_hash: string|null, name: string|null, size: int, downloads: int, seeders: int, leechers: int, peers: int, bandwidth: int, filename?: string|null, files?: list<array{path: string, length: int}>|null, trackers?: list<string>|null, webseeds?: list<string>|null, magnet?: string|null}> $index */
-function view_index_html(array $index, bool $show_meta = false, string $version = ''): string
+/**
+ * @param list<array{info_hash: string|null, name: string|null, size: int, downloads: int, seeders: int, leechers: int, peers: int, bandwidth: int, filename?: string|null, files?: list<array{path: string, length: int}>|null, trackers?: list<string>|null, webseeds?: list<string>|null, magnet?: string|null}> $index
+ * @param array{favicon?: string, mark?: string, wordmark?: string} $brand
+ */
+function view_index_html(array $index, bool $show_meta = false, string $version = '', array $brand = []): string
 {
     require_once __DIR__.'/html.public.layout.php';
     require_once __DIR__.'/html.health.php';
@@ -172,5 +176,5 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
     $extra_head = '
 	<link rel="stylesheet" href="/assets/index.css">';
 
-    return view_public_layout_html('Torrent Index — Phoenix', $body, 'index', $version, false, $extra_head, '', ['/assets/copy.js', '/assets/tables.js']);
+    return view_public_layout_html('Torrent Index — Phoenix', $body, 'index', $version, false, $extra_head, '', ['/assets/copy.js', '/assets/tables.js'], $brand);
 }

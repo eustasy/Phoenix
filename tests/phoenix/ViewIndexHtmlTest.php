@@ -237,4 +237,10 @@ class ViewIndexHtmlTest extends PhoenixTestCase
         preg_match('/<td class="idx-title">(.*?)<\/td>/s', $html, $m);
         $this->assertSame('Test Torrent', trim(strip_tags($m[1] ?? '')));
     }
+
+    public function testBrandPassesThroughToTheLayout(): void
+    {
+        $html = view_index_html($this->fixture(), false, '', ['wordmark' => 'Ashrise']);
+        $this->assertStringContainsString('<span class="ph-wordmark">Ashrise</span>', $html);
+    }
 }

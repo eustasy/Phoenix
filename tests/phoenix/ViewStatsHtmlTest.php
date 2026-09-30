@@ -20,7 +20,7 @@ class ViewStatsHtmlTest extends TestCase
             'downloads' => 100,
             'bandwidth' => 5000000,
         ];
-        $settings = ['phoenix_version' => 'v1.0', 'phoenix_release' => 'Testing'];
+        $settings = ['phoenix_version' => 'v1.0', 'phoenix_release' => 'Testing', 'public_favicon' => '', 'public_mark' => '', 'public_wordmark' => ''];
 
         $output = view_stats_html($stats, $settings);
 
@@ -51,7 +51,7 @@ class ViewStatsHtmlTest extends TestCase
             'downloads' => 0,
             'bandwidth' => 0,
         ];
-        $settings = ['phoenix_version' => 'v1.0', 'phoenix_release' => 'Testing'];
+        $settings = ['phoenix_version' => 'v1.0', 'phoenix_release' => 'Testing', 'public_favicon' => '', 'public_mark' => '', 'public_wordmark' => ''];
 
         $output = view_stats_html($stats, $settings);
 
@@ -74,7 +74,7 @@ class ViewStatsHtmlTest extends TestCase
             'downloads' => 543210,
             'bandwidth' => 9876543210,
         ];
-        $settings = ['phoenix_version' => 'v1.0', 'phoenix_release' => 'Testing'];
+        $settings = ['phoenix_version' => 'v1.0', 'phoenix_release' => 'Testing', 'public_favicon' => '', 'public_mark' => '', 'public_wordmark' => ''];
 
         $output = view_stats_html($stats, $settings);
 
@@ -87,5 +87,26 @@ class ViewStatsHtmlTest extends TestCase
         // Bandwidth: human-readable headline + exact bytes.
         $this->assertStringContainsString('9.2 GB', $output);
         $this->assertStringContainsString('9,876,543,210 bytes', $output);
+    }
+
+    public function testRenderHtmlCarriesPublicBranding()
+    {
+        require_once __DIR__.'/../../src/views/html.stats.php';
+
+        $stats = [
+            'peers' => 0,
+            'seeders' => 0,
+            'leechers' => 0,
+            'torrents' => 0,
+            'downloads' => 0,
+            'bandwidth' => 0,
+        ];
+        $settings = ['phoenix_version' => 'v1.0', 'phoenix_release' => 'Testing', 'public_favicon' => '/assets/ashrise.ico', 'public_mark' => '/assets/ashrise.svg', 'public_wordmark' => 'Ashrise'];
+
+        $output = view_stats_html($stats, $settings);
+
+        $this->assertStringContainsString('<link rel="icon" href="/assets/ashrise.ico">', $output);
+        $this->assertStringContainsString('<img src="/assets/ashrise.svg" alt="">', $output);
+        $this->assertStringContainsString('<span class="ph-wordmark">Ashrise</span>', $output);
     }
 }

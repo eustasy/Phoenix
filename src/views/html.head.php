@@ -12,16 +12,20 @@ declare(strict_types=1);
 // verbatim after phoenix.css (page overrides win). $head_pre is trusted HTML
 // injected before phoenix.css, for vendor base styles the app must override
 // (e.g. the jsVectorMap stylesheet). $title is plain text and is escaped here.
+// $favicon is a URL replacing the flame favicon (the public pages' operator
+// branding); empty keeps the flame.
 
-function view_head_html(string $title, string $extra_head = '', string $head_pre = ''): string
+function view_head_html(string $title, string $extra_head = '', string $head_pre = '', string $favicon = ''): string
 {
+    $favicon = $favicon !== '' ? $favicon : '/assets/phoenix-mark.svg';
+
     return '<!DOCTYPE html>
 <html lang="en" class="theme-light">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>'.htmlspecialchars($title, ENT_QUOTES, 'UTF-8').'</title>
-	<link rel="icon" href="/assets/phoenix-mark.svg">
+	<link rel="icon" href="'.htmlspecialchars($favicon, ENT_QUOTES, 'UTF-8').'">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">

@@ -22,6 +22,15 @@ $announce_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'http
     .rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/magnet.php'), '/\\')
     .'/announce.php';
 
+// The operator's branding comes from settings, read straight from the config
+// files — no bootstrap, so no database. A missing custom config falls back to
+// the defaults, so the page still works on an unconfigured tracker.
+require_once __DIR__.'/../src/functions/settings.load.php';
+$settings = settings_load(
+    __DIR__.'/../config/phoenix.default.php',
+    __DIR__.'/../config/phoenix.custom.php',
+);
+
 require_once __DIR__.'/../src/views/html.public.layout.php';
 
 $extra_head = '
@@ -40,4 +49,8 @@ $body = (string) ob_get_clean();
 $inline_js = 'const ANNOUNCE = '.json_encode($announce_url).";\n"
     .(string) file_get_contents(__DIR__.'/assets/_magnet.js');
 
-echo view_public_layout_html('Magnet Generator — Phoenix', $body, 'magnet', '', true, $extra_head, $inline_js, ['/assets/torrent-parse.js']);
+echo view_public_layout_html('Magnet Generator — Phoenix', $body, 'magnet', '', true, $extra_head, $inline_js, ['/assets/torrent-parse.js'], [
+    'favicon' => $settings['public_favicon'],
+    'mark' => $settings['public_mark'],
+    'wordmark' => $settings['public_wordmark'],
+]);
