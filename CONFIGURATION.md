@@ -188,7 +188,7 @@ The public pages — the torrent index, stats and magnet generator — can carry
 
 - `$settings['public_favicon']` — the browser-tab icon, as an image URL.
 - `$settings['public_mark']` — an image replacing the flame mark in the header. It is shown at 28×28 px; a mark that isn't square is fitted inside that box, not stretched.
-- `$settings['public_wordmark']` — the name beside the mark, as plain text, e.g. `'Ashrise'`.
+- `$settings['public_wordmark']` — the name beside the mark, as plain text, e.g. `'Ashrise'`. It also names the site in the page titles (`Torrent Index — Ashrise`).
 
 Serve the images from the tracker's own site, e.g. `/assets/my-mark.svg`: the public pages' Content Security Policy only loads same-origin (and `data:`) images, so a URL on another domain is blocked.
 

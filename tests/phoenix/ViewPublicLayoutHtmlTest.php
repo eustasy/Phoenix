@@ -20,6 +20,7 @@ class ViewPublicLayoutHtmlTest extends TestCase
         $this->assertStringContainsString('<link rel="icon" href="/assets/phoenix-mark.svg">', $html);
         $this->assertStringContainsString('class="ph-mark"', $html);
         $this->assertStringContainsString('<span class="ph-wordmark">Phoenix</span>', $html);
+        $this->assertStringContainsString('<title>Index — Phoenix</title>', $html);
     }
 
     public function testEmptyBrandValuesFallBackToPhoenix(): void
@@ -54,6 +55,9 @@ class ViewPublicLayoutHtmlTest extends TestCase
     {
         $html = view_public_layout_html('Index', '', 'index', '', false, '', '', [], ['wordmark' => 'Ashrise']);
         $this->assertStringContainsString('<span class="ph-wordmark">Ashrise</span>', $html);
+        // The page title names the site the same way the header does.
+        $this->assertStringContainsString('<title>Index — Ashrise</title>', $html);
+        $this->assertStringNotContainsString('Phoenix</title>', $html);
     }
 
     public function testBrandValuesAreEscaped(): void
@@ -66,5 +70,6 @@ class ViewPublicLayoutHtmlTest extends TestCase
         $this->assertStringNotContainsString('" onload="', $html);
         $this->assertStringNotContainsString('" onerror="', $html);
         $this->assertStringContainsString('<span class="ph-wordmark">&lt;b&gt;A&amp;B&lt;/b&gt;</span>', $html);
+        $this->assertStringContainsString('<title>Index — &lt;b&gt;A&amp;B&lt;/b&gt;</title>', $html);
     }
 }

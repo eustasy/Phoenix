@@ -12,7 +12,8 @@ declare(strict_types=1);
 // as on the standalone magnet page). Returns the full HTML document.
 //
 // Parameters:
-//   $title      - <title> text (plain; escaped here)
+//   $title      - page name; the <title> is "<title> — <wordmark>" (plain;
+//                 escaped in view_head_html)
 //   $body       - trusted HTML for the main column
 //   $active     - 'index' | 'stats' | 'magnet'; highlights the matching nav link
 //   $version    - phoenix_version for the footer, or '' to hide it
@@ -59,6 +60,7 @@ function view_public_layout_html(string $title, string $body, string $active, st
 
     ////	Branding
     // A custom mark is decorative: the wordmark beside it already names the link.
+    // The wordmark also names the site in the page title.
     $mark = $brand['mark'] ?? '';
     $mark_html = $mark !== ''
         ? '<img src="'.htmlspecialchars($mark, ENT_QUOTES, 'UTF-8').'" alt="">'
@@ -66,7 +68,7 @@ function view_public_layout_html(string $title, string $body, string $active, st
     $wordmark = $brand['wordmark'] ?? '';
     $wordmark = $wordmark !== '' ? $wordmark : 'Phoenix';
 
-    return view_head_html($title, $extra_head, '', $brand['favicon'] ?? '').'
+    return view_head_html($title.' — '.$wordmark, $extra_head, '', $brand['favicon'] ?? '').'
 <body>
 <div class="ph-public">
 

@@ -176,5 +176,5 @@ function view_index_html(array $index, bool $show_meta = false, string $version 
     $extra_head = '
 	<link rel="stylesheet" href="/assets/index.css">';
 
-    return view_public_layout_html('Torrent Index — Phoenix', $body, 'index', $version, false, $extra_head, '', ['/assets/copy.js', '/assets/tables.js'], $brand);
+    return view_public_layout_html('Torrent Index', $body, 'index', $version, false, $extra_head, '', ['/assets/copy.js', '/assets/tables.js'], $brand);
 }

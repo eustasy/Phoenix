@@ -108,5 +108,6 @@ class ViewStatsHtmlTest extends TestCase
         $this->assertStringContainsString('<link rel="icon" href="/assets/ashrise.ico">', $output);
         $this->assertStringContainsString('<img src="/assets/ashrise.svg" alt="">', $output);
         $this->assertStringContainsString('<span class="ph-wordmark">Ashrise</span>', $output);
+        $this->assertStringContainsString('<title>Tracker Stats — Ashrise</title>', $output);
     }
 }

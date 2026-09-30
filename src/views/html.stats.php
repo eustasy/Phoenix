@@ -72,5 +72,5 @@ function view_stats_html(array $stats, array $settings): string
         'wordmark' => $settings['public_wordmark'],
     ];
 
-    return view_public_layout_html('Tracker Stats — Phoenix', $body, 'stats', $settings['phoenix_version'].' '.$settings['phoenix_release'], true, $extra_head, '', [], $brand);
+    return view_public_layout_html('Tracker Stats', $body, 'stats', $settings['phoenix_version'].' '.$settings['phoenix_release'], true, $extra_head, '', [], $brand);
 }

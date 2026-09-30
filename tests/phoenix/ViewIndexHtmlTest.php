@@ -242,5 +242,6 @@ class ViewIndexHtmlTest extends PhoenixTestCase
     {
         $html = view_index_html($this->fixture(), false, '', ['wordmark' => 'Ashrise']);
         $this->assertStringContainsString('<span class="ph-wordmark">Ashrise</span>', $html);
+        $this->assertStringContainsString('<title>Torrent Index — Ashrise</title>', $html);
     }
 }

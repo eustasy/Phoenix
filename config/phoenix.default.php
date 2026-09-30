@@ -133,7 +133,8 @@ $settings['public_favicon'] = '';
 /* image URL replacing the flame mark in the public header, on this */
 /* site like public_favicon; empty = the Phoenix flame */
 $settings['public_mark'] = '';
-/* name beside the mark in the public header; empty = Phoenix */
+/* name beside the mark in the public header, and in the public pages' */
+/* titles; empty = Phoenix */
 $settings['public_wordmark'] = '';
 
 ////	Logging & Debugging

@@ -49,7 +49,7 @@ $body = (string) ob_get_clean();
 $inline_js = 'const ANNOUNCE = '.json_encode($announce_url).";\n"
     .(string) file_get_contents(__DIR__.'/assets/_magnet.js');
 
-echo view_public_layout_html('Magnet Generator — Phoenix', $body, 'magnet', '', true, $extra_head, $inline_js, ['/assets/torrent-parse.js'], [
+echo view_public_layout_html('Magnet Generator', $body, 'magnet', '', true, $extra_head, $inline_js, ['/assets/torrent-parse.js'], [
     'favicon' => $settings['public_favicon'],
     'mark' => $settings['public_mark'],
     'wordmark' => $settings['public_wordmark'],
