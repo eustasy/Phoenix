@@ -37,7 +37,7 @@ $settings = settings_load(
 // rather than one string so a machine reading the JSON, XML or scrape output
 // gets the version on its own — a client comparing versions should never have
 // to parse a codename out of them. The HTML surfaces join them for display.
-$settings['phoenix_version'] = 'v5.0';
+$settings['phoenix_version'] = 'v5.1';
 $settings['phoenix_release'] = 'Boulevard';
 
 ////	Resolve the GeoLite2 database

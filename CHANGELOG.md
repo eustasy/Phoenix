@@ -1,5 +1,17 @@
 # Phoenix Changelog
 
+## v5.1 - 29/10/2026 - Boulevard
+
+Branding for the public pages, and an admin panel that can live under any name.
+Upgrading from 5.0 needs no schema or configuration changes.
+
+- FEATURE: **Rebrand the public pages** ([#79](https://github.com/eustasy/phoenix/issues/79)). `public_favicon`, `public_mark` and `public_wordmark` replace Phoenix's favicon, flame mark and name on the torrent index, stats and magnet pages. The wordmark also names the site in their titles (`Torrent Index — Ashrise`). All three are empty by default, and the admin panel and login always keep Phoenix's branding. Serve the images from the tracker's own site, because the public pages' Content Security Policy only loads same-origin images. See [CONFIGURATION.md](CONFIGURATION.md#public-page-branding).
+- FEATURE: **`admin.php` can be renamed.** Redirects inside the admin panel now resolve against whatever the script is called, so `public/admin.php` can be moved to a hard-to-guess name and rate-limited, as an alternative to removing it after setup. See [README.md](README.md), [APACHE.md](APACHE.md) and [NGINX.md](NGINX.md).
+- IMPROVEMENT: The public header gets the admin sidebar's red treatment, and the public page titles match the new wordmark.
+- IMPROVEMENT: The optional 2FA works with **authenticatron 4.2**, which makes enrolment QR codes with an MIT/Apache-licensed library instead of a GPL one. `composer update eustasy/authenticatron` picks it up, and it needs `ext-mbstring`.
+- MAINTENANCE: Install eustasy/.Normal 5.0, keeping Phoenix's MariaDB-backed test and smoke workflows. Markdown and shell scripts are formatted with Qlty, and YAML linting excludes the deployed workflow configs.
+- MAINTENANCE: Bump `qltysh/qlty-action/coverage`.
+
 ## v5.0 - 12/09/2026 - Boulevard
 
 Phoenix 5.0 is the first stable release of a ground-up rebuild. The whole 4.x

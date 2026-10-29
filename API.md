@@ -291,7 +291,7 @@ Unauthenticated.
 ```json
 {
   "tracker": {
-    "version": "v5.0",
+    "version": "v5.1",
     "release": "Boulevard",
     "peers": 346,
     "seeders": 343,
@@ -304,9 +304,9 @@ Unauthenticated.
 ```
 
 The XML form puts the version on the root element:
-`<tracker version="v5.0" release="Boulevard">`.
+`<tracker version="v5.1" release="Boulevard">`.
 
-`version` is the version alone (`v5.0`) and `release` its codename
+`version` is the version alone (`v5.1`) and `release` its codename
 (`Boulevard`), kept separate so a client comparing versions never has to parse a
 codename out of a display string. The HTML surfaces join them for display.
 
@@ -359,10 +359,10 @@ check the API is present without a key.
 
 ```console
 $ curl https://tracker.example.com/api/
-{"phoenix":{"version":"v5.0","release":"Boulevard"}}
+{"phoenix":{"version":"v5.1","release":"Boulevard"}}
 ```
 
-XML: `<phoenix><version>v5.0</version><release>Boulevard</release></phoenix>`.
+XML: `<phoenix><version>v5.1</version><release>Boulevard</release></phoenix>`.
 
 ### GET /api/torrents
 
