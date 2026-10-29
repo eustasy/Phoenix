@@ -1,4 +1,4 @@
-# eustasy/.Normal 4.0beta16
+# eustasy/.Normal 5.0
 name: "Normal: PHP"
 on:
   workflow_dispatch:
@@ -31,7 +31,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: eustasy/.normal/php@v4
+      - uses: eustasy/.normal/php@v5
         with:
           php-version: ${{ matrix.php-version }}
           extensions: gd
