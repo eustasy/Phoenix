@@ -33,7 +33,7 @@ An optional TOTP second factor can be enrolled alongside the password, and is re
 
 The admin panel supports an optional TOTP second factor (the codes from authenticator apps like Google Authenticator or Aegis), on top of the admin password.
 
-1. Run `composer require eustasy/authenticatron` (the QR code needs PHP's `gd` extension; without it the installer falls back to showing the secret and `otpauth://` URL for manual entry).
+1. Run `composer require eustasy/authenticatron` (it needs PHP's `mbstring` extension, and the QR code needs `gd`; without `gd` the installer falls back to showing the secret and `otpauth://` URL for manual entry).
 2. During install, scan the displayed QR code with your authenticator app, then enter a current code to confirm and enable 2FA. Leave the code blank to skip it — the panel stays password-only.
 
 Once enabled, the login page asks for the 6-digit code alongside the password. To recover from a lost authenticator, remove the `$settings['admin_totp_secret'] = '...';` line from `config/phoenix.custom.php`; the panel reverts to password-only and you can re-enrol.

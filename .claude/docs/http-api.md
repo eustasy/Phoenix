@@ -36,7 +36,7 @@ here and passed to the shared layout via `$settings` (gated on installed tables 
 - Failed logins are throttled (`admin_login_delay`, escalating, capped by
   `admin_login_delay_max`).
 - Optional TOTP second factor when `admin_totp_secret` is set (needs
-  `eustasy/authenticatron`; QR needs ext-gd). Lost device → remove the secret
+  `eustasy/authenticatron`, which needs ext-mbstring; QR needs ext-gd). Lost device → remove the secret
   line to revert to password-only.
 - Sessions are hardened; all mutating admin forms carry a CSRF token
   (`auth.csrf.token.php` / `auth.csrf.verify.php`).
