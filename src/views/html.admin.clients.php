@@ -135,7 +135,11 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
                 ($historical ? 'Downloads' : 'Peers').' '.$sort_ico.'</th>'.
             '<th class="ph-sort table-col-numeric" data-type="num">Share '.$sort_ico.'</th>'.
             '<th>Major versions</th>'.
-        '</tr></thead><tbody>'.$rows.'</tbody></table></div>';
+        '</tr></thead><tbody>'.$rows.'</tbody></table>'.
+        // Revealed by tables.js when the filter matches nothing, so an empty
+        // result says so rather than leaving a bare header row.
+        '<div class="ph-empty" hidden><span class="ph-ico" data-lucide="search-x"></span>'.
+            '<p>No clients match your filter.</p></div></div>';
 
     // Same chart script as the dashboard; it draws whatever families it is
     // given, and a single '' version renders as one solid bar. Charted by major
