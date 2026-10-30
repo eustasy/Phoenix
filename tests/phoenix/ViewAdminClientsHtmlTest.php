@@ -157,4 +157,16 @@ class ViewAdminClientsHtmlTest extends TestCase
         // And the table reads the same way, so chart and table agree.
         $this->assertMatchesRegularExpression('/>5<\/abbr>.*>4<\/abbr>.*>3<\/abbr>/s', $html);
     }
+
+    public function testTableCarriesAHiddenEmptyStateForTheFilter(): void
+    {
+        $html = view_admin_clients_html($this->settings(), 'live', ['Transmission' => ['4.1.3.0' => 3]], 3, 'tok');
+
+        // tables.js reveals the .ph-empty beside the table when a filter leaves
+        // no rows; without one, an empty result is just a header.
+        $this->assertMatchesRegularExpression(
+            '/<table id="tbl-clients">.*<\/table><div class="ph-empty" hidden>.*No clients match your filter\./s',
+            $html,
+        );
+    }
 }
