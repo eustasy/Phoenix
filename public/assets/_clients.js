@@ -1,7 +1,12 @@
 /* Phoenix — client breakdown chart (admin Dashboard).
- * Inlined by PHP inside a <script> tag, prefixed with `var CLIENTS = {…};` —
- * client family => { version => peer count }, biggest family first. Draws one
- * horizontal bar per family, divided into its versions.
+ * Inlined by PHP inside a <script> tag, prefixed with `var CLIENTS = […];` —
+ * [[family, [[major, count], …]], …] from stats_client_chart(), biggest family
+ * first and newest major first within each. Draws one horizontal bar per
+ * family, divided into its versions.
+ *
+ * Lists of pairs, not objects: an object would hand back integer-like keys
+ * (a family named "53", majors "3" and "4") first and in ascending order,
+ * whatever order PHP sorted them into.
  *
  * Horizontal, because family names are words and would otherwise be rotated or
  * truncated; stacked, because the question is "how much of my swarm is
@@ -18,7 +23,7 @@
 function phClientTheme() {
   var dark = document.documentElement.classList.contains("theme-dark")
   return {
-    // Shades of the action colour, darkest for the most-used version, so a bar
+    // Shades of the action colour, strongest for the newest version, so a bar
     // reads as one family at a glance and still separates into versions.
     shades: dark ? ["#abcfe2", "#7ab4d6", "#4385be", "#2d6ca8", "#1f4f80"] : ["#205ea6", "#4385be", "#66a0c8", "#a1cbe4", "#c6dde8"],
     grid: dark ? "rgba(255,252,240,0.14)" : "rgba(16,15,15,0.14)",
@@ -30,15 +35,17 @@ function phClientChart() {
   var el = document.getElementById("clients-chart")
   if (!el || typeof Chart === "undefined") return
 
-  var families = Object.keys(CLIENTS)
-  if (!families.length) return
+  if (!CLIENTS.length) return
+  var families = CLIENTS.map(function (c) {
+    return c[0]
+  })
 
   // One dataset per stack position rather than per version: versions differ
   // between families, so stacking by name would leave most cells empty. Slot 0
-  // is each family's most-used version, slot 1 the next, and so on.
+  // is each family's newest version, slot 1 the next, and so on.
   var depth = 0
-  families.forEach(function (f) {
-    depth = Math.max(depth, Object.keys(CLIENTS[f]).length)
+  CLIENTS.forEach(function (c) {
+    depth = Math.max(depth, c[1].length)
   })
 
   var c = phClientTheme()
@@ -50,15 +57,13 @@ function phClientChart() {
       label: "v" + (slot + 1),
       backgroundColor: shades[Math.min(slot, shades.length - 1)],
       borderWidth: 0,
-      data: families.map(function (f) {
-        var versions = Object.keys(CLIENTS[f])
-        return slot < versions.length ? CLIENTS[f][versions[slot]] : 0
+      data: CLIENTS.map(function (c) {
+        return slot < c[1].length ? c[1][slot][1] : 0
       }),
       // The version name each slot holds, per family — read back by the
       // tooltip, since the dataset label is only a stack position.
-      phNames: families.map(function (f) {
-        var versions = Object.keys(CLIENTS[f])
-        return slot < versions.length ? versions[slot] : null
+      phNames: CLIENTS.map(function (c) {
+        return slot < c[1].length ? c[1][slot][0] : null
       }),
     })
   }

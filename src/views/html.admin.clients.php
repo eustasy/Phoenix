@@ -25,6 +25,7 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
 {
     require_once __DIR__.'/html.admin.layout.php';
     require_once __DIR__.'/../functions/cdn.assets.php';
+    require_once __DIR__.'/../functions/stats.client.chart.php';
     require_once __DIR__.'/../functions/stats.client.majors.php';
 
     $historical = $metric === 'events';
@@ -140,16 +141,8 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
     // given, and a single '' version renders as one solid bar. Charted by major
     // rather than exact version: a family's bar otherwise fragments into a
     // sliver per point release and stops being readable.
-    $chart_families = [];
-    foreach ($families as $family => $versions) {
-        $chart_families[$family] = [];
-        foreach (stats_client_majors($versions) as $major => $group) {
-            $chart_families[$family][$major] = $group['total'];
-        }
-    }
-
     $inline_js = 'var CLIENTS = '.
-        (string) json_encode($chart_families, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
+        (string) json_encode(stats_client_chart($families), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
         (string) file_get_contents(__DIR__.'/../../public/assets/_clients.js');
     $extra_srcs = [
         '/assets/tables.js',

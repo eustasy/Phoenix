@@ -39,7 +39,7 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
     require_once __DIR__.'/html.admin.layout.php';
     require_once __DIR__.'/../functions/cdn.assets.php';
     require_once __DIR__.'/../functions/format.bytes.php';
-    require_once __DIR__.'/../functions/stats.client.majors.php';
+    require_once __DIR__.'/../functions/stats.client.chart.php';
 
     $body = '';
 
@@ -379,16 +379,8 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
     if ($clients !== []) {
         // Charted by major rather than exact version, as the Clients page is:
         // a family's bar otherwise fragments into a sliver per point release.
-        $chart_clients = [];
-        foreach ($clients as $family => $versions) {
-            $chart_clients[$family] = [];
-            foreach (stats_client_majors($versions) as $major => $group) {
-                $chart_clients[$family][$major] = $group['total'];
-            }
-        }
-
         $inline_js .= 'var CLIENTS = '.
-            (string) json_encode($chart_clients, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
+            (string) json_encode(stats_client_chart($clients), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
             (string) file_get_contents(__DIR__.'/../../public/assets/_clients.js')."\n";
     }
     if ($bandwidth !== []) {
