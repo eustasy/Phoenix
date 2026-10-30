@@ -147,6 +147,7 @@ function view_admin_clients_html(array $settings, string $metric, array $familie
     // sliver per point release and stops being readable.
     $inline_js = 'var CLIENTS = '.
         (string) json_encode(stats_client_chart($families), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
+        'var CLIENTS_UNIT = '.(string) json_encode($unit).";\n".
         (string) file_get_contents(__DIR__.'/../../public/assets/_clients.js');
     $extra_srcs = [
         '/assets/tables.js',

@@ -381,6 +381,8 @@ function view_admin_html(array $settings, bool $tables_installed, bool $show_ins
         // a family's bar otherwise fragments into a sliver per point release.
         $inline_js .= 'var CLIENTS = '.
             (string) json_encode(stats_client_chart($clients), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).";\n".
+            // The dashboard charts the live swarm only.
+            'var CLIENTS_UNIT = "peer";'."\n".
             (string) file_get_contents(__DIR__.'/../../public/assets/_clients.js')."\n";
     }
     if ($bandwidth !== []) {
