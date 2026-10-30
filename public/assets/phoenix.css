@@ -850,6 +850,20 @@ th.ph-sort:not([aria-sort]) .ph-sort-asc { display: none; }
 .ph-srv.is-critical { --ph-srv-color: var(--color-danger); }
 .ph-srv.is-warning .ph-srv-val,
 .ph-srv.is-critical .ph-srv-val { color: var(--ph-srv-color); }
+/* The sidebar is red in both themes, so the page tokens above — tuned for the
+   page background — go grey-on-red in light mode. Paint the gauges from the
+   red sidebar treatment instead: text like the nav, a paper track like the
+   active item, and light hues that read on red whichever theme is on. The
+   alert hues match the sidebar's nav badges. */
+.ph-sidebar .ph-srv-name { color: var(--flexoki-red-100); }
+.ph-sidebar .ph-srv-val { color: var(--flexoki-red-200); }
+.ph-sidebar .ph-srv-bar { background-color: rgba(255, 252, 240, 0.16); }
+.ph-sidebar .ph-srv--cpu { --ph-srv-color: var(--flexoki-orange-300); }
+.ph-sidebar .ph-srv--memory { --ph-srv-color: var(--flexoki-blue-300); }
+.ph-sidebar .ph-srv--swap { --ph-srv-color: var(--flexoki-purple-300); }
+.ph-sidebar .ph-srv--disk { --ph-srv-color: var(--flexoki-green-300); }
+.ph-sidebar .ph-srv.is-warning { --ph-srv-color: var(--flexoki-yellow-300); }
+.ph-sidebar .ph-srv.is-critical { --ph-srv-color: var(--flexoki-red-300); }
 
 /* --------------------------------------------------------------------------
    Dashboard maintenance alerts — an overdue or never-run task (view_admin_html).
