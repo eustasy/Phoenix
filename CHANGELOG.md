@@ -2,8 +2,7 @@
 
 ## v5.1 - 29/10/2026 - Boulevard
 
-Branding for the public pages, and an admin panel that can live under any name.
-Upgrading from 5.0 needs no schema or configuration changes.
+_Upgrading from 5.0 needs no schema or configuration changes._
 
 - FEATURE: **Rebrand the public pages** ([#79](https://github.com/eustasy/phoenix/issues/79)). `public_favicon`, `public_mark` and `public_wordmark` replace Phoenix's favicon, flame mark and name on the torrent index, stats and magnet pages. The wordmark also names the site in their titles (`Torrent Index — Ashrise`). All three are empty by default, and the admin panel and login always keep Phoenix's branding. Serve the images from the tracker's own site, because the public pages' Content Security Policy only loads same-origin images. See [CONFIGURATION.md](CONFIGURATION.md#public-page-branding).
 - FEATURE: **`admin.php` can be renamed.** Redirects inside the admin panel now resolve against whatever the script is called, so `public/admin.php` can be moved to a hard-to-guess name and rate-limited, as an alternative to removing it after setup. See [README.md](README.md), [APACHE.md](APACHE.md) and [NGINX.md](NGINX.md).
