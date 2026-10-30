@@ -136,7 +136,7 @@ class ViewAdminClientsHtmlTest extends TestCase
 
         // Charted by exact version, a family's bar fragments into a sliver per
         // point release.
-        $this->assertStringContainsString('"Transmission":{"4":61,"3":7}', $html);
+        $this->assertStringContainsString('["Transmission",[["4",61],["3",7]]]', $html);
     }
 
     public function testChartSubBarsAreOrderedByVersionNotCount(): void
@@ -151,7 +151,9 @@ class ViewAdminClientsHtmlTest extends TestCase
             'tok',
         );
 
-        $this->assertStringContainsString('"Transmission":{"5":2,"4":61,"3":7}', $html);
+        // Pairs, not an object: the browser would read the object's numeric
+        // keys back as 3, 4, 5 whatever order they were written in.
+        $this->assertStringContainsString('["Transmission",[["5",2],["4",61],["3",7]]]', $html);
         // And the table reads the same way, so chart and table agree.
         $this->assertMatchesRegularExpression('/>5<\/abbr>.*>4<\/abbr>.*>3<\/abbr>/s', $html);
     }
