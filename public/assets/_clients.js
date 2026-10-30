@@ -2,7 +2,9 @@
  * Inlined by PHP inside a <script> tag, prefixed with `var CLIENTS = […];` —
  * [[family, [[major, count], …]], …] from stats_client_chart(), biggest family
  * first and newest major first within each. Draws one horizontal bar per
- * family, divided into its versions.
+ * family, divided into its versions. `var CLIENTS_UNIT = "…";` names what the
+ * counts are, singular — "peer" for the live swarm, "completed download" for
+ * the ledger — for the tooltip.
  *
  * Lists of pairs, not objects: an object would hand back integer-like keys
  * (a family named "53", majors "3" and "4") first and in ascending order,
@@ -11,7 +13,7 @@
  * Horizontal, because family names are words and would otherwise be rotated or
  * truncated; stacked, because the question is "how much of my swarm is
  * Transmission" first and "which Transmission" second. */
-/* global CLIENTS, Chart */
+/* global CLIENTS, CLIENTS_UNIT, Chart */
 
 // Theme colours, read at paint time rather than captured once: the class on
 // <html> flips under a live chart when the reader toggles the theme.
@@ -75,6 +77,10 @@ function phClientChart() {
       indexAxis: "y",
       responsive: true,
       maintainAspectRatio: false,
+      // Any point in a row's band opens that row's tooltip, not only the bar
+      // itself. Counts run from 1 to hundreds of thousands on one axis, so most
+      // bars are a few pixels wide, or less, and could not be hovered at all.
+      interaction: { mode: "index", axis: "y", intersect: false },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -82,7 +88,7 @@ function phClientChart() {
             label: function (ctx) {
               var name = ctx.dataset.phNames[ctx.dataIndex]
               if (!ctx.raw) return null
-              return (name ? name + ": " : "") + ctx.raw.toLocaleString() + " peers"
+              return (name ? name + ": " : "") + ctx.raw.toLocaleString() + " " + CLIENTS_UNIT + (ctx.raw === 1 ? "" : "s")
             },
           },
         },

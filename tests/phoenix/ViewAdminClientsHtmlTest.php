@@ -29,6 +29,8 @@ class ViewAdminClientsHtmlTest extends TestCase
         $this->assertStringContainsString('<canvas id="clients-chart">', $html);
         $this->assertStringContainsString('4.1.3.0', $html);
         $this->assertStringContainsString('>Peers ', $html);
+        // The chart's tooltip names the unit the view counts in.
+        $this->assertStringContainsString('var CLIENTS_UNIT = "peer";', $html);
         $this->assertStringContainsString('metric=events', $html);
     }
 
@@ -41,6 +43,7 @@ class ViewAdminClientsHtmlTest extends TestCase
         $html = view_admin_clients_html($this->settings(), 'events', $families, 364239, 'tok');
 
         $this->assertStringContainsString('>Downloads ', $html);
+        $this->assertStringContainsString('var CLIENTS_UNIT = "completed download";', $html);
         $this->assertStringContainsString('4.1.3.0', $html);
         $this->assertStringContainsString('metric=live', $html);
     }

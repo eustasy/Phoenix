@@ -107,6 +107,7 @@ class ViewAdminHtmlTest extends TestCase
         // Data is inlined for the chart script, like the geography map.
         $this->assertStringContainsString('var CLIENTS =', $html);
         $this->assertStringContainsString('"Transmission"', $html);
+        $this->assertStringContainsString('var CLIENTS_UNIT = "peer";', $html);
     }
 
     public function testClientChartAbsentWhenThereAreNoPeers(): void
