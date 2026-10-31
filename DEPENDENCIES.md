@@ -93,9 +93,9 @@ one means widening that policy too.
 Phoenix has no front-end build step. These load at runtime from third-party
 origins, so the reader's browser contacts them, not the server.
 
-- **[Lucide](https://lucide.dev) 1.44.0**, icons on every HTML page. From
+- **[Lucide](https://lucide.dev) 1.65.0**, icons on every HTML page. From
   cdn.jsdelivr.net.
-- **[Chart.js](https://www.chartjs.org) 4.5.1**, charts on the dashboard,
+- **[Chart.js](https://www.chartjs.org) 4.6.1**, charts on the dashboard,
   Clients and Bandwidth pages. From cdn.jsdelivr.net.
 - **[jsvectormap](https://github.com/themustafaomar/jsvectormap) 1.7.0**, with
   its world map data and stylesheet, for the Geography map. From
