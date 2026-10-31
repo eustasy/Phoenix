@@ -26,11 +26,18 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 
 ### Requirements
 
-- PHP 8.2+ (the latest supported release recommended) with the `mysqli` extension. The bundled `filter`, `json`, `session`, `xml`, `pcre`, and `date` extensions are also used and enabled by default.
-- A MySQL-compatible database — MariaDB recommended.
-- Apache 2.4 or Nginx 1.18+.
+- PHP 8.2+ — The latest supported release is recommended.
+  - The PHP extensions: `ext-mysqli`, `ext-filter`, `ext-json`, `ext-session`, `ext-xml`, `ext-pcre`, and `ext-date`.
+  - The `ext-gd`, `ext-mbstring`, and `ext-zlib` extensions are also recommended.
+  - `ext-maxminddb` is recommended if using the optional `maxmind-db/reader`.
+- A MySQL-compatible database — MariaDB is recommended.
+- Apache 2.4+ or Nginx 1.18+.
 
-Recommended and optional extras (two-factor auth, backups and cron, geo stats, error reporting) and the client-side libraries are listed in [DEPENDENCIES.md](./DEPENDENCIES.md).
+### Recommendations
+
+Composer support is not essential, but will aid in adding packages like:
+- [eustasy/Authenticatron](https://github.com/eustasy/authenticatron) — 2nd-factor-security for the admin area.
+- [maxmind-db/reader](https://github.com/maxmind/MaxMind-DB-Reader-php) — Enhance statistics with geographical locations.
 
 ### With server access
 
