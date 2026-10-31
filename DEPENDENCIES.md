@@ -28,9 +28,6 @@ image in `docker/Dockerfile`.
   `backup_compress` is on.
 - **cron**, to run `bin/` maintenance on a schedule. Without it, pruning runs on
   a share of announces, and backups only run when started from the admin panel.
-
-### Optional (Server)
-
 - **A GeoLite2-Country database** (`.mmdb`) from
   [MaxMind](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data), for
   geo stats. Its licence forbids bundling it. Phoenix looks for it at
@@ -38,6 +35,9 @@ image in `docker/Dockerfile`.
   `config/`.
 - **`ext-maxminddb`**, if geo stats are on. The pure-PHP reader works but is
   around 40× slower on the announce path.
+
+### Optional (Server)
+
 - **`ext-excimer`**, for Sentry profiling. Inert without it.
 
 ### Development (Server)
@@ -67,12 +67,12 @@ None.
 - **`eustasy/authenticatron` ^4.2**, for TOTP two-factor auth on the admin
   panel. Needs `ext-mbstring`, and `ext-gd` for the enrolment QR code. See
   [CONFIGURATION.md](CONFIGURATION.md) and [RECOVERY.md](RECOVERY.md).
-
-### Optional (Composer)
-
 - **`maxmind-db/reader` ^1.11**, for geo stats: country and continent on stat
   events, and the admin Geography page. Needs a GeoLite2-Country database, and
   `ext-maxminddb` for speed.
+
+### Optional (Composer)
+
 - **`sentry/sentry` ^4.31**, for error reporting to Sentry or a compatible
   monitor, through `report_errors` and the `src/hooks/` hooks.
 

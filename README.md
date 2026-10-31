@@ -13,6 +13,7 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 
 - [Installation](#installation)
   - [Requirements](#requirements)
+  - [Recommendations](#recommendations)
   - [With server access](#with-server-access)
   - [Managed LAMP / shared hosting](#managed-lamp--shared-hosting)
 - [Configuration](#configuration)
@@ -27,9 +28,9 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 ### Requirements
 
 - PHP 8.2+ — The latest supported release is recommended.
-  - The PHP extensions: `ext-mysqli`, `ext-filter`, `ext-json`, `ext-session`, `ext-xml`, `ext-pcre`, and `ext-date`.
+  - The PHP extensions: `ext-mysqli`, `ext-filter`, `ext-json`, `ext-session`, and `ext-xml`.
   - The `ext-gd`, `ext-mbstring`, and `ext-zlib` extensions are also recommended.
-  - `ext-maxminddb` is recommended if using the optional `maxmind-db/reader`.
+  - `ext-maxminddb` is recommended if using `maxmind-db/reader`.
 - A MySQL-compatible database — MariaDB is recommended.
 - Apache 2.4+ or Nginx 1.18+.
 
@@ -88,6 +89,7 @@ Every HTTP endpoint Phoenix exposes is documented in [API.md](./API.md) — the 
 - [LIMITS.md](./LIMITS.md) — how many peers and torrents an install carries, and what binds first.
 - [APACHE.md](./APACHE.md) — web server configuration for Apache 2.4.
 - [NGINX.md](./NGINX.md) — web server configuration for Nginx.
+- [DEPENDENCIES.md](./DEPENDENCIES.md) — every server, Composer and client dependency, and where it's declared.
 - [CONTRIBUTING.md](./CONTRIBUTING.md) — development environment, project structure, and contribution conventions.
 - [ALTERNATIVES.md](./ALTERNATIVES.md) — other BitTorrent tracker projects.
 - [CHANGELOG.md](./CHANGELOG.md) — release history.
