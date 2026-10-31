@@ -33,8 +33,10 @@ there is no manual hashing.
 not expose that gate:
 
 ```bash
-php -r "echo password_hash('your-new-password', PASSWORD_DEFAULT), PHP_EOL;"
+php -r 'echo password_hash(rtrim(fgets(STDIN), "\r\n"), PASSWORD_DEFAULT), PHP_EOL;'
 ```
+
+Run it, type the new password (it shows as you type), and press Enter.
 
 Set `$settings['admin_password']` to the printed value. Editing the file
 directly bypasses the length policy, so pick a strong password yourself.
