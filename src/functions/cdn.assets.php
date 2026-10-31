@@ -28,13 +28,13 @@ function cdn_assets(): array
     return [
         // Icons, on every HTML page.
         'lucide' => [
-            'url' => 'https://cdn.jsdelivr.net/npm/lucide@1.44.0/dist/umd/lucide.min.js',
-            'integrity' => 'sha256-VSX/Muw2o9JWn2tkUpFFTU3+eQfHMfHo7BqP2qnki/0=',
+            'url' => 'https://cdn.jsdelivr.net/npm/lucide@1.65.0/dist/umd/lucide.min.js',
+            'integrity' => 'sha256-r9D1nvmWLcLN4PMaWKkNRdokDqzq8PeD1sD1EDgLqx4=',
         ],
         // Charts: the dashboard, Clients and Bandwidth.
         'chart' => [
-            'url' => 'https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js',
-            'integrity' => 'sha256-SERKgtTty1vsDxll+qzd4Y2cF9swY9BCq62i9wXJ9Uo=',
+            'url' => 'https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js',
+            'integrity' => 'sha256-hzZMwrKnamaEkp59a4Cxiol3lNs4QAyv8fzxeRxpJdI=',
         ],
         // The Geography map: library, world map data, and the library's CSS.
         'jsvectormap' => [
