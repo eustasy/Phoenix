@@ -1,27 +1,35 @@
 # eustasy/.Normal 5.0
 name: "Test: PHP"
+# Paths match smoke-php.yml exactly: both upload coverage to Qlty for the same
+# commit, and the badge only shows the full figure when both have run on it.
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
       - "**.php"
+      - "sql/**"
       - "tests/**"
       - "composer.json"
       - "composer.lock"
       - "phpunit.xml"
       - "phpunit.xml.dist"
+      - "phpunit.smoke.xml.dist"
       - ".github/workflows/test-php.yml"
+      - ".github/workflows/smoke-php.yml"
   pull_request:
     branches: [main]
     paths:
       - "**.php"
+      - "sql/**"
       - "tests/**"
       - "composer.json"
       - "composer.lock"
       - "phpunit.xml"
       - "phpunit.xml.dist"
+      - "phpunit.smoke.xml.dist"
       - ".github/workflows/test-php.yml"
+      - ".github/workflows/smoke-php.yml"
 
 permissions:
   contents: read
