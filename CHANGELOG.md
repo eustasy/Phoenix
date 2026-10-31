@@ -1,8 +1,8 @@
 # Phoenix Changelog
 
-## v5.1 - 29/10/2026 - Boulevard
+## v5.1 - 31/10/2026 - Boulevard
 
-Minor update introducting customizable branding for the public pages, and an admin panel that can be hosted under alternative paths and filenames.
+Minor update introducing customizable branding for the public pages, and an admin panel that can be hosted under alternative paths and filenames.
 
 _Upgrading from 5.0 needs no schema or configuration changes._
 
@@ -10,8 +10,18 @@ _Upgrading from 5.0 needs no schema or configuration changes._
 - FEATURE: **`admin.php` can be renamed.** Redirects inside the admin panel now resolve against whatever the script is called, so `public/admin.php` can be moved to a hard-to-guess name and rate-limited, as an alternative to removing it after setup. See [README.md](README.md), [APACHE.md](APACHE.md) and [NGINX.md](NGINX.md).
 - IMPROVEMENT: The public header gets the admin sidebar's red treatment, and the public page titles match the new wordmark.
 - IMPROVEMENT: The optional 2FA works with **authenticatron 4.2**, which makes enrolment QR codes with an MIT/Apache-licensed library instead of a GPL one. `composer update eustasy/authenticatron` picks it up, and it needs `ext-mbstring`.
+- BUGFIX: **The client chart keeps its sort order** ([#82](https://github.com/eustasy/phoenix/issues/82)). A client with a numeric name, like `53`, jumped to the top of the chart, and each bar's versions came out oldest first.
+- BUGFIX: **The client chart's popup opens anywhere along a row** ([#88](https://github.com/eustasy/phoenix/issues/88)), not only over the bar, so a client with a handful of downloads can be read next to one with hundreds of thousands. It also names the right unit: completed downloads on the all-time view, and peers elsewhere.
+- BUGFIX: The sidebar's server gauges are readable on the red sidebar in light mode ([#83](https://github.com/eustasy/phoenix/issues/83)).
+- BUGFIX: The Clients table says when the filter matches nothing, instead of showing only its header ([#86](https://github.com/eustasy/phoenix/issues/86)).
+- DOCS: **[DEPENDENCIES.md](DEPENDENCIES.md)** lists every server, Composer and client dependency, whether it's required, recommended or optional, and where each is declared.
+- DOCS: The recovery step for setting the admin password hash reads the password from input, so the shell and PHP can't alter a `!` or `$` in it. See [RECOVERY.md](RECOVERY.md).
 - MAINTENANCE: Install eustasy/.Normal 5.0, keeping Phoenix's MariaDB-backed test and smoke workflows. Markdown and shell scripts are formatted with Qlty, and YAML linting excludes the deployed workflow configs.
-- MAINTENANCE: Bump `qltysh/qlty-action/coverage`.
+- MAINTENANCE: Bump `qltysh/qlty-action/coverage` to 2.5.0 and, in the smoke workflow, `shivammathur/setup-php` to 2.40.0.
+- MAINTENANCE: Bump Lucide to 1.65.0 and Chart.js to 4.6.1.
+- MAINTENANCE: The Docker dev image runs PHP 8.5, and Dependabot also watches the Dockerfile and compose file.
+- MAINTENANCE: PHPUnit 13 is allowed alongside 11 and 12, so each supported PHP version tests with the newest PHPUnit it can run.
+- MAINTENANCE: The PHP test and smoke workflows run on the same paths, so their combined coverage report stays complete.
 
 ## v5.0 - 12/09/2026 - Boulevard
 
