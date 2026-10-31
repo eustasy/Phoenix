@@ -1,16 +1,5 @@
 # Dependencies
 
-Everything Phoenix relies on outside its own code. Dependencies come from three
-places: the server it runs on, Composer packages, and what the browser loads.
-Each section starts with where those dependencies are declared. Server and
-Composer dependencies are split into **Required**, **Recommended**,
-**Optional**, and **Development**. Client dependencies are all loaded by
-default, so they are a single list.
-
-Composer is not needed to run Phoenix. Every Composer package is optional,
-guarded with `class_exists()`, and the feature it enables stays switched off
-without it. The admin **Diagnostics** page reports which are installed.
-
 ## Server
 
 Declared in `composer.json` (`require`: the PHP version and extensions) and
@@ -61,6 +50,10 @@ image in `docker/Dockerfile`.
   linters CI enforces. Configuration is in `.qlty/`.
 
 ## Composer
+
+Composer is not needed to run Phoenix. Every Composer package is optional,
+guarded with `class_exists()`, and the feature it enables stays switched off
+without it. The admin **Diagnostics** page reports which are installed.
 
 Declared in `composer.json`: `suggest` for the optional packages, and
 `require-dev` for development. Installed into `vendor/`.
