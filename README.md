@@ -36,6 +36,7 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 ### Recommendations
 
 Composer support is not essential, but will aid in adding packages like:
+
 - [eustasy/Authenticatron](https://github.com/eustasy/authenticatron) — 2nd-factor-security for the admin area.
 - [maxmind-db/reader](https://github.com/maxmind/MaxMind-DB-Reader-php) — Enhance statistics with geographical locations.
 
