@@ -9,7 +9,7 @@
 # The application is NOT copied in: docker-compose.dev.yml mounts the working
 # tree and runs docker/entrypoint.sh, so this image only needs rebuilding when
 # the toolchain changes.
-FROM php:8.4-cli
+FROM php:8.5-cli
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
