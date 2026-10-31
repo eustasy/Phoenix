@@ -16,8 +16,12 @@ optional public index (`public/index.php`), a public stats page
 and an authenticated management REST API (`public/api/`).
 
 **Stack:** PHP 8.2–8.6, `mysqli`. No framework, no front-end build step. Optional
-Composer libraries (`geoip2/geoip2` for geo stats, `eustasy/authenticatron` for
-admin 2FA), loaded conditionally and guarded with `class_exists()`. PHPUnit for
+Composer libraries (`maxmind-db/reader` for geo stats, `eustasy/authenticatron`
+for admin 2FA, `sentry/sentry` for error reporting), loaded conditionally and
+guarded with `class_exists()`. Client-side libraries load from jsDelivr, pinned
+with SRI in `cdn_assets()`; a new external origin means widening the CSP in
+`http_security_headers()`. Every dependency, and where it's declared, is in
+`DEPENDENCIES.md` — keep it in step when adding or bumping one. PHPUnit for
 tests; qlty orchestrates phpstan (level 9) + php-cs-fixer + other linters.
 
 ## Non-negotiable invariants
@@ -101,6 +105,7 @@ Repo-level docs: `README.md` (install), `CONFIGURATION.md` (every operator
 setting — the user-facing counterpart to [configuration.md](docs/configuration.md),
 which covers the settings *model*), `RECOVERY.md` (admin lockout, 2FA removal, backup restore),
 `API.md` (every HTTP endpoint, request and
-response), `CONTRIBUTING.md` (dev env, Docker), `MIGRATING.md` (3.2.x→5.0),
+response), `DEPENDENCIES.md` (every server, Composer and client dependency),
+`CONTRIBUTING.md` (dev env, Docker), `MIGRATING.md` (3.2.x→5.0),
 `LIMITS.md` (measured ceilings and what binds first), `APACHE.md`/`NGINX.md`
 (server config), `BEPs.md` (spec coverage), `CHANGELOG.md`.

@@ -30,6 +30,8 @@ A lightweight BitTorrent Tracker written in PHP, with an SQL backend, for people
 - A MySQL-compatible database — MariaDB recommended.
 - Apache 2.4 or Nginx 1.18+.
 
+Recommended and optional extras (two-factor auth, backups and cron, geo stats, error reporting) and the client-side libraries are listed in [DEPENDENCIES.md](./DEPENDENCIES.md).
+
 ### With server access
 
 Use this path when you control the web server configuration (VPS, dedicated server, etc.).
