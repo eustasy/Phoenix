@@ -19,6 +19,10 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    # Add new majors to a constraint rather than replacing it: phpunit is
+    # "^11.0 || ^12.0 || ^13.0" so each PHP version in the test matrix resolves
+    # the newest major it can run, and a replaced constraint drops PHP 8.2.
+    versioning-strategy: widen
     allow:
       - dependency-type: "all"
     groups:
