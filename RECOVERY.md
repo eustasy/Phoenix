@@ -36,10 +36,7 @@ not expose that gate:
 php -r 'echo password_hash(rtrim(fgets(STDIN), "\r\n"), PASSWORD_DEFAULT), PHP_EOL;'
 ```
 
-Run it, type the new password, and press Enter. The password is read from input
-rather than written into the command, so the shell can't expand a `!` in it,
-PHP can't interpolate a `$`, and it stays out of your shell history. It does
-show on screen as you type.
+Run it, type the new password (it shows as you type), and press Enter.
 
 Set `$settings['admin_password']` to the printed value. Editing the file
 directly bypasses the length policy, so pick a strong password yourself.
