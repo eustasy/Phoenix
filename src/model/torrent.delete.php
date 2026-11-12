@@ -5,7 +5,7 @@ declare(strict_types=1);
 ////	torrent_delete
 // Delete a torrent row by info_hash. When $user is non-null the DELETE is
 // additionally guarded by `AND user = ?`, so a caller can only remove its own
-// torrents; the API always passes the user, while the admin panel (#56) passes
+// torrents; the API always passes the user, while the admin panel passes
 // null to remove any torrent. Peer rows are not touched here — callers run
 // peers_delete_by_torrent() afterwards so the swarm disappears at once.
 // Returns true when the statement executed, false on error. Uses a prepared

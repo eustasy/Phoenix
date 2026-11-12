@@ -32,7 +32,7 @@ by the bootstrap (see below).
 
 Only `public/` is meant to be web-served. Each entry point is thin: it
 bootstraps via `require_once __DIR__.'/../src/phoenix.php'`, then delegates to a
-controller. `announce.php` is ~12 lines.
+controller.
 
 - **`announce.php`** → `announce_controller()` — BEP 3 announce. Sanitize →
   validate info_hash/peer_id → resolve IPs/ports → rate-limit → dispatch on
@@ -75,8 +75,8 @@ order, it:
    `default_charset` to `iso-8859-1` for the binary protocol.
 2. Conditionally loads the Composer autoloader (optional libs).
 3. `settings_load()` (`settings.load.php`) loads `phoenix.default.php` then
-   `phoenix.custom.php` (or hard-coded fallbacks) and returns `$settings`. Then
-   injects `$settings['phoenix_version']`.
+   `phoenix.custom.php` when it is readable, and returns `$settings`. Then
+   injects `$settings['phoenix_version']` and `$settings['phoenix_release']`.
 4. Resolves the GeoLite2 DB path only when `stats_geo` is on (keeps the announce
    hot path free of file stats).
 5. `error_configure()` applies the operator's debug/error_log overrides.

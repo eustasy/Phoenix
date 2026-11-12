@@ -7,7 +7,7 @@ declare(strict_types=1);
 // shutdown errors through phoenix_hook_event('error', ...) so an external
 // monitor (e.g. the src/hooks/phoenix.error.php Sentry handler) sees them.
 // Called from phoenix.php only when $settings['report_errors'] is on, so a
-// default install registers nothing and behaves exactly as before.
+// default install registers nothing.
 //
 // The handlers report and log; they do not try to render a tracker response. An
 // uncaught exception or fatal is a bug, not a client-facing condition — the

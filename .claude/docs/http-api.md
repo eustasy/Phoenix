@@ -30,9 +30,10 @@ here and passed to the shared layout via `$settings` (gated on installed tables 
 
 ### Admin auth
 
-- Auth applies **only when `admin_password` is set** (bcrypt hash). Empty
-  password → auth skipped entirely (intended for first setup; secure or remove
-  `admin.php` afterward).
+- Auth applies when `admin_password` is set (bcrypt hash). An empty password
+  shows the one-time **set admin password** gate instead of the panel, unless
+  `admin_auth_optional` is set, which runs the panel unauthenticated for an
+  `admin.php` already protected by the proxy.
 - Failed logins are throttled (`admin_login_delay`, escalating, capped by
   `admin_login_delay_max`).
 - Optional TOTP second factor when `admin_totp_secret` is set (needs

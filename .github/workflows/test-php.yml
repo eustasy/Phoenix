@@ -1,4 +1,4 @@
-# eustasy/.Normal 5.0
+# eustasy/.Normal 5.1
 name: "Test: PHP"
 # Paths match smoke-php.yml exactly: both upload coverage to Qlty for the same
 # commit, and the badge only shows the full figure when both have run on it.

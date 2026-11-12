@@ -8,7 +8,7 @@ declare(strict_types=1);
 // probabilistic cleanup → build and render the peer-list response.
 // Returns the rendered body string. Returns '' for ?event=stopped (the
 // client expects no body). Calls tracker_error() on validation failure
-// (which exits, same contract as before).
+// (which exits).
 
 /** @param PhoenixSettings $settings */
 function announce_controller(mysqli $connection, array $settings, int $time): string

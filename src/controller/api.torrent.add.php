@@ -18,7 +18,7 @@ declare(strict_types=1);
 // `torrent`) is parsed server-side and supplies the BASE for every field —
 // info_hash, name, size, filename, files, trackers, webseeds. Any explicitly
 // posted parameter then OVERRIDES its parsed counterpart. With no upload, the
-// core fields behave exactly as before and the meta params are optional extras.
+// core fields come from the parameters alone and the meta params are optional extras.
 
 /** @param PhoenixSettings $settings */
 function api_torrent_add_controller(mysqli $connection, array $settings): string

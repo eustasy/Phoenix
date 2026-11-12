@@ -9,8 +9,8 @@ declare(strict_types=1);
 // (bin/optimize-database.php): OPTIMIZE TABLE is a full rebuild on InnoDB, and
 // a table in steady state has nothing for it to reclaim.
 //
-// Only runs when clean_with_cron is enabled; that setting disables the per-request fallback
-// in public/announce.php so the announce path doesn't pay the pruning overhead on any requests.
+// Only runs when clean_with_cron is enabled; that setting disables the per-request
+// fallback in announce_controller() so the announce path never pays for pruning.
 require_once __DIR__.'/../src/phoenix.php';
 
 if ($settings['clean_with_cron']) {

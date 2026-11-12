@@ -78,12 +78,12 @@ Full list with comments is in `config/phoenix.default.php`. Highlights:
   is `img-src 'self' data:`.
 
 **API** (see [http-api.md](http-api.md))
-- `api_keys` — `'user' => 'key'` pairs; `'*'` user is the admin. Empty disables.
+- `api_keys` — `'user' => sha256-hash` pairs, written by the admin API Keys page; `'*'` user is the admin. Empty disables.
 - `api_allow_delete` — allow deletion via the API (admin always can).
 - `torrent_upload_max` — max `.torrent` upload size for server-side parsing.
 
 **Admin / 2FA** (see [http-api.md](http-api.md))
-- `admin_password` (bcrypt; empty = no auth), `admin_login_delay` /
+- `admin_password` (bcrypt; empty = the set-password gate, or no auth with `admin_auth_optional`), `admin_login_delay` /
   `admin_login_delay_max`, `admin_totp_secret`, `admin_peers_rows`,
   `admin_torrents_rows`, `admin_bandwidth_rows`.
 
