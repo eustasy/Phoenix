@@ -28,8 +28,8 @@ function cdn_assets(): array
     return [
         // Icons, on every HTML page.
         'lucide' => [
-            'url' => 'https://cdn.jsdelivr.net/npm/lucide@1.65.0/dist/umd/lucide.min.js',
-            'integrity' => 'sha256-r9D1nvmWLcLN4PMaWKkNRdokDqzq8PeD1sD1EDgLqx4=',
+            'url' => 'https://cdn.jsdelivr.net/npm/lucide@1.72.0/dist/umd/lucide.min.js',
+            'integrity' => 'sha256-X03Xbr3IZ6IlxWeR4FX26uM1YhpPHDyKodyVcH3J1bw=',
         ],
         // Charts: the dashboard, Clients and Bandwidth.
         'chart' => [
