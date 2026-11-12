@@ -61,7 +61,7 @@ require_once __DIR__.'/functions/tracker.error.php';
 // register handlers that route uncaught exceptions + fatal shutdown errors
 // through phoenix_hook_event('error', ...). Both run after the autoload/settings
 // load and BEFORE the DB connect below, so even a connection failure lands in an
-// initialised context. Off by default = nothing registered, identical to before.
+// initialised context. Off by default, so nothing is registered.
 if ($settings['report_errors']) {
     require_once __DIR__.'/functions/phoenix.hook.event.php';
     phoenix_hook_event('init', ['settings' => $settings]);
@@ -83,8 +83,10 @@ require_once __DIR__.'/functions/db.connect.php';
 $connection = db_connect($settings);
 if (! $connection) {
     // A live tracker losing its DB is a server fault worth reporting; the hook
-    // dispatch does not need the DB, so it works even here.
-    tracker_error('Connection Failed. Tracker may be mis-configured. '.mysqli_connect_error(), null, $settings['report_errors']);
+    // dispatch does not need the DB, so it works even here. The driver's text
+    // names the DB user and host, so it goes to the log, not to the client.
+    error_log('Database connection failed: '.mysqli_connect_error());
+    tracker_error('Connection Failed. Tracker may be mis-configured.', null, $settings['report_errors']);
 }
 
 ////	Closed tracker (BEP 27)
