@@ -78,6 +78,5 @@ otherwise bencode/JSON emit them as strings, not integers.
   still open and copy the title.
 - Otherwise a short descriptive subject, present tense.
 - One concern per commit; avoid batching unrelated fixes.
-- Include the `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>` trailer
-  (or current model).
+- No AI attribution trailers in commit messages or PR bodies.
 - **The user commits as they go — never auto-commit or offer to.**

@@ -1,14 +1,12 @@
 # Migrations
 
-Intentionally empty as of 5.0.
+Empty until a release ships a schema change. `sql/*.sql` describes the finished
+schema, so `db_create()` builds it in one step and there is nothing to migrate
+onto a fresh install.
 
-Phoenix 5.0 is a clean-install release: every schema change that the 3.x and
-4.x migrations applied is folded into `sql/*.sql`, so `db_create()` produces the
-finished schema in one step and there is nothing left to migrate onto it.
-
-`db_migrate()` still runs — it globs this directory, finds nothing, and reports
-success — so the Utilities → Migrate action and the 5.x upgrade path are intact
-for whenever the first 5.x schema change lands.
+`db_migrate()` still runs: it globs this directory, finds nothing, and reports
+success, so the Utilities → Migrate action is ready for the first 5.x schema
+change.
 
 ## Adding one
 

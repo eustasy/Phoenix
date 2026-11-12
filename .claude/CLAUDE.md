@@ -68,7 +68,7 @@ existing test's structure when adding one. → [testing](docs/testing.md)
 - **Never auto-commit.** The user commits as they go. Don't offer to.
 - When work closes a tracked issue, run `gh issue view <N>` and use
   `Fix #<N>: <Title>.` verbatim. Otherwise a short present-tense subject.
-  One concern per commit. Include the `Co-Authored-By:` trailer.
+  One concern per commit. No AI attribution trailers.
 - New tunable behavior → add a setting, don't hardcode.
 - `config/phoenix.default.php` says "do not modify" — that's for *installs*;
   it is the right place to add new settings during development.

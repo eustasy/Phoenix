@@ -6,7 +6,7 @@ declare(strict_types=1);
 // Set a torrent's public-index visibility (`listed` = 1 or 0) by info_hash.
 // When $user is non-null the UPDATE is additionally guarded by `AND user = ?`,
 // so a caller can only flip its own torrents; the API always passes the user,
-// while the admin panel (#56) passes null to act on any torrent. Idempotent:
+// while the admin panel passes null to act on any torrent. Idempotent:
 // re-setting the current value still succeeds.
 // Returns true when the statement executed, false on error. Uses a prepared
 // statement and catches the strict-mode exception so the bool contract holds

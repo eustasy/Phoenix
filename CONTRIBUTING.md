@@ -179,10 +179,13 @@ phoenix/
 ├── config/
 │   ├── phoenix.default.php    # Default configuration (DO NOT EDIT)
 │   └── phoenix.custom.php     # Your configuration (gitignored)
+├── sql/                 # Schema, one CREATE TABLE per file; migrations/ for idempotent changes
 ├── bin/                 # Cron maintenance scripts
 │   ├── backup-database.php
+│   ├── optimize-database.php
 │   └── prune-database.php
-└── tests/               # PHPUnit test suite
+├── docker/              # Dev image and entrypoint for docker-compose.dev.yml
+└── tests/               # PHPUnit suite (tests/phoenix/) and HTTP smoke suite (tests/smoke/)
 ```
 
 ### Architecture Notes

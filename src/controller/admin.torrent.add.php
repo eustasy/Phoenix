@@ -8,8 +8,8 @@ declare(strict_types=1);
 // for the panel to render. Mirrors api_torrent_add_controller()'s flow, but is
 // driven by an authenticated admin session (CSRF-gated by the dashboard) rather
 // than an API key, so it records NULL for the owner: admin-added torrents have
-// no API owner, and per #64/#65 NULL-owner rows are managed by the panel and the
-// '*' API admin, never by a normal API key.
+// no API owner, and NULL-owner rows are managed by the panel and the '*' API
+// admin, never by a normal API key.
 //
 // Unlike the API controller, every failure RETURNS its message rather than
 // calling tracker_error() (which would exit) — the dashboard re-renders with the
